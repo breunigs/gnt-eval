@@ -24,7 +24,7 @@ RewriteEngine On
 #
 # Example:
 #   Alias /myrailsapp /path/to/myrailsapp/public
-#   RewriteBase /myrailsapp
+RewriteBase /seee
 
 RewriteRule ^$ index.html [QSA]
 RewriteRule ^([^.]+)$ $1.html [QSA]
