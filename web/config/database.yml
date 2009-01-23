@@ -3,6 +3,7 @@ development:
   encoding: utf8
   database: seee
   username: seee
+  socket: /var/run/mysqld/mysqld.sock
   password: uh8ieL8MSic1aiS0
 
 # Warning: The database defined as 'test' will be erased and
