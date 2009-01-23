@@ -1,0 +1,27 @@
+<h1>Editing semester</h1>
+
+<%= error_messages_for :semester %>
+
+<% form_for(@semester) do |f| %>
+  <p>
+    <b>Firstday</b><br />
+    <%= f.date_select :firstday %>
+  </p>
+
+  <p>
+    <b>Lastday</b><br />
+    <%= f.date_select :lastday %>
+  </p>
+
+  <p>
+    <b>Title</b><br />
+    <%= f.text_field :title %>
+  </p>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @semester %> |
+<%= link_to 'Back', semesters_path %>

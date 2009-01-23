@@ -1,0 +1,26 @@
+<h1>Listing profs</h1>
+
+<table>
+  <tr>
+    <th>Firstname</th>
+    <th>Surname</th>
+    <th>Email</th>
+    <th>Gender</th>
+  </tr>
+
+<% for prof in @profs %>
+  <tr>
+    <td><%=h prof.firstname %></td>
+    <td><%=h prof.surname %></td>
+    <td><%=h prof.email %></td>
+    <td><%=h prof.gender %></td>
+    <td><%= link_to 'Show', prof %></td>
+    <td><%= link_to 'Edit', edit_prof_path(prof) %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<%= link_to 'New course', new_course_path %> |
+<%= link_to 'New Prof', new_prof_path %> |
+<%= link_to 'New semester', new_semester_path %>

@@ -1,0 +1,46 @@
+<h1>New course</h1>
+
+<%= error_messages_for :course %>
+
+<% form_for(@course) do |f| %>
+  <p>
+    <b>Semester</b><br />
+    <%= collection_select(:course, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}) %>
+  </p>
+
+  <p>
+    <b>Title</b><br />
+    <%= f.text_field :title %>
+  </p>
+
+  <p>
+    <b>Students</b><br />
+    <%= f.text_field :students %>
+  </p>
+
+  <p>
+    <b>Evaluated by</b><br />
+    <%= f.text_field :evaluator %>
+  </p>
+  <p>
+    <b>FS contact (@mathphys added automagically)</b><br />
+    <%= f.text_field :fscontact %>
+  </p>
+  <p>
+    <b>Form</b><br />
+    <%= f.select('form', {'Englischer Bogen' => 2, 'Spezialbogen'=> 1, 'Normaler Bogen' => 0}, :selected => 0) %>
+  </p>
+  <p>
+    <b>Description (date etc)</b><br />
+    <%= f.text_field :description %>
+  </p>
+  <p>
+    <b>Faculty</b><br />
+    <%= f.select('faculty', {'Mathe/Info' => 0, 'Physik'=> 1}) %>
+  </p>
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', courses_path %>

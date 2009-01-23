@@ -1,0 +1,32 @@
+<h1>Editing prof</h1>
+
+<%= error_messages_for :prof %>
+
+<% form_for(@prof) do |f| %>
+  <p>
+    <b>Firstname</b><br />
+    <%= f.text_field :firstname %>
+  </p>
+
+  <p>
+    <b>Surname</b><br />
+    <%= f.text_field :surname %>
+  </p>
+
+  <p>
+    <b>Email</b><br />
+    <%= f.text_field :email %>
+  </p>
+
+  <p>
+    <b>Gender</b><br />
+    <%= f.select('gender', {'w' => 0, 'm'=> 1}) %>
+  </p>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @prof %> |
+<%= link_to 'Back', profs_path %>

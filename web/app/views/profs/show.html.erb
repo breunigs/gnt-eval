@@ -1,0 +1,24 @@
+<p>
+  <b>Firstname:</b>
+  <%=h @prof.firstname %>
+</p>
+
+<p>
+  <b>Surname:</b>
+  <%=h @prof.surname %>
+</p>
+
+<p>
+  <b>Email:</b>
+  <%=h @prof.email %>
+</p>
+
+<p>
+  <b>Gender:</b>
+  <%=h @prof.gender %>
+</p>
+
+<%= link_to 'New', new_prof_path %> |
+<%= link_to 'Edit', edit_prof_path(@prof) %> |
+<%= link_to 'Back', profs_path %> |
+<%= link_to 'Courses', courses_path %>

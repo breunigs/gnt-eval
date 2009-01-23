@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  semester: 
+  title: MyString
+  students: 1
+  faculty: 
+
+two:
+  semester: 
+  title: MyString
+  students: 1
+  faculty: 

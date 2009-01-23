@@ -1,0 +1,16 @@
+<h1>New tutor</h1>
+
+<%= error_messages_for :tutor %>
+
+<% form_for([@course, @tutor]) do |f| %>
+  <p>
+    <b>Abbr name</b><br />
+    <%= f.text_field :abbr_name %>
+  </p>
+
+  <p>
+    <%= f.submit "Create" %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', tutors_path %>

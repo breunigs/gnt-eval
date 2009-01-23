@@ -1,0 +1,10 @@
+<% form_for([@course, @tutor]) do |f| %>
+  <p>
+    <b>Name (abbr.)</b><br />
+    <%= f.text_field :abbr_name %>
+  </p>
+
+  <p>
+    <%= f.submit button_name %>
+  </p>
+<% end %>

@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  firstday: 2008-05-26
+  lastday: 2008-05-26
+  title: MyString
+
+two:
+  firstday: 2008-05-26
+  lastday: 2008-05-26
+  title: MyString

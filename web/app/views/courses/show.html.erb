@@ -1,0 +1,106 @@
+<p>
+  <b>Semester:</b>
+  <%=h @course.semester.title %>
+</p>
+
+<p>
+  <b>Title:</b>
+  <%=h @course.title %>
+</p>
+
+<p>
+  <b>Students:</b>
+  <%=h @course.students %>
+</p>
+
+<p>
+  <b>Form:</b>
+  <%=h @course.form %>
+</p>
+
+<p>
+  <b>Evaluated by:</b>
+  <%=h @course.evaluator %>
+</p>
+
+<p>
+  <b>FS contact (email, @mathphys is added automatically if address lacks @):</b>
+  <%=h @course.fscontact %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%=h @course.description %>
+</p>
+
+<p>
+  <b>Faculty:</b>
+  <%=h @course.faculty %>
+</p>
+
+<p>
+  <b>Summary:</b>
+  <%=h @course.summary %>
+</p>
+<p>
+  <fieldset>
+  <b>Profs:</b>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+    </tr>
+    <% for prof in @course.profs.uniq %>
+    <tr>
+      <td><%=h prof.fullname %></td>
+      <td><%=h prof.email + ' (' + @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s + ')' %></td>
+      <td><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof}, :method => :delete %></td>
+      <td><%= link_to 'Form (cached)', { :action => 'get_pdf', :id => @course, :prof_id => prof} %></td>
+      <td><%= link_to 'Form (regenerate)', { :action => 'get_fresh_pdf', :id => @course, :prof_id => prof} %></td>
+    </tr>
+    <% end %>
+    </table>
+  <% form_for :course, @course, :url => { :action => 'add_prof', :id => @course } do |f| %>
+  <%= collection_select(:courses, :profs, Prof.find(:all, :order => 'surname'), :id, :surnamefirst) %>
+  <%= submit_tag 'Add' %>
+  <%= link_to 'Neuer Prof', new_prof_path %>
+  <% end %>
+  </fieldset>
+</p><!--
+<p>
+  <fieldset>
+    <b>Emails:</b>
+    <ul>
+      <li><%= link_to 'Email an <em>alle</em> Profs dieser
+		       Veranstaltung senden, dass sie an Description
+		       evaluiert werden', { :id => @course, :action =>
+		       'send_ankuendigungsmail'}, :confirm => "Ganz
+		       ganz sicher? Es gehen wirkliche richtige Emails
+		       raus!" %></li>
+      <li><%= link_to 'Email an den Evaluator', { :action =>
+	'send_ankuendigungsmail', :id => @course }, :confirm =>
+	'Es wird eine richtige Email versendet!'  %></li> 
+    </ul>
+  </fieldset>
+</p>-->
+<p>
+  <fieldset>
+  <b>Tutoren</b>
+  <table>
+    <tr>
+      <th>Name</th>
+    </tr>
+    <% for tutor in @course.tutors %>
+    <tr>
+      <td><%= link_to tutor.abbr_name, tutor %></td>
+<!--      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor, :course_id => @course.id, :action => 'destroy' }, :method => :delete %></td> -->
+    </tr>
+    <% end %>
+    </table>
+
+    <%= render :partial => @tutor = Tutor.new, :locals => { :button_name => 'Add' } %>
+    </fieldset>
+</p>
+<%= link_to 'New', new_course_path %> |
+<%= link_to 'Edit', edit_course_path(@course) %> |
+<%= link_to 'Back', courses_path %>

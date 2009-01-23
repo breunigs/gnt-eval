@@ -1,0 +1,18 @@
+<p>
+  <b>Firstday:</b>
+  <%=h @semester.firstday %>
+</p>
+
+<p>
+  <b>Lastday:</b>
+  <%=h @semester.lastday %>
+</p>
+
+<p>
+  <b>Title:</b>
+  <%=h @semester.title %>
+</p>
+
+
+<%= link_to 'Edit', edit_semester_path(@semester) %> |
+<%= link_to 'Back', semesters_path %>

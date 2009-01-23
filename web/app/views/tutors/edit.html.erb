@@ -1,0 +1,24 @@
+<h1>Editing tutor</h1>
+
+<%= error_messages_for :tutor %>
+
+<% form_for([@course, @tutor]) do |f| %>
+  <p>
+    <b>Abbr name</b><br />
+    <%= f.text_field :abbr_name %>
+  </p>
+
+  <p>
+    <b>Comment</b><br/>
+    <%= f.text_area :comment %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% for p in @tutor.pics %>
+<img src="http://mathphys.fsk.uni-heidelberg.de/~oliver/.eval/ss08/kommentare/.tutkommentare/<%=h p.basename %>" width=1000 /><br/>
+<% end %>
+<% end %>
+
+<%= link_to 'Show', @tutor %> |
+<%= link_to 'Back', @course %>

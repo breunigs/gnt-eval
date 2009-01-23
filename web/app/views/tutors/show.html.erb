@@ -1,0 +1,17 @@
+<p>
+  <b>Course:</b>
+  <%=h @tutor.course.title %>
+</p>
+
+<p>
+  <b>Abbr name:</b>
+  <%=h @tutor.abbr_name %>
+</p>
+
+<p>
+  <b>Comment</b><br/>
+  <%=h @tutor.comment %>
+</p>
+
+<%= link_to 'Edit', edit_tutor_path(@tutor) %> |
+<%= link_to 'Back', Course.find(@tutor.course_id) %>

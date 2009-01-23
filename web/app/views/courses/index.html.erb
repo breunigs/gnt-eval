@@ -1,0 +1,34 @@
+<h1>Listing courses</h1>
+
+<table>
+  <tr>
+    <th>Semester</th>
+    <th>Title</th>
+    <th>Students</th>
+    <th>Evaluated by</th>
+    <th>Profs</th>
+    <th>Description</th>
+    <th>Faculty</th>
+  </tr>
+
+<% for course in @courses.find_all{|c| c.semester.id == 3}.sort_by { |c| c.title } %>
+  <tr>
+    <td><%=h course.semester.title %></td>
+    <td><%=h course.title %></td>
+    <td><%=h course.students %></td>
+    <td><%=h course.evaluator %></td>
+    <td><%=h course.profs.map { |p| p.fullname + " " } %></td>
+    <td><%=h course.description %></td>
+    <td><%=h course.faculty %></td>
+    <td><%= link_to 'Show', course %></td>
+    <td><%= link_to 'Edit', edit_course_path(course) %></td>
+    <td><%= link_to 'Destroy', course, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<%= link_to 'New course', new_course_path %> |
+<%= link_to 'New Prof', new_prof_path %> |
+<%= link_to 'New semester', new_semester_path %>
+
