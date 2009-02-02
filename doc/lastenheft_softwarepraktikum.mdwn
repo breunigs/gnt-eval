@@ -1,0 +1,51 @@
+Eval-Software der FS MathPhys -- Lastenheft
+===========================================
+
+Ausgangssituation
+-----------------
+
+Jedes Semester führt die FS MathPhys eine Vorlesungsevaluation
+durch. Es werden dabei mehrere tausend Bögen ausgefüllt, die
+ausgewertet werden müssen. Dazu erkennt eine OMR-Software die
+ausgefüllten Bögen und trägt die Daten in eine Datenbank ein.
+Momentan werden die Bögen über ein rudimentäres Webinterface erstellt,
+in das Vorlesung, Dozenten und Tutoren eingetragen werden.
+
+Jeder Bogen ist mit einem Barcode versehen, damit beim Auswerten das
+Mapping Bogen <-> [Veranstaltung, Dozent, Tutor] erfolgen kann.
+
+Dann werten mehrere Skripte die Daten statistisch aus, woraufhin
+Fachschaftler die handschriftlichen Kommentare auf den Bögen abtippen.
+
+Problembeschreibung
+-------------------
+
+Die momentane Software funktioniert, hat aber vor allem zwei Probleme.
+
+Momentan gibt es viele Skripte in mehreren Skriptsprachen (Perl, Ruby,
+Bash, sed). Diese haben keine Schnittstellen, arbeiten nicht gut
+zusammen und erfordern viel Handarbeit. Das muss und soll
+vereinheitlicht werden.
+
+Die Skripte, die momentan auswerten, sind darauf ausgerichtet, nur
+einen Typ Bogen zu verarbeiten: den Standardbogen. Dieser Bogen ist
+geeignet, Vorlesungen ab etwa 30 Hörern gut zu evaluieren. Vorlesungen
+mit weniger Hörern, Seminare, Blockkurse, der Basiskurs
+Schlüsselkompetenzen und andere Veranstaltungen können so leider nicht
+evaluiert werden. Auch das muss geändert werden. Konkrete Pläne für
+die Bögen bestehen bereits, es mangelt einzig an den technischen
+Möglichkeiten.
+
+Weitere Anforderungen
+---------------------
+
+Über das letzte Jahr wurde ein weiteres Problem deutlich, nämlich die
+Wartbarkeit der Software. Durch die verschiedenen verwendeten
+Programmiersprachen ist es unnötig schwierig, sich in die momentane
+Software einzuarbeiten und daran mitzuentwickeln. Die Wahl einer
+ausdrucksstarken Sprache ist notwendig, wo möglich muss Komplexität
+reduziert werden.
+
+Es sollte in Zukunft möglich sein, mit nur rudimentären Kenntnissen
+der verwendeten Programmiersprache (voraussichtlich Ruby) z.B. neue
+Bögen hinzuzufügen.
