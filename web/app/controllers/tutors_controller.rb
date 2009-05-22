@@ -50,7 +50,6 @@ class TutorsController < ApplicationController
   def create
     @tutor = @course.tutors.build(params[:tutor])
     par = params[:tutor]['abbr_name'].split(',').map!{ |x| x.strip }
-    p par
     par.each { |p| t = @course.tutors.build({'abbr_name'=>p} ); t.save }
     respond_to do |format|
 #      if @tutor.save
