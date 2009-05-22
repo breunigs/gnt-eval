@@ -49,16 +49,18 @@ class TutorsController < ApplicationController
   # POST /tutors.xml
   def create
     @tutor = @course.tutors.build(params[:tutor])
-
+    par = params[:tutor]['abbr_name'].split(',').map!{ |x| x.strip }
+    p par
+    par.each { |p| t = @course.tutors.build({'abbr_name'=>p} ); t.save }
     respond_to do |format|
-      if @tutor.save
+#      if @tutor.save
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @tutor, :status => :created, :location => @course }
-      else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
-      end
+#     else
+#        format.html { render :action => "new" }
+#        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
+#      end
     end
   end
 
