@@ -14,8 +14,8 @@ class Postoffice < ActionMailer::Base
     
     anrede = c.profs.map{ |p| 'sehr ' + ['geehrte Frau',
                                          'geehrter Herr'][p.gender] + 
-                              ' ' + p.surname }.join(', ').
-             gsub(/^(\w)/) { $1.chars.capitalize }
+                              ' ' + p.surname.strip }.join(', ').
+             gsub(/^(\w)/) { $1.chars.first.capitalize }
     
     body[:course] = c
     body[:anrede] = anrede
