@@ -167,7 +167,7 @@ class CoursesController < ApplicationController
   def get_fresh_pdf
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
-    workdir = '/var/www-seee/public/forms/'
+    workdir = '/var/www-seee/web/public/forms/'
     hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)    
     filename = @course.students.to_s + '_' + hexdigest
     if FileTest.exists?(workdir + filename + '.pdf')
