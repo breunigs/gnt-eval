@@ -109,7 +109,32 @@ class CoursesController < ApplicationController
       format.xml { head :ok }
     end
   end
-  
+  def get_direct_pdf(c,p)
+    @course = c
+    @prof = p
+    workdir = '/var/www-seee/web/public/forms/'
+    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)    
+    filename = @course.students.to_s + '_' + hexdigest
+    if not FileTest.exists?(workdir + filename + '.pdf')
+      b = Evalbogen.new
+      b.workdir = workdir
+      b.tutoren = @course.tutors.map { |t| t.abbr_name}.reverse
+      b.dozent = @prof.fullname
+      b.semester = @course.semester.title
+      b.veranstaltung = @course.title
+      @course.form ||= 0
+      b.bogen_basefile = @course.form.to_s
+      b.barcodeid = "%07d" % @course.course_profs.find(:first, :conditions => { :prof_id => @prof.id }).id
+      b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf' 
+      b.generate_barcode
+      
+      b.output_to_file_and_compile(filename)
+    end    
+    
+    File.copy(workdir + filename + '.pdf', './' + @course.title + ' - ' + @prof.fullname + ' - ' + @course.students.to_s + ' pcs.pdf')
+  end  
+
+
   # GET /courses/get_pdf?course=1&prof_id=1
   def get_pdf
     @course = Course.find(params[:id])
