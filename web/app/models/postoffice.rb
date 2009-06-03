@@ -33,7 +33,7 @@ class Postoffice < ActionMailer::Base
     sent_on Time.now
     
     anrede = c.evaluator.split(',').map{ |x| 'hallo ' + x }.join(', ').
-      gsub(/^(\w)/) { $1.chars.capitalize }
+      gsub(/^(\w)/) { $1.chars.first.capitalize }
     body[:course] = c
     body[:anrede] = anrede
   end
