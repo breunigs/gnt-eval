@@ -7,7 +7,7 @@ class Course < ActiveRecord::Base
   validates_numericality_of :students
   
   def fs_contact_addresses
-    if fscontact.nil?
+    if fscontact.empty?
       pre_format = evaluator
     else
       pre_format = fscontact
