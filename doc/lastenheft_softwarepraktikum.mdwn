@@ -28,13 +28,13 @@ zusammen und erfordern viel Handarbeit. Das muss und soll
 vereinheitlicht werden.
 
 Die Skripte, die momentan auswerten, sind darauf ausgerichtet, nur
-einen Typ Bogen zu verarbeiten: den Standardbogen. Dieser Bogen ist
-geeignet, Vorlesungen ab etwa 30 Hörern gut zu evaluieren. Vorlesungen
-mit weniger Hörern, Seminare, Blockkurse, der Basiskurs
-Schlüsselkompetenzen und andere Veranstaltungen können so leider nicht
-evaluiert werden. Auch das muss geändert werden. Konkrete Pläne für
-die Bögen bestehen bereits, es mangelt einzig an den technischen
-Möglichkeiten.
+einen Typ Bogen zu verarbeiten: den sog. Standardbogen. Dieser Bogen
+ist geeignet, Vorlesungen ab etwa 30 Hörern gut zu
+evaluieren. Vorlesungen mit weniger Hörern, Seminare, Blockkurse, der
+Basiskurs Schlüsselkompetenzen und andere Veranstaltungen können so
+leider nicht evaluiert werden. Auch das muss geändert werden. Konkrete
+Pläne für die Bögen bestehen bereits, es mangelt einzig an den
+technischen Möglichkeiten.
 
 Weitere Anforderungen
 ---------------------
@@ -49,3 +49,12 @@ reduziert werden.
 Es sollte in Zukunft möglich sein, mit nur rudimentären Kenntnissen
 der verwendeten Programmiersprache (voraussichtlich Ruby) z.B. neue
 Bögen hinzuzufügen.
+
+Konkrete Pläne
+--------------
+
+1. Abstraktion des Konzepts "Bogen"
+2. kompletter Rewrite der Software
+   in einer einheitlichen Programmiersprache
+3. Sammlung der bestehenden Softwarefetzen, um einen dursichtigeren
+   Arbeitsfluss zu ermöglichen
