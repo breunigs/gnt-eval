@@ -22,6 +22,7 @@ files = Dir.glob('*.tif')
 
 files.each do |f|
   pages = ImageList.new(f)
+  p pages
   
   changed_smth = nil
 
@@ -30,16 +31,19 @@ files.each do |f|
   
   if r.nil?
     r = find_barcode_on_first(pages.reverse!, tmp_filename)
-    puts "switched #{filename}"
+    puts "switched #{f}"
     changed_smth = true
   end
 
   if r[0] < r[1]
     pages.map! { |i| i.rotate(180) }
-    puts "flipped #{filename}"
+    puts "flipped #{f}"
     changed_smth = true
   end
   
+  if changed_smth.nil?
+    puts 'nix mit ' + f
+  end
   File.delete(tmp_filename)
   
   pages.write(f) unless changed_smth.nil?
