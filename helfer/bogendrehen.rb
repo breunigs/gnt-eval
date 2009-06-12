@@ -27,10 +27,16 @@ files.each do |f|
   changed_smth = nil
 
   tmp_filename = "/tmp/bogendrehen_#{Time.now.to_i}.tif"
+  puts tmp_filename
+  
   r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
     r = find_barcode_on_first(pages.reverse!, tmp_filename)
+    if r.nil?
+      `mv #{f} bizarre`
+      next
+    end
     puts "switched #{f}"
     changed_smth = true
   end
