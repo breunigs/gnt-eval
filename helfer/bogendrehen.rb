@@ -21,15 +21,15 @@ end
 ARGV.each do |filename|
   pages = ImageList.new(filename)
 
-  tmp_filename = 'tmp.tif'
-  r = find_barcode_on_first(pages, filename)
+  tmp_filename = '.tmp.tif'
+  r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
-    r = find_barcode_on_first(pages.reverse!, filename)
+    r = find_barcode_on_first(pages.reverse!, tmp_filename)
   end
 
   if r[0] < r[1]
-    pages = ImageList.new(filename).map! { |i| i.rotate(180) }
+    pages.map! { |i| i.rotate(180) }
   end
 
   pages.write(filename)
