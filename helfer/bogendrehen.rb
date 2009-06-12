@@ -34,6 +34,7 @@ if r.nil?
   if r.nil?
     `mv #{f} bizarre`
     puts "bizarre #{f}"
+    Process.exit
   end
   puts "switched #{f}"
   changed_smth = true
