@@ -20,17 +20,24 @@ end
 
 ARGV.each do |filename|
   pages = ImageList.new(filename)
+  
+  changed_smth = nil
 
   tmp_filename = '.tmp.tif'
   r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
     r = find_barcode_on_first(pages.reverse!, tmp_filename)
+    puts "switched #{filename}"
+    changed_smth = true
   end
 
   if r[0] < r[1]
     pages.map! { |i| i.rotate(180) }
+    puts "flipped #{filename}"
+    changed_smth = true
   end
+  
+  pages.write(filename) unless changed_smth.nil?
 
-  pages.write(filename)
 end
