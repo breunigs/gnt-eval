@@ -25,7 +25,7 @@ pages = ImageList.new(f)
 
 changed_smth = nil
 
-tmp_filename = "/tmp/bogendrehen_#{Time.now.to_i}.tif"
+tmp_filename = "/tmp/bgndrhn_#{f}_#{Time.now.to_i}.tif"
 
 r = find_barcode_on_first(pages, tmp_filename)
   
@@ -34,7 +34,6 @@ if r.nil?
   if r.nil?
     `mv #{f} bizarre`
     puts "bizarre #{f}"
-    next
   end
   puts "switched #{f}"
   changed_smth = true
