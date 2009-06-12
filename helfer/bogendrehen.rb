@@ -22,7 +22,7 @@ Dir.glob('*.tif').each do |filename|
   
   changed_smth = nil
 
-  tmp_filename = '.tmp.tif'
+  tmp_filename = '/tmp/bogendrehen.tif'
   r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
