@@ -2,7 +2,7 @@
 
 # bogen richtig drehen, ueberschreibt urspruengliche dateien
 # haette gern two-pages-tifs ...
-# USAGE: bogendrehen.rb file1.tif file2.tif ...
+# USAGE: bogendrehen.rb directory/
 
 require 'RMagick'
 include Magick
@@ -18,8 +18,9 @@ def find_barcode_on_first(imagelist, tmp_filename)
   end
 end
 
-ARGV.each do |filename|
-  pages = ImageList.new(filename)
+directory = ARGV[0]
+Dir.new(directory).entries.each do |filename|
+  pages = ImageList.new(directory + '/' + filename)
   
   changed_smth = nil
 
@@ -38,6 +39,6 @@ ARGV.each do |filename|
     changed_smth = true
   end
   
-  pages.write(filename) unless changed_smth.nil?
+  pages.write(directory + '/' + filename) unless changed_smth.nil?
 
 end
