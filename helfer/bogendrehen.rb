@@ -4,6 +4,8 @@
 # urspruengliche dateien haette gern two-pages-tifs ... 
 
 require 'RMagick'
+require 'ftools'
+
 include Magick
 
 def find_barcode_on_first(imagelist, tmp_filename)
@@ -16,13 +18,14 @@ def find_barcode_on_first(imagelist, tmp_filename)
     return nil
   end
 end
+files = Dir.glob('*.tif')
 
-Dir.glob('*.tif').each do |filename|
-  pages = ImageList.new(filename)
+files.each do |f|
+  pages = ImageList.new(f)
   
   changed_smth = nil
 
-  tmp_filename = '/tmp/bogendrehen.tif'
+  tmp_filename = "/tmp/bogendrehen_#{Time.now}.tif"
   r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
@@ -37,6 +40,8 @@ Dir.glob('*.tif').each do |filename|
     changed_smth = true
   end
   
-  pages.write(directory + '/' + filename) unless changed_smth.nil?
+  File.delete(tmp_filename)
+  
+  pages.write(f) unless changed_smth.nil?
 
 end
