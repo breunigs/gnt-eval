@@ -25,7 +25,7 @@ files.each do |f|
   
   changed_smth = nil
 
-  tmp_filename = "/tmp/bogendrehen_#{Time.now}.tif"
+  tmp_filename = "/tmp/bogendrehen_#{Time.now.to_i}.tif"
   r = find_barcode_on_first(pages, tmp_filename)
   
   if r.nil?
