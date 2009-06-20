@@ -49,3 +49,4 @@ end
 File.delete(tmp_filename)
 
 pages.write(f) unless changed_smth.nil?
+
