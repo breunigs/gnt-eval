@@ -11,7 +11,7 @@
     <th>Faculty</th>
   </tr>
 
-<% for course in @courses.find_all{|c| c.semester.id == 4}.sort_by { |c| c.title } %>
+<% for course in @courses.find_all{|c| c.semester.id == 4 && c.faculty == 2}.sort_by { |c| c.title } %>
   <tr>
     <td><%=h course.semester.title %></td>
     <td><%= link_to course.title, course %></td>
