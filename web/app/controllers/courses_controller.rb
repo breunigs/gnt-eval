@@ -254,7 +254,7 @@ class Evalbogen
     (0..5).each do |i|
       (0..4).each do |j|
         buffer += draw_fucking_box(12.3+37*j,-51-7*i)
-        if not (!@tutoren.empty?)
+        if not (@tutoren.empty?)
           buffer += '\put(' + (12.3+37*j+5).to_s + ',' + (-51-7*i).to_s + '){\footnotesize \raisebox{0.6mm}{' + @tutoren.pop + '}}' + "\n"
         end
       end
