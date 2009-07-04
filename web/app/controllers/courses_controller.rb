@@ -241,7 +241,7 @@ class Evalbogen
 \begin{picture}(0,0)(0,0)
 \thinlines
 \put(0,-297){\includegraphics*{' + @bogen_basefile  + '_1.pdf}} % erste seite evalbogen' + "\n"
-    if not(@barcodefile.nil? OR @barcodefile.empty?)
+    if not(@barcodefile.nil?)
       buffer += '\put(158,-20){\includegraphics*{' + @barcodefile + '.pdf}} % barcode' + "\n"
     end
     buffer += '\fontsize{11pt}{21}\selectfont
@@ -254,7 +254,7 @@ class Evalbogen
     (0..5).each do |i|
       (0..4).each do |j|
         buffer += draw_fucking_box(12.3+37*j,-51-7*i)
-        if(!@tutoren.empty?)
+        if not (!@tutoren.empty?)
           buffer += '\put(' + (12.3+37*j+5).to_s + ',' + (-51-7*i).to_s + '){\footnotesize \raisebox{0.6mm}{' + @tutoren.pop + '}}' + "\n"
         end
       end
