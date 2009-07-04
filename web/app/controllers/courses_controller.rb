@@ -118,6 +118,7 @@ class CoursesController < ApplicationController
     if not FileTest.exists?(workdir + filename + '.pdf')
       b = Evalbogen.new
       b.workdir = workdir
+      b.dozent = ''
       b.tutoren = @course.tutors.map { |t| t.abbr_name}.reverse
       b.semester = @course.semester.title
       b.veranstaltung = @course.title
@@ -240,7 +241,7 @@ class Evalbogen
 \begin{picture}(0,0)(0,0)
 \thinlines
 \put(0,-297){\includegraphics*{' + @bogen_basefile  + '_1.pdf}} % erste seite evalbogen' + "\n"
-    if(!@barcodefile.empty?)
+    if not(@barcodefile.nil? OR @barcodefile.empty?)
       buffer += '\put(158,-20){\includegraphics*{' + @barcodefile + '.pdf}} % barcode' + "\n"
     end
     buffer += '\fontsize{11pt}{21}\selectfont
