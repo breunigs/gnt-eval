@@ -216,7 +216,7 @@ class Evalbogen
     `barcode -b "#{@barcodeid}" -g 80x30 -u mm -e EAN -n -o #{@workdir + @barcodefile}.ps && ps2pdf #{@workdir + barcodefile}.ps #{@workdir + @barcodefile}.pdf && rm #{@workdir + @barcodefile}.ps`
   end
   def cleanup
-    `rm #{@workdir + @barcodefile}.pdf`
+    `rm #{@workdir + @barcodefile}.pdf` unless @barcodefile.nil?
   end
   def output_to_file_and_compile(filename)
     `echo "#{output}" > #{@workdir + filename}.tex`
