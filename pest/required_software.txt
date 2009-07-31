@@ -1,0 +1,8 @@
+imagmagick
+ruby1.9
+rubygems
+gem rmagick
+mysql
+bardecode
+apache
+ruby-gnome2

@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Class: PESTOmr</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Class</strong></td>
+          <td class="class-name-in-header">PESTOmr</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/omr_rb.html">
+                omr.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        <tr class="top-aligned-row">
+            <td><strong>Parent:</strong></td>
+            <td>
+                Object
+            </td>
+        </tr>
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000049">blackPercentage</a>&nbsp;&nbsp;
+      <a href="#M000050">blackPixels</a>&nbsp;&nbsp;
+      <a href="#M000055">calcSkew</a>&nbsp;&nbsp;
+      <a href="#M000061">checkForExistingFiles</a>&nbsp;&nbsp;
+      <a href="#M000051">findFirstPixelsFromLeft</a>&nbsp;&nbsp;
+      <a href="#M000052">findFirstPixelsFromTop</a>&nbsp;&nbsp;
+      <a href="#M000054">findOffset</a>&nbsp;&nbsp;
+      <a href="#M000053">findRotation</a>&nbsp;&nbsp;
+      <a href="#M000060">getNewFileName</a>&nbsp;&nbsp;
+      <a href="#M000065">new</a>&nbsp;&nbsp;
+      <a href="#M000064">parseArguments</a>&nbsp;&nbsp;
+      <a href="#M000059">parseFile</a>&nbsp;&nbsp;
+      <a href="#M000062">parseFilenames</a>&nbsp;&nbsp;
+      <a href="#M000063">parseOMRSheet</a>&nbsp;&nbsp;
+      <a href="#M000058">recoImage</a>&nbsp;&nbsp;
+      <a href="#M000056">typeSquareParse</a>&nbsp;&nbsp;
+      <a href="#M000057">typeTextParse</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000065" class="method-detail">
+        <a name="M000065"></a>
+
+        <div class="method-heading">
+          <a href="#M000065" class="method-signature">
+          <span class="method-name">new</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Class Constructor
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000065-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000065-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 616</span>
+616:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>
+617:         <span class="ruby-identifier">parseArguments</span>
+618:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="section-bar">Public Instance methods</h3>
+
+      <div id="method-M000049" class="method-detail">
+        <a name="M000049"></a>
+
+        <div class="method-heading">
+          <a href="#M000049" class="method-signature">
+          <span class="method-name">blackPercentage</span><span class="method-args">(x, y, width, height, img)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Finds the percentage of black/white pixels for the given rectangle and
+image.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000049-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000049-source">
+<pre>
+    <span class="ruby-comment cmt"># File omr.rb, line 32</span>
+32:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">blackPercentage</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">img</span>)
+33:         <span class="ruby-identifier">black</span> = <span class="ruby-identifier">blackPixels</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">img</span>)
+34:         <span class="ruby-identifier">all</span> = (<span class="ruby-identifier">width</span><span class="ruby-operator">*</span><span class="ruby-identifier">height</span>).<span class="ruby-identifier">to_f</span>
+35:         <span class="ruby-keyword kw">return</span> (<span class="ruby-identifier">black</span><span class="ruby-operator">/</span><span class="ruby-identifier">all</span><span class="ruby-operator">*</span><span class="ruby-value">100.0</span>)
+36:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000050" class="method-detail">
+        <a name="M000050"></a>
+
+        <div class="method-heading">
+          <a href="#M000050" class="method-signature">
+          <span class="method-name">blackPixels</span><span class="method-args">(x, y, width, height, img)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Counts the black pixels in the given area and image.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000050-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000050-source">
+<pre>
+    <span class="ruby-comment cmt"># File omr.rb, line 39</span>
+39:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">blackPixels</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">img</span>)
+40:         <span class="ruby-identifier">black</span> = <span class="ruby-value">0</span>
+41:         <span class="ruby-keyword kw">begin</span>
+42:             <span class="ruby-identifier">rect</span> = <span class="ruby-identifier">img</span>.<span class="ruby-identifier">export_pixels</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-value str">&quot;G&quot;</span>)
+43:         <span class="ruby-keyword kw">rescue</span>
+44:             <span class="ruby-comment cmt"># This occurs when we specified invalid geometry: i.e. zero</span>
+45:             <span class="ruby-comment cmt"># width or height or reuqesting pixels outside the image.</span>
+46:             <span class="ruby-comment cmt"># Output some nice debugging data and just return 0.</span>
+47:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;\nx: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">x</span>.<span class="ruby-identifier">to_s</span>
+48:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;y: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">y</span>.<span class="ruby-identifier">to_s</span>
+49:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;w: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">width</span>.<span class="ruby-identifier">to_s</span>
+50:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;h: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">height</span>.<span class="ruby-identifier">to_s</span>
+51:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;g: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-ivar">@group</span>[<span class="ruby-value str">'dbvalue'</span>] <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@group</span>
+52:             <span class="ruby-identifier">puts</span> <span class="ruby-identifier">img</span>.<span class="ruby-identifier">inspect</span>
+53:             <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@ilist</span>.<span class="ruby-identifier">inspect</span>
+54:             <span class="ruby-keyword kw">return</span> <span class="ruby-value">0</span>
+55:         <span class="ruby-keyword kw">end</span>
+56:         <span class="ruby-identifier">rect</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span> <span class="ruby-identifier">black</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">x</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span> }
+57:         <span class="ruby-identifier">black</span>
+58:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000055" class="method-detail">
+        <a name="M000055"></a>
+
+        <div class="method-heading">
+          <a href="#M000055" class="method-signature">
+          <span class="method-name">calcSkew</span><span class="method-args">(imgid, ox, oy)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+For a given image id and perfect coordinates, this calculates the corrected
+coordinates by taking offset and angle into account.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000055-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000055-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 190</span>
+190:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">calcSkew</span>(<span class="ruby-identifier">imgid</span>, <span class="ruby-identifier">ox</span>, <span class="ruby-identifier">oy</span>)
+191:         <span class="ruby-identifier">ox</span> <span class="ruby-operator">+=</span> <span class="ruby-ivar">@leftoff</span>[<span class="ruby-identifier">imgid</span>]
+192:         <span class="ruby-identifier">oy</span> <span class="ruby-operator">+=</span> <span class="ruby-ivar">@topoff</span>[<span class="ruby-identifier">imgid</span>]
+193:         <span class="ruby-identifier">x</span> = <span class="ruby-identifier">ox</span> <span class="ruby-operator">*</span> <span class="ruby-constant">Math</span>.<span class="ruby-identifier">cos</span>(<span class="ruby-ivar">@rad</span>[<span class="ruby-identifier">imgid</span>]) <span class="ruby-operator">+</span> <span class="ruby-identifier">oy</span> <span class="ruby-operator">*</span> <span class="ruby-constant">Math</span>.<span class="ruby-identifier">sin</span>(<span class="ruby-ivar">@rad</span>[<span class="ruby-identifier">imgid</span>])
+194:         <span class="ruby-identifier">y</span> = <span class="ruby-identifier">oy</span> <span class="ruby-operator">*</span> <span class="ruby-constant">Math</span>.<span class="ruby-identifier">cos</span>(<span class="ruby-ivar">@rad</span>[<span class="ruby-identifier">imgid</span>]) <span class="ruby-operator">-</span> <span class="ruby-identifier">ox</span> <span class="ruby-operator">*</span> <span class="ruby-constant">Math</span>.<span class="ruby-identifier">sin</span>(<span class="ruby-ivar">@rad</span>[<span class="ruby-identifier">imgid</span>])
+195:         <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">x</span>.<span class="ruby-identifier">round</span>, <span class="ruby-identifier">y</span>.<span class="ruby-identifier">round</span>
+196:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000061" class="method-detail">
+        <a name="M000061"></a>
+
+        <div class="method-heading">
+          <a href="#M000061" class="method-signature">
+          <span class="method-name">checkForExistingFiles</span><span class="method-args">(files)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Checks for existing files and issues a warning if so. Returns a list of
+non-exisitng files
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000061-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000061-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 463</span>
+463:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">checkForExistingFiles</span>(<span class="ruby-identifier">files</span>)
+464:         <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;Checking for existing files&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+465: 
+466:         <span class="ruby-comment cmt"># Look for each file</span>
+467:         <span class="ruby-identifier">filesExist</span> = <span class="ruby-keyword kw">false</span>
+468:         <span class="ruby-identifier">files</span>.<span class="ruby-identifier">delete_if</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+469:             <span class="ruby-identifier">fn</span> = <span class="ruby-identifier">getNewFileName</span>(<span class="ruby-identifier">file</span>)
+470:             <span class="ruby-identifier">fileExist</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">exist?</span>(<span class="ruby-identifier">fn</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">size</span>(<span class="ruby-identifier">fn</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+471:             <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  WARNING: File already exists: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">fn</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">fileExist</span>
+472:             <span class="ruby-identifier">fileExist</span>
+473:         <span class="ruby-keyword kw">end</span>
+474:         <span class="ruby-identifier">files</span>
+475:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000051" class="method-detail">
+        <a name="M000051"></a>
+
+        <div class="method-heading">
+          <a href="#M000051" class="method-signature">
+          <span class="method-name">findFirstPixelsFromLeft</span><span class="method-args">(left, top, width, height, threshold, img)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This function finds the first line of pixels whose black-% is above the
+given threshold. <tt>left</tt> and <tt>top</tt> mark the start of the
+search area, <tt>width</tt> and <tt>height</tt> how large the search radius
+should be. Searches in 1 pixel steps from left to left+width and returns
+that value as soon as the 1-pixel-line is above <tt>threshold</tt>.
+<tt>img</tt> is the image to search. Does not take rotation or offset into
+account.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000051-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000051-source">
+<pre>
+    <span class="ruby-comment cmt"># File omr.rb, line 68</span>
+68:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-identifier">left</span>, <span class="ruby-identifier">top</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">threshold</span>, <span class="ruby-identifier">img</span>)
+69:         <span class="ruby-identifier">left</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-identifier">left</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">width</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+70:             <span class="ruby-identifier">bp</span> = <span class="ruby-identifier">blackPercentage</span>(<span class="ruby-identifier">i</span>, <span class="ruby-identifier">top</span>, <span class="ruby-value">1</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">img</span>)
+71:             <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">i</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">threshold</span>
+72:         <span class="ruby-keyword kw">end</span>
+73:         <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">left</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">width</span>
+74:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000052" class="method-detail">
+        <a name="M000052"></a>
+
+        <div class="method-heading">
+          <a href="#M000052" class="method-signature">
+          <span class="method-name">findFirstPixelsFromTop</span><span class="method-args">(left, top, width, height, threshold, img)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+same as <tt><a
+href="PESTOmr.html#M000051">findFirstPixelsFromLeft</a></tt>, but starts
+searching from the top and returns a vertical/y-value
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000052-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000052-source">
+<pre>
+    <span class="ruby-comment cmt"># File omr.rb, line 78</span>
+78:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">findFirstPixelsFromTop</span>(<span class="ruby-identifier">left</span>, <span class="ruby-identifier">top</span>, <span class="ruby-identifier">width</span>, <span class="ruby-identifier">height</span>, <span class="ruby-identifier">threshold</span>, <span class="ruby-identifier">img</span>)
+79:         <span class="ruby-identifier">top</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-identifier">top</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">height</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+80:             <span class="ruby-identifier">bp</span> = <span class="ruby-identifier">blackPercentage</span>(<span class="ruby-identifier">left</span>, <span class="ruby-identifier">i</span>, <span class="ruby-identifier">width</span>, <span class="ruby-value">1</span>, <span class="ruby-identifier">img</span>)
+81:             <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">i</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">threshold</span>
+82:         <span class="ruby-keyword kw">end</span>
+83:         <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">top</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">height</span>
+84:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000054" class="method-detail">
+        <a name="M000054"></a>
+
+        <div class="method-heading">
+          <a href="#M000054" class="method-signature">
+          <span class="method-name">findOffset</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This finds out how large the white &quot;border&quot; around the actual
+sheet is, in order to get a fixed point of reference (i.e. the top left
+corner is the same for every sheet)
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000054-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000054-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 129</span>
+129:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">findOffset</span>
+130:         <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+131:         <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Determining Offset&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+132: 
+133:         <span class="ruby-comment cmt"># FIXME: Move this somewhere else in order to support more than</span>
+134:         <span class="ruby-comment cmt"># two pages without changing code</span>
+135: 
+136:         <span class="ruby-comment cmt"># X/Y values in the YAML files are relative to this corner</span>
+137:         <span class="ruby-identifier">leftcut</span> = [<span class="ruby-value">145</span>, <span class="ruby-value">143</span>]
+138:         <span class="ruby-identifier">topcut</span> = [<span class="ruby-value">65</span>, <span class="ruby-value">102</span>]
+139: 
+140:         <span class="ruby-comment cmt"># This will contain the offset for each sheet</span>
+141:         <span class="ruby-ivar">@leftoff</span> = [<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+142:         <span class="ruby-ivar">@topoff</span> = [<span class="ruby-value">0</span>,<span class="ruby-value">0</span>]
+143: 
+144:         <span class="ruby-comment cmt"># Use different thresholds for each page to lessen the chance of</span>
+145:         <span class="ruby-comment cmt"># failing due to some black pixels</span>
+146:         <span class="ruby-identifier">leftThres</span> = [<span class="ruby-value">9</span>, <span class="ruby-value">9</span>]
+147:         <span class="ruby-identifier">topThres</span> = [<span class="ruby-value">20</span>, <span class="ruby-value">60</span>]
+148: 
+149:         <span class="ruby-value">0</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-ivar">@numPages</span><span class="ruby-operator">-</span><span class="ruby-value">1</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+150:             <span class="ruby-identifier">left</span>   = <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-value">95</span>,   <span class="ruby-value">70</span>, <span class="ruby-value">500</span>, <span class="ruby-value">400</span>, <span class="ruby-identifier">leftThres</span>[<span class="ruby-identifier">i</span>], <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">i</span>])
+151:             <span class="ruby-identifier">top</span>    =  <span class="ruby-identifier">findFirstPixelsFromTop</span>(<span class="ruby-value">1870</span>, <span class="ruby-value">50</span>, <span class="ruby-value">400</span>, <span class="ruby-value">500</span>, <span class="ruby-identifier">topThres</span>[<span class="ruby-identifier">i</span>], <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">i</span>])
+152: 
+153:             <span class="ruby-comment cmt"># Draw the lines where the threshold was found</span>
+154:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+155:                 <span class="ruby-identifier">draw</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Draw</span>.<span class="ruby-identifier">new</span>
+156:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">font_weight</span> = <span class="ruby-value">100</span>
+157:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">pointsize</span> = <span class="ruby-value">20</span>
+158:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">fill</span>(<span class="ruby-value str">&quot;magenta&quot;</span>)
+159:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;magenta&quot;</span>)
+160:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">left</span>, <span class="ruby-value">70</span>, <span class="ruby-identifier">left</span>, <span class="ruby-value">400</span>)
+161:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-value">1870</span>, <span class="ruby-identifier">top</span>, <span class="ruby-value">2270</span>, <span class="ruby-identifier">top</span>)
+162:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">text</span>(<span class="ruby-value">10</span>, <span class="ruby-value">15</span>, <span class="ruby-identifier">left</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; x &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">top</span>.<span class="ruby-identifier">to_s</span>)
+163:             <span class="ruby-keyword kw">end</span>
+164: 
+165:             <span class="ruby-comment cmt"># The offset detection is done at points that are affected</span>
+166:             <span class="ruby-comment cmt"># by rotation. We take this into account here.</span>
+167:             <span class="ruby-identifier">top</span> <span class="ruby-operator">+=</span>  <span class="ruby-identifier">top</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">calcSkew</span>(<span class="ruby-identifier">i</span>, <span class="ruby-value">1870</span> <span class="ruby-operator">+</span> <span class="ruby-value">200</span>, <span class="ruby-identifier">top</span>)[<span class="ruby-value">1</span>]
+168:             <span class="ruby-identifier">left</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">left</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">calcSkew</span>(<span class="ruby-identifier">i</span>, <span class="ruby-identifier">left</span>, <span class="ruby-value">100</span> )[<span class="ruby-value">0</span>]
+169: 
+170:             <span class="ruby-ivar">@leftoff</span>[<span class="ruby-identifier">i</span>] = <span class="ruby-identifier">left</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">leftcut</span>[<span class="ruby-identifier">i</span>]
+171:             <span class="ruby-ivar">@topoff</span>[<span class="ruby-identifier">i</span>]  = <span class="ruby-identifier">top</span>  <span class="ruby-operator">-</span>  <span class="ruby-identifier">topcut</span>[<span class="ruby-identifier">i</span>]
+172: 
+173:             <span class="ruby-comment cmt"># Draw the rotation-corrected lines</span>
+174:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+175:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">fill</span>(<span class="ruby-value str">&quot;magenta&quot;</span>)
+176:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;magenta&quot;</span>)
+177:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">left</span>, <span class="ruby-value">70</span>, <span class="ruby-identifier">left</span>, <span class="ruby-value">400</span>)
+178:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-value">1870</span>, <span class="ruby-identifier">top</span>, <span class="ruby-value">2270</span>, <span class="ruby-identifier">top</span>)
+179:                 <span class="ruby-comment cmt"># This affects offset detection. I will die a miserable</span>
+180:                 <span class="ruby-comment cmt"># death for this</span>
+181:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">draw</span>(<span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">i</span>])
+182:             <span class="ruby-keyword kw">end</span>
+183:         <span class="ruby-keyword kw">end</span>
+184: 
+185:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot; (took: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s)&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+186:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000053" class="method-detail">
+        <a name="M000053"></a>
+
+        <div class="method-heading">
+          <a href="#M000053" class="method-signature">
+          <span class="method-name">findRotation</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Finds the rotation for each page seperately. Does so by finding the start
+of the text/questions on top and bottom of each page. These values are then
+used to calulate the angle the sheet is rotated.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000053-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000053-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 90</span>
+ 90:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">findRotation</span>
+ 91:         <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+ 92:         <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Correcting Rotation&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+ 93:         <span class="ruby-ivar">@rad</span> = []
+ 94:         <span class="ruby-ivar">@ilist</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">img</span><span class="ruby-operator">|</span>
+ 95:             <span class="ruby-identifier">topstart</span> = <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-value">95</span>, <span class="ruby-value">50</span>,   <span class="ruby-value">250</span>, <span class="ruby-value">250</span>, <span class="ruby-value">9</span>, <span class="ruby-identifier">img</span>)
+ 96:             <span class="ruby-identifier">botstart</span> = <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-value">95</span>, <span class="ruby-value">2650</span>, <span class="ruby-value">250</span>, <span class="ruby-value">250</span>, <span class="ruby-value">9</span>, <span class="ruby-identifier">img</span>)
+ 97: 
+ 98:             <span class="ruby-comment cmt"># The text on the bottom half is a little indented compared</span>
+ 99:             <span class="ruby-comment cmt"># to the upper one. The horizontal lines are not enough</span>
+100:             <span class="ruby-comment cmt"># &quot;black enough&quot; to be used for orientation, so we have to</span>
+101:             <span class="ruby-comment cmt"># go for the text and correct the offset here.</span>
+102:             <span class="ruby-identifier">botstart</span> <span class="ruby-operator">-=</span> <span class="ruby-value">5</span>
+103: 
+104:             <span class="ruby-comment cmt"># Calculate angle in radians</span>
+105:             <span class="ruby-ivar">@rad</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Math</span>.<span class="ruby-identifier">atan</span>((<span class="ruby-identifier">botstart</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">topstart</span>).<span class="ruby-identifier">to_f</span><span class="ruby-operator">/</span>(<span class="ruby-value">2650</span> <span class="ruby-operator">-</span> <span class="ruby-value">50</span> <span class="ruby-operator">-</span> <span class="ruby-value">250</span>).<span class="ruby-identifier">to_f</span>)
+106: 
+107:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+108:                 <span class="ruby-comment cmt"># Careful! This draws into the images before they are</span>
+109:                 <span class="ruby-comment cmt"># completely recognized. If it intersects with a checkbox</span>
+110:                 <span class="ruby-comment cmt"># the results will be wrong</span>
+111:                 <span class="ruby-identifier">draw</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Draw</span>.<span class="ruby-identifier">new</span>
+112:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">font_weight</span> = <span class="ruby-value">100</span>
+113:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">pointsize</span> = <span class="ruby-value">20</span>
+114:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">fill</span>(<span class="ruby-value str">&quot;blue&quot;</span>)
+115:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;blue&quot;</span>)
+116:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">topstart</span>,   <span class="ruby-value">50</span>, <span class="ruby-identifier">topstart</span>,   <span class="ruby-value">50</span><span class="ruby-operator">+</span><span class="ruby-value">250</span>)
+117:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">botstart</span>, <span class="ruby-value">2650</span>, <span class="ruby-identifier">botstart</span>, <span class="ruby-value">2650</span><span class="ruby-operator">+</span><span class="ruby-value">250</span>)
+118:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">text</span>(<span class="ruby-value">10</span>, <span class="ruby-value">35</span>, (<span class="ruby-ivar">@rad</span>.<span class="ruby-identifier">last</span><span class="ruby-operator">*</span><span class="ruby-constant">RAD2DEG</span>).<span class="ruby-identifier">to_s</span>)
+119:                 <span class="ruby-identifier">draw</span>.<span class="ruby-identifier">draw</span>(<span class="ruby-identifier">img</span>)
+120:             <span class="ruby-keyword kw">end</span>
+121:         <span class="ruby-keyword kw">end</span>
+122: 
+123:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot; (took: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s)&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+124:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000060" class="method-detail">
+        <a name="M000060"></a>
+
+        <div class="method-heading">
+          <a href="#M000060" class="method-signature">
+          <span class="method-name">getNewFileName</span><span class="method-args">(file)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Helper function that determines where the parsed data should go
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000060-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000060-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 457</span>
+457:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">getNewFileName</span>(<span class="ruby-identifier">file</span>)
+458:         <span class="ruby-keyword kw">return</span> <span class="ruby-ivar">@path</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;/&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-identifier">file</span>, <span class="ruby-value str">&quot;.tif&quot;</span>) <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;.yaml&quot;</span>
+459:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000064" class="method-detail">
+        <a name="M000064"></a>
+
+        <div class="method-heading">
+          <a href="#M000064" class="method-signature">
+          <span class="method-name">parseArguments</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Reads the commandline arguments and decides which routines to call
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000064-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000064-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 524</span>
+524:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">parseArguments</span>
+525:         <span class="ruby-comment cmt"># Define useful default values</span>
+526:         <span class="ruby-ivar">@omrsheet</span> = <span class="ruby-keyword kw">nil</span>
+527:         <span class="ruby-ivar">@path</span>     = <span class="ruby-keyword kw">nil</span>
+528:         <span class="ruby-identifier">overwrite</span> = <span class="ruby-keyword kw">false</span>
+529:         <span class="ruby-ivar">@debug</span>    = <span class="ruby-keyword kw">false</span>
+530:         <span class="ruby-ivar">@spaces</span>   = <span class="ruby-value str">&quot;  &quot;</span>
+531:         <span class="ruby-identifier">cores</span>     = <span class="ruby-value">1</span>
+532: 
+533:         <span class="ruby-comment cmt"># Option Parser</span>
+534:         <span class="ruby-identifier">opt</span> = <span class="ruby-constant">OptionParser</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">opts</span><span class="ruby-operator">|</span>
+535:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">banner</span> = <span class="ruby-value str">&quot;Usage: omr.rb --omrsheet omrsheet.yaml --path workingdir [options] [file1 file2 ...]&quot;</span>
+536:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">separator</span>(<span class="ruby-value str">&quot;&quot;</span>)
+537:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">separator</span>(<span class="ruby-value str">&quot;REQUIRED ARGUMENTS:&quot;</span>)
+538:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-s&quot;</span>, <span class="ruby-value str">&quot;--omrsheet OMRSHEET&quot;</span>, <span class="ruby-value str">&quot;Path to the OMR Sheet that should be used to parse the sheets&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">sheet</span><span class="ruby-operator">|</span> <span class="ruby-ivar">@omrsheet</span> = <span class="ruby-identifier">sheet</span> }
+539: 
+540:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-p&quot;</span>, <span class="ruby-value str">&quot;--path WORKINGDIR&quot;</span>, <span class="ruby-value str">&quot;Path to the working directory where all the ouput will be saved.&quot;</span>, <span class="ruby-value str">&quot;All paths are relative to this.&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">path</span><span class="ruby-operator">|</span> <span class="ruby-ivar">@path</span> = <span class="ruby-identifier">path</span>.<span class="ruby-identifier">chomp</span>(<span class="ruby-value str">&quot;/&quot;</span>) }
+541: 
+542:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">separator</span>(<span class="ruby-value str">&quot;&quot;</span>)
+543:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">separator</span>(<span class="ruby-value str">&quot;OPTIONAL ARGUMENTS:&quot;</span>)
+544:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-o&quot;</span>, <span class="ruby-value str">&quot;--overwrite&quot;</span>, <span class="ruby-value str">&quot;Specify if you want to output files in the working directory to be overwritten&quot;</span>) { <span class="ruby-identifier">overwrite</span> = <span class="ruby-keyword kw">true</span> }
+545: 
+546:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-c&quot;</span>, <span class="ruby-value str">&quot;--cores CORES&quot;</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-value str">&quot;Number of cores to use (=processes to start)&quot;</span>, <span class="ruby-value str">&quot;This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">c</span><span class="ruby-operator">|</span> <span class="ruby-identifier">cores</span> = <span class="ruby-identifier">c</span> }
+547: 
+548:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-i&quot;</span>, <span class="ruby-value str">&quot;--indent SPACES&quot;</span>, <span class="ruby-constant">Integer</span>, <span class="ruby-value str">&quot;How much the messages should be indented.&quot;</span>, <span class="ruby-value str">&quot;Will be automatically set for the additionally spawned processes when using multiple cores in oder to keep it readable for humans.&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span> <span class="ruby-ivar">@spaces</span> = <span class="ruby-value str">&quot; &quot;</span><span class="ruby-operator">*</span><span class="ruby-identifier">i</span> }
+549: 
+550:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-v&quot;</span>, <span class="ruby-value str">&quot;--verbose&quot;</span>, <span class="ruby-value str">&quot;Print more output (not recommended with cores &gt; 1)&quot;</span>) { <span class="ruby-ivar">@verbose</span> = <span class="ruby-keyword kw">true</span> }
+551: 
+552:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>(<span class="ruby-value str">&quot;-d&quot;</span>, <span class="ruby-value str">&quot;--debug&quot;</span>, <span class="ruby-value str">&quot;Specify if you want debug output as well.&quot;</span>, <span class="ruby-value str">&quot;Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.&quot;</span>, <span class="ruby-value str">&quot;Be aware, that this makes processing about four times slower.&quot;</span>) { <span class="ruby-ivar">@debug</span> = <span class="ruby-keyword kw">true</span> }
+553: 
+554:             <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">on</span>( <span class="ruby-value str">'-h'</span>, <span class="ruby-value str">'--help'</span>, <span class="ruby-value str">'Display this screen'</span> ) { <span class="ruby-identifier">puts</span> <span class="ruby-identifier">opts</span>; <span class="ruby-identifier">exit</span> }
+555:         <span class="ruby-keyword kw">end</span>
+556:         <span class="ruby-identifier">opt</span>.<span class="ruby-identifier">parse!</span>
+557: 
+558:         <span class="ruby-comment cmt"># For some reason, the option parser doesn't halt the app over</span>
+559:         <span class="ruby-comment cmt"># missing mandatory arguments, so we do have to check manually</span>
+560:         <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@path</span> <span class="ruby-operator">||</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@omrsheet</span>
+561:             <span class="ruby-identifier">opt</span>.<span class="ruby-identifier">parse</span>([<span class="ruby-value str">&quot;-h&quot;</span>])
+562:         <span class="ruby-keyword kw">end</span>
+563: 
+564:         <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-constant">File</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-ivar">@path</span>)
+565:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Specified PATH is not a directory&quot;</span>
+566:             <span class="ruby-identifier">exit</span>
+567:         <span class="ruby-keyword kw">end</span>
+568: 
+569:         <span class="ruby-comment cmt"># All set? Ready, steady, parse!</span>
+570:         <span class="ruby-identifier">parseOMRSheet</span>
+571:         <span class="ruby-identifier">files</span> = []
+572: 
+573:         <span class="ruby-comment cmt"># If no list of files is given, look at the given working</span>
+574:         <span class="ruby-comment cmt"># directory.</span>
+575:         <span class="ruby-keyword kw">if</span> <span class="ruby-constant">ARGV</span>.<span class="ruby-identifier">empty?</span>
+576:             <span class="ruby-identifier">files</span> = <span class="ruby-constant">Dir</span>.<span class="ruby-identifier">glob</span>(<span class="ruby-ivar">@path</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;/*.tif&quot;</span>)
+577:         <span class="ruby-keyword kw">else</span>
+578:             <span class="ruby-constant">ARGV</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">files</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-ivar">@path</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;/&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">f</span> }
+579:         <span class="ruby-keyword kw">end</span>
+580: 
+581:         <span class="ruby-comment cmt"># Warn the user about existing files</span>
+582:         <span class="ruby-identifier">files</span> = <span class="ruby-identifier">checkForExistingFiles</span>(<span class="ruby-identifier">files</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">overwrite</span>
+583: 
+584:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">cores</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+585:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Owning FormPro, &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">cores</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; sheets at a time&quot;</span>
+586:             <span class="ruby-comment cmt"># The array is split unequally because the spawned processes</span>
+587:             <span class="ruby-comment cmt"># generally take longer than the main process. This tweak</span>
+588:             <span class="ruby-comment cmt"># ensures the processes run about equally long and therefore</span>
+589:             <span class="ruby-comment cmt"># produce the fastest output</span>
+590:             <span class="ruby-identifier">splitFiles</span> = <span class="ruby-identifier">files</span>.<span class="ruby-identifier">sqrtChunk</span>(<span class="ruby-identifier">cores</span>)
+591:             <span class="ruby-identifier">files</span> = <span class="ruby-identifier">splitFiles</span>.<span class="ruby-identifier">shift</span>
+592:             <span class="ruby-identifier">path</span> = <span class="ruby-value str">&quot; -p &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-ivar">@path</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp re">/(?=\s)/</span>, <span class="ruby-value str">&quot;\\&quot;</span>)
+593:             <span class="ruby-identifier">sheet</span> = <span class="ruby-value str">&quot; -s &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-ivar">@omrsheet</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp re">/(?=\s)/</span>, <span class="ruby-value str">&quot;\\&quot;</span>)
+594:             <span class="ruby-identifier">d</span> = <span class="ruby-ivar">@debug</span>    <span class="ruby-operator">?</span> <span class="ruby-value str">&quot; -d &quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot; &quot;</span>
+595:             <span class="ruby-identifier">v</span> = <span class="ruby-ivar">@verbose</span>  <span class="ruby-operator">?</span> <span class="ruby-value str">&quot; -v &quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot; &quot;</span>
+596:             <span class="ruby-identifier">o</span> = <span class="ruby-identifier">overwrite</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot; -o &quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot; &quot;</span>
+597:             <span class="ruby-identifier">corecount</span> = <span class="ruby-value">0</span>
+598:             <span class="ruby-identifier">splitFiles</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span>
+599:                 <span class="ruby-identifier">corecount</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
+600:                 <span class="ruby-keyword kw">next</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">empty?</span>
+601:                 <span class="ruby-identifier">list</span> = <span class="ruby-value str">&quot;&quot;</span>
+602:                 <span class="ruby-identifier">f</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">x</span><span class="ruby-operator">|</span> <span class="ruby-identifier">list</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-value str">&quot; &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-identifier">x</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp re">/(?=\s)/</span>, <span class="ruby-value str">&quot;\\&quot;</span>) }
+603:                 <span class="ruby-comment cmt"># This is the amount of spaces the output of newly</span>
+604:                 <span class="ruby-comment cmt"># spawned instances are indented. Quite useful to keep</span>
+605:                 <span class="ruby-comment cmt"># the console output readable.</span>
+606:                 <span class="ruby-identifier">i</span> = <span class="ruby-value str">&quot; -i &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-identifier">corecount</span><span class="ruby-operator">*</span><span class="ruby-value">35</span>).<span class="ruby-identifier">to_s</span>
+607:                 <span class="ruby-identifier">system</span>(<span class="ruby-value str">&quot;ruby omr.rb &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">sheet</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">path</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">i</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">v</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">d</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">o</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">list</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; &amp;&quot;</span>)
+608:             <span class="ruby-keyword kw">end</span>
+609:         <span class="ruby-keyword kw">end</span>
+610: 
+611:         <span class="ruby-comment cmt"># Iterates over the given filenames and recognizes them</span>
+612:         <span class="ruby-identifier">parseFilenames</span>(<span class="ruby-identifier">files</span>, <span class="ruby-identifier">overwrite</span>)
+613:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000059" class="method-detail">
+        <a name="M000059"></a>
+
+        <div class="method-heading">
+          <a href="#M000059" class="method-signature">
+          <span class="method-name">parseFile</span><span class="method-args">(file)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Does all of the overhead work required to be able to recognize an image.
+More or less, it glues together all other functions and saves the output to
+an YAML named like the input image.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000059-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000059-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 413</span>
+413:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">parseFile</span>(<span class="ruby-identifier">file</span>)
+414:         <span class="ruby-identifier">file</span> = <span class="ruby-identifier">file</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp re">/\.yaml:?$/</span>, <span class="ruby-value str">&quot;.tif&quot;</span>)
+415:         <span class="ruby-keyword kw">if</span> <span class="ruby-operator">!</span><span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">file</span>) <span class="ruby-operator">||</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">zero?</span>(<span class="ruby-identifier">file</span>)
+416:             <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;WARNING: File not found: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">file</span>
+417:             <span class="ruby-keyword kw">return</span>
+418:         <span class="ruby-keyword kw">end</span>
+419: 
+420:         <span class="ruby-ivar">@currentFile</span> = <span class="ruby-identifier">file</span>
+421:         <span class="ruby-identifier">newfile</span> = <span class="ruby-identifier">getNewFileName</span>(<span class="ruby-identifier">file</span>)
+422: 
+423:         <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+424:         <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Loading Image: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">file</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+425: 
+426:         <span class="ruby-comment cmt"># Load image and yaml sheet</span>
+427:         <span class="ruby-identifier">threadYaml</span> = <span class="ruby-constant">Thread</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword kw">do</span>
+428:             <span class="ruby-ivar">@doc</span> = <span class="ruby-constant">YAML</span><span class="ruby-operator">::</span><span class="ruby-identifier">load</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@omrsheet</span>))
+429:         <span class="ruby-keyword kw">end</span>
+430:         <span class="ruby-ivar">@ilist</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageList</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">file</span>)
+431:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot; (took: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s)&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+432: 
+433:         <span class="ruby-comment cmt"># do the hard work</span>
+434:         <span class="ruby-identifier">findRotation</span>
+435:         <span class="ruby-identifier">findOffset</span>
+436: 
+437:         <span class="ruby-identifier">threadYaml</span>.<span class="ruby-identifier">join</span>
+438:         <span class="ruby-identifier">recoImage</span>
+439: 
+440:         <span class="ruby-comment cmt"># Draw debugging image with thresholds, selected fields, etc.</span>
+441:         <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+442:             <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+443:             <span class="ruby-identifier">img</span> = <span class="ruby-ivar">@ilist</span>.<span class="ruby-identifier">append</span>(<span class="ruby-keyword kw">false</span>)
+444:             <span class="ruby-identifier">dbgFlnm</span> = <span class="ruby-identifier">newfile</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp re">/\.yaml$/</span>, <span class="ruby-value str">&quot;_DEBUG.jpg&quot;</span>)
+445:             <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Saving Image: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">dbgFlnm</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+446:             <span class="ruby-identifier">img</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">dbgFlnm</span>
+447:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot; (took: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s)&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+448:         <span class="ruby-keyword kw">end</span>
+449: 
+450:         <span class="ruby-comment cmt"># Output generated data</span>
+451:         <span class="ruby-identifier">fout</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-identifier">newfile</span>, <span class="ruby-value str">&quot;w&quot;</span>)
+452:         <span class="ruby-identifier">fout</span>.<span class="ruby-identifier">puts</span> <span class="ruby-constant">YAML</span><span class="ruby-operator">::</span><span class="ruby-identifier">dump</span>(<span class="ruby-ivar">@doc</span>)
+453:         <span class="ruby-identifier">fout</span>.<span class="ruby-identifier">close</span>
+454:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000062" class="method-detail">
+        <a name="M000062"></a>
+
+        <div class="method-heading">
+          <a href="#M000062" class="method-signature">
+          <span class="method-name">parseFilenames</span><span class="method-args">(files, overwrite)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Iterates a list of filenames and parses each. Checks for existing files if
+told so and does all that &quot;processing time&quot; yadda yadda.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000062-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000062-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 479</span>
+479:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">parseFilenames</span>(<span class="ruby-identifier">files</span>, <span class="ruby-identifier">overwrite</span>)
+480:         <span class="ruby-identifier">i</span> = <span class="ruby-value">0</span>
+481:         <span class="ruby-identifier">f</span> = <span class="ruby-constant">Float</span>.<span class="ruby-identifier">induced_from</span>(<span class="ruby-identifier">files</span>.<span class="ruby-identifier">length</span>)
+482:         <span class="ruby-identifier">overall_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+483:         <span class="ruby-identifier">skippedFiles</span> = <span class="ruby-value">0</span>
+484:         <span class="ruby-identifier">files</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+485:             <span class="ruby-comment cmt"># Processes the file and prints processing time</span>
+486:             <span class="ruby-identifier">file_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+487:             <span class="ruby-identifier">i</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
+488:             <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;Processing File &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">i</span>.<span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;/&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">to_s</span>
+489:             <span class="ruby-identifier">puts</span>  <span class="ruby-value str">&quot; (&quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-identifier">i</span><span class="ruby-operator">/</span><span class="ruby-identifier">f</span><span class="ruby-operator">*</span><span class="ruby-value">100.0</span>).<span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;%)&quot;</span>
+490:             <span class="ruby-identifier">parseFile</span>(<span class="ruby-identifier">file</span>)
+491:             <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Processing Time: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">file_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+492:             <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;&quot;</span>
+493: 
+494:             <span class="ruby-comment cmt"># Calculates and prints time remaining</span>
+495:             <span class="ruby-identifier">rlFiles</span> = <span class="ruby-constant">Float</span>.<span class="ruby-identifier">induced_from</span>(<span class="ruby-identifier">i</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">skippedFiles</span>)
+496:             <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">rlFiles</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+497:                 <span class="ruby-identifier">timePerFile</span> = (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">overall_time</span>)<span class="ruby-operator">/</span><span class="ruby-identifier">rlFiles</span>
+498:                 <span class="ruby-identifier">filesLeft</span> = (<span class="ruby-identifier">files</span>.<span class="ruby-identifier">length</span><span class="ruby-operator">-</span><span class="ruby-identifier">rlFiles</span>)
+499:                 <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;Time remaining: &quot;</span> <span class="ruby-operator">+</span> ((<span class="ruby-identifier">timePerFile</span><span class="ruby-operator">*</span><span class="ruby-identifier">filesLeft</span><span class="ruby-operator">/</span><span class="ruby-value">60</span>)<span class="ruby-operator">+</span><span class="ruby-value">0</span><span class="ruby-value">.5</span>).<span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; m&quot;</span>
+500:             <span class="ruby-keyword kw">end</span>
+501:         <span class="ruby-keyword kw">end</span>
+502: 
+503:         <span class="ruby-comment cmt"># Print some nice stats</span>
+504:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;&quot;</span>
+505:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;&quot;</span>
+506:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;&quot;</span>
+507:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;&quot;</span>
+508:         <span class="ruby-identifier">t</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">overall_time</span>
+509:         <span class="ruby-identifier">f</span> = <span class="ruby-identifier">files</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">skippedFiles</span>
+510:         <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;Total Time: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-identifier">t</span><span class="ruby-operator">/</span><span class="ruby-value">60</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; m &quot;</span>
+511:         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;(for &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; files)&quot;</span>
+512:         <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;(that's &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-identifier">t</span><span class="ruby-operator">/</span><span class="ruby-identifier">f</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s per file)&quot;</span>
+513:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000063" class="method-detail">
+        <a name="M000063"></a>
+
+        <div class="method-heading">
+          <a href="#M000063" class="method-signature">
+          <span class="method-name">parseOMRSheet</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Parses the given OMR sheet and extracts globally interesting data.
+Currently this isn&#8216;t too much, but this might change in the future.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000063-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000063-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 517</span>
+517:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">parseOMRSheet</span>
+518:         <span class="ruby-identifier">doc</span> = <span class="ruby-constant">YAML</span><span class="ruby-operator">::</span><span class="ruby-identifier">load</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@omrsheet</span>))
+519:         <span class="ruby-ivar">@dbtable</span> = <span class="ruby-identifier">doc</span>[<span class="ruby-value str">'dbtable'</span>]
+520:         <span class="ruby-ivar">@numPages</span> = <span class="ruby-identifier">doc</span>[<span class="ruby-value str">'page'</span>].<span class="ruby-identifier">size</span>
+521:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000058" class="method-detail">
+        <a name="M000058"></a>
+
+        <div class="method-heading">
+          <a href="#M000058" class="method-signature">
+          <span class="method-name">recoImage</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+Looks at each group listed in the yaml file and calls the appro- priate
+functions to parse it. This is determined by looking at the
+&quot;type&quot; attribute as specified in the YAML file. Results are saved
+directly into the loaded sheet.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000058-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000058-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 376</span>
+376:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">recoImage</span>
+377:         <span class="ruby-identifier">start_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+378:         <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;  Recognizing Image&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+379: 
+380:         <span class="ruby-identifier">max</span> = <span class="ruby-constant">Math</span><span class="ruby-operator">::</span><span class="ruby-identifier">min</span>(<span class="ruby-ivar">@ilist</span>.<span class="ruby-identifier">length</span>, <span class="ruby-ivar">@numPages</span>) <span class="ruby-operator">-</span> <span class="ruby-value">1</span>
+381: 
+382:         <span class="ruby-value">0</span>.<span class="ruby-identifier">upto</span>(<span class="ruby-identifier">max</span>) <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
+383:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+384:                 <span class="ruby-comment cmt"># Create @draw element the type*Parse functions can</span>
+385:                 <span class="ruby-comment cmt"># access</span>
+386:                 <span class="ruby-ivar">@draw</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Draw</span>.<span class="ruby-identifier">new</span>
+387:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">font_weight</span> = <span class="ruby-value">100</span>
+388:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">pointsize</span> = <span class="ruby-value">20</span>
+389:             <span class="ruby-keyword kw">end</span>
+390: 
+391:             <span class="ruby-ivar">@doc</span>[<span class="ruby-value str">'page'</span>][<span class="ruby-identifier">i</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">g</span><span class="ruby-operator">|</span>
+392:                 <span class="ruby-keyword kw">case</span> <span class="ruby-identifier">g</span>[<span class="ruby-value str">&quot;type&quot;</span>]
+393:                     <span class="ruby-keyword kw">when</span> <span class="ruby-value str">&quot;square&quot;</span> <span class="ruby-keyword kw">then</span>
+394:                         <span class="ruby-comment cmt"># width, height and threshold are predefined for squares</span>
+395:                         <span class="ruby-identifier">g</span>[<span class="ruby-value str">&quot;value&quot;</span>] = <span class="ruby-identifier">typeSquareParse</span>(<span class="ruby-identifier">i</span>, <span class="ruby-identifier">g</span>)
+396:                     <span class="ruby-keyword kw">when</span> <span class="ruby-value str">&quot;text&quot;</span> <span class="ruby-keyword kw">then</span>
+397:                         <span class="ruby-identifier">g</span>[<span class="ruby-value str">'value'</span>] = <span class="ruby-identifier">typeTextParse</span>(<span class="ruby-identifier">i</span>, <span class="ruby-identifier">g</span>)
+398:                     <span class="ruby-keyword kw">else</span>
+399:                         <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Unsupported type: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">g</span>[<span class="ruby-value str">'type'</span>].<span class="ruby-identifier">to_s</span>
+400:                 <span class="ruby-keyword kw">end</span>
+401:             <span class="ruby-keyword kw">end</span>
+402: 
+403:             <span class="ruby-comment cmt"># Apply what the type*Parse functions drew</span>
+404:             <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">draw</span>(<span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">i</span>]) <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+405:         <span class="ruby-keyword kw">end</span>
+406: 
+407:         <span class="ruby-identifier">puts</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;    (took: &quot;</span> <span class="ruby-operator">+</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span><span class="ruby-operator">-</span><span class="ruby-identifier">start_time</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot; s)&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+408:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000056" class="method-detail">
+        <a name="M000056"></a>
+
+        <div class="method-heading">
+          <a href="#M000056" class="method-signature">
+          <span class="method-name">typeSquareParse</span><span class="method-args">(imgid, group)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This function encapsulates the process for determining if a set of square
+boxes is checked and returns the appropriate answer.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000056-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000056-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 200</span>
+200:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">typeSquareParse</span>(<span class="ruby-identifier">imgid</span>, <span class="ruby-identifier">group</span>)
+201:         <span class="ruby-identifier">checks</span> = []
+202:         <span class="ruby-identifier">first</span> = <span class="ruby-keyword kw">true</span>
+203:         <span class="ruby-identifier">inner</span> = <span class="ruby-constant">SQUARE_SIZE</span> <span class="ruby-operator">-</span> <span class="ruby-value">2</span><span class="ruby-operator">*</span><span class="ruby-constant">SQUARE_STROKE</span>
+204: 
+205:         <span class="ruby-identifier">group</span>[<span class="ruby-value str">'boxes'</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">box</span><span class="ruby-operator">|</span>
+206:             <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-identifier">calcSkew</span>(<span class="ruby-identifier">imgid</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'x'</span>], <span class="ruby-identifier">box</span>[<span class="ruby-value str">'y'</span>])
+207: 
+208:             <span class="ruby-comment cmt"># Find the pre-printed box</span>
+209:             <span class="ruby-identifier">mx</span> = <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>], <span class="ruby-value">50</span>, <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+210: 
+211: 
+212:             <span class="ruby-comment cmt"># We didn't really find anything and got the maximum value</span>
+213:             <span class="ruby-comment cmt"># returned. Let's rather look a few pixels left or above for</span>
+214:             <span class="ruby-comment cmt"># the box</span>
+215:             <span class="ruby-identifier">maxCorr</span> = <span class="ruby-value">2</span>
+216:             <span class="ruby-keyword kw">while</span> <span class="ruby-identifier">mx</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">x</span><span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">maxCorr</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+217:                 <span class="ruby-identifier">x</span> <span class="ruby-operator">-=</span> <span class="ruby-constant">SQUARE_STROKE</span><span class="ruby-operator">*</span><span class="ruby-value">2</span>
+218:                 <span class="ruby-identifier">mx</span> = <span class="ruby-identifier">findFirstPixelsFromLeft</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>], <span class="ruby-value">50</span>, <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+219:                 <span class="ruby-identifier">maxCorr</span> <span class="ruby-operator">-=</span> <span class="ruby-value">1</span>
+220:             <span class="ruby-keyword kw">end</span>
+221: 
+222:             <span class="ruby-identifier">my</span>  = <span class="ruby-identifier">findFirstPixelsFromTop</span>(<span class="ruby-identifier">mx</span>, <span class="ruby-identifier">y</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>], <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span>, <span class="ruby-value">50</span>, <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+223:             <span class="ruby-comment cmt"># This is not a typo:        ^^</span>
+224:             <span class="ruby-comment cmt"># If we managed to find left already, we have better chances</span>
+225:             <span class="ruby-comment cmt"># of finding the correct top. If we found a wrong left we're</span>
+226:             <span class="ruby-comment cmt"># doomed anyway</span>
+227: 
+228:             <span class="ruby-identifier">maxCorr</span> = <span class="ruby-value">3</span>
+229:             <span class="ruby-keyword kw">while</span> <span class="ruby-identifier">my</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">y</span> <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">maxCorr</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+230:                 <span class="ruby-identifier">y</span> <span class="ruby-operator">-=</span> <span class="ruby-constant">SQUARE_STROKE</span><span class="ruby-operator">*</span><span class="ruby-value">2</span>
+231:                 <span class="ruby-identifier">my</span>  = <span class="ruby-identifier">findFirstPixelsFromTop</span>(<span class="ruby-identifier">mx</span>, <span class="ruby-identifier">y</span>, <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>], <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>]<span class="ruby-operator">/</span><span class="ruby-value">2</span>, <span class="ruby-value">50</span>, <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+232:                 <span class="ruby-identifier">maxCorr</span> <span class="ruby-operator">-=</span> <span class="ruby-value">1</span>
+233:             <span class="ruby-keyword kw">end</span>
+234: 
+235:             <span class="ruby-comment cmt"># Save corrected values to sheet so the FIX component doesn't</span>
+236:             <span class="ruby-comment cmt"># need to re-calculate this</span>
+237:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'x'</span>] = <span class="ruby-identifier">x</span>
+238:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'y'</span>] = <span class="ruby-identifier">y</span>
+239:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'mx'</span>] = <span class="ruby-identifier">mx</span>
+240:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'my'</span>] = <span class="ruby-identifier">my</span>
+241: 
+242:             <span class="ruby-comment cmt"># First check for the inner pixels. If there are any, we al-</span>
+243:             <span class="ruby-comment cmt"># most absolutely have a checkmark</span>
+244:             <span class="ruby-identifier">bp</span> = <span class="ruby-identifier">blackPercentage</span>(<span class="ruby-identifier">mx</span> <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span>, <span class="ruby-identifier">my</span> <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span>, <span class="ruby-identifier">inner</span>, <span class="ruby-identifier">inner</span>, <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+245: 
+246:             <span class="ruby-comment cmt"># Save the raw value to the yaml</span>
+247:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'bp'</span>] = <span class="ruby-identifier">bp</span>
+248: 
+249:             <span class="ruby-comment cmt"># Draw the rotation-correction-guidelines and the search</span>
+250:             <span class="ruby-comment cmt"># radius for each checkbox</span>
+251:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+252:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;black&quot;</span>)
+253:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill_opacity</span>(<span class="ruby-value">1</span>)
+254:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">text</span>(<span class="ruby-identifier">x</span><span class="ruby-operator">+</span><span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">+</span><span class="ruby-value">5</span>, <span class="ruby-identifier">y</span><span class="ruby-operator">+</span><span class="ruby-value">20</span>, ((<span class="ruby-identifier">bp</span> <span class="ruby-operator">*</span> <span class="ruby-value">100</span>).<span class="ruby-identifier">round</span>.<span class="ruby-identifier">to_f</span> <span class="ruby-operator">/</span> <span class="ruby-value">100</span>).<span class="ruby-identifier">to_s</span>)
+255: 
+256:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">x</span> <span class="ruby-operator">-</span> <span class="ruby-value">100</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">x</span> <span class="ruby-operator">+</span> <span class="ruby-value">100</span>, <span class="ruby-identifier">y</span>)
+257:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">line</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> <span class="ruby-operator">-</span> <span class="ruby-value">100</span>, <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> <span class="ruby-operator">+</span> <span class="ruby-value">200</span>)
+258: 
+259:                 <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">first</span>
+260:                     <span class="ruby-identifier">first</span> = <span class="ruby-keyword kw">false</span>
+261:                     <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">text</span>(<span class="ruby-identifier">x</span> <span class="ruby-operator">-</span> <span class="ruby-value">50</span>, <span class="ruby-identifier">y</span> <span class="ruby-operator">+</span> <span class="ruby-value">20</span>, <span class="ruby-identifier">group</span>[<span class="ruby-value str">'dbfield'</span>])
+262:                 <span class="ruby-keyword kw">end</span>
+263: 
+264:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;blue&quot;</span>)
+265:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill_opacity</span>(<span class="ruby-value">0</span>)
+266:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">rectangle</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">x</span> <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">0</span>], <span class="ruby-identifier">y</span> <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_SEARCH</span>[<span class="ruby-value">1</span>])
+267:             <span class="ruby-keyword kw">end</span>
+268:         <span class="ruby-keyword kw">end</span>
+269: 
+270:         <span class="ruby-comment cmt"># At first, use very high thresholds so that question that are</span>
+271:         <span class="ruby-comment cmt"># clearly marked are not affected by small errors due to dirt or</span>
+272:         <span class="ruby-comment cmt"># imperfect scanning. If no checkmark is found, lower the thres-</span>
+273:         <span class="ruby-comment cmt"># hold each time. This makes it more prone to false-positives,</span>
+274:         <span class="ruby-comment cmt"># but at least keeps them to a minimum on questions that do not</span>
+275:         <span class="ruby-comment cmt"># need such a low limit.</span>
+276:         <span class="ruby-identifier">thresholds</span> = [<span class="ruby-value">3.5</span>, <span class="ruby-value">1.5</span>, <span class="ruby-value">0</span><span class="ruby-value">.5</span>]
+277:         <span class="ruby-comment cmt"># This ensures that single boxes won't get checked because of</span>
+278:         <span class="ruby-comment cmt"># dirt. This might result in undetected checkmarks but no answer</span>
+279:         <span class="ruby-comment cmt"># is preferable over a wrong one.</span>
+280:         <span class="ruby-identifier">thresholds</span>.<span class="ruby-identifier">pop</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'boxes'</span>].<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span>
+281: 
+282:         <span class="ruby-identifier">threshold</span>  = <span class="ruby-value">-1</span>
+283:         <span class="ruby-identifier">thresholds</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span>
+284:             <span class="ruby-comment cmt"># Save for debugging uses</span>
+285:             <span class="ruby-identifier">threshold</span> = <span class="ruby-identifier">t</span>
+286:             <span class="ruby-identifier">group</span>[<span class="ruby-value str">'boxes'</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">box</span><span class="ruby-operator">|</span>
+287:                 <span class="ruby-identifier">checks</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'choice'</span>] <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'bp'</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">t</span>
+288:             <span class="ruby-keyword kw">end</span>
+289:             <span class="ruby-keyword kw">break</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">checks</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-value">1</span>
+290:         <span class="ruby-keyword kw">end</span>
+291: 
+292:         <span class="ruby-comment cmt"># Draws the red/green boxes for each answer</span>
+293:         <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+294:             <span class="ruby-identifier">group</span>[<span class="ruby-value str">'boxes'</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">box</span><span class="ruby-operator">|</span>
+295:                 <span class="ruby-identifier">color</span> = <span class="ruby-identifier">box</span>[<span class="ruby-value str">'bp'</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">threshold</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot;green&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot;red&quot;</span>
+296:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill</span>(<span class="ruby-identifier">color</span>)
+297:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill_opacity</span>(<span class="ruby-value">0</span><span class="ruby-value">.3</span>)
+298:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-identifier">color</span>)
+299:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">rectangle</span>(<span class="ruby-identifier">box</span>[<span class="ruby-value str">'mx'</span>] <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'my'</span>] <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'mx'</span>] <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">inner</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'my'</span>] <span class="ruby-operator">+</span> <span class="ruby-constant">SQUARE_STROKE</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">inner</span>)
+300:             <span class="ruby-keyword kw">end</span>
+301:         <span class="ruby-keyword kw">end</span>
+302: 
+303:         <span class="ruby-keyword kw">case</span> <span class="ruby-identifier">checks</span>.<span class="ruby-identifier">length</span>
+304:             <span class="ruby-keyword kw">when</span> <span class="ruby-value">0</span> <span class="ruby-keyword kw">then</span> <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'nochoice'</span>]
+305:             <span class="ruby-keyword kw">when</span> <span class="ruby-value">1</span> <span class="ruby-keyword kw">then</span> <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">checks</span>[<span class="ruby-value">0</span>]
+306:             <span class="ruby-keyword kw">else</span>        <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'failchoice'</span>]
+307:         <span class="ruby-keyword kw">end</span>
+308:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="method-M000057" class="method-detail">
+        <a name="M000057"></a>
+
+        <div class="method-heading">
+          <a href="#M000057" class="method-signature">
+          <span class="method-name">typeTextParse</span><span class="method-args">(imgid, group)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <p>
+This function tries to determine if a text field is filled out If so and
+the &quot;saveas&quot; attribute is specified the comment will be saved to
+the given filename.
+</p>
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000057-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000057-source">
+<pre>
+     <span class="ruby-comment cmt"># File omr.rb, line 313</span>
+313:     <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">typeTextParse</span>(<span class="ruby-identifier">imgid</span>, <span class="ruby-identifier">group</span>)
+314:         <span class="ruby-identifier">bp</span> = <span class="ruby-value">0</span>
+315:         <span class="ruby-identifier">limit</span> = <span class="ruby-value">1000</span>
+316:         <span class="ruby-identifier">boxes</span> = []
+317:         <span class="ruby-comment cmt"># Split up the text fields into many smaller boxes. Is is needed</span>
+318:         <span class="ruby-comment cmt"># for rotated sheets as the box would otherwise cover preprinted</span>
+319:         <span class="ruby-comment cmt"># areas and produce a false positive. If cut, large areas would</span>
+320:         <span class="ruby-comment cmt"># be missing and if would produce false negatives.</span>
+321:         <span class="ruby-comment cmt"># Splitting the boxes allows to circumvent this while still</span>
+322:         <span class="ruby-comment cmt"># being reasonable fast.</span>
+323:         <span class="ruby-identifier">group</span>[<span class="ruby-value str">'boxes'</span>].<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">box</span><span class="ruby-operator">|</span> <span class="ruby-identifier">boxes</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">splitBoxes</span>(<span class="ruby-identifier">box</span>, <span class="ruby-value">150</span>, <span class="ruby-value">150</span>) }
+324:         <span class="ruby-identifier">boxes</span>.<span class="ruby-identifier">flatten!</span>
+325:         <span class="ruby-identifier">boxes</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">box</span><span class="ruby-operator">|</span>
+326:             <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span> = <span class="ruby-identifier">calcSkew</span>(<span class="ruby-identifier">imgid</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'x'</span>], <span class="ruby-identifier">box</span>[<span class="ruby-value str">'y'</span>])
+327: 
+328:             <span class="ruby-comment cmt"># We may need to shrink the detection rectangle on severe</span>
+329:             <span class="ruby-comment cmt"># rotations. Otherwise it would cover pre-printed text which</span>
+330:             <span class="ruby-comment cmt"># chould result in a false positive</span>
+331:             <span class="ruby-identifier">skewx</span>, <span class="ruby-identifier">skewy</span> = <span class="ruby-identifier">x</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'x'</span>], <span class="ruby-identifier">y</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'y'</span>]
+332: 
+333:             <span class="ruby-comment cmt"># Save corrected values to sheet so the FIX component</span>
+334:             <span class="ruby-comment cmt"># doesn't need to re-calculate this</span>
+335:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'x'</span>] = <span class="ruby-identifier">x</span>
+336:             <span class="ruby-identifier">box</span>[<span class="ruby-value str">'y'</span>] = <span class="ruby-identifier">y</span>
+337: 
+338:             <span class="ruby-identifier">bp</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">blackPixels</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">box</span>[<span class="ruby-value str">'width'</span>], <span class="ruby-identifier">box</span>[<span class="ruby-value str">'height'</span>], <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>])
+339: 
+340:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@debug</span>
+341:                 <span class="ruby-identifier">color</span> = <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">limit</span> <span class="ruby-value">? </span><span class="ruby-value str">&quot;green&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-value str">&quot;red&quot;</span>
+342:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill</span>(<span class="ruby-identifier">color</span>)
+343:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill_opacity</span>(<span class="ruby-value">0</span><span class="ruby-value">.3</span>)
+344:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-identifier">color</span>)
+345:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">rectangle</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">x</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'width'</span>], <span class="ruby-identifier">y</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">box</span>[<span class="ruby-value str">'height'</span>])
+346:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">stroke</span>(<span class="ruby-value str">&quot;black&quot;</span>)
+347:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">fill_opacity</span>(<span class="ruby-value">1</span>)
+348:                 <span class="ruby-ivar">@draw</span>.<span class="ruby-identifier">text</span>(<span class="ruby-identifier">x</span><span class="ruby-operator">+</span><span class="ruby-value">5</span>, <span class="ruby-identifier">y</span><span class="ruby-operator">+</span><span class="ruby-value">20</span>, <span class="ruby-identifier">bp</span>.<span class="ruby-identifier">to_s</span>)
+349:             <span class="ruby-keyword kw">end</span>
+350: 
+351:             <span class="ruby-keyword kw">break</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">limit</span>
+352:         <span class="ruby-keyword kw">end</span>
+353:         <span class="ruby-identifier">group</span>[<span class="ruby-value str">'blackPixels'</span>] = <span class="ruby-identifier">bp</span>
+354: 
+355:         <span class="ruby-comment cmt"># Save the comment as extra file if possible/required</span>
+356:         <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'saveas'</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">limit</span>
+357:             <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@verbose</span>
+358:                 <span class="ruby-identifier">print</span> <span class="ruby-ivar">@spaces</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;    Saving Comment Image: &quot;</span>
+359:                 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'saveas'</span>]
+360:             <span class="ruby-keyword kw">end</span>
+361:             <span class="ruby-identifier">filename</span> = <span class="ruby-ivar">@path</span> <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;/&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">basename</span>(<span class="ruby-ivar">@currentFile</span>, <span class="ruby-value str">&quot;.tif&quot;</span>)
+362:             <span class="ruby-identifier">filename</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'saveas'</span>] <span class="ruby-operator">+</span> <span class="ruby-value str">&quot;.jpg&quot;</span>
+363:             <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">w</span>, <span class="ruby-identifier">h</span> = <span class="ruby-identifier">calculateBounds</span>(<span class="ruby-identifier">boxes</span>, <span class="ruby-identifier">group</span>)
+364:             <span class="ruby-ivar">@ilist</span>[<span class="ruby-identifier">imgid</span>].<span class="ruby-identifier">crop</span>(<span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">w</span>, <span class="ruby-identifier">h</span>).<span class="ruby-identifier">minify</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">filename</span>
+365:         <span class="ruby-keyword kw">end</span>
+366:         
+367:         <span class="ruby-comment cmt"># We're text-parsing, thus we can only have yes or no, but no</span>
+368:         <span class="ruby-comment cmt"># &quot;fail&quot; answer</span>
+369:         <span class="ruby-keyword kw">return</span> <span class="ruby-identifier">bp</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">limit</span> <span class="ruby-value">? </span><span class="ruby-identifier">group</span>[<span class="ruby-value str">'choice'</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">group</span>[<span class="ruby-value str">'nochoice'</span>]
+370:     <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
