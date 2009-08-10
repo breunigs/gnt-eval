@@ -86,6 +86,12 @@
 <li>x,y: coordinates
 
 </li>
+<li>width, height: size
+
+</li>
+<li>text: what is the <em>meaning</em> of this box
+
+</li>
 </ul>
 
     </div>
@@ -123,6 +129,21 @@
           <td class="context-item-desc"></td>
         </tr>
         <tr class="top-aligned-row context-row">
+          <td class="context-item-name">height</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">text</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">width</td>
+          <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
+          <td class="context-item-desc"></td>
+        </tr>
+        <tr class="top-aligned-row context-row">
           <td class="context-item-name">x</td>
           <td class="context-item-value">&nbsp;[RW]&nbsp;</td>
           <td class="context-item-desc"></td>
@@ -146,13 +167,26 @@
         <a name="M000001"></a>
 
         <div class="method-heading">
-          <a href="Box.src/M000001.html" target="Code" class="method-signature"
-            onclick="popupCode('Box.src/M000001.html');return false;">
-          <span class="method-name">new</span><span class="method-args">(c, x, y)</span>
+          <a href="#M000001" class="method-signature">
+          <span class="method-name">new</span><span class="method-args">(c, x, y, w, h)</span>
           </a>
         </div>
       
         <div class="method-description">
+          <p><a class="source-toggle" href="#"
+            onclick="toggleCode('M000001-source');return false;">[Source]</a></p>
+          <div class="method-source-code" id="M000001-source">
+<pre>
+    <span class="ruby-comment cmt"># File Form.rb, line 21</span>
+21:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">c</span>, <span class="ruby-identifier">x</span>, <span class="ruby-identifier">y</span>, <span class="ruby-identifier">w</span>, <span class="ruby-identifier">h</span>)
+22:     <span class="ruby-ivar">@choice</span> = <span class="ruby-identifier">c</span>
+23:     <span class="ruby-ivar">@x</span> = <span class="ruby-identifier">x</span>
+24:     <span class="ruby-ivar">@y</span> = <span class="ruby-identifier">y</span>
+25:     <span class="ruby-ivar">@width</span> = <span class="ruby-identifier">w</span>
+26:     <span class="ruby-ivar">@height</span> = <span class="ruby-identifier">h</span>
+27:   <span class="ruby-keyword kw">end</span>
+</pre>
+          </div>
         </div>
       </div>
 

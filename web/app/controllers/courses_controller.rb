@@ -122,8 +122,7 @@ class CoursesController < ApplicationController
       b.tutoren = @course.tutors.map { |t| t.abbr_name}.reverse
       b.semester = @course.semester.title
       b.veranstaltung = @course.title
-      @course.form ||= 0
-      b.bogen_basefile = @course.form.to_s
+      b.bogen_basefile = '99'
       
       b.output_to_file_and_compile(filename)
     end    

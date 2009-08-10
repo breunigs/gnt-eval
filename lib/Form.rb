@@ -12,14 +12,18 @@
 
 # - choice: value to insert into database
 # - x,y: coordinates
+# - width, height: size
+# - text: what is the _meaning_ of this box
 
 class Box
-  attr_accessor :choice, :x, :y
+  attr_accessor :choice, :x, :y, :width, :height, :text
 
-  def initialize(c, x, y)
+  def initialize(c, x, y, w, h)
     @choice = c
     @x = x
     @y = y
+    @width = w
+    @height = h
   end
 end
 
@@ -30,23 +34,23 @@ end
 # - type: what does the box look like (i.e. square)
 # - dbfield: into which field to write the result
 # - active: active question?
-
+# - save_as: postfix when saving file (got an alias saveas)
 class Question 
-  attr_accessor :boxes, :qtext, :ltext, :rtext,
-                :failchoice, :nochoice, :type, :dbfield, :active
+  attr_accessor :boxes, :qtext, :failchoice, :nochoice,
+                :type, :dbfield, :active
 
-  def initialize(boxes = [], qtext='', ltext='', rtext= '',
-                 failchoice=-1, nochoice=nil, type='square',
-                 dbfield='', active=true)
+  def initialize(boxes = [], qtext='', failchoice=-1,
+                 nochoice=nil, type='square', dbfield='',
+                 active=true, save_as = '')
+
     @boxes = boxes
     @qtext = qtext
-    @ltext = ltext
-    @rtext = rtext
     @failchoice = failchoice
     @nochoice = nochoice
     @type = type
     @dbfield = dbfield
     @active = active
+    @save_as = save_as
   end
 
   # how many choices are there?
@@ -62,6 +66,11 @@ class Question
       return false
     end
   end 
+
+  # for compatibility reasons
+  def saveas
+    @save_as
+  end
 end
 
 
