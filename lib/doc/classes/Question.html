@@ -198,20 +198,20 @@ href="Question.html#M000006">saveas</a>)
             onclick="toggleCode('M000003-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000003-source">
 <pre>
-    <span class="ruby-comment cmt"># File Form.rb, line 42</span>
-42:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">boxes</span> = [], <span class="ruby-identifier">qtext</span>=<span class="ruby-value str">''</span>, <span class="ruby-identifier">failchoice</span>=<span class="ruby-value">-1</span>,
-43:                  <span class="ruby-identifier">nochoice</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">type</span>=<span class="ruby-value str">'square'</span>, <span class="ruby-identifier">dbfield</span>=<span class="ruby-value str">''</span>,
-44:                  <span class="ruby-identifier">active</span>=<span class="ruby-keyword kw">true</span>, <span class="ruby-identifier">save_as</span> = <span class="ruby-value str">''</span>)
-45: 
-46:     <span class="ruby-ivar">@boxes</span> = <span class="ruby-identifier">boxes</span>
-47:     <span class="ruby-ivar">@qtext</span> = <span class="ruby-identifier">qtext</span>
-48:     <span class="ruby-ivar">@failchoice</span> = <span class="ruby-identifier">failchoice</span>
-49:     <span class="ruby-ivar">@nochoice</span> = <span class="ruby-identifier">nochoice</span>
-50:     <span class="ruby-ivar">@type</span> = <span class="ruby-identifier">type</span>
-51:     <span class="ruby-ivar">@dbfield</span> = <span class="ruby-identifier">dbfield</span>
-52:     <span class="ruby-ivar">@active</span> = <span class="ruby-identifier">active</span>
-53:     <span class="ruby-ivar">@save_as</span> = <span class="ruby-identifier">save_as</span>
-54:   <span class="ruby-keyword kw">end</span>
+    <span class="ruby-comment cmt"># File Form.rb, line 43</span>
+43:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">boxes</span> = [], <span class="ruby-identifier">qtext</span>=<span class="ruby-value str">''</span>, <span class="ruby-identifier">failchoice</span>=<span class="ruby-value">-1</span>,
+44:                  <span class="ruby-identifier">nochoice</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-identifier">type</span>=<span class="ruby-value str">'square'</span>, <span class="ruby-identifier">dbfield</span>=<span class="ruby-value str">''</span>,
+45:                  <span class="ruby-identifier">active</span>=<span class="ruby-keyword kw">true</span>, <span class="ruby-identifier">save_as</span> = <span class="ruby-value str">''</span>)
+46: 
+47:     <span class="ruby-ivar">@boxes</span> = <span class="ruby-identifier">boxes</span>
+48:     <span class="ruby-ivar">@qtext</span> = <span class="ruby-identifier">qtext</span>
+49:     <span class="ruby-ivar">@failchoice</span> = <span class="ruby-identifier">failchoice</span>
+50:     <span class="ruby-ivar">@nochoice</span> = <span class="ruby-identifier">nochoice</span>
+51:     <span class="ruby-ivar">@type</span> = <span class="ruby-identifier">type</span>
+52:     <span class="ruby-ivar">@dbfield</span> = <span class="ruby-identifier">dbfield</span>
+53:     <span class="ruby-ivar">@active</span> = <span class="ruby-identifier">active</span>
+54:     <span class="ruby-ivar">@save_as</span> = <span class="ruby-identifier">save_as</span>
+55:   <span class="ruby-keyword kw">end</span>
 </pre>
           </div>
         </div>
@@ -236,14 +236,14 @@ is the question <a href="Question.html#M000005">active?</a>
             onclick="toggleCode('M000005-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000005-source">
 <pre>
-    <span class="ruby-comment cmt"># File Form.rb, line 62</span>
-62:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">active?</span>
-63:     <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">not</span> <span class="ruby-ivar">@active</span>.<span class="ruby-identifier">nil?</span>
-64:       <span class="ruby-keyword kw">return</span> <span class="ruby-keyword kw">true</span>
-65:     <span class="ruby-keyword kw">else</span>
-66:       <span class="ruby-keyword kw">return</span> <span class="ruby-keyword kw">false</span>
-67:     <span class="ruby-keyword kw">end</span>
-68:   <span class="ruby-keyword kw">end</span>
+    <span class="ruby-comment cmt"># File Form.rb, line 63</span>
+63:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">active?</span>
+64:     <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">not</span> <span class="ruby-ivar">@active</span>.<span class="ruby-identifier">nil?</span>
+65:       <span class="ruby-keyword kw">return</span> <span class="ruby-keyword kw">true</span>
+66:     <span class="ruby-keyword kw">else</span>
+67:       <span class="ruby-keyword kw">return</span> <span class="ruby-keyword kw">false</span>
+68:     <span class="ruby-keyword kw">end</span>
+69:   <span class="ruby-keyword kw">end</span>
 </pre>
           </div>
         </div>
@@ -266,10 +266,10 @@ for compatibility reasons
             onclick="toggleCode('M000006-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000006-source">
 <pre>
-    <span class="ruby-comment cmt"># File Form.rb, line 71</span>
-71:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">saveas</span>
-72:     <span class="ruby-ivar">@save_as</span>
-73:   <span class="ruby-keyword kw">end</span>
+    <span class="ruby-comment cmt"># File Form.rb, line 72</span>
+72:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">saveas</span>
+73:     <span class="ruby-ivar">@save_as</span>
+74:   <span class="ruby-keyword kw">end</span>
 </pre>
           </div>
         </div>
@@ -292,10 +292,10 @@ how many choices are there?
             onclick="toggleCode('M000004-source');return false;">[Source]</a></p>
           <div class="method-source-code" id="M000004-source">
 <pre>
-    <span class="ruby-comment cmt"># File Form.rb, line 57</span>
-57:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">size</span>
-58:     <span class="ruby-keyword kw">return</span> <span class="ruby-ivar">@boxes</span>.<span class="ruby-identifier">count</span>
-59:   <span class="ruby-keyword kw">end</span>
+    <span class="ruby-comment cmt"># File Form.rb, line 58</span>
+58:   <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">size</span>
+59:     <span class="ruby-keyword kw">return</span> <span class="ruby-ivar">@boxes</span>.<span class="ruby-identifier">count</span>
+60:   <span class="ruby-keyword kw">end</span>
 </pre>
           </div>
         </div>
