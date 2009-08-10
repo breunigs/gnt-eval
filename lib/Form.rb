@@ -18,12 +18,13 @@
 class Box
   attr_accessor :choice, :x, :y, :width, :height, :text
 
-  def initialize(c, x, y, w, h)
+  def initialize(c, x, y, w, h, t)
     @choice = c
     @x = x
     @y = y
     @width = w
     @height = h
+    @text = t
   end
 end
 
