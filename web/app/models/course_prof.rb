@@ -38,7 +38,13 @@ class CourseProf < ActiveRecord::Base
           sth.fetch_hash { |r| antworten.push(r['anzahl_i']) }
         end
       end
-      p [mittel, sigma, anzahl, mittel_alle, sigma_alle, antworten]
+
+      # p [mittel, sigma, anzahl, mittel_alle, sigma_alle, antworten]
+      t = TeXSingleQuestion.new(q.qtext, q.ltext, q.rtext, antworten,
+                                anzahl, mittel, mittel_alle, sigma,
+                                sigma_alle)
+
+      puts t.the_tex
     end
   end
   

@@ -73,6 +73,16 @@ class Question
   def saveas
     @save_as
   end
+
+  # leftmost choice
+  def ltext
+    @boxes.first.text
+  end
+
+  #rightmost choice
+  def rtext
+    @boxes.last.text
+  end
 end
 
 

@@ -4,7 +4,7 @@
 # Wesentliche Fragen-Klasse mit einer Antwortmöglichkeit, rechnet gar
 # nichts selbst sondern bekommt alles geschenkt. Nur das Zählen der
 # Kästchen wird selbst vorgenommen.
-class TeXSingleFrage
+class TeXSingleQuestion
   
   # Frage will: Fragentext, Beschriftung links und rechts, abgegebene
   # Antworten im Fortmat: [0,1,3,9,0] (0*AW1, 1*AW2, ..., 0*AW5),
@@ -20,11 +20,11 @@ class TeXSingleFrage
     @frage = frage
     @ltext = ltext
     @rtext = rtext
-    @mittel_alle = mittel_alle
-    @sigma_alle = sigma_alle
-    @anzahl = anzahl
-    @mittel = mittel
-    @sigma = sigma
+    @mittel_alle = mittel_alle.to_f
+    @sigma_alle = sigma_alle.to_f
+    @anzahl = anzahl.to_f
+    @mittel = mittel.to_f
+    @sigma = sigma.to_f
     
     @width_mm = 45.0
     @width_u = 500 - (500 % @kaestchen)
@@ -86,7 +86,7 @@ end
 # Held. Recht gut für Test-Cases geeignet, könnte man meinen, weil man
 # direkt Zahlen eingeben kann und er eine Frage ausspuckt.
 
-class Frage < TeXSingleFrage
+class Frage < TeXSingleQuestion
 
   # Was hat eine Frage alles?
   # Fragetext, Text rechts, Text links, Array antworten ([1,3,0,2,1]

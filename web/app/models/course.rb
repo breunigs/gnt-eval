@@ -15,4 +15,8 @@ class Course < ActiveRecord::Base
     
     pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@mathphys.fsk.uni-heidelberg.de'}.join(',')
   end
+
+  def barcodes_with_checksum
+    course_profs.map { |cp| cp.barcode_with_checksum }
+  end
 end
