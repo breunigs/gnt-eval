@@ -171,7 +171,7 @@ class CoursesController < ApplicationController
       b.veranstaltung = @course.title
       @course.form ||= 0
       b.bogen_basefile = @course.form.to_s
-      b.barcodeid = "%07d" % @course.course_profs.find(:first, :conditions => { :prof_id => @prof.id }).id
+      b.barcodeid = @course.course_profs.find(:first, :conditions => { :prof_id => @prof.id }).barcode
       b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf' 
       b.generate_barcode
       

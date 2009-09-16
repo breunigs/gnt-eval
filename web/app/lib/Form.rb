@@ -33,7 +33,8 @@ end
 # - failchoice: value to insert into database if OMR fails
 # - nochoice: value to insert into db if there is no mark
 # - type: what does the box look like (i.e. square)
-# - dbfield: into which field to write the result
+# - dbfield: into which field to write the result (use a list for
+#            multiple choice questions!)
 # - active: active question?
 # - save_as: postfix when saving file (got an alias saveas)
 class Question 
@@ -96,11 +97,17 @@ end
 #   - No. It is a trivial task to get forms into a database.
 
 class Form
-  attr_accessor :pages, :dbtable
+  attr_accessor :pages, :db_table, :db_host, :db_db, :db_user, :db_password, :db_backend
 
-  def initialize(pages = [], dbtable = '')
+  def initialize(pages = [], db_table = '', db_host = '', db_db = '',
+                 db_user = '', db_password = '', db_backend = '') 
     @pages = pages
-    @dbtable = dbtable
+    @db_table = db_table
+    @db_user = db_user
+    @db_db = db_db
+    @db_host = db_host
+    @db_password = db_password
+    @db_backend = db_backend
   end
 
   # direct access to questions
