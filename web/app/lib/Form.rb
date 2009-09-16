@@ -39,10 +39,10 @@ end
 # - save_as: postfix when saving file (got an alias saveas)
 class Question 
   attr_accessor :boxes, :qtext, :failchoice, :nochoice,
-                :type, :dbfield, :active
+                :type, :db_column, :active
 
   def initialize(boxes = [], qtext='', failchoice=-1,
-                 nochoice=nil, type='square', dbfield='',
+                 nochoice=nil, type='square', db_column='',
                  active=true, save_as = '')
 
     @boxes = boxes
@@ -50,7 +50,7 @@ class Question
     @failchoice = failchoice
     @nochoice = nochoice
     @type = type
-    @dbfield = dbfield
+    @db_column = db_column
     @active = active
     @save_as = save_as
   end
@@ -112,6 +112,6 @@ class Form
 
   # direct access to questions
   def questions
-    @pages.collect { |p| p.questions }
+    @pages.collect { |p| p.questions }.flatten
   end
 end
