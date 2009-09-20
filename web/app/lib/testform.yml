@@ -1,10 +1,5 @@
 --- !ruby/object:Form 
-db_backend: Mysql
-db_db: eval
-db_host: localhost
-db_password: E-Wahl
 db_table: evaldaten_ss09
-db_user: eval
 pages: 
 - !ruby/object:Page 
   questions: 

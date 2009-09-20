@@ -112,17 +112,11 @@ end
 #   - No. It is a trivial task to get forms into a database.
 
 class Form
-  attr_accessor :pages, :db_table, :db_host, :db_db, :db_user, :db_password, :db_backend
+  attr_accessor :pages, :db_table
 
-  def initialize(pages = [], db_table = '', db_host = '', db_db = '',
-                 db_user = '', db_password = '', db_backend = '') 
+  def initialize(pages = [], db_table = '')
     @pages = pages
     @db_table = db_table
-    @db_user = db_user
-    @db_db = db_db
-    @db_host = db_host
-    @db_password = db_password
-    @db_backend = db_backend
   end
 
   # direct access to questions

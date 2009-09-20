@@ -7,6 +7,8 @@ class Course < ActiveRecord::Base
   validates_presence_of :semester_id
   validates_numericality_of :students
   
+  include FunkyDBBits
+  
   def fs_contact_addresses
     if fscontact.empty?
       pre_format = evaluator
@@ -23,13 +25,14 @@ class Course < ActiveRecord::Base
   
   def eval_against_form(form, dbh)
     b = ''
-
-    boegenanzahl = 0
-    q = "SELECT COUNT(*) AS anzahl FROM #{form.db_table} WHERE barcode IN (?)"
-    sth = dbh.prepare(q)
-    sth.execute(course_profs.map{ |cp| cp.barcode_with_checksum.to_i })
-    sth.fetch_hash { |r| boegenanzahl = r['anzahl'] }
-
+    
+    # setup for FunkyDBBits
+    @dbh = dbh
+    @db_table = form.db_table
+    
+    boegenanzahl = count_forms({ 'barcode' => course_profs.map{ |cp|
+                                   cp.i_bcwc}})
+    
     b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
    
     # TODO: semester/abschluss
