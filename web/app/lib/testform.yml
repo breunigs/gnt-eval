@@ -1,0 +1,89 @@
+--- !ruby/object:Form 
+db_backend: Mysql
+db_db: eval
+db_host: localhost
+db_password: E-Wahl
+db_table: evaldaten_ss09
+db_user: eval
+pages: 
+- !ruby/object:Page 
+  questions: 
+  - !ruby/object:Question 
+    active: true
+    boxes: 
+    - !ruby/object:Box 
+      choice: 1
+      x: 100
+      y: 200
+      text: ja
+    - !ruby/object:Box 
+      choice: 2
+      x: 100
+      y: 200
+      text: nein
+    db_column: v10
+    failchoice: -1
+    nochoice: 
+    qtext: Ist das Praesentationsmedium angemessen?
+    type: square
+  - !ruby/object:Question 
+    active: true
+    boxes: 
+    - !ruby/object:Box 
+      choice: 1
+      height: 0
+      text: keine
+      width: 0
+      x: 0
+      y: 0
+    - !ruby/object:Box 
+      choice: 2
+      height: 0
+      text: Darstellung wirr
+      width: 0
+      x: 0
+      y: 0
+    - !ruby/object:Box 
+      choice: 3
+      height: 0
+      text: Schrift unleserlich
+      width: 0
+      x: 0
+      y: 0
+    - !ruby/object:Box 
+      choice: 4
+      height: 0
+      text: sonstige
+      width: 0
+      x: 0
+      y: 0
+    db_column: 
+    - v12a
+    - v12b
+    - v12c
+    - v12d
+    failchoice: -1
+    nochoice: 
+    qtext: Gibt es Probleme mit der Praesentation? Wenn ja, welche?
+    save_as: ""
+    type: square
+- !ruby/object:Page 
+  questions: 
+  - !ruby/object:Question 
+    active: true
+    boxes: 
+    - !ruby/object:Box 
+      choice: 1
+      x: 100
+      y: 200
+      text: ja
+    - !ruby/object:Box 
+      choice: 2
+      x: 400
+      y: 200
+      text: nein
+    db_column: v15
+    failchoice: -1
+    nochoice: 
+    qtext: Traust du dich, Fragen zu stellen?
+    type: square

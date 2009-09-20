@@ -83,6 +83,11 @@ class Question
   def rtext
     @boxes.last.text
   end
+  
+  # question itself
+  def text
+    @qtext
+  end
 end
 
 

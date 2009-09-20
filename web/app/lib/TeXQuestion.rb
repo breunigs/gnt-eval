@@ -1,6 +1,33 @@
 # -*- coding: utf-8 -*-
 #/usr/bin/env ruby
 
+# Multiple-Choice-Fragen, rechtnet nichts selbst
+#
+# Hätte gern den Fragetext und ['so und so' => "30 \%", 'nein, anders'
+#  => "40 \%"]
+
+class TeXMultiQuestion
+  def initialize(q, a)
+    @frage = q
+    @antworten = a
+  end
+  
+  def to_tex
+    b = ""
+    b << "   \\parbox[t]{8.3cm}{\\raggedright #{@frage}}\n"
+    b << "   \\hspace{0.7cm}\n"
+    b << "   \\raisebox{.8em}{\\sffamily\\begin{tabular}[t]{|p{5.6cm}r|}"
+    b << "\\hline\n"
+    @antworten.each_pair do |q,a|
+      b << "     \\raggedright\\small #{q} & #{a} \\,\\%\\\\\\hline\n"
+    end
+    
+    b << "   \\end{tabular}}\n\n"
+    return b
+  end
+end
+
+
 # Wesentliche Fragen-Klasse mit einer Antwortmöglichkeit, rechnet gar
 # nichts selbst sondern bekommt alles geschenkt. Nur das Zählen der
 # Kästchen wird selbst vorgenommen.
@@ -40,14 +67,14 @@ class TeXSingleQuestion
   
   # Gibt den TeX-Code zur aktuellen Frage zurück
   
-  def the_tex
+  def to_tex
     # Die Frage wird tatsächlich gemalt (!). Kruder TeX-Scheiß halt.
     b = ""
     b << "   \\parbox[t]{8.3cm}{\\raggedright #{@frage}}\n"
     b << "   \\hspace{0.3cm}\\rule[-1cm]{0mm}{1cm}\n"
     b << "   \\smash{\\raisebox{-1mm}{\\parbox{1.7cm}{\\flushright\\sffamily\\small #{@ltext}}}}\n"
     b << "   \\smash{\\raisebox{-0mm}{\\parbox[t]{#{@width_mm}mm}{\n"
-    b << "      \\setlength{\\unitlength}{#{@unitlength}mm}   %%Beginn eines Histogramms"
+    b << "      \\setlength{\\unitlength}{#{@unitlength}mm}   %%Beginn eines Histogramms\n"
     b << "      \\begin{picture}(#{@width_u},65)\n"
     b << "          \\put(0,#{35-@y_offset}){\\framebox(#{@width_u},100){}}\n"
     b << "          \\put(#{@mittel_pos}, #{20-@y_offset}){\\circle*{15}}\n"
