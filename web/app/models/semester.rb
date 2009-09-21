@@ -6,12 +6,18 @@ class Semester < ActiveRecord::Base
   validates_presence_of :title
   
   include FunkyTeXBits
+  include FunkyDBBits
   
   def eval_against_form(faculty, form, dbh)
     b = ''
+    
+    # FunkyDBBits setup
+    @dbh = dbh
+    @db_table = form.db_table
+    
     cs = courses.find_all{ |c| c.faculty == faculty }    
     evalname = ['Mathematik', 'Physik'][faculty] + ' ' + title
-    anzahl_boegen = 0
+    anzahl_boegen = count_forms({ 'eval' => evalname })
     
     b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
                    c.profs.count }, cs.inject(0) { |sum, c| sum +

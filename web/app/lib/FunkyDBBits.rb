@@ -46,10 +46,10 @@ module FunkyDBBits
   # h_general: where-clause-hash für die vergleichsveranstaltungen
   def single_q(h_particular, h_general, q)
     col = q.db_column
-    mittel, sigma, anzahl = query(["STD(#{col})", "AVG(#{col})",
+    sigma, mittel, anzahl = query(["STD(#{col})", "AVG(#{col})",
                                    "COUNT(#{col})"], h_particular,
                                   "AND #{col} != 0") 
-    mittel_alle, sigma_alle = query(["STD(#{col})", "AVG(#{col})"],
+    sigma_alle, mittel_alle = query(["STD(#{col})", "AVG(#{col})"],
                                    h_general, "AND #{col} != 0")
 
     # single values
