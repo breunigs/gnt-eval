@@ -1,4 +1,4 @@
-#!/usr/bin/ruby1.9
+#!/usr/bin/ruby1.8
 
 # PEST
 # Praktisches Evaluations ScripT ( >> FormPro)
@@ -20,11 +20,17 @@ require 'RMagick'
 require 'optparse'
 require 'yaml'
 require 'pp'
+require 'narray'
 
 require 'helper.array.rb'
 require 'helper.boxtools.rb'
 require 'helper.constants.rb'
 require 'helper.math.rb'
+
+# Profiler. Uncomment code at the end of this file, too.
+#require 'ruby-prof'
+#RubyProf.start
+
 
 class PESTOmr
     # Finds the percentage of black/white pixels for the given rectangle
@@ -37,7 +43,6 @@ class PESTOmr
 
     # Counts the black pixels in the given area and image.
     def blackPixels(x, y, width, height, img)
-        black = 0
         begin
             rect = img.export_pixels(x, y, width, height, "G")
         rescue
@@ -53,8 +58,8 @@ class PESTOmr
             puts @ilist.inspect
             return 0
         end
-        rect.each { |x| black += 1 if x == 0 }
-        black
+        nrect = NArray.to_na(rect)
+        nrect.size - (nrect.sum / 65535)
     end
 
     # This function finds the first line of pixels whose black-% is
@@ -424,17 +429,13 @@ class PESTOmr
         print @spaces + "  Loading Image: " + file if @verbose
 
         # Load image and yaml sheet
-        threadYaml = Thread.new do
-            @doc = YAML::load(File.new(@omrsheet))
-        end
+        @doc = YAML::load(File.new(@omrsheet))
         @ilist = Magick::ImageList.new(file)
         puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
 
         # do the hard work
         findRotation
         findOffset
-
-        threadYaml.join
         recoImage
 
         # Draw debugging image with thresholds, selected fields, etc.
@@ -479,24 +480,42 @@ class PESTOmr
     def parseFilenames(files, overwrite)
         i = 0
         f = Float.induced_from(files.length)
+        allfile = f.to_i.to_s
+        
         overall_time = Time.now
         skippedFiles = 0
+        
         files.each do |file|
             # Processes the file and prints processing time
             file_time = Time.now
             i += 1
-            print @spaces + "Processing File " + i.to_i.to_s + "/" + f.to_i.to_s
-            puts  " (" + (i/f*100.0).to_i.to_s + "%)"
-            parseFile(file)
-            puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s" if @verbose
-            puts ""
 
+            curfile = i.to_i.to_s
+            percentage = (i/f*100.0).to_i.to_s
+            
+            if @verbose
+                print @spaces + "Processing File " + curfile + "/" + allfile
+                puts  " (" + percentage + "%)"
+            end
+            
+            parseFile(file)
+            
+            if @verbose
+                puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s" 
+                puts ""
+            end
+            
             # Calculates and prints time remaining
             rlFiles = Float.induced_from(i - skippedFiles)
             if rlFiles > 0
                 timePerFile = (Time.now-overall_time)/rlFiles
                 filesLeft = (files.length-rlFiles)
-                puts @spaces + "Time remaining: " + ((timePerFile*filesLeft/60)+0.5).to_i.to_s + " m"
+                timeleft = ((timePerFile*filesLeft/60)+0.5).to_i.to_s
+                if @verbose
+                    puts @spaces + "Time remaining: " + timeleft + " m"
+                else
+                    puts @spaces + timeleft + " m left (" + percentage + "%, " + curfile + "/" + allfile + ")"
+                end
             end
         end
 
@@ -587,7 +606,10 @@ class PESTOmr
             # generally take longer than the main process. This tweak
             # ensures the processes run about equally long and therefore
             # produce the fastest output
-            splitFiles = files.sqrtChunk(cores)
+            #splitFiles = files.Chunk(cores)
+            # Above does not seem to imply using NArray
+            splitFiles = files.chunk(cores)
+            
             files = splitFiles.shift
             path = " -p " + @path.gsub(/(?=\s)/, "\\")
             sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
@@ -619,3 +641,8 @@ class PESTOmr
 end
 
 PESTOmr.new()
+
+
+#result = RubyProf.stop
+#printer = RubyProf::FlatPrinter.new(result)
+#printer.print(STDOUT, 0)
