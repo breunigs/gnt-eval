@@ -37,13 +37,16 @@ end
 #            multiple choice questions!)
 # - active: active question?
 # - save_as: postfix when saving file (got an alias saveas)
+# - section: belongs to: 'tutor', 'prof', 'tutoring'
 class Question 
+  include FunkyDBBits
+  
   attr_accessor :boxes, :qtext, :failchoice, :nochoice,
-                :type, :db_column, :active
+                :type, :db_column, :active, :section
 
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='',
-                 active=true, save_as = '')
+                 active=true, save_as = '', section = '')
 
     @boxes = boxes
     @qtext = qtext
@@ -53,6 +56,7 @@ class Question
     @db_column = db_column
     @active = active
     @save_as = save_as
+    @section = ''
   end
 
   # how many choices are there?
@@ -88,6 +92,35 @@ class Question
   def text
     @qtext
   end
+  
+  def eval_to_tex(this_eval, bc, db_table, dbh)
+    @dbh = dbh
+    @db_table = db_table
+    
+    b = ''
+    
+    if @db_column.is_a?(Array)
+        
+      answers = multi_q({ 'eval' => this_eval, 'barcode' =>
+                          bc}, self)
+      
+      t = TeXMultiQuestion.new(@qtext, answers)
+      b << t.to_tex
+      
+      # single-q
+    else
+      antw, anz, m, m_a, s, s_a = single_q({'eval' => this_eval,
+                                             'barcode' =>
+                                             bc},
+                                           {'eval' => this_eval}, self) 
+      
+      t = TeXSingleQuestion.new(text, ltext, rtext, antw,
+                                anz, m, m_a, s, s_a)
+      
+      b << t.to_tex
+    end
+    return b
+  end
 end
 
 
@@ -112,17 +145,11 @@ end
 #   - No. It is a trivial task to get forms into a database.
 
 class Form
-  attr_accessor :pages, :db_table, :db_host, :db_db, :db_user, :db_password, :db_backend
+  attr_accessor :pages, :db_table
 
-  def initialize(pages = [], db_table = '', db_host = '', db_db = '',
-                 db_user = '', db_password = '', db_backend = '') 
+  def initialize(pages = [], db_table = '')
     @pages = pages
     @db_table = db_table
-    @db_user = db_user
-    @db_db = db_db
-    @db_host = db_host
-    @db_password = db_password
-    @db_backend = db_backend
   end
 
   # direct access to questions

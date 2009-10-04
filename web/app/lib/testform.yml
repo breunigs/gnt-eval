@@ -1,10 +1,5 @@
 --- !ruby/object:Form 
-db_backend: Mysql
-db_db: eval
-db_host: localhost
-db_password: E-Wahl
 db_table: evaldaten_ss09
-db_user: eval
 pages: 
 - !ruby/object:Page 
   questions: 
@@ -26,6 +21,7 @@ pages:
     nochoice: 
     qtext: Ist das Praesentationsmedium angemessen?
     type: square
+    section: prof
   - !ruby/object:Question 
     active: true
     boxes: 
@@ -67,6 +63,7 @@ pages:
     qtext: Gibt es Probleme mit der Praesentation? Wenn ja, welche?
     save_as: ""
     type: square
+    section: prof
 - !ruby/object:Page 
   questions: 
   - !ruby/object:Question 
@@ -87,3 +84,4 @@ pages:
     nochoice: 
     qtext: Traust du dich, Fragen zu stellen?
     type: square
+    section: prof

@@ -7,6 +7,8 @@ class Course < ActiveRecord::Base
   validates_presence_of :semester_id
   validates_numericality_of :students
   
+  include FunkyDBBits
+  
   def fs_contact_addresses
     if fscontact.empty?
       pre_format = evaluator
@@ -23,34 +25,52 @@ class Course < ActiveRecord::Base
   
   def eval_against_form(form, dbh)
     b = ''
-
-    boegenanzahl = 0
-    q = "SELECT COUNT(*) AS anzahl FROM #{form.db_table} WHERE barcode IN (?)"
-    sth = dbh.prepare(q)
-    sth.execute(course_profs.map{ |cp| cp.barcode_with_checksum.to_i })
-    sth.fetch_hash { |r| boegenanzahl = r['anzahl'] }
-
+    
+    # setup for FunkyDBBits
+    @dbh = dbh
+    @db_table = form.db_table
+    
+    this_eval = ['Mathematik', 'Physik'][faculty] + ' ' +
+      semester.title 
+      
+    boegenanzahl = count_forms({ 'barcode' => course_profs.map{ |cp|
+                                   cp.i_bcwc}})
+    
     b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
    
     # TODO: semester/abschluss
     
     b << "\\zusammenfassung\n"
-    b << summary
+    b << summary.to_s
     b << "\n\\medskip\n\n"
     
     # vorlesungseval pro dozi
     course_profs.each do |cp|
-      b << cp.eval_against_form(form, dbh)
+      b << cp.eval_against_form(form, dbh).to_s
     end
     
+    # uebungen allgemein
     b << "\\fragenzudenuebungen\n"
-    # TODO übungen allgemein
-    
+    form.questions.find_all{ |q| q.section == 'tutoring'}.each do |q|
+      b << q.eval_to_tex(this_eval, course_profs.map { |cp| cp.i_bcwc
+                         }, form.db_table, @dbh).to_s
+    end
+
     # TODO tutor_innen
+    tutors.each do |t|
+      b << t.eval_against_form(form, dbh).to_s
+    end
     return b
   end
   
-  def eval_against_form!(form, dbh)
-    puts eval_against_form(form, dbh)
+  def evaluate(dbh)
+    eval_against_form(form.to_form, dbh)
+  end
+  
+end
+
+class Integer
+  def to_form
+    YAML::load(File.read('/home/oliver/seee/lib/testform.yml'))
   end
 end

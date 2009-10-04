@@ -5,9 +5,7 @@ require 'dbi'
 
 s = Semester.find(4)
 
-f = YAML::load(File.read('lib/testform.yml'))
-
-DBI.connect("DBI:#{f.db_backend}:#{f.db_db}", f.db_user, f.db_password) do |dbh|
-  s.eval_against_form!(1, f, dbh)
+DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl') do |dbh| 
+  puts s.evaluate(1, dbh)
 end
 
