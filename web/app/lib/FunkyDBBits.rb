@@ -5,10 +5,10 @@ module FunkyDBBits
   attr :dbh, :db_table
   
   # query fields, where-hash and additional clauses
-  def query(f, h, additional = '')
+  def query_single_table(f, h, t, additional = '')
     q = 'SELECT '
     q += f.to_a.join(', ')
-    q += " FROM #{@db_table}"
+    q += " FROM #{t}"
     q += ' WHERE ' + h.keys.join(' IN (?) AND ') + ' IN (?) ' +
       additional
     
@@ -20,6 +20,26 @@ module FunkyDBBits
       return result[0]
     else
       return result
+    end
+  end
+  
+  def query(f, h, additional = '')
+    ts = @db_table.to_a
+    res = ts.map{ |t| query_single_table(f, h, t, additional)}
+    
+    # at this very moment we just use queries over multiple tables at
+    # the very beginning when counting all forms, so we can safely
+    # (*cough*) do this:
+    
+    if res.count == 1
+      return res[0]
+    else
+      if res.any?{ |r| not r.is_a?(Integer) }
+        raise TypeError, "Shall use tables #{@db_table.join(', ')} and
+  got results #{res.join(', ')}, which is like not good"
+      else
+        res.inject(0){ |sum,x| sum+x}
+      end
     end
   end
   

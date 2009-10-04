@@ -8,14 +8,15 @@ class Semester < ActiveRecord::Base
   include FunkyTeXBits
   include FunkyDBBits
   
-  def eval_against_form(faculty, form, dbh)
+  def evaluate(faculty, dbh)
     b = ''
-    
+
+    cs = courses.find_all{ |c| c.faculty == faculty }    
+
     # FunkyDBBits setup
     @dbh = dbh
-    @db_table = form.db_table
-    
-    cs = courses.find_all{ |c| c.faculty == faculty }    
+    @db_table = cs.map { |c| c.form.to_form.db_table }.uniq
+
     evalname = ['Mathematik', 'Physik'][faculty] + ' ' + title
     anzahl_boegen = count_forms({ 'eval' => evalname })
     
@@ -24,7 +25,7 @@ class Semester < ActiveRecord::Base
                    c.tutors.count }, anzahl_boegen)
 
     cs.each do |c|
-      b << c.eval_against_form(form, dbh)
+      b << c.evaluate(dbh)
     end
     
     b << TeXFuss()

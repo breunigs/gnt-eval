@@ -28,7 +28,7 @@ class CourseProf < ActiveRecord::Base
     b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
     b << "\\fragenzurvorlesung\n\n"
     
-    form.questions.each do |q|
+    form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
       b << q.eval_to_tex(this_eval, i_bcwc, form.db_table, @dbh)
     end
     

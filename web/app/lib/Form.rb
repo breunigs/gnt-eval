@@ -37,15 +37,16 @@ end
 #            multiple choice questions!)
 # - active: active question?
 # - save_as: postfix when saving file (got an alias saveas)
+# - section: belongs to: 'tutor', 'prof', 'tutoring'
 class Question 
   include FunkyDBBits
   
   attr_accessor :boxes, :qtext, :failchoice, :nochoice,
-                :type, :db_column, :active
+                :type, :db_column, :active, :section
 
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='',
-                 active=true, save_as = '')
+                 active=true, save_as = '', section = '')
 
     @boxes = boxes
     @qtext = qtext
@@ -55,6 +56,7 @@ class Question
     @db_column = db_column
     @active = active
     @save_as = save_as
+    @section = ''
   end
 
   # how many choices are there?
