@@ -48,7 +48,9 @@ etc. erhoben werden. Dazu dient *einzig* der Barcode.
 Jede Spalte der Tabelle korrespondiert im Wesentlichen mit einer
 Frage, wobei Multiple-Choice-Fragen in einer Art one-hot-Kodierung
 gespeichert sind, indem für alle Antwortmöglichkeiten ein Feld vX_a,
-... vX_n exisiert.
+... vX_n exisiert. Damit korrespondieren verschiedene Tabellen nicht
+nur mit verschiedenen Semestern, sondern auch mit verschiedenen
+Fragebögen.
 
 Die Daten in dieser Datenbank haben also keinerlei Informationen, auf
 welche Veranstaltung sie sich beziehen. Sie sind damit nur ausgefüllte
@@ -65,8 +67,7 @@ Und was ist jetzt der Seee im engeren Sinne?
 
 Der Seee im engeren Sinne ist ein (Web-)Frontend für die Datenbank
 "seee". Es handelt sich um ein Ruby-on-Rails-Projekt, das auf MathPhys
-unter [^1]
-gefunden werden kann.
+unter [^1] gefunden werden kann.
 
 Es ist *niemals* notwendig oder auch nur ratsam, direkt mit der
 Datenbak "seee" zu arbeiten. Für das Überleben der Menschheit ist es
@@ -142,3 +143,23 @@ derartige ist im Verzeichnis `lib/` zu finden.
 
 Die wichtigesten Begebenheit sind derart kommentiert, dass `rdoc` zu
 passablen Ergebnissen führt.
+
+Was ist also der Ablauf?
+------------------------
+
+Eine vollständige Evaluation besteht damit aus folgenden beinahe
+einfachen Schritten:
+
+1. Erhebung: Was soll evaluiert werden? Das in das Web-Interface
+   "Seee" eintragen. Bei den Bögen aufpassen und immer gegenchecken in
+   lib/forms
+2. Eval ankündingen per Mail (dafür: `Postoffice`)
+3. Bögen drucken: Im Seee erstellen lassen und ins URZ
+   geben. Aufpassen, dass die nicht komisch in der Größe angepasst
+   werden.
+4. Austeilen, einsammeln, einscannen.
+5. Digitalisieren, d.i. OMR: dafür: PEST oder FormPro. Dazu: Andere
+   Doku.
+6. Sich `eval_smth.rb` anschauen, anpassen und LaTeX-File ausspucken
+   lassen.
+7. Profit.
