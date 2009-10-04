@@ -1,0 +1,144 @@
+Der Seee ("Sieh! Es erleichtert Evaluationen!")
+===============================================
+
+Übersicht
+---------
+
+Zu einer Vorlesungs- bzw. Veranstaltungsumfrage gehören mehrere
+Teilaspekte, diese sind im Wesentlichen:
+
+- Erhebung: Welche Veranstaltungen sollen mit welchen Fragen befragt
+  werden
+- Druck der entsprechenden Bögen
+- aus den ausgefüllten Bögen digitalisierte Einträge in einer
+  Datenbank machen
+- diese Einträge auswerten
+
+Selbstverständlich sind die einzelnen Punkte etwas diffiziler als
+aufgeführt. Diese Dokumentation soll erklären, mit welcher Software
+welcher dieser Schritte auf welche Art durchgeführt wird und wie das
+auf MathPhys konkret aussieht.
+
+Was ist der "Seee"?
+-------------------
+
+Als Seee ("Sieh! Es erleichtert Evaluationen!") wird einerseits im
+Großen das gesamte Framework der Evaluation bezeichnet, welche alle in
+der Übersicht aufgeführten Schritte umfasst. In dieser Verwendung
+umfasst der Seee aber noch die "PEST" ("Praktische
+EvaluationsSofTware"), welche aus den ausgefüllten Bögen
+digitalisierte Einträge erstellt.
+
+Im engeren Sinne meint "Seee" ein Webfrontend, mit dem die
+Veranstaltungen, die beumfragt werden sollen, gesammelt werden und das
+aus einer Datenbank hübsche Ergebnisse produziert. Diese Verwobenheit
+ist dem Problem immanent und wird klar, wenn man sich die Struktur der
+Daten in der Datenbank vergegenwärtigt.
+
+Datenbanken und Tabellen - was steckt dahinter?
+-----------------------------------------------
+
+Die wichtigste Datenbank heißt auf MathPhys "eval", sie umfasst viele
+verschiedene Tabellen mit Namen wie "evaldaten_\*". In ihr sind die
+digitalisierten Fragebögen gespeichert. Eine Zeile (also ein Eintrag)
+in der Tabelle korrespondiert mit genau einem Bogen. Zu beachten ist,
+dass beim Scannen *keinerlei* Elemente wie Vorlesungsname, Dozi-Name
+etc. erhoben werden. Dazu dient *einzig* der Barcode.
+
+Jede Spalte der Tabelle korrespondiert im Wesentlichen mit einer
+Frage, wobei Multiple-Choice-Fragen in einer Art one-hot-Kodierung
+gespeichert sind, indem für alle Antwortmöglichkeiten ein Feld vX_a,
+... vX_n exisiert.
+
+Die Daten in dieser Datenbank haben also keinerlei Informationen, auf
+welche Veranstaltung sie sich beziehen. Sie sind damit nur ausgefüllte
+Fragebögen und unabhängig von einer Veranstaltung.
+
+Aus diesem Grund gibt es eine weitere Datenbank mit Namen "seee". In
+dieser Datenbank sind genau diese Informationen gespeichert. Sie ist
+essentiell, um aus abstrakten ausgefüllten Bögen konkrete Ergebnisse
+zu generieren.
+
+
+Und was ist jetzt der Seee im engeren Sinne?
+--------------------------------------------
+
+Der Seee im engeren Sinne ist ein (Web-)Frontend für die Datenbank
+"seee". Es handelt sich um ein Ruby-on-Rails-Projekt, das auf MathPhys
+unter [^1]
+gefunden werden kann.
+
+Es ist *niemals* notwendig oder auch nur ratsam, direkt mit der
+Datenbak "seee" zu arbeiten. Für das Überleben der Menschheit ist es
+von *fundamentaler* Wichtigkeit, *immer* über das Web-Frontend, eine
+Interactive Shell oder sonstwie, aber auf jeden Fall per
+"Object-Relational-Mapping" auf die Datenbank zuzugreifen.
+
+Das heißt, dass es Ruby-*Objekte* `Prof`, `Course`, `Semester` etc.
+gibt. In einer Interactive Shell ist daher folgendes möglich:
+
+`>> s = Semester.find(4)`
+
+`=> #<Semester id: 4, firstday: "2009-03-01", title: "SS 2009", [...]
+>`
+
+`>> s.courses.find_all{ |c| c.faculty == 1 }.each{ |c| puts c.title }`
+
+`Experimentalphysik 2`
+
+`...`
+
+`Physik B`
+
+Alle Features des Seees können und müssen durch solche Interfaces
+bedient werden. ORM geht kaputt, wenn man das nicht tut.
+
+[^1]: [mathphys.fsk.uni-heidelberg.de/seee](https://mathphys.fsk.uni-heidelberg.de/seee)
+
+### Technische Aspekte
+
+Selbstverständlich wäre die Welt zu einfach, wäre der Seee im engeren
+Sinne ein normales RoR-Projekt. Das Web-Interface ist in der Tat ein
+sehr klassisches Projekt, das allerdings noch ein wenig Usability
+vertragen könnte. In diesem Web-Interface können Veranstaltungen
+angelegt etc. werden. Es gibt allerdings noch ein nifty feature,
+das zwar nicht zum Auswertungsteil gehört, aber dennoch nicht im
+Web-Interface zu bedienen ist, das:
+
+`Postoffice`
+:	Das Postoffice kann Mails verschicken und hat dafür auch ein
+	paar Routinen parat, die sich in
+	`web/app/models/postoffice.rb` finden.
+
+RoR ist überall hinreichend dokumentiert. Festzuhalten ist, dass das
+RoR-root in `web/` ist. Pushes im `git`-Repository sorgen für `git
+pull` in `/var/www-seee` auf MathPhys.
+
+Die Auswertung ist praktisch vollständig in den *Models* enthalten:
+`Semester` kann sich evaluieren, `Course` kann sich evaluieren usw.
+
+Für die Auswertung bedarf es einiger Klassen und Methoden. Alles
+derartige ist im Verzeichnis `lib/` zu finden.
+
+`Form.rb`
+:	enthält Klasse für Bogen inkl. Fragen und Boxen. Ein Objekt
+	der Klasse `Form` beschreibt einen Bogen.
+`TeXQuestion.rb`
+:	enthält Klasse, um Fragen wirklich auch als TeX ausgeben zu
+	können 
+`FunkyTeXBits.rb`
+:	enthält gleichnamiges Mixin, um zum Beispiel TeX-Header
+	ausgeben zu können.
+`FunkyDBBits.rb`
+:	enthält gleichnamiges Mixin und kann den ganzen DB-Krimskrams,
+	darunter auch Averages etc. rausfischen und so.
+`rails_requirements.rb`
+:	Datei, die alles wichtige required. Wird von **Rails**
+	benutzt, dh eine Shell über `web/script/console` verfügt über
+	alle tollen neuen Features.
+`ext_requirements.rb, database.rb`
+:	möchte man von außen auf das ORM zugreifen, sollten diese
+	Dateien geladen werden
+
+Die wichtigesten Begebenheit sind derart kommentiert, dass `rdoc` zu
+passablen Ergebnissen führt.
