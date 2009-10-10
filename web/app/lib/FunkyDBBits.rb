@@ -5,7 +5,20 @@ module FunkyDBBits
   attr :dbh, :db_table
   
   # query fields, where-hash and additional clauses
-  def query_single_table(f, h, t, additional = '')
+  # does caching, see uncached_query_single_table
+  def query_single_table(f, h, t, additional = '', cache = true)
+    @cached_results ||= { }
+    
+    if cache == true
+      @cached_results[[f, h, t, additional]] ||=
+        uncached_query_single_table(f, h, t, additional)
+    else
+      uncached_query_single_table(f, h, t, additional)
+    end
+  end
+  
+  # query fields, where-hash and additional clauses, all uncached
+  def uncached_query_single_table(f, h, t, additional = '')
     q = 'SELECT '
     q += f.to_a.join(', ')
     q += " FROM #{t}"
