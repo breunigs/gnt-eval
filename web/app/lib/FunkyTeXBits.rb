@@ -96,9 +96,9 @@ module FunkyTeXBits
     end
     
     b << "{Die Fragebögen}\n"
-    b << "\\includegraphics[height=.85\\textheight]{musterbogen1.pdf}\n\n"
+    b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen1.pdf}\n\n"
     b << "\\begin{figure}\n"
-    b << "\\includegraphics[height=.85\\textheight]{musterbogen2.pdf}\n\\end{figure}"
+    b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen2.pdf}\n\\end{figure}"
     b << "\n\\end{document}\n"
  
     return b

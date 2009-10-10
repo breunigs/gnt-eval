@@ -5,8 +5,11 @@ require 'rake/clean'
 
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
 
-def get_dbh
-  $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+
+namespace :db do 
+  task :connect do 
+    $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+  end
 end
 
 namespace :pdf do 
@@ -28,13 +31,9 @@ namespace :pdf do
   end
 end
 
-namespace :db do 
-  task :connect do 
-    get_dbh
-  end
-end
-
 rule '.pdf' => '.tex' do |t|
-  3.times { `pdflatex -output-directory #{File.dirname(t.source)} #{t.source}` }
+  3.times do
+    `pdflatex -output-directory #{File.dirname(t.source)} #{File.basename(t.source)}`
+  end
   puts "Wrote #{t.name}"
 end
