@@ -1,17 +1,16 @@
 #!/usr/bin/env ruby
-# ncurses-ruby unfortunatly has no built-in support for menus
-# i - unfortunately - have no particular interest in porting it.
-# therefore this is a simple menu class, hence its name.
-# it's build to show nothing but the menu - no implementation in windows
-# no nothing, although it should not be difficult to write that.
+
+# ncurses-ruby unfortunatly has no built-in support for menus i -
+# unfortunately - have no particular interest in porting it.
+# therefore this is a simple menu class, hence its name.  it's build
+# to show nothing but the menu - no implementation in windows no
+# nothing, although it should not be difficult to write that.
 #
-# This piece of code was written by Oliver Thomas <oliver@lernresistenz.de>
-# and resembles free software. It is distributed under the GNU GPL v2.
-# You did probablay not receive a copy of that.
-# GFOAD.
 
 require 'ncurses'
 
+# Presents a simple ncurses menu
+# Needs a list of MenuItems and nothing else
 class SimpleMenu
   attr_reader :items, :index, :lines, :cols
 
@@ -31,7 +30,7 @@ class SimpleMenu
 
   def set_items(list)
     @items = list
-    @items << Item.new("Exit") { exit }
+    @items << MenuItem.new("Exit") { exit }
   end
  
   def calculate_size
@@ -39,9 +38,6 @@ class SimpleMenu
     @cols = Ncurses.COLS
   end
 
-  def add(what)
-    `echo "#{what}" >> /home/amens/rbtail.log`
-  end
   # displays menu at current position
   #
   def print_menu
@@ -161,7 +157,8 @@ class SimpleMenu
 
 end
 
-class Item
+# consists of a caption and a ruby-proc. pretty easy, eh?
+class MenuItem
   attr_accessor :caption, :command
   def initialize(caption, &cmd)
         @caption = caption
