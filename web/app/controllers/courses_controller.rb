@@ -197,18 +197,21 @@ class CoursesController < ApplicationController
   end
 end
 
+# Einen Bogen wirklich TeX0rn. Blödes Teil. Ungefähr so:
+#
+#   b = Evalbogen.new
+#   b.tutoren=["Mustafa Msutermann", "MyPhi", "Specki", "Petra Meier",
+#    "Patricia Bayer", "Klothilde Müller", "Claire Grupe", "Armin
+#     Gibs", "Karsten Bier", "Etienne Mbe Mbock",
+#    "Sigfried-P. Weizenäcker"] 
+#   b.dozent = "Prof. Dr. hc. mul. M. Phys"
+#   b.veranstaltung = "Mein kleiner grüner Kaktus -- das Lied"
+#   b.semester = "SS 2008"
+#   b.barcodefile = "test.pdf"
+#   b.output
+
 class Evalbogen
 
-  # b = Evalbogen.new
-  # b.tutoren=["Mustafa Msutermann", "MyPhi", "Specki", "Petra Meier",
-  #  "Patricia Bayer", "Klothilde Müller", "Claire Grupe", "Armin
-  #   Gibs", "Karsten Bier", "Etienne Mbe Mbock",
-  #  "Sigfried-P. Weizenäcker"] 
-  # b.dozent = "Prof. Dr. hc. mul. M. Phys"
-  # b.veranstaltung = "Mein kleiner grüner Kaktus -- das Lied"
-  # b.semester = "SS 2008"
-  # b.barcodefile = "test.pdf"
-  # b.output
 
   attr_accessor :veranstaltung, :dozent, :semester, :tutoren, :barcodefile, :barcodeid, :bogen_basefile, :workdir
   def generate_barcode

@@ -10,13 +10,20 @@
 # notion of a form!
 
 
-# - choice: value to insert into database
-# - x,y: coordinates
-# - width, height: size
-# - text: what is the _meaning_ of this box
 
 class Box
-  attr_accessor :choice, :x, :y, :width, :height, :text
+  
+  # value to insert into database
+  attr_accessor :coiche
+
+  # coordinates
+  attr_accessor :x,:y
+  
+  # size
+  attr_accessor :width, :height
+
+  # what is the _meaning_ of this box
+  attr_accessor :text
 
   def initialize(c, x, y, w, h, t)
     @choice = c
@@ -28,22 +35,37 @@ class Box
   end
 end
 
-# - boxes: list of boxes
-# - text: text of the question
-# - failchoice: value to insert into database if OMR fails
-# - nochoice: value to insert into db if there is no mark
-# - type: what does the box look like (i.e. square)
-# - dbfield: into which field to write the result (use a list for
-#            multiple choice questions!)
-# - active: active question?
-# - save_as: postfix when saving file (got an alias saveas)
-# - section: belongs to: 'tutor', 'prof', 'tutoring'
+
 class Question 
   include FunkyDBBits
-  
-  attr_accessor :boxes, :qtext, :failchoice, :nochoice,
-                :type, :db_column, :active, :section
 
+  # list of boxes
+  attr_accessor :boxes
+  
+  # text of the question
+  attr_accessor :qtext
+  
+  # value to insert into database if OMR fails
+  attr_accessor :failchoice
+  
+  # value to insert into db if there is no mark
+  attr_accessor :nochoice
+  
+  # what does the box look like (defaults to square)
+  attr_accessor :type
+  
+  # into which field to write the result (use a list for multiple choice questions!)
+  attr_accessor :db_column
+  
+  # active question? (defaults to true)
+  attr_accessor :active
+  
+  # postfix when saving file
+  attr_accessor :save_as
+  
+  # belongs to: 'tutor', 'prof', 'tutoring'
+  attr_accessor :section
+  
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='',
                  active=true, save_as = '', section = '')
@@ -127,9 +149,10 @@ end
 # this is actually just needed for the OMR to distinguish between
 # pages 
 #
-# - questions: list of questions on that page
 
 class Page
+
+  # list of questions on that page
   attr_accessor :questions
 
   def initialize(qs = [])
@@ -140,12 +163,14 @@ end
 
 # main form, list of pages and (ATM) dbtable.
 #
-# == TODO
-# - do we want other backends?
-#   - No. It is a trivial task to get forms into a database.
 
 class Form
-  attr_accessor :pages, :db_table
+  
+  # list of pages
+  attr_accessor :pages
+  
+  # database table to use for this form
+  attr_accessor :db_table
 
   def initialize(pages = [], db_table = '')
     @pages = pages
