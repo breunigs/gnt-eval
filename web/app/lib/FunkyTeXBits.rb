@@ -95,11 +95,11 @@ module FunkyTeXBits
       b << "\\section"
     end
     
-    b << "{Der Fragebogen}\n"
+    b << "{Die Fragebögen}\n"
     b << "\\includegraphics[height=.85\\textheight]{musterbogen1.pdf}\n\n"
     b << "\\begin{figure}\n"
     b << "\\includegraphics[height=.85\\textheight]{musterbogen2.pdf}\n\\end{figure}"
-    b << "\\end{document}\n"
+    b << "\n\\end{document}\n"
  
     return b
   end
