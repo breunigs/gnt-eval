@@ -33,7 +33,7 @@ class Course < ActiveRecord::Base
     this_eval = ['Mathematik', 'Physik'][faculty] + ' ' +
       semester.title 
       
-    boegenanzahl = count_forms({ 'barcode' => course_profs.map{ |cp|
+    boegenanzahl = count_forms({ :barcode => course_profs.map{ |cp|
                                    cp.i_bcwc}})
     
     b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"

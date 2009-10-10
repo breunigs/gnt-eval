@@ -7,10 +7,13 @@ module FunkyDBBits
   # query fields, where-hash and additional clauses
   # does caching, see uncached_query_single_table
   def query_single_table(f, h, t, additional = '', cache = true)
-    @cached_results ||= { }
+    
+    # yes, this IS a global variable. and it is being used on purpose
+    $cached_results ||= { }
     
     if cache == true
-      @cached_results[[f, h, t, additional]] ||=
+      $cached_results[[@dbh, @db_table]] ||= { }
+      $cached_results[[@dbh, @db_table]][[f, h, t, additional]] ||=
         uncached_query_single_table(f, h, t, additional)
     else
       uncached_query_single_table(f, h, t, additional)

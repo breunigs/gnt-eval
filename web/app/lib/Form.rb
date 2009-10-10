@@ -123,7 +123,7 @@ class Question
     
     if @db_column.is_a?(Array)
         
-      answers = multi_q({ 'eval' => this_eval, 'barcode' =>
+      answers = multi_q({ :eval => this_eval, :barcode =>
                           bc}, self)
       
       t = TeXMultiQuestion.new(@qtext, answers)
@@ -131,10 +131,10 @@ class Question
       
       # single-q
     else
-      antw, anz, m, m_a, s, s_a = single_q({'eval' => this_eval,
-                                             'barcode' =>
+      antw, anz, m, m_a, s, s_a = single_q({:eval => this_eval,
+                                             :barcode =>
                                              bc},
-                                           {'eval' => this_eval}, self) 
+                                           {:eval => this_eval}, self) 
       
       t = TeXSingleQuestion.new(text, ltext, rtext, antw,
                                 anz, m, m_a, s, s_a)
