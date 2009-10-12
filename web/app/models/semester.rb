@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 #require 'FunkyTeXBits.rb'
 
+# A semester is a period of time, in which courses are held --
+# typically a semester. A semester has many courses.
 class Semester < ActiveRecord::Base
   has_many :courses
   validates_presence_of :title

@@ -38,17 +38,17 @@ Daten in der Datenbank vergegenwärtigt.
 Datenbanken und Tabellen - was steckt dahinter?
 -----------------------------------------------
 
-Die wichtigste Datenbank heißt auf MathPhys "eval", sie umfasst viele
-verschiedene Tabellen mit Namen wie "evaldaten_\*". In ihr sind die
-digitalisierten Fragebögen gespeichert. Eine Zeile (also ein Eintrag)
-in der Tabelle korrespondiert mit genau einem Bogen. Zu beachten ist,
-dass beim Scannen *keinerlei* Elemente wie Vorlesungsname, Dozi-Name
-etc. erhoben werden. Dazu dient *einzig* der Barcode.
+Die wichtigste Datenbank heißt auf MathPhys "`eval`", sie umfasst
+viele verschiedene Tabellen mit Namen wie "`evaldaten_\*`". In ihr
+sind die digitalisierten Fragebögen gespeichert. Eine Zeile (also ein
+Eintrag) in der Tabelle korrespondiert mit genau einem ausgefüllten
+Bogen. Ein ausgefüllter Bogen lässt abgesehen vom Barcode keine
+Rückschlüsse auf die besuchte Veranstaltung zu.
 
 Jede Spalte der Tabelle korrespondiert im Wesentlichen mit einer
 Frage, wobei Multiple-Choice-Fragen in einer Art one-hot-Kodierung
-gespeichert sind, indem für alle Antwortmöglichkeiten ein Feld vX_a,
-... vX_n exisiert. Damit korrespondieren verschiedene Tabellen nicht
+gespeichert sind, indem für alle Antwortmöglichkeiten ein Feld `vX_a,
+..., vX_n` exisiert. Damit korrespondieren verschiedene Tabellen nicht
 nur mit verschiedenen Semestern, sondern auch mit verschiedenen
 Fragebögen.
 
@@ -56,7 +56,7 @@ Die Daten in dieser Datenbank haben also keinerlei Informationen, auf
 welche Veranstaltung sie sich beziehen. Sie sind damit nur ausgefüllte
 Fragebögen und unabhängig von einer Veranstaltung.
 
-Aus diesem Grund gibt es eine weitere Datenbank mit Namen "seee". In
+Aus diesem Grund gibt es eine weitere Datenbank mit Namen "`seee`". In
 dieser Datenbank sind genau diese Informationen gespeichert. Sie ist
 essentiell, um aus abstrakten ausgefüllten Bögen konkrete Ergebnisse
 zu generieren.
@@ -66,17 +66,21 @@ Und was ist jetzt der Seee im engeren Sinne?
 --------------------------------------------
 
 Der Seee im engeren Sinne ist ein (Web-)Frontend für die Datenbank
-"seee". Es handelt sich um ein Ruby-on-Rails-Projekt, das auf MathPhys
-unter [^1] gefunden werden kann.
+"seee". Es handelt sich um ein Ruby[^3]-on-Rails[^2]-Projekt, das auf
+MathPhys unter [^1] gefunden werden kann.
 
 Es ist *niemals* notwendig oder auch nur ratsam, direkt mit der
-Datenbak "seee" zu arbeiten. Für das Überleben der Menschheit ist es
+Datenbak "`seee`" zu arbeiten. Für das Überleben der Menschheit ist es
 von *fundamentaler* Wichtigkeit, *immer* über das Web-Frontend, eine
-Interactive Shell oder sonstwie, aber auf jeden Fall per
-"Object-Relational-Mapping" auf die Datenbank zuzugreifen.
+Interactive Shell oder sonstwie. Ruby-on-Rails benutzt extensiv
+sog. "Object Relational Mapping": Relationale Einträge in der
+Datenbank werden als Instanzen von Ruby-Klassen realisiert und sollten
+auch nur als solche Instanzen bearbeitet werden!
 
-Das heißt, dass es Ruby-*Objekte* `Prof`, `Course`, `Semester` etc.
-gibt. In einer Interactive Shell ist daher folgendes möglich:
+Die zur Verfügung stehenden Klassen sind zum Beispiel `Prof`,
+`Semester`, `Course`, `Tutor` etc. Eine `rdoc`-Dokumentation der
+Ruby-Klassen und der Erweiterungen für die Auswertung gibt es
+hier[^4]. Sie gibt auch einen Überblick über innere Zusammenhänge.
 
 `>> s = Semester.find(4)`
 
@@ -94,7 +98,6 @@ gibt. In einer Interactive Shell ist daher folgendes möglich:
 Alle Features des Seees können und müssen durch solche Interfaces
 bedient werden. ORM geht kaputt, wenn man das nicht tut.
 
-[^1]: [mathphys.fsk.uni-heidelberg.de/seee](https://mathphys.fsk.uni-heidelberg.de/seee)
 
 ### Technische Aspekte
 
@@ -112,14 +115,16 @@ Web-Interface zu bedienen ist, das:
 	`web/app/models/postoffice.rb` finden.
 
 RoR ist überall hinreichend dokumentiert. Festzuhalten ist, dass das
-RoR-root in `web/` ist. Pushes im `git`-Repository sorgen für `git
+RoR-root in `web/` ist. Pushes im `git`-Repository[^5] sorgen für `git
 pull` in `/var/www-seee` auf MathPhys.
 
 Die Auswertung ist praktisch vollständig in den *Models* enthalten:
 `Semester` kann sich evaluieren, `Course` kann sich evaluieren usw.
 
 Für die Auswertung bedarf es einiger Klassen und Methoden. Alles
-derartige ist im Verzeichnis `lib/` zu finden.
+derartige ist im Verzeichnis `lib/` zu finden. Wie oben bereits
+erwähnt, gibt es eine mehr oder weniger ausführliche
+`rdoc`-Dokumentation zu alledem.
 
 `Form.rb`
 :	enthält Klasse für Bogen inkl. Fragen und Boxen. Ein Objekt
@@ -144,6 +149,49 @@ derartige ist im Verzeichnis `lib/` zu finden.
 Die wichtigesten Begebenheit sind derart kommentiert, dass `rdoc` zu
 passablen Ergebnissen führt.
 
+
+
+### `rake` for the win
+
+Um Ergebnisse der Evaluationen zu erstellen, verwenden wir `rake` --
+ein Ruby-Analogon zu `make`. `rake` zu bedienen ist nicht weiter
+schwierig, es gibt aber eine wesentliche Besonderheit: zwei
+Rakefiles. Eines im Root-Verzeichnis des Repositories. Dieses
+Rake-File kann echte Evaluationsergebnisse ausspucken. Andererseits
+das Standard-Ruby-On-Rails-Rakefile im RoR-Root `web`. `rake -T` gibt
+die möglichen Ziele aus. Ein möglicher Ablauf wäre:
+
+`~/seee* rake -T`
+
+`(in /home/oliver/seee)`
+
+` ... `
+
+`rake pdf:semester[semester_id]  # create pdf-file for a certain semester`
+
+`~/seee* rake pdf:semester\[4\]`
+
+`(in /home/oliver/seee)`
+
+`Wrote ./tmp/Mathematik_SS_2009.tex`
+
+`Wrote ./tmp/Mathematik_SS_2009.pdf`
+
+`Wrote ./tmp/Physik_SS_2009.tex`
+
+`Wrote ./tmp/Physik_SS_2009.pdf`
+
+Die Backslashes um die eckigen Klammern werden in manchen Shells nicht
+benötigt.
+
+[^1]: [mathphys.fsk.uni-heidelberg.de/seee](https://mathphys.fsk.uni-heidelberg.de/seee)
+[^2]: [Ruby-on-Rails-Doku](http://rubyonrails.org/documentation),
+[Ruby-on-Rails-guides](http://guides.rubyonrails.org/)
+[^3]: [Ruby-Doku](http://www.ruby-lang.org/de/documentation/)
+[^4]: [rdoc-Doku des Projekts](http://mathphys.fsk.uni-heidelberg.de/~oliver/.seeedoc/app)
+[^5]: [git](http://git-scm.com) ist ein verteiltes
+Versionskontrollsystem
+
 Was ist also der Ablauf?
 ------------------------
 
@@ -160,6 +208,5 @@ einfachen Schritten:
 4. Austeilen, einsammeln, einscannen.
 5. Digitalisieren, d.i. OMR: dafür: PEST oder FormPro. Dazu: Andere
    Doku.
-6. Sich `eval_smth.rb` anschauen, anpassen und LaTeX-File ausspucken
-   lassen.
+6. Sich `rake -T` anschauen und bedienen.
 7. Profit.

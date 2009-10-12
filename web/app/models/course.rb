@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+# A course has many professors, belongs to a semester and has a lot of
+# tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
   belongs_to :semester
   has_many :course_profs

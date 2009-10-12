@@ -10,7 +10,7 @@
 # notion of a form!
 
 
-
+# This is a box on a printed form. Nothing more.
 class Box
   
   # value to insert into database
@@ -35,7 +35,7 @@ class Box
   end
 end
 
-
+# This is a question on a printed form. Nothing more.
 class Question 
   include FunkyDBBits
 

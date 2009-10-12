@@ -1,3 +1,4 @@
+# This means physical persons. They have many courses.
 class Prof < ActiveRecord::Base
   has_many :course_profs
   has_many :courses, :through => :course_profs
