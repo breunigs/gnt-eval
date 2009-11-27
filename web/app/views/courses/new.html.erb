@@ -5,7 +5,7 @@
 <% form_for(@course) do |f| %>
   <p>
     <b>Semester</b><br />
-    <%= collection_select(:course, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}) %>
+    <%= select_tag 'course[semester_id]', options_from_collection_for_select(Semester.find(:all), :id, :title, Semester.find(:all).last.id) %>
   </p>
 
   <p>
