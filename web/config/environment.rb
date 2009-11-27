@@ -58,3 +58,5 @@ Rails::Initializer.run do |config|
   # Make Active Record use UTC-base instead of local time
   # config.active_record.default_timezone = :utc
 end
+ActionController::AbstractRequest.relative_url_root = "/seee"
+
