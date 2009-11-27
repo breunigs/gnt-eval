@@ -1,4 +1,9 @@
 <h1>Listing courses</h1>
+<p>
+  <%= link_to 'New course', new_course_path %> |
+  <%= link_to 'New Prof', new_prof_path %> |
+  <%= link_to 'New semester', new_semester_path %>
+</p>
 
 <table>
   <tr>
@@ -12,7 +17,7 @@
   </tr>
 
 <% for course in @courses.find_all{|c| c.semester.id == 5 && c.faculty != 2}.sort_by { |c| c.title } %>
-  <tr>
+  <tr style="<%= cycle('background: #efefef', 'background:#a5a5a5') %>">
     <td><%=h course.semester.title %></td>
     <td><%= link_to course.title, course %></td>
     <td><%=h course.students %></td>
