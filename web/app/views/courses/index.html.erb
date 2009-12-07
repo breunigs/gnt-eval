@@ -17,7 +17,7 @@
   </tr>
 
 <% for course in @courses.find_all{|c| c.semester.id == 5 && c.faculty != 2}.sort_by { |c| c.title } %>
-  <tr style="<%= cycle('background: #efefef', 'background:#a5a5a5') %>">
+  <tr style="<%= cycle('background: #efefef', 'background:#ffffff') %>">
     <td><%=h course.semester.title %></td>
     <td><%= link_to course.title, course %></td>
     <td><%=h course.students %></td>
