@@ -39,7 +39,7 @@ Datenbanken und Tabellen - was steckt dahinter?
 -----------------------------------------------
 
 Die wichtigste Datenbank heißt auf MathPhys "`eval`", sie umfasst
-viele verschiedene Tabellen mit Namen wie "`evaldaten_\*`". In ihr
+viele verschiedene Tabellen mit Namen wie "`evaldaten_XYZ`". In ihr
 sind die digitalisierten Fragebögen gespeichert. Eine Zeile (also ein
 Eintrag) in der Tabelle korrespondiert mit genau einem ausgefüllten
 Bogen. Ein ausgefüllter Bogen lässt abgesehen vom Barcode keine
@@ -71,33 +71,66 @@ MathPhys unter [^1] gefunden werden kann.
 
 Es ist *niemals* notwendig oder auch nur ratsam, direkt mit der
 Datenbak "`seee`" zu arbeiten. Für das Überleben der Menschheit ist es
-von *fundamentaler* Wichtigkeit, *immer* über das Web-Frontend, eine
-Interactive Shell oder sonstwie. Ruby-on-Rails benutzt extensiv
-sog. "Object Relational Mapping": Relationale Einträge in der
-Datenbank werden als Instanzen von Ruby-Klassen realisiert und sollten
-auch nur als solche Instanzen bearbeitet werden!
+von *fundamentaler* Wichtigkeit, *ausschließlich* über das
+Web-Frontend, eine Interactive Shell oder Skripte nach Vorbild des
+`Rakefile`s (s.u.) auf die Datenbank zuzugreifen. Ruby-on-Rails
+benutzt extensiv sog. "Object Relational Mapping" (ORM): Relationale
+Einträge in der Datenbank werden als Instanzen von Ruby-Klassen
+realisiert und sollten auch nur als solche Instanzen bearbeitet
+werden!
 
 Die zur Verfügung stehenden Klassen sind zum Beispiel `Prof`,
 `Semester`, `Course`, `Tutor` etc. Eine `rdoc`-Dokumentation der
 Ruby-Klassen und der Erweiterungen für die Auswertung gibt es
 hier[^4]. Sie gibt auch einen Überblick über innere Zusammenhänge.
 
+Ein wichtiges Hilfsmittel ist die Interactive Shell. Sie wird durch
+Ausführen von `web/script/console` ausgeführt. Eine interactive
+Shell ermöglicht es, live auf die Datenbank und die Methoden des Seees
+zuzugreifen und Ruby-Code direkt ausführen zu können. Die interactive
+Shell ist -- für den regulären Betrieb -- eigentlich nicht
+notwendig. Eigentlich deshalb, weil sie sich bei unvorhergesehenen
+Problemen als immens nützlich erwiesen hat. Wichtig ist dieses
+Hilfsmittel, weil erfahrungsgemäß unvorhergesehen keinen
+Seltenheitswert genießt.
+
+Wir wollen uns aus diesem Grund ein paar Beispiele anschauen:
+
 `>> s = Semester.find(4)`
 
 `=> #<Semester id: 4, firstday: "2009-03-01", title: "SS 2009", [...]
 >`
 
-`>> s.courses.find_all{ |c| c.faculty == 1 }.each{ |c| puts c.title }`
+Die Methode `find` wird von Rails direkt mitgeliefert. Sie ist daher
+nicht in dieser Dokumentation enthalten. Die Methode auch nicht
+sonderlich empfehlenswert. `find` bekommt einen Integer (die
+Datenbank-ID) oder ein Ruby-Symbol. Das wichtigste Ruby-Symbol lautet
+`:all`, so würde
 
-`Experimentalphysik 2`
+`semesters = Semester.find(:all)`
 
-`...`
+eine Liste aller Semester liefern. Listen dann sind wieder einfacher
+zu benutzen: `s` ist jetzt ein bestimmtes Semester. Ein Semester hat
+viele Kurse und folgerichtig das Objekt `s` eine Liste `s.courses`,
+auf die wir normale Ruby-Sprachkonstrukte anwenden können:
 
-`Physik B`
+`>> s.courses.find_all{ |c| c.fs_contact_adresses.empty? }.each{ |c| puts c.title }`
 
-Alle Features des Seees können und müssen durch solche Interfaces
-bedient werden. ORM geht kaputt, wenn man das nicht tut.
+`Analysis 1`
 
+`Experimentalphysik 3`
+
+So würden wir uns händisch auf die Suche machen nach Kursen, in denen
+keine Kontaktadresse zu finden ist. Generell ist der wichtigste
+Einsatz von `find` wohl `XYZ.find(:all).find_all{ ... }`, wobei `XYZ`
+natürlich `Semester`, `Course`, `Prof`, `Tutor` etc. sein könnte. Im
+Gegensatz zu `find` ist `find_all` eine sehr empfehlenswerte Methode,
+da sie es erlaubt, die Suchprädikate "rubyesque" zu schreiben (s.o.),
+dokumentiert in der Ruby-Dokumentation.
+
+Änderungen an Objekten durch die Interactive Shell bewirken Änderungen
+in der Datenbank. Die `destroy`-Methode löscht Objekte, ebenfalls auch
+aus der Datenbank.
 
 ### Technische Aspekte
 
@@ -105,21 +138,27 @@ Selbstverständlich wäre die Welt zu einfach, wäre der Seee im engeren
 Sinne ein normales RoR-Projekt. Das Web-Interface ist in der Tat ein
 sehr klassisches Projekt, das allerdings noch ein wenig Usability
 vertragen könnte. In diesem Web-Interface können Veranstaltungen
-angelegt etc. werden. Es gibt allerdings noch ein nifty feature,
+angelegt etc. werden. Es gibt allerdings noch ein tolles Feature,
 das zwar nicht zum Auswertungsteil gehört, aber dennoch nicht im
 Web-Interface zu bedienen ist, das:
 
 `Postoffice`
 :	Das Postoffice kann Mails verschicken und hat dafür auch ein
 	paar Routinen parat, die sich in
-	`web/app/models/postoffice.rb` finden.
+	`web/app/models/postoffice.rb` finden. Die Methode, um zum
+	Beispiel eine Ankündigungsmail zu erstellen, ist
+	`create_ankuendigungsmail` -- im Gegensatz zu
+	`deliver_ankuendigungsmail`, welche die Mail auch
+	gleich verschickt.
 
 RoR ist überall hinreichend dokumentiert. Festzuhalten ist, dass das
 RoR-root in `web/` ist. Pushes im `git`-Repository[^5] sorgen für `git
 pull` in `/var/www-seee` auf MathPhys.
 
-Die Auswertung ist praktisch vollständig in den *Models* enthalten:
-`Semester` kann sich evaluieren, `Course` kann sich evaluieren usw.
+Die Auswertung ist praktisch vollständig in den *Models*[^6]
+enthalten: `Semester` kann sich evaluieren, `Course` kann sich
+evaluieren usw. Evaluieren heißt in diesem Kontext, echten harten
+TeX-Output zu erzeugen, die Details erledigt `rake` (s.u.)
 
 Für die Auswertung bedarf es einiger Klassen und Methoden. Alles
 derartige ist im Verzeichnis `lib/` zu finden. Wie oben bereits
@@ -133,7 +172,7 @@ erwähnt, gibt es eine mehr oder weniger ausführliche
 :	enthält Klasse, um Fragen wirklich auch als TeX ausgeben zu
 	können 
 `FunkyTeXBits.rb`
-:	enthält gleichnamiges Mixin, um zum Beispiel TeX-Header
+:	enthält gleichnamiges Mixin[^7], um zum Beispiel TeX-Header
 	ausgeben zu können.
 `FunkyDBBits.rb`
 :	enthält gleichnamiges Mixin und kann den ganzen DB-Krimskrams,
@@ -150,7 +189,6 @@ Die wichtigesten Begebenheit sind derart kommentiert, dass `rdoc` zu
 passablen Ergebnissen führt.
 
 
-
 ### `rake` for the win
 
 Um Ergebnisse der Evaluationen zu erstellen, verwenden wir `rake` --
@@ -159,7 +197,7 @@ schwierig, es gibt aber eine wesentliche Besonderheit: zwei
 Rakefiles. Eines im Root-Verzeichnis des Repositories. Dieses
 Rake-File kann echte Evaluationsergebnisse ausspucken. Andererseits
 das Standard-Ruby-On-Rails-Rakefile im RoR-Root `web`. `rake -T` gibt
-die möglichen Ziele aus. Ein möglicher Ablauf wäre:
+die möglichen Ziele (targets) aus. Ein möglicher Ablauf wäre:
 
 `~/seee* rake -T`
 
@@ -191,6 +229,16 @@ benötigt.
 [^4]: [rdoc-Doku des Projekts](http://mathphys.fsk.uni-heidelberg.de/~oliver/.seeedoc/app)
 [^5]: [git](http://git-scm.com) ist ein verteiltes
 Versionskontrollsystem
+[^6]: RoR teilt Software in ein Model-View-Controller (MVC)-Schema
+ein. Grob gesprochen sind Views das, was man im Webinterface sieht,
+ein Controller ist das Ding, was die Objekte wirklich manipuliert und
+ein Model ist die Repräsentation von Daten in einem abstrakten
+Schema. Wir behaupten, dass die Ergebnisse einer Veranstaltungsumfrage
+eine inhärente Eigenschaft dieser Veranstaltung ist und finden, dass
+dieser Code in den Models am besten aufgehoben ist.
+[^7]: Mixins sind Rubys Antwort auf Mehrfachvererbung:
+Mehrfachvererbung ist böse, in verschiedenen Klassen benötigte
+Funktionalität wird daher in "Mixins" ausgelagert.
 
 Was ist also der Ablauf?
 ------------------------
@@ -206,7 +254,7 @@ einfachen Schritten:
    geben. Aufpassen, dass die nicht komisch in der Größe angepasst
    werden.
 4. Austeilen, einsammeln, einscannen.
-5. Digitalisieren, d.i. OMR: dafür: PEST oder FormPro. Dazu: Andere
-   Doku.
+5. Digitalisieren, d.h. Optical Mark Recognition: dafür: PEST oder
+   FormPro. Dazu: Andere Doku.
 6. Sich `rake -T` anschauen und bedienen.
 7. Profit.
