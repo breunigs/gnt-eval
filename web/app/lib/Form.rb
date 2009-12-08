@@ -14,7 +14,7 @@
 class Box
 
   # value to insert into database
-  attr_accessor :coiche
+  attr_accessor :choice
 
   # coordinates
   attr_accessor :x,:y
@@ -70,6 +70,9 @@ class Question
 
   # belongs to: 'tutor', 'prof', 'tutoring'
   attr_accessor :section
+  
+  # the field where OMR saves the selected box
+  attr_accessor :value
 
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='',
@@ -84,6 +87,7 @@ class Question
     @active = active
     @save_as = save_as
     @section = ''
+    @value = nil
   end
 
   # how many choices are there?
@@ -119,6 +123,22 @@ class Question
   def text
     @qtext
   end
+  
+  # did the user fail to answer the question?
+  def failed?
+    return @value == @failchoice
+  end
+    
+  # didn't the user make any choice?
+  def nochoice?
+    return @value == @nochoice || (@value == 0 && @nochoice.nil?)
+  end
+  
+  # is this a multi-answer question?
+  def multi?
+    return @db_column.is_a?(Array)
+  end
+
 
   def eval_to_tex(this_eval, bc, db_table, dbh)
     @dbh = dbh

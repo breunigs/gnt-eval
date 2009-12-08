@@ -54,7 +54,7 @@ files.each do |f|
     @keys = [] if addkeys
     vals = []
     doc = YAML::load(File.new(f))
-    @dbtable = doc['dbtable'] if addkeys
+    @dbtable = doc.db_table if addkeys
 
     # Write some meta information that is not stored in the YAML file
     # itself
@@ -70,9 +70,9 @@ files.each do |f|
 
     # Write the actual values
     begin
-        doc['page'].allChildren.each do |g|
-            @keys << g['dbfield'] if addkeys
-            vals << g['value']
+        doc.questions.each do |g|
+            @keys << g.db_column if addkeys
+            vals << g.value
         end
     rescue
         puts "FAILED PARSING SHEET!"
