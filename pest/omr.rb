@@ -25,7 +25,17 @@ require 'narray'
 require 'helper.array.rb'
 require 'helper.boxtools.rb'
 require 'helper.constants.rb'
-require 'helper.math.rb'
+require 'helper.misc.rb'
+
+require './../lib/rails_requirements.rb'
+
+# bp stands for "black percentage" and holds how much pixels in this
+# box are black. mx and my define the inner, top left corner of the
+# current box. These are only used for debugging purposes.
+class Box
+  attr_accessor :bp, :mx, :my
+end
+
 
 # Profiler. Uncomment code at the end of this file, too.
 #require 'ruby-prof'
@@ -49,13 +59,17 @@ class PESTOmr
             # This occurs when we specified invalid geometry: i.e. zero
             # width or height or reuqesting pixels outside the image.
             # Output some nice debugging data and just return 0.
-            puts "\nx: " + x.to_s
-            puts "y: " + y.to_s
-            puts "w: " + width.to_s
-            puts "h: " + height.to_s
-            puts "g: " + @group['dbvalue'] if @group
-            puts img.inspect
-            puts @ilist.inspect
+            if @debug
+                puts "\nx: " + x.to_s
+                puts "y: " + y.to_s
+                puts "w: " + width.to_s
+                puts "h: " + height.to_s
+                puts "g: " + @group['dbvalue'] if @group
+                puts img.inspect
+                puts @ilist.inspect
+            else
+                puts "Critical Error: Invalid Geometry"
+            end
             return 0
         end
         nrect = NArray.to_na(rect)
@@ -93,21 +107,21 @@ class PESTOmr
     # These values are then used to calulate the angle the sheet is
     # rotated.
     def findRotation
+        sLeft = (  40*@dpifix).to_i
+        sTop  = ( 200*@dpifix).to_i
+        sBot  = (2650*@dpifix).to_i
+        width = ( 250*@dpifix).to_i
+        height= ( 400*@dpifix).to_i
+
         start_time = Time.now
         print @spaces + "  Correcting Rotation" if @verbose
         @rad = []
         @ilist.each do |img|
-            topstart = findFirstPixelsFromLeft(95, 50,   250, 250, 9, img)
-            botstart = findFirstPixelsFromLeft(95, 2650, 250, 250, 9, img)
-
-            # The text on the bottom half is a little indented compared
-            # to the upper one. The horizontal lines are not enough
-            # "black enough" to be used for orientation, so we have to
-            # go for the text and correct the offset here.
-            botstart -= 5
+            topstart = findFirstPixelsFromLeft(sLeft, sTop, width, height, 9, img)
+            botstart = findFirstPixelsFromLeft(sLeft, sBot, width, height, 9, img)
 
             # Calculate angle in radians
-            @rad << Math.atan((botstart - topstart).to_f/(2650 - 50 - 250).to_f)
+            @rad << Math.atan((botstart - topstart).to_f/(sBot - sTop - height).to_f)
 
             if @debug
                 # Careful! This draws into the images before they are
@@ -115,12 +129,20 @@ class PESTOmr
                 # the results will be wrong
                 draw = Magick::Draw.new
                 draw.font_weight = 100
-                draw.pointsize = 20
+                draw.pointsize = 20*@dpifix
                 draw.fill("blue")
                 draw.stroke("blue")
-                draw.line(topstart,   50, topstart,   50+250)
-                draw.line(botstart, 2650, botstart, 2650+250)
-                draw.text(10, 35, (@rad.last*RAD2DEG).to_s)
+                draw.line(topstart, sTop, topstart, sTop+height)
+                draw.line(botstart, sBot, botstart, sBot+height)
+                draw.text(10*@dpifix, 35*@dpifix, (@rad.last*RAD2DEG).to_s)
+                
+                draw.fill_opacity(0.05)
+                draw.stroke_opacity(0)
+                draw.rectangle(sLeft, sTop, topstart, sTop+height)
+                draw.rectangle(sLeft, sBot, botstart, sBot+height)
+                draw.fill_opacity(1)
+                draw.stroke_opacity(1)
+                
                 draw.draw(img)
             end
         end
@@ -139,8 +161,11 @@ class PESTOmr
         # two pages without changing code
 
         # X/Y values in the YAML files are relative to this corner
-        leftcut = [145, 143]
-        topcut = [65, 102]
+        # These values mark the coordinates where the objects used
+        # for detection should actually be in a perfectly scanned
+        # document. They are hardcoded, since they never change.
+        leftcut = [178*@dpifix, 178*@dpifix]
+        topcut = [170*@dpifix, 165*@dpifix]
 
         # This will contain the offset for each sheet
         @leftoff = [0,0]
@@ -150,37 +175,57 @@ class PESTOmr
         # failing due to some black pixels
         leftThres = [9, 9]
         topThres = [20, 60]
-
+        
+        lTop    = ( 200*@dpifix).to_i
+        lLeft   = (  40*@dpifix).to_i
+        lWidth  = ( 500*@dpifix).to_i
+        lHeight = ( 400*@dpifix).to_i
+        tLeft   = (2000*@dpifix).to_i
+        tTop    = (  50*@dpifix).to_i
+        tWidth  = ( 400*@dpifix).to_i
+        tHeight = ( 500*@dpifix).to_i
         0.upto(@numPages-1) do |i|
-            left   = findFirstPixelsFromLeft(95,   70, 500, 400, leftThres[i], @ilist[i])
-            top    =  findFirstPixelsFromTop(1870, 50, 400, 500, topThres[i], @ilist[i])
+            left = findFirstPixelsFromLeft(lLeft, lTop, lWidth, lHeight, leftThres[i], @ilist[i])
+            top  =  findFirstPixelsFromTop(tLeft, tTop, tWidth, tHeight, topThres[i], @ilist[i])
 
             # Draw the lines where the threshold was found
             if @debug
                 draw = Magick::Draw.new
                 draw.font_weight = 100
-                draw.pointsize = 20
+                draw.pointsize = 20*@dpifix
                 draw.fill("magenta")
                 draw.stroke("magenta")
-                draw.line(left, 70, left, 400)
-                draw.line(1870, top, 2270, top)
-                draw.text(10, 15, left.to_s + " x " + top.to_s)
+                draw.line(left, lTop, left, lTop+lHeight)
+                draw.line(tLeft, top, tLeft+tWidth, top)
+                draw.text(10*@dpifix, 15*@dpifix, left.to_s + " x " + top.to_s)
+
+                draw.fill_opacity(0.05)
+                draw.stroke_opacity(0)
+                draw.rectangle(lLeft, lTop, left, lTop+lHeight)
+                draw.rectangle(tLeft, tTop, tLeft+tWidth, top)
+                draw.fill_opacity(1)
+                draw.stroke_opacity(1)
             end
 
             # The offset detection is done at points that are affected
             # by rotation. We take this into account here.
-            top +=  top - calcSkew(i, 1870 + 200, top)[1]
-            left += left - calcSkew(i, left, 100 )[0]
+            top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
+            left += left - calcSkew(i, left, lTop/2)[0]
 
             @leftoff[i] = left - leftcut[i]
             @topoff[i]  = top  -  topcut[i]
 
             # Draw the rotation-corrected lines
             if @debug
+                #draw.stroke("green")
+                #draw.fill("green")
+                #draw.rectangle(-1*@leftoff[i], 0, -1*@leftoff[i]+5, 400)
+                #draw.rectangle(0, -1*@topoff[i], 400, -1*@topoff[i]+5)
+
                 draw.fill("magenta")
                 draw.stroke("magenta")
-                draw.line(left, 70, left, 400)
-                draw.line(1870, top, 2270, top)
+                draw.line(left, lTop, left, lTop+lHeight)
+                draw.line(tLeft, top, tLeft+tWidth, top)
                 # This affects offset detection. I will die a miserable
                 # death for this
                 draw.draw(@ilist[i])
@@ -197,78 +242,90 @@ class PESTOmr
         oy += @topoff[imgid]
         x = ox * Math.cos(@rad[imgid]) + oy * Math.sin(@rad[imgid])
         y = oy * Math.cos(@rad[imgid]) - ox * Math.sin(@rad[imgid])
-        return x.round, y.round
+        return x.round.makePos, y.round.makePos
     end
 
     # This function encapsulates the process for determining if a set of
     # square boxes is checked and returns the appropriate answer.
     def typeSquareParse(imgid, group)
         checks = []
-        first = true
-        inner = SQUARE_SIZE - 2*SQUARE_STROKE
+        first = 0
+        inner = (SQUARE_SIZE - 2*SQUARE_STROKE)*@dpifix
 
-        group['boxes'].each do |box|
-            x, y = calcSkew(imgid, box['x'], box['y'])
+        group.boxes.each do |box|
+            x, y = calcSkew(imgid, box.x, box.y)
 
             # Find the pre-printed box
-            mx = findFirstPixelsFromLeft(x, y, SQUARE_SEARCH[0]/2, SQUARE_SEARCH[1], 50, @ilist[imgid])
+            mx = findFirstPixelsFromLeft(x, y, (SQUARE_SEARCH[0]/2)*@dpifix, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid]).makePos
 
 
             # We didn't really find anything and got the maximum value
             # returned. Let's rather look a few pixels left or above for
             # the box
             maxCorr = 2
-            while mx == x+ SQUARE_SEARCH[0]/2 && maxCorr > 0
-                x -= SQUARE_STROKE*2
-                mx = findFirstPixelsFromLeft(x, y, SQUARE_SEARCH[0]/2, SQUARE_SEARCH[1], 50, @ilist[imgid])
+            while mx == x+(SQUARE_SEARCH[0]/2)*@dpifix && maxCorr > 0 && x > 0
+                x = (x-(SQUARE_STROKE*2)*@dpifix).makePos
+                mx = findFirstPixelsFromLeft(x, y, (SQUARE_SEARCH[0]/2)*@dpifix, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid])
                 maxCorr -= 1
             end
 
-            my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0], SQUARE_SEARCH[1]/2, 50, @ilist[imgid])
+            my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid]).makePos
             # This is not a typo:        ^^
             # If we managed to find left already, we have better chances
             # of finding the correct top. If we found a wrong left we're
             # doomed anyway
 
             maxCorr = 3
-            while my == y + SQUARE_SEARCH[1]/2 && maxCorr > 0
-                y -= SQUARE_STROKE*2
-                my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0], SQUARE_SEARCH[1]/2, 50, @ilist[imgid])
+            while my == y + (SQUARE_SEARCH[1]/2)*@dpifix && maxCorr > 0 && y > 0
+                y = (y-(SQUARE_STROKE*2)*@dpifix).makePos
+                my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid])
                 maxCorr -= 1
             end
 
+            # Ensure positive values
+            x = x.makePos
+            y = y.makePos
+            mx = mx.makePos
+            my = my.makePos
+
             # Save corrected values to sheet so the FIX component doesn't
             # need to re-calculate this
-            box['x'] = x
-            box['y'] = y
-            box['mx'] = mx
-            box['my'] = my
+            box.x = x
+            box.y = y
+
+            # Usage?
+            box.mx = mx
+            box.my = my
 
             # First check for the inner pixels. If there are any, we al-
             # most absolutely have a checkmark
-            bp = blackPercentage(mx + SQUARE_STROKE, my + SQUARE_STROKE, inner, inner, @ilist[imgid])
+            bp = blackPercentage(mx + SQUARE_STROKE*@dpifix, my + SQUARE_STROKE*@dpifix, inner, inner, @ilist[imgid])
 
             # Save the raw value to the yaml
-            box['bp'] = bp
+            box.bp = bp
 
             # Draw the rotation-correction-guidelines and the search
             # radius for each checkbox
             if @debug
                 @draw.stroke("black")
                 @draw.fill_opacity(1)
-                @draw.text(x+SQUARE_SEARCH[0]+5, y+20, ((bp * 100).round.to_f / 100).to_s)
+                @draw.text(x+(SQUARE_SEARCH[0]+5)*@dpifix, y+20*@dpifix, ((bp * 100).round.to_f / 100).to_s)
 
-                @draw.line(x - 100, y, x + 100, y)
-                @draw.line(x, y - 100, x, y + 200)
+                @draw.line(x - 100*@dpifix, y, x + 100*@dpifix, y)
+                @draw.line(x, y - 100*@dpifix, x, y + 200*@dpifix)
 
-                if first
-                    first = false
-                    @draw.text(x - 50, y + 20, group['dbfield'])
+                if first == 0 && !group.db_column.is_a?(Array)
+                    @draw.text((x - 50*@dpifix).makePos, y + 20*@dpifix, group.db_column)
+                end
+                first += 1
+
+                if group.db_column.is_a?(Array)
+                    @draw.text((x - 50*@dpifix).makePos, y + 20*@dpifix, group.db_column[first-1])
                 end
 
                 @draw.stroke("blue")
                 @draw.fill_opacity(0)
-                @draw.rectangle(x, y, x + SQUARE_SEARCH[0], y + SQUARE_SEARCH[1])
+                @draw.rectangle(x, y, x + SQUARE_SEARCH[0]*@dpifix, y + SQUARE_SEARCH[1]*@dpifix)
             end
         end
 
@@ -282,33 +339,33 @@ class PESTOmr
         # This ensures that single boxes won't get checked because of
         # dirt. This might result in undetected checkmarks but no answer
         # is preferable over a wrong one.
-        thresholds.pop if group['boxes'].size == 1
+        thresholds.pop if group.boxes.size == 1
 
         threshold  = -1
         thresholds.each do |t|
             # Save for debugging uses
             threshold = t
-            group['boxes'].each do |box|
-                checks << box['choice'] if box['bp'] > t
+            group.boxes.each do |box|
+                checks << box.choice if box.bp > t
             end
             break if checks.size >= 1
         end
 
         # Draws the red/green boxes for each answer
         if @debug
-            group['boxes'].each do |box|
-                color = box['bp'] > threshold ? "green" : "red"
+            group.boxes.each do |box|
+                color = box.bp > threshold ? "green" : "red"
                 @draw.fill(color)
                 @draw.fill_opacity(0.3)
                 @draw.stroke(color)
-                @draw.rectangle(box['mx'] + SQUARE_STROKE, box['my'] + SQUARE_STROKE, box['mx'] + SQUARE_STROKE + inner, box['my'] + SQUARE_STROKE + inner)
+                @draw.rectangle(box.mx + SQUARE_STROKE*@dpifix, box.my + SQUARE_STROKE*@dpifix, box.mx + SQUARE_STROKE*@dpifix + inner, box.my + SQUARE_STROKE*@dpifix + inner)
             end
         end
 
         case checks.length
-            when 0 then return group['nochoice']
+            when 0 then return group.nochoice
             when 1 then return checks[0]
-            else        return group['failchoice']
+            else        return group.failchoice
         end
     end
 
@@ -317,7 +374,7 @@ class PESTOmr
     # saved to the given filename.
     def typeTextParse(imgid, group)
         bp = 0
-        limit = 1000
+        limit = 1000*@dpifix
         boxes = []
         # Split up the text fields into many smaller boxes. Is is needed
         # for rotated sheets as the box would otherwise cover preprinted
@@ -325,53 +382,56 @@ class PESTOmr
         # be missing and if would produce false negatives.
         # Splitting the boxes allows to circumvent this while still
         # being reasonable fast.
-        group['boxes'].each { |box| boxes << splitBoxes(box, 150, 150) }
+        group.boxes.each { |box| boxes << splitBoxes(box, 150, 150) }
         boxes.flatten!
         boxes.each do |box|
-            x, y = calcSkew(imgid, box['x'], box['y'])
+            # LaTeX' coordinates are shifted by default for some reason.
+            # Fix this here.
+            x, y = calcSkew(imgid, box.x + 60*@dpifix, box.y + 20*@dpifix)
 
             # We may need to shrink the detection rectangle on severe
             # rotations. Otherwise it would cover pre-printed text which
             # chould result in a false positive
-            skewx, skewy = x - box['x'], y - box['y']
+            skewx, skewy = x - box.x, y - box.y
 
             # Save corrected values to sheet so the FIX component
             # doesn't need to re-calculate this
-            box['x'] = x
-            box['y'] = y
+            box.x = x
+            box.y = y
 
-            bp += blackPixels(x, y, box['width'], box['height'], @ilist[imgid])
+            bp += blackPixels(x, y, box.width, box.height, @ilist[imgid])
 
             if @debug
                 color = bp > limit ? "green" : "red"
                 @draw.fill(color)
                 @draw.fill_opacity(0.3)
                 @draw.stroke(color)
-                @draw.rectangle(x, y, x + box['width'], y + box['height'])
+                @draw.rectangle(x, y, x + box.width, y + box.height)
                 @draw.stroke("black")
                 @draw.fill_opacity(1)
-                @draw.text(x+5, y+20, bp.to_s)
+                @draw.text(x+5*@dpifix, y+20*@dpifix, bp.to_s)
             end
 
             break if bp > limit
         end
-        group['blackPixels'] = bp
 
         # Save the comment as extra file if possible/required
-        if group['saveas'] && bp > limit
+        if !group.saveas.empty? && bp > limit
             if @verbose
                 print @spaces + "    Saving Comment Image: "
-                puts group['saveas']
+                puts group.saveas
             end
             filename = @path + "/" + File.basename(@currentFile, ".tif")
-            filename << group['saveas'] + ".jpg"
+            filename << group.saveas + ".jpg"
             x, y, w, h = calculateBounds(boxes, group)
             @ilist[imgid].crop(x, y, w, h).minify.write filename
         end
-        
+
         # We're text-parsing, thus we can only have yes or no, but no
-        # "fail" answer
-        return bp > limit ? group['choice'] : group['nochoice']
+        # "fail" answer. "Yes" answer is hardcoded because it's not used
+        # anywhere. An existing image is usually "yes" enough, but keep this for
+        # debugging.
+        return bp > limit ? 1 : group.nochoice
     end
 
     # Looks at each group listed in the yaml file and calls the appro-
@@ -390,18 +450,25 @@ class PESTOmr
                 # access
                 @draw = Magick::Draw.new
                 @draw.font_weight = 100
-                @draw.pointsize = 20
+                @draw.pointsize = 20*@dpifix
             end
 
-            @doc['page'][i].each do |g|
-                case g["type"]
+            if @doc.pages[i].questions.nil?
+                puts "WARNING: Page does not contain any questions."
+                puts "Are you sure there's a correct 'questions:' marker in the"
+                puts "YAML file?"
+                next
+            end
+
+            @doc.pages[i].questions.each do |g|
+                case g.type
                     when "square" then
                         # width, height and threshold are predefined for squares
-                        g["value"] = typeSquareParse(i, g)
+                        g.value = typeSquareParse(i, g)
                     when "text" then
-                        g['value'] = typeTextParse(i, g)
+                        g.value = typeTextParse(i, g)
                     else
-                        puts "Unsupported type: " + g['type'].to_s
+                        puts "Unsupported type: " + g.type.to_s
                 end
             end
 
@@ -429,7 +496,7 @@ class PESTOmr
         print @spaces + "  Loading Image: " + file if @verbose
 
         # Load image and yaml sheet
-        @doc = YAML::load(File.new(@omrsheet))
+        @doc = loadYAMLsheet # YAML::load(File.new(@omrsheet))
         @ilist = Magick::ImageList.new(file)
         puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
 
@@ -481,10 +548,10 @@ class PESTOmr
         i = 0
         f = Float.induced_from(files.length)
         allfile = f.to_i.to_s
-        
+
         overall_time = Time.now
         skippedFiles = 0
-        
+
         files.each do |file|
             # Processes the file and prints processing time
             file_time = Time.now
@@ -492,19 +559,19 @@ class PESTOmr
 
             curfile = i.to_i.to_s
             percentage = (i/f*100.0).to_i.to_s
-            
+
             if @verbose
                 print @spaces + "Processing File " + curfile + "/" + allfile
                 puts  " (" + percentage + "%)"
             end
-            
+
             parseFile(file)
-            
+
             if @verbose
-                puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s" 
+                puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s"
                 puts ""
             end
-            
+
             # Calculates and prints time remaining
             rlFiles = Float.induced_from(i - skippedFiles)
             if rlFiles > 0
@@ -534,9 +601,31 @@ class PESTOmr
     # Parses the given OMR sheet and extracts globally interesting data.
     # Currently this isn't too much, but this might change in the future.
     def parseOMRSheet
-        doc = YAML::load(File.new(@omrsheet))
-        @dbtable = doc['dbtable']
-        @numPages = doc['page'].size
+        if !File.exists?(@omrsheet)
+            puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
+            exit
+        end 
+        doc = YAML::load(File.read(@omrsheet))
+
+        @dbtable = doc.db_table
+        @numPages = doc.pages.count
+    end
+
+    # Loads the YAML file and converts LaTeX's scalepoints into pixels
+    def loadYAMLsheet
+        doc = YAML::load(File.read(@omrsheet))
+        doc.pages.each do |p| 
+            next if p.questions.nil?
+            p.questions.each do |q|
+                q.boxes.each do |b|
+                    b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
+                    b.height = b.height/SP_TO_PX*@dpifix unless b.height.nil?
+                    b.x = b.x / SP_TO_PX*@dpifix
+                    b.y = 3507.0*@dpifix - (b.y / SP_TO_PX*@dpifix)
+                end
+            end
+        end
+        doc
     end
 
     # Reads the commandline arguments and decides which routines to call
@@ -547,6 +636,7 @@ class PESTOmr
         overwrite = false
         @debug    = false
         @spaces   = "  "
+        dpi      = 300.0
         cores     = 1
 
         # Option Parser
@@ -563,6 +653,8 @@ class PESTOmr
             opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { overwrite = true }
 
             opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| cores = c }
+            
+            opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
 
             opts.on("-i", "--indent SPACES", Integer, "How much the messages should be indented.", "Will be automatically set for the additionally spawned processes when using multiple cores in oder to keep it readable for humans.") { |i| @spaces = " "*i }
 
@@ -584,9 +676,7 @@ class PESTOmr
             puts "Specified PATH is not a directory"
             exit
         end
-
-        # All set? Ready, steady, parse!
-        parseOMRSheet
+        
         files = []
 
         # If no list of files is given, look at the given working
@@ -596,6 +686,16 @@ class PESTOmr
         else
             ARGV.each { |f| files << @path + "/" + f }
         end
+        
+        # Unless set manually, grab a sample image and use it to calculate the
+        # DPI
+        if @dpifix.nil?
+            list = Magick::ImageList.new(files[0])
+            @dpifix = list[0].dpifix
+        end
+        
+        # All set? Ready, steady, parse!
+        parseOMRSheet
 
         # Warn the user about existing files
         files = checkForExistingFiles(files) if !overwrite
@@ -609,7 +709,7 @@ class PESTOmr
             #splitFiles = files.Chunk(cores)
             # Above does not seem to imply using NArray
             splitFiles = files.chunk(cores)
-            
+
             files = splitFiles.shift
             path = " -p " + @path.gsub(/(?=\s)/, "\\")
             sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")

@@ -7,7 +7,6 @@
 # Adds some useful features to the array class that are used by some
 # PEST components.
 
-
 class Array
     # Sums the array
     def sum;
@@ -73,9 +72,9 @@ class Array
     end
 
     # Joins all children of the current array into one and returns that
-    def allChildren
-        a = []
-        self.each { |x| x.each { |y| a << y } }
-        a
-    end
+    #def allChildren
+    #    a = []
+    #    self.each { |x| x.each { |y| a << y } }
+    #    a
+    #end
 end

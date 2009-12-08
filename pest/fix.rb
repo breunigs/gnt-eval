@@ -26,8 +26,9 @@ require 'pp'
 require 'helper.array.rb'
 require 'helper.boxtools.rb'
 require 'helper.constants.rb'
-require 'helper.math.rb'
+require 'helper.misc.rb'
 
+require './../lib/rails_requirements.rb'
 
 class PESTFix
     def initialize(win)
@@ -73,14 +74,13 @@ class PESTFix
     def initGetWorkingDirectory
         puts "Getting working directory"
         path = ARGV.shift
-        #path = "09ss" # FIXME
         return path if path != nil && File.directory?(path)
 
         if path && File.exists?(path)
             @startUpImg = path.gsub(/\.tif$/, ".yaml")
-            @startUpQuest = ARGV.shift
-            puts "Loading predefined file ans question:"
-            puts @startUpImg + " " + @startUpQuest.to_s
+            #@startUpQuest = ARGV.shift
+            #puts "Loading predefined file ans question:"
+            #puts @startUpImg + " " + @startUpQuest.to_s
             return File.dirname(path)
         end        
 
@@ -294,11 +294,11 @@ class PESTFix
             if isCtrl && k == g::GDK_s then exportAsSql end
 
             # Mark as Failed
-            if isCtrl && k == g::GDK_f
+            if isCtrl && k == g::GDK_f && !@group.nil?
                 undoCommit
-                @group['value'] = @group['failchoice']
+                @group.value = @group.failchoice
                 @yamlChanged = true
-                @statusbar.push 1, "Setting value to " + @group['failchoice'].to_s + " (marking as failed)"
+                @statusbar.push 1, "Setting value to " + @group.failchoice.to_s + " (marking as failed)"
                 imageUpdate
                 answerButtonCheck
             end
@@ -320,8 +320,8 @@ class PESTFix
                  nil,
                  Gtk::FileChooser::ACTION_SAVE,
                  nil,
-                 [Gtk::Stock::CANCEL, Gtk::Dialog::RESPONSE_CANCEL],
-                 [Gtk::Stock::OPEN, Gtk::Dialog::RESPONSE_ACCEPT])
+                 [Gtk::Stock::CANCEL, Gtk::Dialog::RESPONSE_CANCEL,
+                 Gtk::Stock::OPEN, Gtk::Dialog::RESPONSE_ACCEPT])
         dialog.set_window_position Gtk::Window::POS_CENTER
         dialog.set_do_overwrite_confirmation true
         dialog.set_filename "output.sql"
@@ -385,9 +385,9 @@ class PESTFix
         end
 
         # Select at least some image
-        #imagePrevNext(false)
+        imagePrevNext(false)
         if @startUpImg
-            jumpTo(@startUpImg, @startUpQuest)
+            jumpToQuest(@startUpImg, -1) #@startUpQuest)
             @startUpImg = nil
         else
             questionFindFail(false)
@@ -396,22 +396,20 @@ class PESTFix
 
     # Jumps to given image and question and optionally sets the question's
     # value to the given answer.
-    def jumpTo(image, question, answer = nil)
+    def jumpToQuest(image, quest_num, answer = nil)
         undoEnd
-        puts "Jumping to: " + image.to_s + " / " + question
         writeYAML
         @currentImage = image
-        @currentQuestion = question
+        @currentQuestion = quest_num >= 0 ? quest_num : 0
+        
+        puts "Jumping to: IMG " + image.to_s + " | QUEST " + @currentQuestion.to_s
+
         sheetLoad
 
         # Find correct group
-        @doc['page'].allChildren.each do |g|
-            next if g['dbfield'] != @currentQuestion
-            @group = g
-            break
-        end
+        @group = @doc.questions[@currentQuestion]
 
-        @group['value'] = answer if answer != nil
+        @group.value = answer unless answer.nil?
         #sheetLoad
         findPageForQuestion
         questionButtonCheck
@@ -430,7 +428,7 @@ class PESTFix
         # Reset the checked state so findFailed finds this again
         @files[undo[0]][1] = false
         @yamlChanged = true      
-        jumpTo(undo[0], undo[1], undo[2])
+        jumpToQuest(undo[0], undo[1], undo[2])
         @find_fail.set_sensitive(true)
         @statusbar.push 4, "Undid last change"
     end
@@ -441,7 +439,7 @@ class PESTFix
     def undoStart
         #puts "Saving current values into temp undo buffer"
         return if !@group
-        @undoStartState = [@currentImage, @currentQuestion, @group['value']]
+        @undoStartState = [@currentImage, @currentQuestion, @group.value]
     end
 
     # This puts the data into the real undo-stack so that it may be un-
@@ -461,7 +459,7 @@ class PESTFix
         a = @undoActions.last
         return if a.nil? || a[0] != @currentImage || a[1] != @currentQuestion
         # The value changed, so keep it in the undo list
-        return if a[2] != @group['value']
+        return if a[2] != @group.value
         # else remove it
         @undoActions.pop
         @undo.set_sensitive !@undoActions.empty?
@@ -474,10 +472,8 @@ class PESTFix
             @quest_next.set_sensitive(false)
             return
         end
-        groups = @doc['page'].allChildren
-        i = groups.index(@group)
-        
-        @quest_next.set_sensitive(i < groups.size-1)
+        i = @doc.questions.index(@group)
+        @quest_next.set_sensitive(i < @doc.questions.size-1)
         @quest_prev.set_sensitive(i > 0)
 
         titleUpdate
@@ -491,37 +487,39 @@ class PESTFix
             return
         end
 
-        if @group['value'] == @group['failchoice']
+        if @group.failed?
             @answr_prev.set_sensitive(true)
             @answr_next.set_sensitive(true)
             return
         end
-        
-        nochoice = @group['value'] == @group['nochoice']
-                #|| @group['value'] ==     @group['failchoice']
-        
+
+        if @group.nochoice?
+            @answr_prev.set_sensitive(false)
+            @answr_next.set_sensitive(true)
+            return
+        end
+
         # Find currently selected answer
-        if !nochoice
-            cur = nil
-            @group['boxes'].each do |b|
-                next if @group['value'] != b['choice']
-                # We've found the currently selected answer
-                cur = b
+        cur = nil
+        n = false
+        @group.boxes.each do |b|
+            if !cur.nil?
+                n = true
                 break
             end
+            next if @group.value != b.choice
+            # We've found the currently selected answer
+            cur = b
         end
         
-        p = !nochoice
-        n = nochoice || (cur != nil && @group['boxes'].next(cur) != nil)
-    
-        @answr_prev.set_sensitive(p)
+        @answr_prev.set_sensitive(true)
         @answr_next.set_sensitive(n)
     end
 
     # Does the various update operations after an answer has changed
     def answerChanged
         @yamlChanged = true
-        @statusbar.push 1, "Setting value to " + @group['value'].to_s
+        @statusbar.push 1, "Setting value to " + @group.value.to_s
         imageUpdate
         answerButtonCheck
     end
@@ -533,29 +531,28 @@ class PESTFix
         undoCommit
         found = false
         # If the current answer is either failed or nochoice, we need to select
-        # the first real answer
-        isBadAnsw = @group['value'] == @group['nochoice'] \
-                || (@group['failchoice'] != nil && @group['value'] == @group['failchoice'])
+        # the first real answerButtonCheckanswer
+        isBadAnsw = @group.nochoice? || @group.failed?
         amount -= 1 if isBadAnsw
-        @group['boxes'].each do |b|
+        @group.boxes.each do |b|
             # If the boxes don't have a choice attribute, it's probably
             # a question that doesn't have different answers (i.e. a
             # comment field that's non rectangular). If so, choose the
             # choice attribute of the group and stop searching
             # Choice because we want to select the next answer
-            if !b['choice']
-                @group['value'] = @group['choice'] || 1
+            if !b.choice
+                @group.value = @group.choice || 1
                 answerChanged
                 break
             end
             
-            next if @group['value'] != b['choice'] && !found && !isBadAnsw
+            next if @group.value != b.choice && !found && !isBadAnsw
             found = true
             amount -= 1
             # Instead of selecting nothing when the "amount" to go is larger
             # than the available answers, select the last one
-            next if amount >= 0 && @group['boxes'].next(b) != nil
-            @group['value'] = b['choice']
+            next if amount >= 0 && @group.boxes.next(b) != nil
+            @group.value = b.choice
             answerChanged
             return
         end
@@ -569,32 +566,32 @@ class PESTFix
         undoCommit
         found = false
         
-        @group['boxes'].reverse_each do |b|
-            #puts "Group1: "+b['choice'].to_s
+        @group.boxes.reverse_each do |b|
+            #puts "Group1: "+b.choice.to_s
             # If the boxes don't have a choice attribute, it's probably
             # a question that doesn't have different answers (i.e. a
             # comment field that's non rectangular). If so, choose the
             # nochoice attribute of the group and stop searching.
             # Nochoice because we want to select the previous answer
-            if !b['choice']                
-                @group['value'] = @group['nochoice'] || 0
+            if !b.choice
+                @group.value = @group.nochoice || 0
                 break
             end
             
-            next if @group['value'] != b['choice'] && !found
+            next if @group.value != b.choice && !found
             found = true
             amount -= 1
             # Unlike answerNext, we don't check if the previous element
             # is nil because we want to exit the loop with no action so
             # we can easily select the "no choice" option
             next if amount >= 0
-            @group['value'] = b['choice']
+            @group.value = b.choice
             answerChanged
             return
         end
 
         # We're already at the first, so select "nochoice"
-        @group['value'] = @group['nochoice'] || 0
+        @group.value = @group.nochoice || 0
         answerChanged
     end
 
@@ -604,23 +601,17 @@ class PESTFix
         return if !@quest_next.sensitive? && !isPrev
         return if !@quest_prev.sensitive? && isPrev
         # Save undo before loading
-        undoEnd
 
-        # FIXME
-        a = @doc['page'].allChildren
-        a.each do |e|
-            next if e['dbfield'] != @currentQuestion
-            if isPrev
-                new = a.previous(e)
-            else
-                new = a.next(e)
-            end
-            
-            break if !new
-            @currentQuestion = new['dbfield']
-            @group = new
-            break
+        undoEnd
+        a = @doc.questions
+        if isPrev
+            @currentQuestion = Math.max(a.size-1, @currentQuestion+1)
+        else
+            @currentQuestion = Math.min(0, @currentQuestion-1)
         end
+        
+        @group = a[@currentQuestion]
+
         findPageForQuestion
         questionButtonCheck
         answerButtonCheck
@@ -630,7 +621,7 @@ class PESTFix
 
     # Finds the page for the current question
     def findPageForQuestion
-        @doc['page'].each_index { |i| @currentPage = i if @doc['page'][i].include?(@group) }
+        @doc.pages.each_with_index { |p,i| @currentPage = i if p.questions.include?(@group) }
     end
 
     # Loads the first question of the current sheet and en/disbales the
@@ -638,8 +629,8 @@ class PESTFix
     def questionFirst
         undoEnd
         @currentPage = 0
-        @group =  @doc['page'][0][1] # Selects first group
-        @currentQuestion = @group['dbfield']
+        @group =  @doc.questions[0] # Selects first group
+        @currentQuestion = 0
         questionButtonCheck
         answerButtonCheck
         undoStart
@@ -649,15 +640,15 @@ class PESTFix
     # Selects the first failed question it finds. Pass true to look for
     # new files in the working directory if all loaded files are depleted
     def questionFindFail(reparseDirectory = true, isPreload = false)
-        return if !@find_fail.sensitive?
-        @statusbar.push 99, "### PLEASE WAIT ### LOOKING FOR FAILED QUESTION ###" if !isPreload
+        return unless @find_fail.sensitive?
+        @statusbar.push 99, "### PLEASE WAIT ### LOOKING FOR FAILED QUESTION ###" unless isPreload
         @cancelFindFail = false
         puts "Looking for wrongly answered question"
         # Deactivate while searching
         @find_fail.set_sensitive(false)
         undoEnd
 
-        writeYAML if !isPreload
+        writeYAML unless isPreload
 
         @files.each do |f|            
             next if f[1] || (isPreload && @imgpath ==f[0])
@@ -666,20 +657,20 @@ class PESTFix
                 @statusbar.pop 99
                 return
             end
-            doc = YAML::load(File.new(f[0]))
+            doc = YAML::load(File.read(f[0]))
             if !doc
                 puts "WARNING: yaml file cannot be read or is broken: " + f[0]
                 puts "Skipping to next file"
                 next
             end
-            doc['page'].allChildren.each do |g|
-                next if g['value'] != g['failchoice']
-                next if g['failchoice'] == nil
+            doc.questions.each_with_index do |q,i|
+                next unless q.failed?
+                next if q.failchoice == nil
+                next if q.multi?
                 curImg = @files.index(f)
-                curQue = g['dbfield']
                 @find_fail.set_sensitive(true)
                 if !isPreload
-                    jumpTo(curImg, curQue)
+                    jumpToQuest(curImg, i)
                     questionFindFailPreload
                 end
                 @statusbar.pop 99                    
@@ -702,7 +693,7 @@ class PESTFix
         undoStart
         @statusbar.push 2, "No more failed questions found! (You may want to reload the directory for changes though)"
         # Load at least some image if none has been displayed so far
-        imagePrevNext(false) if !@doc
+        imagePrevNext(false) unless @doc
         return nil
     end
 
@@ -773,7 +764,7 @@ class PESTFix
         @imgpath = @files.length > @currentImage ? @files[@currentImage][0] : ""
         
         sheetLoad
-        questionFirst
+        #questionFirst
         imageUpdate
         titleUpdate
     end
@@ -831,16 +822,18 @@ class PESTFix
             
             if File.exists?(img)
                 @orig = Magick::ImageList.new(img)
+                @dpifix = @orig[0].dpifix
             else
                 # This is a small tweak that at least doesn't crash the
                 # application. It provides no info for the user what
                 # went wrong, but that shouldn't happen.
                 puts "ERROR: Image File not found: " + img
                 @orig = Magick::ImageList.new
-                @doc['page'].size.times do
+                @doc.pages.size.times do
                     @orig << Magick::Image.new(2480, 3507) {
                         self.background_color = 'grey'
                     }
+                    @dpifix = 1
                 end
             end
             
@@ -890,7 +883,7 @@ class PESTFix
         start_time = Time.now
         print "Updating on screen image"
 
-        x, y, width, height = calculateBounds(@group['boxes'], @group, @noChoiceDrawWidth)
+        x, y, width, height = calculateBounds(@group.boxes, @group, @noChoiceDrawWidth)
 
         draw = Magick::Draw.new
 
@@ -901,7 +894,7 @@ class PESTFix
         draw.fill("white")
         draw.stroke("black")
         draw.rectangle(0, 0, @noChoiceDrawWidth, @noChoiceDrawWidth)    
-        if @group['value'] == @group['nochoice']
+        if @group.nochoice?
             draw.fill("green")
             draw.stroke("green")
         else
@@ -912,13 +905,13 @@ class PESTFix
         draw.rectangle(1, 1, @noChoiceDrawWidth, @noChoiceDrawWidth)
 
         # Draw the colored boxes
-        @group['boxes'].each do |b|
+        @group.boxes.each do |b|
             w, h = getBoxDimension(b, @group)
             # The former is for "normal" question where a different box
             # means a different answer. The latter is for when the whole
             # group can either be on or off but consists of several
             # boxes. E.g. a comment field that's not rectangular
-            if @group['value'] == b['choice'] || (@group['value'] == @group['choice'] && @group['choice'])
+            if @group.value == b.choice# || (@group.value == @group.choice && @group.choice)
                 draw.fill("green")
                 draw.stroke("green")
             else
@@ -927,10 +920,10 @@ class PESTFix
             end
             draw.fill_opacity(0.4)
 
-            bx = b['x']
-            by = b['y']
-            bw = b['width']
-            bh = b['height']
+            bx = b.x
+            by = b.y
+            #bw = b.width
+            #bh = b.height
             
             draw.rectangle(bx-x, by-y, bx-x+w, by-y+h)
         end
