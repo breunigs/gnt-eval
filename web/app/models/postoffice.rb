@@ -4,8 +4,7 @@ class Postoffice < ActionMailer::Base
   def ankuendigungsmail(course_id)
     c = Course.find(course_id)
 
-#    recipients c.profs.collect{ |p| p.email }.join(', ')
-    recipients 'oliver@aleph0.de'
+    recipients c.profs.collect{ |p| p.email }.join(', ')
     from 'evaluation@mathphys.fsk.uni-heidelberg.de'
     cc 'evaluation@mathphys.fsk.uni-heidelberg.de'
     subject "Evaluation Ihrer Veranstaltung '#{c.title}'"

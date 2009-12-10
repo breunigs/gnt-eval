@@ -18,7 +18,8 @@ zu informieren. Ferner gehen wir davon aus, dass es sich bei folgender
 Liste um eine vollständige Liste der Tutor_innen Ihrer Veranstaltung
 handelt:
 
-     <%= word_wrap(@course.tutors.collect { |t| t.abbr_name }.join(', '), 67) %>
+     <%= word_wrap((@course.tutors.empty? ? 'keine' : @course.tutors.collect { |t| t.abbr_name 
+}.join(', ')) , 67) %>
 
 Sollte sich bei dieser Liste ein Fehler eingeschlichen haben, wären
 wir über einen kurzen Hinweis ebenfalls sehr dankbar.
