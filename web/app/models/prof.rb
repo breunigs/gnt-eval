@@ -4,9 +4,9 @@ class Prof < ActiveRecord::Base
   has_many :courses, :through => :course_profs
   validates_presence_of :firstname, :surname, :gender
   def fullname
-    return firstname + ' ' + surname
+    return firstname.strip + ' ' + surname.strip
   end
   def surnamefirst
-    return surname + ', ' + firstname
+    return surname.strip + ', ' + firstname.strip
   end
 end

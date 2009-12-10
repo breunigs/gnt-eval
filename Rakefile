@@ -46,7 +46,7 @@ namespace :pdf do
         h << '\dozent{' + cp.prof.fullname + '}' + "\n"
         h << '\vorlesung{' + cp.course.title + '}' + "\n"
         h << '\semester{' + s.title + '}' + "\n"
-        if cp.course.tutors.count < 30
+        if cp.course.form != 3
           h << '\tutoren{' + "\n"
 
           tutoren = cp.course.tutors.map{ |t| t.abbr_name }.sort + (["--"] * (30-cp.course.tutors.count))
@@ -58,12 +58,12 @@ namespace :pdf do
           h << '}' + "\n"
         end
         h << '\begin{document}' + "\n"
-        h << '\kopf{1}' + "\n\n"
-        h << '\vorlesungsfragen' + "\n"
+        h << '\kopf{' + ['1', '1', '1', '0'][cp.course.form] + '}' + "\n\n\n" # [vorlesung, spezial, englisch, seminar]
+        h << ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungsfragen', '\seminarfragen'][cp.course.form] + "\n"
         h << '\end{document}'
       end
       puts "Wrote #{filename}.tex"
-#      Rake::Task[(filename + '.pdf').to_sym].invoke
+      Rake::Task[(filename + '.pdf').to_sym].invoke
     end
 
   end
@@ -71,7 +71,7 @@ end
 
 rule '.pdf' => '.tex' do |t|
   3.times do
-    `/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -output-directory #{File.dirname(t.source)} #{File.basename(t.source)}`
+    `/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -output-directory #{File.dirname(t.source)} "#{File.basename(t.source)}"`
   end
   puts "Wrote #{t.name}"
 end
