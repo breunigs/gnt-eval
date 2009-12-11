@@ -27,7 +27,7 @@ class Postoffice < ActionMailer::Base
     recipients c.fs_contact_addresses
     from 'evaluation@mathphys.fsk.uni-heidelberg.de'
     bcc 'eval@oth.dea.aleph0.de'
-    subject "Dein Glück, die Vorlesung '#{c.title}' evaluieren zu dürfen"
+    subject "Dein Glück, die Veranstaltung '#{c.title}' evaluieren zu dürfen"
     headers 'Reply-To' => 'evaluation@mathphys.fsk.uni-heidelberg.de'
     content_type 'text/plain'
     sent_on Time.now

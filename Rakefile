@@ -1,15 +1,56 @@
+require 'action_mailer'
+require 'web/config/boot'
 require 'lib/ext_requirements.rb'
 require 'dbi'
 require 'pp'
+
 
 require 'rake/clean'
 
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
 
 
+def word_wrap(txt, col = 80)
+    txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
+      "\\1\\3\n")
+end
+
 namespace :db do 
   task :connect do 
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+  end
+end
+
+namespace :print do 
+  ## Nach Datum sortieren!
+end
+
+namespace :mail do 
+  desc "send reminder mails to FSlers"
+  task :reminder do 
+    s = Semester.find(:all).find{ |s| s.now? }
+
+    puts word_wrap("This will send reminder mails to _all_ fscontacts for courses " +
+                   "in semester #{s.title}. I will now show you a list of the mails, " +
+                   "that I will send. After you have seen the list, you will still be " +
+                   "able to abort.\nPlease press Enter.", 72)
+    $stdin.gets
+    
+    s.courses.each do |c|
+      puts "For '#{c.title} I would send mail to #{c.fs_contact_addresses}"
+    end
+    
+    puts "\n\nIf you really (and I mean REALLY) want to do this, type in 'Jasper ist doof':"
+    check = $stdin.gets.chomp
+    if check == 'Jasper ist doof'
+      Postoffice.view_paths = ['web/app/views/']
+      s.courses.each do |c|
+        Postoffice.deliver_erinnerungsmail(c.id)
+        puts "Delivered mail for #{c.title} to #{c.fs_contact_addresses}."
+      end
+    else
+      puts "K, won't do anything."
+    end
   end
 end
 
@@ -58,7 +99,7 @@ namespace :pdf do
         if cp.course.form != 3
           h << '\tutoren{' + "\n"
 
-          tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (30-cp.course.tutors.count))
+          tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
         
           tutoren.each_with_index do |t, i|
             h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
@@ -81,8 +122,8 @@ namespace :pdf do
 end
 
 rule '.pdf' => '.tex' do |t|
-  # According to Jasper calling pdflatex once is sufficient
-  1.times do
+  
+  3.times do
     err = `cd "#{File.dirname(t.source)}";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -halt-on-error "#{File.basename(t.source)}" 2>&1`
     if $?.to_i != 0
       puts "="*50

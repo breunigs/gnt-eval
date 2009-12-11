@@ -35,6 +35,15 @@ class Semester < ActiveRecord::Base
     return b
   end
   
+  # is it currently this semester?
+  def now?
+    if firstday <= Time.now.to_date && Time.now.to_date <= lastday
+      true
+    else
+      false
+    end
+  end
+  
   def eval_against_form!(faculty, form, dbh)
     puts eval_against_form(faculty, form, dbh)
   end

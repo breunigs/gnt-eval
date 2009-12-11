@@ -102,35 +102,49 @@ Wir wollen uns aus diesem Grund ein paar Beispiele anschauen:
 >`
 
 Die Methode `find` wird von Rails direkt mitgeliefert. Sie ist daher
-nicht in dieser Dokumentation enthalten. Die Methode auch nicht
-sonderlich empfehlenswert. `find` bekommt einen Integer (die
-Datenbank-ID) oder ein Ruby-Symbol. Das wichtigste Ruby-Symbol lautet
-`:all`, so würde
+nicht in dieser Dokumentation enthalten -- die Methode aber auch nicht
+für komplexere Suchen sonderlich empfehlenswert. `find` bekommt einen
+Integer (die Datenbank-ID) oder ein Ruby-Symbol. Das wichtigste
+Ruby-Symbol lautet `:all`, so würde
 
-`semesters = Semester.find(:all)`
+`>> semesters = Semester.find(:all)`
 
-eine Liste aller Semester liefern. Listen dann sind wieder einfacher
-zu benutzen: `s` ist jetzt ein bestimmtes Semester. Ein Semester hat
-viele Kurse und folgerichtig das Objekt `s` eine Liste `s.courses`,
-auf die wir normale Ruby-Sprachkonstrukte anwenden können:
+eine Liste aller Semester liefern.
 
-`>> s.courses.find_all{ |c| c.fs_contact_adresses.empty? }.each{ |c| puts c.title }`
+Generell ist der wichtigste Einsatz von `find` wohl
+`XYZ.find(:all).find_all{ ... }`, wobei `XYZ` natürlich `Semester`,
+`Course`, `Prof`, `Tutor` etc. sein könnte. Im Gegensatz zu `find` ist
+`find_all` eine sehr empfehlenswerte Methode, da sie es erlaubt, die
+Suchprädikate "rubyesque" zu schreiben (s.u.), dokumentiert in der
+Ruby-Dokumentation.
+
+Listen dann sind wieder einfacher zu benutzen: Statt der obigen
+Zuweisung über die ID, ist
+
+`>> s = Semester.find(:all).find { |s| s.now? }`
+
+das Semester, das gerade stattfindet. Ein Semester hat viele Kurse und
+folgerichtig das Objekt `s` eine Liste `s.courses`, auf die wir
+normale Ruby-Sprachkonstrukte anwenden können:
+
+`>> s.courses.find_all{ |c| c.evaluator.empty? }.each{ |c| puts c.title }`
 
 `Analysis 1`
 
 `Experimentalphysik 3`
 
-So würden wir uns händisch auf die Suche machen nach Kursen, in denen
-keine Kontaktadresse zu finden ist. Generell ist der wichtigste
-Einsatz von `find` wohl `XYZ.find(:all).find_all{ ... }`, wobei `XYZ`
-natürlich `Semester`, `Course`, `Prof`, `Tutor` etc. sein könnte. Im
-Gegensatz zu `find` ist `find_all` eine sehr empfehlenswerte Methode,
-da sie es erlaubt, die Suchprädikate "rubyesque" zu schreiben (s.o.),
-dokumentiert in der Ruby-Dokumentation.
+So würden wir uns händisch auf die Suche machen nach Kursen, deren
+Evaluation noch zu vergeben ist. Wir können die Werte auch direkt
+verändern:
 
-Änderungen an Objekten durch die Interactive Shell bewirken Änderungen
-in der Datenbank. Die `destroy`-Methode löscht Objekte, ebenfalls auch
-aus der Datenbank.
+`>> s.courses.find_all{ |c| e.evaluator.empty? }.each{ |c| c.evaluator = 'fachschaft@mathphys.fsk.uni-heidelberg.de' }`
+
+Alle Anfragen an die Evaluation dieser Vorlesung gehen dann an die
+gesamte Fachschaft.
+
+Änderungen an Objekten durch die Interactive Shell bewirken also
+Änderungen in der Datenbank. Die `destroy`-Methode löscht Objekte,
+ebenfalls auch aus der Datenbank.
 
 ### Technische Aspekte
 
