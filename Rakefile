@@ -1,5 +1,6 @@
 require 'lib/ext_requirements.rb'
 require 'dbi'
+require 'pp'
 
 require 'rake/clean'
 
@@ -10,6 +11,14 @@ namespace :db do
   task :connect do 
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
   end
+end
+
+namespace :pest do
+    desc "fixes the LaTeX output to be conform with the yaml specification"
+    task :yamlfix, :file do |t, a|
+        `cd "#{File.dirname(a.file)}" && ../pest/latexfix.rb "#{File.basename(a.file)}" && rm "#{File.basename(a.file)}"`
+        puts "Wrote #{File.basename(a.file)}.yaml"
+    end
 end
 
 namespace :pdf do 
@@ -64,6 +73,7 @@ namespace :pdf do
       end
       puts "Wrote #{filename}.tex"
       Rake::Task[(filename + '.pdf').to_sym].invoke
+      Rake::Task[("pest:yamlfix").to_sym].invoke((filename + '.posout'))
     end
 
     Rake::Task["clean".to_sym].invoke

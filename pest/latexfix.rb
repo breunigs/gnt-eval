@@ -28,7 +28,7 @@ ARGV.each do |file|
                     .gsub(/^u-/, ("  ")  + "-")
     end
     f.close
-    f = File.open(file, "w+")
+    f = File.open(file.gsub(/posout$/, "yaml"), "w+")
     f.write newfile
     f.close
 end
