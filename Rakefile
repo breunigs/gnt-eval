@@ -49,7 +49,7 @@ namespace :pdf do
         if cp.course.form != 3
           h << '\tutoren{' + "\n"
 
-          tutoren = cp.course.tutors.map{ |t| t.abbr_name }.sort + (["\\ "] * (30-cp.course.tutors.count))
+          tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (30-cp.course.tutors.count))
         
           tutoren.each_with_index do |t, i|
             h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
