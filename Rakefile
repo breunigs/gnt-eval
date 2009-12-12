@@ -15,19 +15,19 @@ def word_wrap(txt, col = 80)
       "\\1\\3\n")
 end
 
-namespace :db do 
-  task :connect do 
+namespace :db do
+  task :connect do
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
   end
 end
 
-namespace :print do 
+namespace :print do
   ## Nach Datum sortieren!
 end
 
-namespace :mail do 
+namespace :mail do
   desc "send reminder mails to FSlers"
-  task :reminder do 
+  task :reminder do
     s = Semester.find(:all).find{ |s| s.now? }
 
     puts word_wrap("This will send reminder mails to _all_ fscontacts for courses " +
@@ -35,11 +35,11 @@ namespace :mail do
                    "that I will send. After you have seen the list, you will still be " +
                    "able to abort.\nPlease press Enter.", 72)
     $stdin.gets
-    
+
     s.courses.each do |c|
       puts "For '#{c.title} I would send mail to #{c.fs_contact_addresses}"
     end
-    
+
     puts "\n\nIf you really (and I mean REALLY) want to do this, type in 'Jasper ist doof':"
     check = $stdin.gets.chomp
     if check == 'Jasper ist doof'
@@ -62,24 +62,24 @@ namespace :pest do
     end
 end
 
-namespace :pdf do 
+namespace :pdf do
   desc "create pdf-file for a certain semester"
   task :semester, :semester_id, :needs => 'db:connect' do |t, a|
     s = Semester.find(a.semester_id)
     ['Mathematik', 'Physik'].each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
-      filename = (f + ' ' + s.title).gsub(' ','_') + '.tex'  
+      filename = f.gsub(' ','_') +'_'+ s.dirFriendlyName + '.tex'
 
       File.open(dirname + filename, 'w') do |h|
         h.puts(s.evaluate(i, $dbh))
       end
-      
+
       puts "Wrote #{dirname+filename}"
       Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
     end
   end
-  
+
   desc "create pdf-form-files corresponding to blabla"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
     s = Semester.find(a.semester_id)
@@ -88,9 +88,9 @@ namespace :pdf do
       # first: the barcode
       filename = dirname + cp.barcode
       `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
-      
+
       # second: the form
-      filename = dirname + [cp.course.title, cp.prof.fullname, cp.course.students.to_s + 'pcs'].join(' - ') 
+      filename = dirname + [cp.course.title, cp.prof.fullname, cp.course.students.to_s + 'pcs'].join(' - ')
       File.open(filename + '.tex', 'w') do |h|
         h << '\documentclass[ngerman]{eval}' + "\n"
         h << '\dozent{' + cp.prof.fullname + '}' + "\n"
@@ -100,7 +100,7 @@ namespace :pdf do
           h << '\tutoren{' + "\n"
 
           tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
-        
+
           tutoren.each_with_index do |t, i|
             h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
           end
@@ -119,10 +119,26 @@ namespace :pdf do
 
     Rake::Task["clean".to_sym].invoke
   end
+
+  desc "Create How Tos"
+  task :howto, :needs => 'db:connect' do
+    saveto = './tmp/'
+    dirname = "/home/eval/forms/"
+    # Escape for TeX
+    dirname << Semester.find(:last).dirFriendlyName.gsub('_', '\_')
+    Dir.glob("./doc/howto_*.tex").each do |f|
+        texdata = File.read(f).gsub(/§§§/, dirname)
+        tex = File.open(saveto + File.basename(f), "w")
+        tex.write(texdata)
+        tex.close
+        Rake::Task[(saveto + File.basename(f).gsub(/\.tex$/, ".pdf")).to_sym].invoke
+        File.delete(saveto + File.basename(f))
+    end
+    Rake::Task["clean".to_sym].invoke
+  end
 end
 
 rule '.pdf' => '.tex' do |t|
-  
   3.times do
     err = `cd "#{File.dirname(t.source)}";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -halt-on-error "#{File.basename(t.source)}" 2>&1`
     if $?.to_i != 0
