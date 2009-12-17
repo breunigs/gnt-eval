@@ -10,7 +10,7 @@ require 'ftools'
 include Magick
 
 def find_page(filename)
-  r = `zbarimg --xml --set ean13.disable.1 #{filename} 2>/dev/null`
+  r = `zbarimg --xml --set ean13.disable=1 #{filename} 2>/dev/null`
   if not r.empty?
     return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
   else
