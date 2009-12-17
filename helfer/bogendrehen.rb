@@ -9,38 +9,50 @@ require 'ftools'
 
 include Magick
 
-def find_barcode_on_first(imagelist, tmp_filename)
-  imagelist[0].write(tmp_filename)
-  r = `bardecode #{tmp_filename}`
+def find_page(filename)
+  r = `zbarimg --xml --set ean13.disable.1 #{filename} 2>/dev/null`
   if not r.empty?
-    return r.strip.sub(/^.*\(/,'').sub(')]','').split(',').map{ |s|
-      s.to_i } 
+    return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
+  else
+    return nil
+  end
+end
+
+def find_barcode(filename)
+  r = `zbarimg --set ean13.disable=1 #{filename} 2>/dev/null`
+  if not r.empty?
+    return r.strip.match(/^.*:(.*)$/)[1].to_i
   else
     return nil
   end
 end
 
 f = ARGV[0]
-
 pages = ImageList.new(f)
-
 changed_smth = nil
 
-tmp_filename = "/tmp/bgndrhn_#{f}_#{Time.now.to_i}.tif"
+barcode = find_barcode(f)
+page = find_page(f)
 
-r = find_barcode_on_first(pages, tmp_filename)
-  
-if r.nil?
-  r = find_barcode_on_first(pages.reverse!, tmp_filename)
-  if r.nil?
-    puts "bizarre #{f}"
-    Process.exit
-  end
+if barcode.nil? || page.nil?
+  puts "bizarre #{f}"
+  Process.exit
+end
+
+# is the barcode on the first page
+if page != 0
+  pages.reverse!
   puts "switched #{f}"
   changed_smth = true
 end
 
-if r[0] < r[1]
+# is the barcode on the upper half of the first page?
+tmp_filename = "/tmp/bgndrhn_#{f}_#{Time.now.to_i}.tif"
+
+pages[0].crop(0, 0, 2480, 1000).write(tmp_filename)
+
+# the barcode is not at the top
+if find_barcode(tmp_filename).nil?
   pages.map! { |i| i.rotate(180) }
   puts "flipped #{f}"
   changed_smth = true
@@ -49,4 +61,6 @@ end
 File.delete(tmp_filename)
 
 pages.write(f) unless changed_smth.nil?
-
+if changed_smth.nil?
+  puts "was right from the beginning: #{f} (#{barcode})"
+end
