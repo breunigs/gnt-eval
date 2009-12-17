@@ -19,6 +19,7 @@ def find_barcode_on_first(imagelist, tmp_filename)
     return nil
   end
 end
+
 f = ARGV[0]
 
 pages = ImageList.new(f)
@@ -32,7 +33,6 @@ r = find_barcode_on_first(pages, tmp_filename)
 if r.nil?
   r = find_barcode_on_first(pages.reverse!, tmp_filename)
   if r.nil?
-    `mv #{f} bizarre`
     puts "bizarre #{f}"
     Process.exit
   end
