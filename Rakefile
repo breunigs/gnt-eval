@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
 require 'action_mailer'
 require 'web/config/boot'
 require 'lib/ext_requirements.rb'
 require 'dbi'
 require 'pp'
+
+# needed for image manipulations
+require 'RMagick'
+require 'ftools'
+
+include Magick
 
 
 require 'rake/clean'
@@ -18,6 +25,14 @@ end
 namespace :db do
   task :connect do
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+  end
+end
+
+namespace :images do 
+  desc "Work on the .tif's in directory and sort'em to tmp/images/..."
+  task :sortandalign, :directory do |t, d|
+    imagedir = Dir.new(d.directory)
+    puts imagedir.glob("*.tif")
   end
 end
 
