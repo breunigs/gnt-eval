@@ -50,6 +50,7 @@ end
 namespace :images do 
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
+    raise "This is defunctional and has serious memory leakage"
     Dir.glob(File.join(d.directory, '*.tif')) do |f|
       basename = File.basename(f, '.tif')
       pages = ImageList.new(f)
