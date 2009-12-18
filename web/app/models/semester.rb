@@ -43,6 +43,10 @@ class Semester < ActiveRecord::Base
   def dirFriendlyName
     title.gsub(' ', '_').gsub('/', '_')
   end
+  
+  def dirfriendly_title
+    dirFriendlyName
+  end
 
   def eval_against_form!(faculty, form, dbh)
     puts eval_against_form(faculty, form, dbh)

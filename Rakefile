@@ -86,6 +86,39 @@ namespace :db do
 end
 
 namespace :images do 
+  
+  desc "Insert tutor comment pictures from YAML/jpg in directory." +
+       "Please supply all images to" +
+       " /home/eval/public_html/.tutcomments/#{Semester.find(:all).find{ |s| s.now? }.dirfriendly_title}"
+  task :inserttutorcomments, :directory do |t, d|
+    Dir.glob(File.join(d.directory, '*.yaml')) do |f|
+      basename = File.basename(f, '.yaml')
+      if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
+        scan = YAML::load(File.read(f))
+        tutnum = scan.questions.find{ |q| q.db_column == "v1" }.value.to_i
+        barcode = basename.to_s.sub(/^.*_/, '').to_i
+
+        course = CourseProf.find(barcode).course
+
+        # first cross is 1 !
+        if tutnum > 0
+          tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
+          if tutnum > tutors.count
+            puts "Did nothing with #{basename}, #{tutnum} > #{tutors.count}"
+          else
+            p = Pic.new
+            p.tutor_id = tutors[tutnum-1].id
+            p.basename = basename + '-tutorcomment.jpg'
+            p.save
+            puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
+          end
+        else
+          puts "Did nothing with #{basename}, tutnum is #{tutnum}"
+        end
+      end
+    end
+  end
+  
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     raise "This is defunctional and has serious memory leakage"
@@ -226,7 +259,10 @@ namespace :pest do
     end
   end
   
-  desc "(4) 
+  desc "(4)"
+  task :foo do 
+    raise "not implemented"
+  end
 end
 
 namespace :pdf do
