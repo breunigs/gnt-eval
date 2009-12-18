@@ -52,4 +52,9 @@ class CourseProf < ActiveRecord::Base
   def i_bcwc
     barcode_with_checksum.to_i
   end
+
+  # Returns a pretty unique name for this CourseProf
+  def get_filename
+    [course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+  end
 end

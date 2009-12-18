@@ -9,7 +9,9 @@
 #
 # FIXME: Functions should be moved to class
 
-require 'helper.constants.rb'
+@path = File.dirname(__FILE__)
+
+require @path + '/helper.constants.rb'
 
 # Finds out the box dimensions for the current group (doesn't look
 # at individual box sizes)

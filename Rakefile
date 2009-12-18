@@ -40,6 +40,41 @@ def find_barcode(filename)
   end
 end
 
+# Creates form PDF file for given semester and CourseProf
+def make_pdf_for(s, cp, dirname)
+    # first: the barcode
+    filename = dirname + cp.barcode
+    `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
+
+    # second: the form
+    filename = dirname + cp.get_filename
+    File.open(filename + '.tex', 'w') do |h|
+    h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\dozent{' + cp.prof.fullname + '}' + "\n"
+    h << '\vorlesung{' + cp.course.title + '}' + "\n"
+    h << '\semester{' + s.title + '}' + "\n"
+    if cp.course.form != 3
+      h << '\tutoren{' + "\n"
+
+      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
+
+      tutoren.each_with_index do |t, i|
+        h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
+      end
+
+      h << '}' + "\n"
+    end
+    h << '\begin{document}' + "\n"
+    h << '\\' + ['', '', 'eng', ''][cp.course.form] + 'kopf{' + ['1', '1', '1', '0'][cp.course.form] + '}' + "\n\n\n" # [vorlesung, spezial, englisch, seminar]
+    h << ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][cp.course.form] + "\n"
+    h << '\end{document}'
+    end
+    puts "Wrote #{filename}.tex"
+    Rake::Task[(filename + '.pdf').to_sym].invoke
+
+    `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+end
+
 
 namespace :db do
   task :connect do
@@ -132,11 +167,30 @@ namespace :mail do
 end
 
 namespace :pest do
-    desc "fixes the LaTeX output to be conform with the yaml specification"
-    task :yamlfix, :file do |t, a|
-        `cd "#{File.dirname(a.file)}" && ../pest/latexfix.rb "#{File.basename(a.file)}" && rm "#{File.basename(a.file)}"`
-        puts "Wrote #{File.basename(a.file)}.yaml"
+  desc "Finds all different forms for each folder and puts the form file into tmp/images/[form id]/"
+  task :getyamls, :needs => 'db:connect' do |t|
+    s = Semester.find(:all).find{ |s| s.now? }
+    # FIXME: This can surely be done more simple by directly finding
+    # a form for the current semester
+    Dir.glob("./tmp/images/[0-9]*/").each do |f|
+      Dir.glob("#{f}*.tif") do |y|
+        barcode = find_barcode(y)/10
+        cp = CourseProf.find(barcode)
+        make_pdf_for(s, cp, f)
+        `mv -f "#{f + cp.get_filename}.yaml" "#{f}../#{File.basename(f)}.yaml"`
+        break
+      end
     end
+  end
+
+  desc "Evaluates all sheets in ./tmp/images/"
+  task :omr do
+    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+      puts "Now processing #{f}"
+      bn = File.basename(f, ".yaml")
+      system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -v -d')
+    end
+  end
 end
 
 namespace :pdf do
@@ -162,36 +216,7 @@ namespace :pdf do
     s = Semester.find(a.semester_id)
     dirname = './tmp/'
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
-      # first: the barcode
-      filename = dirname + cp.barcode
-      `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
-
-      # second: the form
-      filename = dirname + [cp.course.title, cp.prof.fullname, cp.course.students.to_s + 'pcs'].join(' - ')
-      File.open(filename + '.tex', 'w') do |h|
-        h << '\documentclass[ngerman]{eval}' + "\n"
-        h << '\dozent{' + cp.prof.fullname + '}' + "\n"
-        h << '\vorlesung{' + cp.course.title + '}' + "\n"
-        h << '\semester{' + s.title + '}' + "\n"
-        if cp.course.form != 3
-          h << '\tutoren{' + "\n"
-
-          tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
-
-          tutoren.each_with_index do |t, i|
-            h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
-          end
-
-          h << '}' + "\n"
-        end
-        h << '\begin{document}' + "\n"
-        h << '\\' + ['', '', 'eng', ''][cp.course.form] + 'kopf{' + ['1', '1', '1', '0'][cp.course.form] + '}' + "\n\n\n" # [vorlesung, spezial, englisch, seminar]
-        h << ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][cp.course.form] + "\n"
-        h << '\end{document}'
-      end
-      puts "Wrote #{filename}.tex"
-      Rake::Task[(filename + '.pdf').to_sym].invoke
-      Rake::Task[("pest:yamlfix").to_sym].invoke((filename + '.posout'))
+        make_pdf_for(s, cp, dirname)
     end
 
     Rake::Task["clean".to_sym].invoke

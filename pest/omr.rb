@@ -15,6 +15,8 @@
 #
 # Call omr.rb without arguments for list of possible/required arguments
 
+@path = File.dirname(__FILE__)
+
 require 'rubygems'
 require 'RMagick'
 require 'optparse'
@@ -22,12 +24,12 @@ require 'yaml'
 require 'pp'
 require 'narray'
 
-require 'helper.array.rb'
-require 'helper.boxtools.rb'
-require 'helper.constants.rb'
-require 'helper.misc.rb'
+require @path + '/helper.array.rb'
+require @path + '/helper.boxtools.rb'
+require @path + '/helper.constants.rb'
+require @path + '/helper.misc.rb'
 
-require './../lib/rails_requirements.rb'
+require @path + '/../lib/rails_requirements.rb'
 
 # bp stands for "black percentage" and holds how much pixels in this
 # box are black. mx and my define the inner, top left corner of the
@@ -646,7 +648,7 @@ class PESTOmr
             opts.separator("REQUIRED ARGUMENTS:")
             opts.on("-s", "--omrsheet OMRSHEET", "Path to the OMR Sheet that should be used to parse the sheets") { |sheet| @omrsheet = sheet }
 
-            opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the ouput will be saved.", "All paths are relative to this.") { |path| @path = path.chomp("/") }
+            opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the output will be saved.", "All paths are relative to this.") { |path| @path = path.chomp("/") }
 
             opts.separator("")
             opts.separator("OPTIONAL ARGUMENTS:")
