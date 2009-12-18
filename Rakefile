@@ -22,6 +22,25 @@ def word_wrap(txt, col = 80)
       "\\1\\3\n")
 end
 
+def find_page(filename)
+  r = `zbarimg --xml --set ean13.disable=1 #{filename} 2>/dev/null`
+  if not r.empty?
+    return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
+  else
+    return nil
+  end
+end
+
+def find_barcode(filename)
+  r = `zbarimg --set ean13.disable=1 #{filename} 2>/dev/null`
+  if not r.empty?
+    return r.strip.match(/^.*:(.*)$/)[1].to_i
+  else
+    return nil
+  end
+end
+
+
 namespace :db do
   task :connect do
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
@@ -31,8 +50,50 @@ end
 namespace :images do 
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
-    imagedir = Dir.new(d.directory)
-    puts imagedir.glob("*.tif")
+    Dir.glob(File.join(d.directory, '*.tif')) do |f|
+      basename = File.basename(f, '.tif')
+      pages = ImageList.new(f)
+
+      changed_smth = nil
+
+      barcode = (find_barcode(f).to_f / 10).floor.to_i
+      page = find_page(f)
+
+      if barcode.nil? || page.nil? || (not CourseProf.exists?(barcode))
+        puts "bizarre #{basename}, exiting"
+        File.makedirs('tmp/images/bizarre')
+        File.copy(f, 'tmp/images/bizarre')
+        next
+      end
+
+      # is the barcode on the first page
+      if page != 0
+        pages.reverse!
+        puts "switched #{basename}"
+      end
+
+      # is the barcode on the upper half of the first page?
+      tmp_filename = "/tmp/bgndrhn_#{basename}_#{Time.now.to_i}.tif"
+
+      pages[0].crop(0, 0, 2480, 1000).write(tmp_filename)
+
+      # the barcode is not at the top
+      if find_barcode(tmp_filename).nil?
+        pages.map! { |i| i.rotate(180) }
+        puts "flipped #{basename}"
+      end
+
+      File.delete(tmp_filename)
+
+      form = CourseProf.find(barcode).course.form
+      
+      File.makedirs("tmp/images/#{form}")
+      
+      pages.write(File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
+
+      puts "Wrote #{form}/#{basename} (#{barcode})"
+
+    end
   end
 end
 
