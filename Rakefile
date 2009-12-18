@@ -28,7 +28,7 @@ def word_wrap(txt, col = 80)
 end
 
 def find_page(filename)
-  r = `zbarimg --xml --set ean13.disable=1 #{filename} 2>/dev/null`
+  r = `zbarimg --xml --set ean13.disable=1 --set y-density=3 #{filename} 2>/dev/null`
   if not r.empty?
     return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
   else
@@ -37,7 +37,7 @@ def find_page(filename)
 end
 
 def find_barcode(filename)
-  r = `zbarimg --set ean13.disable=1 #{filename} 2>/dev/null`
+  r = `zbarimg --set ean13.disable=1 --set y-density=3 #{filename} 2>/dev/null`
   if not r.empty?
     return r.strip.match(/^.*:(.*)$/)[1].to_i
   else
