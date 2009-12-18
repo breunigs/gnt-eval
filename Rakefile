@@ -5,6 +5,9 @@ require 'lib/ext_requirements.rb'
 require 'dbi'
 require 'pp'
 
+# need for parsing yaml into database
+require 'yaml'
+
 # needed for image manipulations
 require 'RMagick'
 require 'ftools'
@@ -167,10 +170,10 @@ namespace :mail do
 end
 
 namespace :pest do
-  desc "Finds all different forms for each folder and puts the form file into tmp/images/[form id]/"
+  desc '(1) Finds all different forms for each folder and puts the form file into tmp/images/[form id]/'
   task :getyamls, :needs => 'db:connect' do |t|
     s = Semester.find(:all).find{ |s| s.now? }
-    # FIXME: This can surely be done more simple by directly finding
+    # FIXME: This can surely be done simpler by directly finding
     # a form for the current semester
     Dir.glob("./tmp/images/[0-9]*/").each do |f|
       Dir.glob("#{f}*.tif") do |y|
@@ -182,8 +185,39 @@ namespace :pest do
       end
     end
   end
+  
+  desc "(2) Create db tables for each form for the available YAML files"
+  task :createtables, :needs => 'db:connect' do |t|
+    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+        yaml = YAML::load(File.read(f))
+        s = Semester.find(:all).find{ |s| s.now? }
+        name = "evaldaten_" + s.dirFriendlyName + '_' + File.basename(f, ".yaml")
+        
+        q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
+        q += "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+        q += "`dateiname` varchar(256) default NULL, "
+        q += "`bearbeiter` varchar(80) default NULL, "
+        q += "`dozent` varchar(256) default NULL, "
+        q += "`vorlesung` varchar(256) default NULL, "
+        
+        yaml.questions.each do |quest|
+            if quest.db_column.is_a?(Array)
+                quest.db_column.each do |a|
+                    q += "`" + a + "` SMALLINT(6) UNSIGNED, "
+                end
+            else
+                q += '`'+ quest.db_column.to_s + "` SMALLINT(6) UNSIGNED, "
+            end
+        end
+        q += "PRIMARY KEY (id)"
+        q += ");"
+      
+        puts "Creating #{name}"
+        $dbh.execute(q)
+    end
+  end
 
-  desc "Evaluates all sheets in ./tmp/images/"
+  desc "(3) Evaluates all sheets in ./tmp/images/"
   task :omr do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
@@ -191,6 +225,8 @@ namespace :pest do
       system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -c 2')
     end
   end
+  
+  desc "(4) 
 end
 
 namespace :pdf do
