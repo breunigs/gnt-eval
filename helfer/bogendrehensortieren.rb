@@ -3,9 +3,10 @@
 # boegen im aktuellen verzeichnis richtig drehen, ueberschreibt
 # urspruengliche dateien haette gern two-pages-tifs ... 
 
-# USAGE: bogendrehen.rb file.tif
+# USAGE: bogendrehen.rb file.tif, writes X/file_bc.tif where X is formnumber
 require 'RMagick'
 require 'ftools'
+require File.join(File.dirname(__FILE__), '../lib/ext_requirements.rb')
 
 include Magick
 
@@ -31,11 +32,13 @@ f = ARGV[0]
 pages = ImageList.new(f)
 changed_smth = nil
 
-barcode = find_barcode(f)
+barcode = (find_barcode(f).to_f / 10).floor.to_i
 page = find_page(f)
 
-if barcode.nil? || page.nil?
+if barcode.nil? || page.nil? || (not CourseProf.exists?(barcode))
   puts "bizarre #{f}"
+  File.makedirs("bizarre")
+  `mv #{f} bizarre/`
   Process.exit
 end
 
@@ -60,7 +63,10 @@ end
 
 File.delete(tmp_filename)
 
-pages.write(f) unless changed_smth.nil?
-if changed_smth.nil?
-  puts "was right from the beginning: #{f} (#{barcode})"
-end
+form = CourseProf.find(barcode).course.form.to_s
+File.makedirs(form)
+newfilename = (File.basename(f, '.tif') + '_' + barcode.to_s + '.tif')
+pages.write(File.join(form, newfilename))
+
+puts "Wrote #{form}/#{newfilename}"
+
