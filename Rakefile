@@ -188,7 +188,7 @@ namespace :pest do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
-      system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -v -d')
+      system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -c 2')
     end
   end
 end

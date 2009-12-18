@@ -15,7 +15,7 @@
 #
 # Call omr.rb without arguments for list of possible/required arguments
 
-@path = File.dirname(__FILE__)
+cdir = File.dirname(__FILE__)
 
 require 'rubygems'
 require 'RMagick'
@@ -24,12 +24,12 @@ require 'yaml'
 require 'pp'
 require 'narray'
 
-require @path + '/helper.array.rb'
-require @path + '/helper.boxtools.rb'
-require @path + '/helper.constants.rb'
-require @path + '/helper.misc.rb'
+require cdir + '/helper.array.rb'
+require cdir + '/helper.boxtools.rb'
+require cdir + '/helper.constants.rb'
+require cdir + '/helper.misc.rb'
 
-require @path + '/../lib/rails_requirements.rb'
+require cdir + '/../lib/rails_requirements.rb'
 
 # bp stands for "black percentage" and holds how much pixels in this
 # box are black. mx and my define the inner, top left corner of the
@@ -728,7 +728,8 @@ class PESTOmr
                 # spawned instances are indented. Quite useful to keep
                 # the console output readable.
                 i = " -i " + (corecount*35).to_s
-                system("ruby omr.rb " + sheet + path + i + v + d + o + list + " &")
+                system("ruby "+ File.dirname(__FILE__) +"/omr.rb " + sheet + path + i + 
+v + d + o + list + " &")
             end
         end
 
