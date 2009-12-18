@@ -23,6 +23,7 @@ require 'optparse'
 require 'yaml'
 require 'pp'
 require 'narray'
+require 'ftools'
 
 require cdir + '/helper.array.rb'
 require cdir + '/helper.boxtools.rb'
@@ -71,6 +72,7 @@ class PESTOmr
                 puts @ilist.inspect
             else
                 puts "Critical Error: Invalid Geometry"
+                @cancelProcessing = true
             end
             return 0
         end
@@ -176,7 +178,7 @@ class PESTOmr
         # Use different thresholds for each page to lessen the chance of
         # failing due to some black pixels
         leftThres = [9, 9]
-        topThres = [20, 60]
+        topThres = [20, 20]
         
         lTop    = ( 200*@dpifix).to_i
         lLeft   = (  40*@dpifix).to_i
@@ -485,6 +487,7 @@ class PESTOmr
     # image. More or less, it glues together all other functions and
     # saves the output to an YAML named like the input image.
     def parseFile(file)
+        @cancelProcessing = false
         file = file.gsub(/\.yaml:?$/, ".tif")
         if !File.exists?(file) || File.zero?(file)
             puts @spaces + "WARNING: File not found: " + file
@@ -515,6 +518,15 @@ class PESTOmr
             print @spaces + "  Saving Image: " + dbgFlnm if @verbose
             img.write dbgFlnm
             puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
+        end
+        
+        if @cancelProcessing
+            print @spaces + "  Found boxes to be out of bounds. Moving to bizzare:"
+            print @spaces + "  " + File.basename(file)
+            dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/") 
+            File.makedirs(dir)
+            File.move(file, File.join(dir, File.basename(file)))
+            return
         end
 
         # Output generated data

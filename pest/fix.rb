@@ -22,13 +22,16 @@ require 'gtk2'
 require 'tempfile'
 require 'yaml'
 require 'pp'
+require 'ftools'
 
-require 'helper.array.rb'
-require 'helper.boxtools.rb'
-require 'helper.constants.rb'
-require 'helper.misc.rb'
 
-require './../lib/rails_requirements.rb'
+cdir = File.dirname(__FILE__)
+require File.join(cdir, 'helper.array.rb')
+require File.join(cdir, 'helper.boxtools.rb')
+require File.join(cdir, 'helper.constants.rb')
+require File.join(cdir, 'helper.misc.rb')
+
+require File.join(cdir, './../lib/rails_requirements.rb')
 
 class PESTFix
     def initialize(win)
@@ -119,7 +122,9 @@ class PESTFix
         newfiles = false
         # We can certainly skip the check on first load
         skipCheck = @files.empty?
-        Dir.glob(@dir + "/*.yaml").each do |file|
+        # This selects all numeric subdirectories of the given one and collects
+        # all yaml files. This is perfectly tuned towards of how eval works
+        Dir.glob(@dir + "/[0-9]*/*.yaml").each do |file|
             next if File.zero?(file)
             # Only add not already parsed files
             if !skipCheck; next if fileAlreadyParsed?(file); end
@@ -149,6 +154,26 @@ class PESTFix
         count = "[" + (@currentImage+1).to_s + " / " + @files.size.to_s + "] "
         quest = "(Q: " + @currentQuestion.to_s + ") "
         @window.set_title title + count + quest + "    "+ @imgpath
+    end
+    
+    # Moves the current file to ../bizarre from its current location
+    # Also deletes the YAML file because it's probably wrong anyway
+    def markAsBizarre
+      tif = File.join(File.dirname(@imgpath), File.basename(@imgpath, ".yaml") + ".tif")
+      biz = File.join(File.dirname(@imgpath), "../bizarre/")
+      sheet = File.basename(File.dirname(@imgpath))
+      cdir = File.dirname(__FILE__)
+      
+      File.move(tif, biz)
+      File.delete(@imgpath)
+      
+      # Automatically create debug output for the affected file
+      system("#{cdir}/omr.rb -o -v -d -s #{cdir}/../tmp/images/#{sheet}.yaml -p #{cdir}/../tmp/images/bizarre " + File.basename(@imgpath, ".yaml") + ".tif&")
+      
+      # Changing the internal structures is hell, so just restart the program
+      system("./pest/fix.rb ./tmp/images/ &")
+      Gtk.main_quit
+      Process.exit 
     end
 
     # Contains definitions for all the toolbar buttons and sets them up
@@ -203,10 +228,17 @@ class PESTFix
         parse_again.set_tooltip_text "Parse Working Directory Again for New Files (CTRL + R)"
         parse_again.signal_connect "clicked" do parseDirectory end
         
-        sql = Gtk::ToolButton.new(Gtk::Stock::SAVE_AS)
-        sql.set_label "Export as SQL"
-        sql.set_tooltip_text "Export the current datasheet as SQL file (CTRL + S)"
-        sql.signal_connect "clicked" do exportAsSql end
+        mark_as_bizarre = Gtk::ToolButton.new(Gtk::Stock::NO)
+        mark_as_bizarre.set_label "Mark file bizarr"
+        mark_as_bizarre.set_tooltip_text "Mark the current file as bizarre, i.e. if it's scanned incorrectly."
+        mark_as_bizarre.signal_connect "clicked" do markAsBizarre end
+        
+        
+        
+        #sql = Gtk::ToolButton.new(Gtk::Stock::SAVE_AS)
+        #sql.set_label "Export as SQL"
+        #sql.set_tooltip_text "Export the current datasheet as SQL file (CTRL + S)"
+        #sql.signal_connect "clicked" do exportAsSql end
         
         quit = Gtk::ToolButton.new(Gtk::Stock::QUIT)
         quit.set_tooltip_text "Exits the Application (CTRL + Q)"
@@ -220,29 +252,31 @@ class PESTFix
         # Setup actual toolbar
         toolbar = Gtk::Toolbar.new  
         toolbar.set_toolbar_style Gtk::Toolbar::Style::BOTH
-        toolbar.insert  0, @undo
-        toolbar.insert  1, Gtk::SeparatorToolItem.new
-        toolbar.insert  2, @img_prev
-        toolbar.insert  3, @img_next
-        toolbar.insert  4, Gtk::SeparatorToolItem.new
-        toolbar.insert  5, @quest_prev
-        toolbar.insert  6, @quest_next
-        toolbar.insert  7, Gtk::SeparatorToolItem.new
-        toolbar.insert  8, @answr_prev
-        toolbar.insert  9, @answr_next
-        toolbar.insert 10, Gtk::SeparatorToolItem.new
-        toolbar.insert 11, @find_fail
-        toolbar.insert 12, parse_again
-        toolbar.insert 13, Gtk::SeparatorToolItem.new
-        toolbar.insert 14, sql
-        toolbar.insert 15, Gtk::SeparatorToolItem.new
-        toolbar.insert 16, quit
+        c = -1
+        toolbar.insert((c+=1), @undo)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), @img_prev)
+        toolbar.insert((c+=1), @img_next)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), @quest_prev)
+        toolbar.insert((c+=1), @quest_next)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), @answr_prev)
+        toolbar.insert((c+=1), @answr_next)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), @find_fail)
+        toolbar.insert((c+=1), parse_again)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), mark_as_bizarre)
+        #toolbar.insert((c+=1), sql)
+        toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
+        toolbar.insert((c+=1), quit)
 
         space = Gtk::ToolItem.new.add((Gtk::VBox.new false, 2))
         space.set_expand(true)
-        toolbar.insert 17, space
+        toolbar.insert((c+=1), space)
         
-        toolbar.insert 18, Gtk::ToolItem.new.add(@prog)
+        toolbar.insert((c+=1), Gtk::ToolItem.new.add(@prog))
 
         toolbar
     end
@@ -291,7 +325,7 @@ class PESTFix
             if isCtrl && k == g::GDK_r then parseDirectory end
 
             # Export as SQL
-            if isCtrl && k == g::GDK_s then exportAsSql end
+            #if isCtrl && k == g::GDK_s then exportAsSql end
 
             # Mark as Failed
             if isCtrl && k == g::GDK_f && !@group.nil?
@@ -314,6 +348,7 @@ class PESTFix
     # Doesn't force the user to solve all failed answers, but does a
     # lookup so the user may notice there's something not quite right.
     def exportAsSql
+        raise("Not up to date. Please use the rake file")
         questionFindFail
 
         dialog = Gtk::FileChooserDialog.new("Select Output SQL File",
@@ -445,7 +480,7 @@ class PESTFix
     # This puts the data into the real undo-stack so that it may be un-
     # done. The data needs to be gathered with undoStart beforehand
     def undoCommit
-        @undoActions << @undoStartState if @undoStartState != nil
+        @undoActions << @undoStartState unless @undoStartState.nil?
         @undoStartState = nil
         @undo.set_sensitive !@undoActions.empty?
     end
@@ -455,7 +490,7 @@ class PESTFix
     # manually corrects it afterwards, no real change has been carried out
     # and therefore may be removed.
     def undoEnd
-        return # Deactivated for now
+        return # Deactivated for now FIXME
         a = @undoActions.last
         return if a.nil? || a[0] != @currentImage || a[1] != @currentQuestion
         # The value changed, so keep it in the undo list

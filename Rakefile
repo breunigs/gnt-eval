@@ -20,6 +20,8 @@ require 'rake/clean'
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
 
 
+$curSem = Semester.find(:all).find{ |s| s.now? }
+
 def word_wrap(txt, col = 80)
     txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
       "\\1\\3\n")
@@ -41,6 +43,10 @@ def find_barcode(filename)
   else
     return nil
   end
+end
+
+def find_barcode_from_basename(basename)
+    basename.to_s.sub(/^.*_/, '').to_i
 end
 
 # Creates form PDF file for given semester and CourseProf
@@ -89,14 +95,14 @@ namespace :images do
   
   desc "Insert tutor comment pictures from YAML/jpg in directory." +
        "Please supply all images to" +
-       " /home/eval/public_html/.tutcomments/#{Semester.find(:all).find{ |s| s.now? }.dirfriendly_title}"
+       " /home/eval/public_html/.tutcomments/#{$curSem.dirfriendly_title}"
   task :inserttutorcomments, :directory do |t, d|
     Dir.glob(File.join(d.directory, '*.yaml')) do |f|
       basename = File.basename(f, '.yaml')
       if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "v1" }.value.to_i
-        barcode = basename.to_s.sub(/^.*_/, '').to_i
+        barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
 
@@ -121,6 +127,8 @@ namespace :images do
   
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
+    puts "Try this:"
+    puts "for i in *.tif; do ~/seee/helfer/bogendrehensortieren.rb $i;done"
     raise "This is defunctional and has serious memory leakage"
     Dir.glob(File.join(d.directory, '*.tif')) do |f|
       basename = File.basename(f, '.tif')
@@ -203,16 +211,15 @@ namespace :mail do
 end
 
 namespace :pest do
-  desc '(1) Finds all different forms for each folder and puts the form file into tmp/images/[form id]/'
+  desc '(1) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
   task :getyamls, :needs => 'db:connect' do |t|
-    s = Semester.find(:all).find{ |s| s.now? }
     # FIXME: This can surely be done simpler by directly finding
     # a form for the current semester
     Dir.glob("./tmp/images/[0-9]*/").each do |f|
       Dir.glob("#{f}*.tif") do |y|
-        barcode = find_barcode(y)/10
+        barcode = find_barcode_from_basename(File.basename(y, ".tif")) #find_barcode(y)/10
         cp = CourseProf.find(barcode)
-        make_pdf_for(s, cp, f)
+        make_pdf_for($curSem, cp, f)
         `mv -f "#{f + cp.get_filename}.yaml" "#{f}../#{File.basename(f)}.yaml"`
         break
       end
@@ -220,18 +227,14 @@ namespace :pest do
   end
   
   desc "(2) Create db tables for each form for the available YAML files"
-  task :createtables, :needs => 'db:connect' do |t|
+  task :createtables, :needs => 'db:connect' do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
-        s = Semester.find(:all).find{ |s| s.now? }
-        name = "evaldaten_" + s.dirFriendlyName + '_' + File.basename(f, ".yaml")
+        name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
         
         q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
         q += "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
-        q += "`dateiname` varchar(256) default NULL, "
-        q += "`bearbeiter` varchar(80) default NULL, "
-        q += "`dozent` varchar(256) default NULL, "
-        q += "`vorlesung` varchar(256) default NULL, "
+        q += "`barcode` INT(11) default NULL, "
         
         yaml.questions.each do |quest|
             if quest.db_column.is_a?(Array)
@@ -259,9 +262,54 @@ namespace :pest do
     end
   end
   
-  desc "(4)"
-  task :foo do 
-    raise "not implemented"
+  desc "(4) Correct invalid sheets"
+  task :correct do
+      `./pest/fix.rb ./tmp/images/`
+  end
+  
+  desc "(5) Copies YAML data into database"
+  task :yaml2db, :needs => 'db:connect' do 
+    Dir.glob("./tmp/images/[0-9]*/*.yaml").each do |f|    
+      form = File.basename(File.dirname(f))
+      yaml = YAML::load(File.read(f))
+      keys = Array.new
+      vals = Array.new
+      
+      # Get barcode
+      keys << "barcode"
+      vals << find_barcode_from_basename(File.basename(f, ".yaml"))
+      
+      yaml.questions.each do |q|
+        next if q.type == "text"
+      
+        if q.db_column.is_a?(Array)
+          q.db_column.each_with_index do |a, i|
+            vals << (q.value == i.to_s ? 1 : 0)
+            keys << a
+          end
+        else
+          vals << q.value
+          keys << q.db_column
+        end
+      end
+      q = "INSERT INTO `evaldaten_" + $curSem.dirFriendlyName + "_#{form}` ("
+      q += keys.join(", ")
+      q += ") VALUES ("
+      q += vals.join(", ")
+      q += ")"
+      
+      puts "Inserting #{File.basename(f)}"
+      puts q
+      $dbh.execute(q)
+    end
+  end
+  
+  desc "(6) Copies extracted comments into eval directory"
+  task :copycomments do
+    puts "Creating folders and copying comments, please wait..."
+    system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.tutcomments/#{$curSem.dirFriendlyName}\"")
+    path=File.join(File.dirname(__FILE__), "tmp/images")
+    system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.tutcomments/#{$curSem.dirFriendlyName}/\" \\;")
   end
 end
 
