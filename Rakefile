@@ -22,13 +22,16 @@ CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
 
 $curSem = Semester.find(:all).find{ |s| s.now? }
 
+# Increase density and disable all other barcodes for perf wins
+$zbarCmd = " --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 "
+
 def word_wrap(txt, col = 80)
     txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
       "\\1\\3\n")
 end
 
 def find_page(filename)
-  r = `zbarimg --xml --set ean13.disable=1 --set y-density=3 #{filename} 2>/dev/null`
+  r = `zbarimg --xml #{$zbarCmd} #{filename} 2>/dev/null`
   if not r.empty?
     return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
   else
@@ -37,7 +40,7 @@ def find_page(filename)
 end
 
 def find_barcode(filename)
-  r = `zbarimg --set ean13.disable=1 --set y-density=3 #{filename} 2>/dev/null`
+  r = `zbarimg #{$zbarCmd} #{filename} 2>/dev/null`
   if not r.empty?
     return r.strip.match(/^.*:(.*)$/)[1].to_i
   else
@@ -91,8 +94,8 @@ namespace :db do
   end
 end
 
-namespace :images do 
-  
+namespace :images do
+
   desc "Insert tutor comment pictures from YAML/jpg in directory." +
        "Please supply all images to" +
        " /home/eval/public_html/.tutcomments/#{$curSem.dirfriendly_title}"
@@ -124,7 +127,7 @@ namespace :images do
       end
     end
   end
-  
+
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     puts "Try this:"
@@ -166,9 +169,9 @@ namespace :images do
       File.delete(tmp_filename)
 
       form = CourseProf.find(barcode).course.form
-      
+
       File.makedirs("tmp/images/#{form}")
-      
+
       pages.write(File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
       puts "Wrote #{form}/#{basename} (#{barcode})"
@@ -225,17 +228,17 @@ namespace :pest do
       end
     end
   end
-  
+
   desc "(2) Create db tables for each form for the available YAML files"
   task :createtables, :needs => 'db:connect' do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
         name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
-        
+
         q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
         q += "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
         q += "`barcode` INT(11) default NULL, "
-        
+
         yaml.questions.each do |quest|
             next if quest.db_column.nil?
             if quest.db_column.is_a?(Array)
@@ -248,7 +251,7 @@ namespace :pest do
         end
         q += "PRIMARY KEY (id)"
         q += ");"
-      
+
         puts "Creating #{name}"
         $dbh.execute(q)
     end
@@ -262,28 +265,28 @@ namespace :pest do
       system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -c 2')
     end
   end
-  
+
   desc "(4) Correct invalid sheets"
   task :correct do
       `./pest/fix.rb ./tmp/images/`
   end
-  
+
   desc "(5) Copies YAML data into database"
-  task :yaml2db, :needs => 'db:connect' do 
-    Dir.glob("./tmp/images/[0-9]*/*.yaml").each do |f|    
+  task :yaml2db, :needs => 'db:connect' do
+    Dir.glob("./tmp/images/[0-9]*/*.yaml").each do |f|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
       keys = Array.new
       vals = Array.new
-      
+
       # Get barcode
       keys << "barcode"
       vals << find_barcode_from_basename(File.basename(f, ".yaml"))
-      
+
       yaml.questions.each do |q|
         next if q.type == "text" || q.type == "text_wholepage"
         next if q.db_column.nil?
-      
+
         if q.db_column.is_a?(Array)
           q.db_column.each_with_index do |a, i|
             vals << (q.value == i.to_s ? 1 : 0)
@@ -301,10 +304,10 @@ namespace :pest do
       q << ") VALUES ("
       q << vals.join(", ")
       q << ")"
-      
+
       print "."
       STDOUT.flush
-      
+
       begin
         $dbh.execute(q)
       rescue DBI::DatabaseError => e
@@ -320,7 +323,7 @@ namespace :pest do
     puts
     puts "Done!"
   end
-  
+
   desc "(6) Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."

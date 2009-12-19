@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: zbar-gtk
+Description: bar code scanning and decoding GTK widget
+URL: http://zbar.sourceforge.net
+Version: 0.10
+Requires: zbar, gtk+-2.0, gthread-2.0
+Libs: -L${libdir} -lzbargtk
+Cflags: -I${includedir}
