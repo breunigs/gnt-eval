@@ -101,7 +101,7 @@ namespace :images do
       basename = File.basename(f, '.yaml')
       if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
-        tutnum = scan.questions.find{ |q| q.db_column == "v1" }.value.to_i
+        tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
