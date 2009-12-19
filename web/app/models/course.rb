@@ -74,6 +74,6 @@ end
 
 class Integer
   def to_form
-    YAML::load(File.read('/home/oliver/seee/lib/testform.yml'))
+    YAML::load(File.read('/home/oliver/seee/lib/forms/' + self.to_s + '.yaml'))
   end
 end

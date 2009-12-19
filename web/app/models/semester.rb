@@ -20,7 +20,7 @@ class Semester < ActiveRecord::Base
     @db_table = cs.map { |c| c.form.to_form.db_table }.uniq
 
     evalname = ['Mathematik', 'Physik'][faculty] + ' ' + title
-    anzahl_boegen = count_forms({ :eval => evalname })
+    anzahl_boegen = count_forms({})
 
     b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
                    c.profs.count }, cs.inject(0) { |sum, c| sum +

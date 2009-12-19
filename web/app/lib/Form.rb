@@ -68,15 +68,12 @@ class Question
   # postfix when saving file
   attr_accessor :save_as
 
-  # belongs to: 'tutor', 'prof', 'tutoring'
-  attr_accessor :section
-  
   # the field where OMR saves the selected box
   attr_accessor :value
 
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='',
-                 active=true, save_as = '', section = '')
+                 active=true, save_as = '')
 
     @boxes = boxes
     @qtext = qtext
@@ -86,7 +83,6 @@ class Question
     @db_column = db_column
     @active = active
     @save_as = save_as
-    @section = ''
     @value = nil
   end
 
@@ -94,7 +90,20 @@ class Question
   def size
     return @boxes.count
   end
-
+  # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
+  def section
+    if @db_column.nil?
+      return 'this is no question in a traditional sense'
+    end
+    first_letter = (@db_column.to_s)[0].chr
+    if first_letter == 'v'
+      return 'prof'
+    elsif first_letter == 't'
+      return 'tutor'
+    elsif first_letter == 'u'
+      return 'uebungsgruppenbetrieb'
+    end
+  end
   # is the question active?
   def active?
     if not @active.nil?
@@ -148,18 +157,15 @@ class Question
 
     if @db_column.is_a?(Array)
 
-      answers = multi_q({ :eval => this_eval, :barcode =>
-                          bc}, self)
+      answers = multi_q({:barcode => bc}, self)
 
       t = TeXMultiQuestion.new(@qtext, answers)
       b << t.to_tex
 
       # single-q
     else
-      antw, anz, m, m_a, s, s_a = single_q({:eval => this_eval,
-                                             :barcode =>
-                                             bc},
-                                           {:eval => this_eval}, self)
+      antw, anz, m, m_a, s, s_a = single_q({:barcode => bc},
+                                           {}, self)
 
       t = TeXSingleQuestion.new(text, ltext, rtext, antw,
                                 anz, m, m_a, s, s_a)

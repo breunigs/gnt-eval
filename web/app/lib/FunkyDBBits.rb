@@ -25,13 +25,26 @@ module FunkyDBBits
     q = 'SELECT '
     q += f.to_a.join(', ')
     q += " FROM #{t}"
-    q += ' WHERE ' + h.keys.join(' IN (?) AND ') + ' IN (?) ' +
-      additional
+    
+    if h.empty?
+      if not additional.empty?
+        additional = additional.sub(/^\s*AND/,'')
+        q += ' WHERE ' + additional
+      end
+    else
+      q += ' WHERE ' + h.keys.join(' IN (?) AND ') + ' IN (?) ' +
+        additional
+    end
     
     result = nil
     sth = @dbh.prepare(q)
-    sth.execute(*h.values)
-    sth.fetch_array { |r| result = r }
+    begin
+      sth.execute(*h.values)
+      sth.fetch_array { |r| result = r }
+    rescue
+      puts q
+      raise "SQL-Error"
+    end
     if result.count == 1
       return result[0]
     else
@@ -61,12 +74,23 @@ module FunkyDBBits
   
   # returns count of stuff where i IN h[i] for each i + additional
   def count_forms(h, additional = '')
-    return query('COUNT(*)', h, additional)
+    res = query('COUNT(*)', h, additional)
+    if res.nil?
+      p h
+      p additional
+      raise "something went nil"
+    end
+    return res
   end
 
   # (where-clause-)hash h, question q
   def multi_q(h, q)
     anzahl = count_forms(h, " AND (#{q.db_column.join('+')} > 0)")
+    if anzahl == 0
+      p h
+      p q
+      raise "something went zero"
+    end
     answers = Hash.new
     q.db_column.each_index do |i|
       c = q.db_column[i]

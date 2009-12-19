@@ -22,15 +22,15 @@ class CourseProf < ActiveRecord::Base
     b = ''
     this_eval = ['Mathematik', 'Physik'][course.faculty] + ' ' + course.semester.title
     
-    boegenanzahl = count_forms({:barcode => i_bcwc}) 
-    
-    b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
-    b << "\\fragenzurvorlesung\n\n"
-    
-    form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-      b << q.eval_to_tex(this_eval, i_bcwc, form.db_table, @dbh)
+    boegenanzahl = count_forms({:barcode => barcode.to_i}) 
+    if boegenanzahl > 0
+      b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
+      b << "\\fragenzurvorlesung\n\n"
+      
+      form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
+        b << q.eval_to_tex(this_eval, barcode.to_i, form.db_table, @dbh)
+      end
     end
-    
     return b
   end
   
@@ -52,6 +52,7 @@ class CourseProf < ActiveRecord::Base
   def i_bcwc
     barcode_with_checksum.to_i
   end
+  
 
   # Returns a pretty unique name for this CourseProf
   def get_filename

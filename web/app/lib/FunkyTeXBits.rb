@@ -88,17 +88,17 @@ module FunkyTeXBits
   def TeXFuss(single = nil)
     b = ''
     
-    if single.nil?
-      b << '\chapter'
-    else
-      b << "\\pagebreak\n"
-      b << "\\section"
-    end
+    # if single.nil?
+    #   b << '\chapter'
+    # else
+    #   b << "\\pagebreak\n"
+    #   b << "\\section"
+    # end
     
-    b << "{Die Fragebögen}\n"
-    b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen1.pdf}\n\n"
-    b << "\\begin{figure}\n"
-    b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen2.pdf}\n\\end{figure}"
+    # b << "{Die Fragebögen}\n"
+    # b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen1.pdf}\n\n"
+    # b << "\\begin{figure}\n"
+    # b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen2.pdf}\n\\end{figure}"
     b << "\n\\end{document}\n"
  
     return b
