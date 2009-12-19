@@ -372,6 +372,26 @@ class PESTOmr
             else        return group.failchoice
         end
     end
+    
+    # Assumes a whole page for commentary. Crops a margin to remove any black
+    # bars and then trims to any text if there.
+    def typeTextWholePageParse(imgid, group)
+        # Crop margins to remove black bars that appear due to rotated sheets
+        s = 2*30*@dpifix
+        i = @ilist[imgid]
+        i.fuzz = 0.25
+        c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim
+        return 0 if c.rows*c.columns < 500*@dpifix
+        # This algorithm is slow and error prone. FIXME FIXME FIXME
+        c = c.median_filter(0.05).trim
+        return 0 if c.rows*c.columns < 500*@dpifix
+        
+        filename = @path + "/" + File.basename(@currentFile, ".tif")
+        filename << group.saveas + ".jpg"
+        puts @spaces + "    Saving Comment Image: " + filename if @verbose
+        c.resize(0.4).write filename
+        return 1
+    end
 
     # This function tries to determine if a text field is filled out
     # If so and the "saveas" attribute is specified the comment will be
@@ -471,13 +491,19 @@ class PESTOmr
                         g.value = typeSquareParse(i, g)
                     when "text" then
                         g.value = typeTextParse(i, g)
+                    when "text_wholepage" then
+                        g.value = typeTextWholePageParse(i, g)
                     else
                         puts "Unsupported type: " + g.type.to_s
                 end
             end
 
             # Apply what the type*Parse functions drew
-            @draw.draw(@ilist[i]) if @debug
+            begin
+                @draw.draw(@ilist[i]) if @debug
+            rescue
+                puts @spaces + "Nothing to draw :(" if @debug
+            end
         end
 
         puts @spaces + "    (took: " + (Time.now-start_time).to_s + " s)" if @verbose
@@ -631,6 +657,7 @@ class PESTOmr
         doc.pages.each do |p| 
             next if p.questions.nil?
             p.questions.each do |q|
+                next if q.boxes.nil?
                 q.boxes.each do |b|
                     b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
                     b.height = b.height/SP_TO_PX*@dpifix unless b.height.nil?

@@ -237,6 +237,7 @@ namespace :pest do
         q += "`barcode` INT(11) default NULL, "
         
         yaml.questions.each do |quest|
+            next if quest.db_column.nil?
             if quest.db_column.is_a?(Array)
                 quest.db_column.each do |a|
                     q += "`" + a + "` SMALLINT(6) UNSIGNED, "
@@ -280,7 +281,8 @@ namespace :pest do
       vals << find_barcode_from_basename(File.basename(f, ".yaml"))
       
       yaml.questions.each do |q|
-        next if q.type == "text"
+        next if q.type == "text" || q.type == "text_wholepage"
+        next if q.db_column.nil?
       
         if q.db_column.is_a?(Array)
           q.db_column.each_with_index do |a, i|
@@ -288,20 +290,35 @@ namespace :pest do
             keys << a
           end
         else
-          vals << q.value
+          vals << q.value.nil? ? 0 : Integer(q.value)
           keys << q.db_column
         end
       end
-      q = "INSERT INTO `evaldaten_" + $curSem.dirFriendlyName + "_#{form}` ("
-      q += keys.join(", ")
-      q += ") VALUES ("
-      q += vals.join(", ")
-      q += ")"
+      q = "INSERT INTO `evaldaten_"
+      q << $curSem.dirFriendlyName
+      q << "_#{form}` ("
+      q << keys.join(", ")
+      q << ") VALUES ("
+      q << vals.join(", ")
+      q << ")"
       
-      puts "Inserting #{File.basename(f)}"
-      puts q
-      $dbh.execute(q)
+      print "."
+      STDOUT.flush
+      
+      begin
+        $dbh.execute(q)
+      rescue DBI::DatabaseError => e
+        puts
+        puts "Failed to insert #{form}/#{File.basename(f)}"
+        puts q
+        puts "Error code: #{e.err}"
+        puts "Error message: #{e.errstr}"
+        puts "Error SQLSTATE: #{e.state}"
+        puts
+      end
     end
+    puts
+    puts "Done!"
   end
   
   desc "(6) Copies extracted comments into eval directory"
