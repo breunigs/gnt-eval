@@ -1,0 +1,80 @@
+;; -*- scheme -*-
+; object definitions ...
+(define-object Gtk
+  (in-module "ZBar")
+  (parent "GtkWidget")
+  (c-name "ZBarGtk")
+  (gtype-id "ZBAR_TYPE_GTK")
+)
+
+;; Enumerations and flags ...
+
+
+;; From zbargtk.h
+
+(define-function zbar_gtk_get_type
+  (c-name "zbar_gtk_get_type")
+  (return-type "GType")
+)
+
+(define-function zbar_gtk_new
+  (c-name "zbar_gtk_new")
+  (is-constructor-of "ZbarGtk")
+  (return-type "GtkWidget*")
+)
+
+(define-method scan_image
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_scan_image")
+  (return-type "none")
+  (parameters
+    '("GdkPixbuf*" "image")
+  )
+)
+
+(define-method get_video_device
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_get_video_device")
+  (return-type "const-char*")
+)
+
+(define-method set_video_device
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_set_video_device")
+  (return-type "none")
+  (parameters
+    '("const-char*" "video_device")
+  )
+)
+
+(define-method get_video_enabled
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_get_video_enabled")
+  (return-type "gboolean")
+)
+
+(define-method set_video_enabled
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_set_video_enabled")
+  (return-type "none")
+  (parameters
+    '("gboolean" "video_enabled")
+  )
+)
+
+(define-method get_video_opened
+  (of-object "ZBarGtk")
+  (c-name "zbar_gtk_get_video_opened")
+  (return-type "gboolean")
+)
+
+(define-function zbar_gtk_image_from_pixbuf
+  (c-name "zbar_gtk_image_from_pixbuf")
+  (return-type "gboolean")
+  (parameters
+    '("zbar_image_t*" "image")
+    '("GdkPixbuf*" "pixbuf")
+  )
+)
+
+

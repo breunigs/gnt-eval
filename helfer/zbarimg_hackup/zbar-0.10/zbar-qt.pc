@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: zbar-qt
+Description: bar code scanning and decoding Qt4 widget
+URL: http://zbar.sourceforge.net
+Version: 0.10
+Requires: zbar, QtCore >= 4, QtGui >= 4
+Libs: -L${libdir} -lzbarqt
+Cflags: -I${includedir}

@@ -1,0 +1,12 @@
+{ global:
+zbar_gtk_get_type;
+zbar_gtk_get_video_device;
+zbar_gtk_get_video_enabled;
+zbar_gtk_get_video_opened;
+zbar_gtk_image_from_pixbuf;
+zbar_gtk_new;
+zbar_gtk_release_pixbuf;
+zbar_gtk_scan_image;
+zbar_gtk_set_video_device;
+zbar_gtk_set_video_enabled;
+local: *; };
