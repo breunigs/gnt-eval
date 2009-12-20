@@ -28,7 +28,7 @@ class CourseProf < ActiveRecord::Base
     if boegenanzahl > 0
       gender = prof.gender == 1 ? "M" : "F"
       b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
-      b << "\\fragenzurvorlesung\n\n"
+#      b << "\\fragenzurvorlesung\n\n"
       
       specific = { :barcode => barcode.to_i }
       general = { :barcode => $facultybarcodes }
