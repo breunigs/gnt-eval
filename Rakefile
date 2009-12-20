@@ -261,7 +261,7 @@ namespace :pest do
 
       # Get barcode
       keys << "barcode"
-      vals << find_barcode_from_basename(File.basename(f, ".yaml"))
+      vals << find_barcode_from_basename(File.basename(f, ".yaml")).to_s
 
       yaml.questions.each do |q|
         next if q.type == "text" || q.type == "text_wholepage"
@@ -272,11 +272,11 @@ namespace :pest do
             # The first answer starts with 1, but i is zero-based.
             # Therefore add 1 everytime to put the results in the
             # right columns.
-            vals << (q.value == (i+1).to_s ? 1 : 0)
+            vals << (q.value == (i+1).to_s ? 1 : 0).to_s
             keys << a
           end
         else
-          vals << q.value.nil? ? 0 : Integer(q.value)
+          vals << (q.value.nil? ? 0 : Integer(q.value)).to_s
           keys << q.db_column
         end
       end
