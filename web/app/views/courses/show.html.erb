@@ -1,3 +1,8 @@
+<%= link_to 'New', new_course_path %> |
+<%= link_to 'Edit', edit_course_path(@course) %> |
+<%= link_to 'Delete course', @course, :confirm => 'Ganz sicher?', :method => :delete %>|
+<%= link_to 'Back', courses_path %>
+<fieldset>
 <p>
   <b>Semester:</b>
   <%=h @course.semester.title %>
@@ -41,10 +46,10 @@
   <b>Faculty:</b>
   <%=h @course.faculty %>
 </p>
-
+</fieldset>
 <p>
   <b>Summary:</b>
-  <pre><%=h @course.summary %></pre>
+  <div style="width:1000px;max-height:150px;overflow:scroll"><%=h @course.summary %></div>
 </p>
 <p>
   <fieldset>
