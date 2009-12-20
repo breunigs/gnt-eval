@@ -96,7 +96,7 @@
     </tr>
     <% for tutor in @course.tutors %>
     <tr>
-      <td><%= link_to tutor.abbr_name, tutor %></td>
+      <td><%= link_to tutor.abbr_name, tutor %> (hat <%= tutor.pics.count %> Kommentare)</td>
 <!--      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor, :course_id => @course.id, :action => 'destroy'}, :confirm => 'Ganz sicher?', :method => :delete %></td>-->
     </tr>
     <% end %>
