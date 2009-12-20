@@ -96,12 +96,13 @@ end
 
 namespace :images do
 
-  desc "Insert tutor comment pictures from YAML/jpg in directory." +
+  desc "Insert comment pictures from YAML/jpg in directory." +
        "Please supply all images to" +
-       " /home/eval/public_html/.tutcomments/#{$curSem.dirfriendly_title}"
-  task :inserttutorcomments, :directory do |t, d|
+       " /home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
+  task :insertcomments, :directory do |t, d|
     Dir.glob(File.join(d.directory, '*.yaml')) do |f|
       basename = File.basename(f, '.yaml')
+      
       if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
@@ -125,9 +126,24 @@ namespace :images do
           puts "Did nothing with #{basename}, tutnum is #{tutnum}"
         end
       end
+
+      if File.exists?(File.join(d.directory, basename + '-comment.jpg'))
+        scan = YAML::load(File.read(f))
+        barcode = find_barcode_from_basename(basename)
+
+        course = CourseProf.find(barcode).course
+
+        # first cross is 1 !
+        p = CPic.new
+        p.course_id = course.id
+        p.basename = basename + '-comment.jpg'
+        p.save
+        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+      end
+      
     end
   end
-
+  
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     puts "Try this:"
@@ -327,9 +343,9 @@ namespace :pest do
   desc "(6) Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."
-    system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.tutcomments/#{$curSem.dirFriendlyName}\"")
+    system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
-    system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.tutcomments/#{$curSem.dirFriendlyName}/\" \\;")
+    system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}/\" \\;")
   end
 end
 

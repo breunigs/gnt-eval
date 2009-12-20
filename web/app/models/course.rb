@@ -7,6 +7,7 @@ class Course < ActiveRecord::Base
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
+  has_many :c_pics
   validates_presence_of :semester_id
   validates_numericality_of :students
   
