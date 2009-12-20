@@ -128,12 +128,10 @@ namespace :images do
       end
 
       if File.exists?(File.join(d.directory, basename + '-comment.jpg'))
-        scan = YAML::load(File.read(f))
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
 
-        # first cross is 1 !
         p = CPic.new
         p.course_id = course.id
         p.basename = basename + '-comment.jpg'
