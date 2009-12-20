@@ -289,7 +289,10 @@ namespace :pest do
 
         if q.db_column.is_a?(Array)
           q.db_column.each_with_index do |a, i|
-            vals << (q.value == i.to_s ? 1 : 0)
+            # The first answer starts with 1, but i is zero-based.
+            # Therefore add 1 everytime to put the results in the
+            # right columns.
+            vals << (q.value == (i+1).to_s ? 1 : 0)
             keys << a
           end
         else
