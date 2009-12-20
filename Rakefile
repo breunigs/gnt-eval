@@ -17,7 +17,7 @@ include Magick
 
 require 'rake/clean'
 
-CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
+CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc')
 
 
 $curSem = Semester.find(:all).find{ |s| s.now? }
@@ -43,6 +43,42 @@ def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
 
+# FIXME: we should really create a "form" class that collects all these information
+# [vorlesung, spezial, englisch, seminar]
+def tex_head_for(form)
+  '\\' + ['', '', 'eng', ''][form] + 'kopf{' + ['1', '0', '1', '0'][form] + '}'
+end
+
+def tex_questions_for(form)
+  ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][form]
+end
+
+def make_sample_sheet(form, hasTutors)
+  dir = "tmp/sample_sheets/"
+  File.makedirs(dir)
+  # Barcode  
+  filename = dir + "barcode"
+  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
+  # TeX
+  filename = dir + "sample_" + form.to_s
+  File.open(filename + ".tex", "w") do |h|
+    h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\dozent{Fachschaft MathPhys}' + "\n"
+    h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
+    h << '\semester{'+ ($curSem.title) +'}' + "\n"
+    
+    h << '\tutoren{ \mmm[1][Mustafa Mustermann] Mustafa Mustermann & \mmm[2][Fred Nurk] Fred Nurk & \mmm[3][Ashok Kumar] Ashok Kumar & \mmm[4][Juan Pérez] Juan Pérez & \mmm[5][Jakob Mierscheid] Jakob Mierscheid\\\\ \mmm[6][Iwan Iwanowitsch] Iwan Iwanowitsch & \mmm[7][Pierre Dupont] Pierre Dupont & \mmm[8][John Smith] John Smith & \mmm[9][Eddi Exzellenz] Eddi Exzellenz & \mmm[10][Joe Bloggs] Joe Bloggs\\\\ \mmm[11][John Doe] John Doe & \mmm[12][\ ] \  & \mmm[13][\ ] \  & \mmm[14][\ ] \  & \mmm[15][\ ] \  \\\\ \mmm[16][\ ] \ & \mmm[17][\ ] \  & \mmm[18][\ ] \  & \mmm[19][\ ] \  & \mmm[20][\ ] \ \\\\ \mmm[21][\ ] \  & \mmm[22][\ ] \  & \mmm[23][\ ] \  & \mmm[24][\ ] \  & \mmm[25][\ ] \ \\\\ \mmm[26][\ ] \  & \mmm[27][\ ] \  & \mmm[28][\ ] \  & \mmm[29][\ ] \  & \mmm[30][\ keine] \ keine\\ }' if hasTutors
+    
+    h << '\begin{document}' + "\n"
+    h << tex_head_for(form) + "\n\n\n"
+    h << tex_questions_for(form) + "\n"
+    h << '\end{document}'
+  end
+  
+  puts "Wrote #{filename}.tex"
+  Rake::Task[(filename + '.pdf').to_sym].invoke
+end
+
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
     # first: the barcode
@@ -56,6 +92,7 @@ def make_pdf_for(s, cp, dirname)
     h << '\dozent{' + cp.prof.fullname + '}' + "\n"
     h << '\vorlesung{' + cp.course.title + '}' + "\n"
     h << '\semester{' + s.title + '}' + "\n"
+    # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
       h << '\tutoren{' + "\n"
 
@@ -68,8 +105,8 @@ def make_pdf_for(s, cp, dirname)
       h << '}' + "\n"
     end
     h << '\begin{document}' + "\n"
-    h << '\\' + ['', '', 'eng', ''][cp.course.form] + 'kopf{' + ['1', '1', '1', '0'][cp.course.form] + '}' + "\n\n\n" # [vorlesung, spezial, englisch, seminar]
-    h << ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][cp.course.form] + "\n"
+    h << tex_head_for(cp.course.form) + "\n\n\n" 
+    h << tex_questions_for(cp.course.form) + "\n"
     h << '\end{document}'
     end
     puts "Wrote #{filename}.tex"
@@ -77,7 +114,6 @@ def make_pdf_for(s, cp, dirname)
 
     `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
-
 
 namespace :db do
   task :connect do
@@ -329,6 +365,16 @@ namespace :pest do
 end
 
 namespace :pdf do
+  desc "create samples for all available sheets for printing or inclusion. "
+  task :samplesheets do
+    0.upto(3) do |i|
+      make_sample_sheet(i, (i == 0 || i == 2))
+    end
+    
+    Rake::Task["clean".to_sym].invoke
+  end
+
+
   desc "create pdf-file for a certain semester"
   task :semester, :semester_id, :needs => 'db:connect' do |t, a|
     s = Semester.find(a.semester_id)
