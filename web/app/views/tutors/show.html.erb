@@ -13,5 +13,9 @@
   <%=h @tutor.comment %>
 </p>
 
+<% for p in @tutor.pics %>
+<img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
+<% end %>
+
 <%= link_to 'Edit', edit_tutor_path(@tutor) %> |
 <%= link_to 'Back', Course.find(@tutor.course_id) %>
