@@ -13,13 +13,7 @@ class Tutor < ActiveRecord::Base
 
     b = ''
     if boegenanzahl > 2
-<<<<<<< HEAD:web/app/models/tutor.rb
       b << "\\section{#{abbr_name}}\n\n"
-=======
-      #gender = prof.gender == 1 ? "M" : "F"
-      #b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
-      #b << "\\fragenzurvorlesung\n\n"
->>>>>>> 2b5eed0e3f9f1a0a7febbcb7196866e414853d5d:web/app/models/tutor.rb
       
       specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
       general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}
