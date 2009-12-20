@@ -1,0 +1,1759 @@
+--- !ruby/object:Form
+db_table: evaldaten_WS_2009_10_2
+pages: 
+- !ruby/object:Page 
+  questions: 
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "\IeC {\"U}bungsgruppe"
+    save_as: ""
+    type: square
+    db_column: tutnum
+    boxes:
+    - !ruby/object:Box
+      x: 2576187
+      y: 45780563
+      choice: "1"
+      height: 0
+      text: "D. Sexty"
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 45780563
+      choice: "2"
+      height: 0
+      text: "G. Tasinato"
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 45780563
+      choice: "3"
+      height: 0
+      text: "L. Fister"
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 45780563
+      choice: "4"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 45780563
+      choice: "5"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2576187
+      y: 44928267
+      choice: "6"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 44928267
+      choice: "7"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 44928267
+      choice: "8"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 44928267
+      choice: "9"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 44928267
+      choice: "10"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2576187
+      y: 44075971
+      choice: "11"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 44075971
+      choice: "12"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 44075971
+      choice: "13"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 44075971
+      choice: "14"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 44075971
+      choice: "15"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2576187
+      y: 43223675
+      choice: "16"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 43223675
+      choice: "17"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 43223675
+      choice: "18"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 43223675
+      choice: "19"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 43223675
+      choice: "20"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2576187
+      y: 42371379
+      choice: "21"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 42371379
+      choice: "22"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 42371379
+      choice: "23"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 42371379
+      choice: "24"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 42371379
+      choice: "25"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2576187
+      y: 41519083
+      choice: "26"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9769074
+      y: 41519083
+      choice: "27"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16961961
+      y: 41519083
+      choice: "28"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 24154848
+      y: 41519083
+      choice: "29"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31347735
+      y: 41519083
+      choice: "30"
+      height: 0
+      text: "\ keine"
+      width: 0
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Studienziel"
+    save_as: ""
+    type: square
+    db_column: studienziel
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "Diploma"
+      width: 0
+      x: 2594244
+      y: 39388214
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Edu. Degree"
+      width: 0
+      x: 9123734
+      y: 39388214
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "Bachelor"
+      width: 0
+      x: 16795711
+      y: 39388214
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "Master"
+      width: 0
+      x: 23489761
+      y: 39388214
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "Ph.D."
+      width: 0
+      x: 29647071
+      y: 39388214
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "other"
+      width: 0
+      x: 35488826
+      y: 39388214
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Hauptfach"
+    save_as: ""
+    type: square
+    db_column: hauptfach
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "Mathematics"
+      width: 0
+      x: 2594244
+      y: 37681241
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Physics"
+      width: 0
+      x: 9111974
+      y: 37681241
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "Comp. Sc."
+      width: 0
+      x: 16793140
+      y: 37681241
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "other"
+      width: 0
+      x: 35488826
+      y: 37681241
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Academic Term:"
+    save_as: ""
+    type: square
+    db_column: semester
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "1"
+      width: 0
+      x: 2594244
+      y: 35846362
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "2"
+      width: 0
+      x: 4577789
+      y: 35846362
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "3"
+      width: 0
+      x: 6561335
+      y: 35846362
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "4"
+      width: 0
+      x: 8708851
+      y: 35846362
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "5"
+      width: 0
+      x: 10856367
+      y: 35846362
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "6"
+      width: 0
+      x: 13003883
+      y: 35846362
+    - !ruby/object:Box
+      choice: "7"
+      height: 0
+      text: "7"
+      width: 0
+      x: 15151400
+      y: 35846362
+    - !ruby/object:Box
+      choice: "8"
+      height: 0
+      text: "8"
+      width: 0
+      x: 17298916
+      y: 35846362
+    - !ruby/object:Box
+      choice: "9"
+      height: 0
+      text: "9"
+      width: 0
+      x: 19446432
+      y: 35846362
+    - !ruby/object:Box
+      choice: "10"
+      height: 0
+      text: "10"
+      width: 0
+      x: 21593948
+      y: 35846362
+    - !ruby/object:Box
+      choice: "11"
+      height: 0
+      text: "11"
+      width: 0
+      x: 24069407
+      y: 35846362
+    - !ruby/object:Box
+      choice: "12"
+      height: 0
+      text: "12"
+      width: 0
+      x: 26544865
+      y: 35846362
+    - !ruby/object:Box
+      choice: "13"
+      height: 0
+      text: "13"
+      width: 0
+      x: 29020323
+      y: 35846362
+    - !ruby/object:Box
+      choice: "14"
+      height: 0
+      text: "14"
+      width: 0
+      x: 31495781
+      y: 35846362
+    - !ruby/object:Box
+      choice: "15"
+      height: 0
+      text: "15"
+      width: 0
+      x: 33971240
+      y: 35846362
+    - !ruby/object:Box
+      choice: "16"
+      height: 0
+      text: ">15"
+      width: 0
+      x: 36446698
+      y: 35846362
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "In your estimate, which percentage of the students remains in comparison to the start of term?"
+    save_as: ""
+    type: square
+    db_column: v5
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "0--20\%"
+      width: 0
+      x: 22237977
+      y: 33011333
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "20--40\%"
+      width: 0
+      x: 25314701
+      y: 33011333
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "40--60\%"
+      width: 0
+      x: 28764356
+      y: 33011333
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "60--80\%"
+      width: 0
+      x: 32214010
+      y: 33011333
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "80--100\%"
+      width: 0
+      x: 35756904
+      y: 33011333
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does your knowledge match the previous knowledge expected by the lecturer?"
+    save_as: ""
+    type: square
+    db_column: v6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "fully"
+      width: 0
+      x: 22237977
+      y: 31029255
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 31029255
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 31029255
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 31029255
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "In your estimation, what is the pace of the lecture?"
+    save_as: ""
+    type: square
+    db_column: v7
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "way too fast"
+      width: 0
+      x: 22237977
+      y: 29047177
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25314701
+      y: 29047177
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "just right"
+      width: 0
+      x: 28764356
+      y: 29047177
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32214010
+      y: 29047177
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "way too slow"
+      width: 0
+      x: 35756904
+      y: 29047177
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "What do you think of the range of contents?"
+    save_as: ""
+    type: square
+    db_column: v8
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "too broad"
+      width: 0
+      x: 22237977
+      y: 27065099
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "appropriate"
+      width: 0
+      x: 28764355
+      y: 27065099
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "too small"
+      width: 0
+      x: 35756903
+      y: 27065099
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Rate the structure of the course"
+    save_as: ""
+    type: square
+    db_column: v9
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "perfect"
+      width: 0
+      x: 22237977
+      y: 25083021
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 25083021
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 25083021
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "none"
+      width: 0
+      x: 35756904
+      y: 25083021
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "What do you think of the lecturer's style?"
+    save_as: ""
+    type: square
+    db_column: v10
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "motivating"
+      width: 0
+      x: 22237977
+      y: 23100943
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 23100943
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 23100943
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "frustrating"
+      width: 0
+      x: 35756904
+      y: 23100943
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does the level of detail correspond to the importance?"
+    save_as: ""
+    type: square
+    db_column: v11
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{perfectly}"
+      width: 0
+      x: 22237977
+      y: 21118865
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 21118865
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 21118865
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 21118865
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How well does the lecturer explain difficult subjects?"
+    save_as: ""
+    type: square
+    db_column: v12
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 19136787
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 19136787
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 19136787
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "very badly"
+      width: 0
+      x: 35756904
+      y: 19136787
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does the lecturer manage to stress important subjects?"
+    save_as: ""
+    type: square
+    db_column: v13
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 17154709
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "no"
+      width: 0
+      x: 26293661
+      y: 17154709
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Is the choice of presentation (blackboard/slides/\dots  ) appropriate?"
+    save_as: ""
+    type: square
+    db_column: v14
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 15172631
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "no"
+      width: 0
+      x: 26293661
+      y: 15172631
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How well is the presentation done? (legibility of blackboard writing/\dots  )"
+    save_as: ""
+    type: square
+    db_column: v15
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very good"
+      width: 0
+      x: 22237977
+      y: 13190553
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 13190553
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 13190553
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "really bad"
+      width: 0
+      x: 35756904
+      y: 13190553
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Are there any problems concerning the presentation? If so, what are they?"
+    type: square
+    db_column: 
+    - v16a
+    - v16b
+    - v16c
+    - v16d
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "none"
+      width: 0
+      x: 22237977
+      y: 11208475
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "queer way of presentation"
+      width: 0
+      x: 26200421
+      y: 11208475
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "writing not legibly"
+      width: 0
+      x: 31328290
+      y: 11208475
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "other"
+      width: 0
+      x: 35756904
+      y: 11208475
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How are the lecturer's verbal skills?"
+    save_as: ""
+    type: square
+    db_column: v17
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 8636573
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 8636573
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 8636573
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "very badly"
+      width: 0
+      x: 35756904
+      y: 8636573
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Are there any problems concerning the language or acoustic understanding?"
+    type: square
+    db_column: 
+    - v18a
+    - v18b
+    - v18c
+    - v18d
+    - v18e
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "none"
+      width: 0
+      x: 22237977
+      y: 6654495
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "too quiet/ technical problems"
+      width: 0
+      x: 25314701
+      y: 6654495
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "lack of knowledge of language"
+      width: 0
+      x: 28764356
+      y: 6654495
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "students too noisy"
+      width: 0
+      x: 32214010
+      y: 6654495
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "other"
+      width: 0
+      x: 35756904
+      y: 6654495
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "During (or after) the lecture are you nervous about asking questions?"
+    save_as: ""
+    type: square
+    db_column: v19
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 3492769
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "no"
+      width: 0
+      x: 26293661
+      y: 3492769
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How does the lecturer answer questions?"
+    save_as: ""
+    type: square
+    db_column: v20
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 51407764
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 51407764
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 51407764
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "very badly"
+      width: 0
+      x: 35756904
+      y: 51407764
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How useful is the material provided for the lecture? (script/slides/\dots  )"
+    save_as: ""
+    type: square
+    db_column: v21
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very"
+      width: 0
+      x: 22237977
+      y: 49473842
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25314701
+      y: 49473842
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28764356
+      y: 49473842
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "useless"
+      width: 0
+      x: 32214010
+      y: 49473842
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "non-existing"
+      width: 0
+      x: 35756904
+      y: 49473842
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Please give an overall mark for the lecture: \hspace  {5cm}\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{(1 = very good, 6 = insufficient)}"
+    save_as: ""
+    type: square
+    db_column: v22
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "1"
+      width: 0
+      x: 22237977
+      y: 47539920
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "2"
+      width: 0
+      x: 25034996
+      y: 47539920
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "3"
+      width: 0
+      x: 27832015
+      y: 47539920
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "4"
+      width: 0
+      x: 30629034
+      y: 47539920
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "5"
+      width: 0
+      x: 33426053
+      y: 47539920
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "6"
+      width: 0
+      x: 36223072
+      y: 47539920
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Would you recommend this lecture with this lecturer?"
+    save_as: ""
+    type: square
+    db_column: v23
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 45605998
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "no"
+      width: 0
+      x: 26293661
+      y: 45605998
+  - !ruby/object:Question
+    active: true
+    nochoice: 
+    choice: 
+    qtext: "Do you have comments regarding the lecture? If so, please give keywords:"
+    save_as: "-vorlcomment"
+    type: text
+    db_column: "vComment"
+    boxes:
+    - !ruby/object:Box
+      type: start
+      height: 743249
+      x: 21253275
+      y: 43903086
+    - !ruby/object:Box
+      type: end
+      x: 37316098
+      y: 43903086
+    - !ruby/object:Box
+      x: 1842182
+      y: 43185467
+      height: 2972997
+      width: 39020584
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Do you attend your study group?"
+    save_as: ""
+    type: square
+    db_column: u1
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 38276293
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "sometimes"
+      width: 0
+      x: 28764355
+      y: 38276293
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "no"
+      width: 0
+      x: 35756903
+      y: 38276293
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Are there problems regarding the organization of the study groups? If so, what are they?"
+    type: square
+    db_column: 
+    - u2a
+    - u2b
+    - u2c
+    - u2d
+    - u2e
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "none"
+      width: 0
+      x: 22237977
+      y: 36342371
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "too few\hskip 1em\relax groups"
+      width: 0
+      x: 25314701
+      y: 36342371
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "organization\discretionary {-}{}{} of enlisting"
+      width: 0
+      x: 28764356
+      y: 36342371
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schedule problems"
+      width: 0
+      x: 32214010
+      y: 36342371
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "other"
+      width: 0
+      x: 35756904
+      y: 36342371
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How well do the exercises match the lecture?"
+    save_as: ""
+    type: square
+    db_column: u3
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 33818625
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 33818625
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 33818625
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "very badly"
+      width: 0
+      x: 35756904
+      y: 33818625
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Are the problems posed well? (no mistakes/clear instructions)"
+    save_as: ""
+    type: square
+    db_column: u4
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 31884703
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 31884703
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 31884703
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 31884703
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How high is the standard of the questions? How difficult are they?"
+    save_as: ""
+    type: square
+    db_column: u5
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "too high"
+      width: 0
+      x: 22237977
+      y: 29950781
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "perfect"
+      width: 0
+      x: 28764355
+      y: 29950781
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "too low"
+      width: 0
+      x: 35756903
+      y: 29950781
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How much time do you need to complete the exercises?"
+    save_as: ""
+    type: square
+    db_column: u6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "<4 h"
+      width: 0
+      x: 22237977
+      y: 28016859
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "4--6 h"
+      width: 0
+      x: 25314701
+      y: 28016859
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "6--8 h"
+      width: 0
+      x: 28764356
+      y: 28016859
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "8--10 h"
+      width: 0
+      x: 32214010
+      y: 28016859
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "> 10 h"
+      width: 0
+      x: 35756904
+      y: 28016859
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Is your study group tutor a good teacher?"
+    save_as: ""
+    type: square
+    db_column: t1
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 26082937
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 26082937
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 26082937
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 26082937
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Do you believe your study group tutor to be competent in the subject matter?"
+    save_as: ""
+    type: square
+    db_column: t2
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 24149015
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 24149015
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 24149015
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 24149015
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "How well is she/he prepared?"
+    save_as: ""
+    type: square
+    db_column: t3
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 22215093
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 22215093
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 22215093
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 22215093
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does she/he respond to questions concerning the lecture?"
+    save_as: ""
+    type: square
+    db_column: t4
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very much"
+      width: 0
+      x: 22237977
+      y: 20281171
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 20281171
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 20281171
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 20281171
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does she/he use the time efficiently? If not, what would you improve?"
+    type: square
+    db_column: 
+    - t5a
+    - t5b
+    - t5c
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "yes"
+      width: 0
+      x: 22237977
+      y: 18347249
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "more about exercises"
+      width: 0
+      x: 28764356
+      y: 18347249
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "more about lecture"
+      width: 0
+      x: 35756904
+      y: 18347249
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does your study group tutor motivate you?"
+    save_as: ""
+    type: square
+    db_column: t6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very much"
+      width: 0
+      x: 22237977
+      y: 15823503
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 15823503
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 15823503
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 15823503
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does she/he explain things well?"
+    save_as: ""
+    type: square
+    db_column: t7
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 13889581
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 13889581
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 13889581
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 13889581
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Do you understand her/him? (acoustics, language)"
+    save_as: ""
+    type: square
+    db_column: t8
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very well"
+      width: 0
+      x: 22237977
+      y: 11955659
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 11955659
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 11955659
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "badly"
+      width: 0
+      x: 35756904
+      y: 11955659
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Does she/he correct your exercises thoroughly?"
+    save_as: ""
+    type: square
+    db_column: t9
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very"
+      width: 0
+      x: 22237977
+      y: 10021737
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 10021737
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 10021737
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "not at all"
+      width: 0
+      x: 35756904
+      y: 10021737
+  - !ruby/object:Question
+    active: true
+    failchoice: -1
+    nochoice: 
+    qtext: "Do you find your study group useful?"
+    save_as: ""
+    type: square
+    db_column: t10
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "very useful"
+      width: 0
+      x: 22237977
+      y: 8087815
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26200421
+      y: 8087815
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31328290
+      y: 8087815
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "useless"
+      width: 0
+      x: 35756904
+      y: 8087815
+  - !ruby/object:Question
+    active: true
+    nochoice: 
+    choice: 
+    qtext: "Comments concerning the study group and your tutor:"
+    save_as: "-tutcomment"
+    type: text
+    db_column: "uComment"
+    boxes:
+    - !ruby/object:Box
+      type: start
+      height: 743249
+      x: 15900626
+      y: 6384903
+    - !ruby/object:Box
+      type: end
+      x: 37316098
+      y: 6384903
+    - !ruby/object:Box
+      x: 1842182
+      y: 5667284
+      height: 3530434
+      width: 39020584
