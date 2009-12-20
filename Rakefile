@@ -17,7 +17,7 @@ include Magick
 
 require 'rake/clean'
 
-CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc')
+CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc')
 
 
 $curSem = Semester.find(:all).find{ |s| s.now? }
@@ -370,6 +370,8 @@ namespace :pdf do
     0.upto(3) do |i|
       make_sample_sheet(i, (i == 0 || i == 2))
     end
+    
+    Rake::Task["clean".to_sym].invoke
   end
 
 

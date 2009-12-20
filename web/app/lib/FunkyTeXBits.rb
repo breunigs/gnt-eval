@@ -4,6 +4,11 @@
 module FunkyTeXBits
   def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
     b = ''
+    
+    # FIXME: Need to encapsulate form stuff. I.e. if it's a seminar,
+    # a lecture and if it's German or English. The class should
+    # automatically provide appropriate strings for all language
+    # specifics
 
     if single.nil?
       b << "\\documentclass[pagesize,halfparskip-,headsepline," +
@@ -26,7 +31,8 @@ module FunkyTeXBits
     b << "\\renewcommand{\\labelitemi}{-}\n"
   
     if single.nil?
-      b << "\\newcommand{\\profkopf}[2]{\\section*{Fragen zur Vorlesung (DozentIn: #1, #2 Bögen)}}\n"
+      b << "\\newcommand{\\profkopfF}[2]{\\section*{Fragen zur Vorlesung (Dozentin: #1, #2 Bögen)}}\n"
+      b << "\\newcommand{\\profkopfM}[2]{\\section*{Fragen zur Vorlesung (Dozent: #1, #2 Bögen)}}\n"
       b << "\\newcommand{\\kurskopf}[3]{\\clearpage\n\\chapter{#1 bei #2}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\fragenzurvorlesung}{\\section*{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}{\\section*{Fragen zum Übungsbetrieb}}\n"
@@ -34,7 +40,8 @@ module FunkyTeXBits
       b << "\\title{Lehrevaluation\\\\#{evalname}}\n"
       b << "\\date{\\today}\n"
     else
-      b << "\\newcommand{\\profkopf}[2]{\\section{Fragen zur Vorlesung (DozentIn: #1, #2 Bögen)}}\n"
+      b << "\\newcommand{\\profkopfF}[2]{\\section{Fragen zur Vorlesung (Dozentin: #1, #2 Bögen)}}\n"
+      b << "\\newcommand{\\profkopfM}[2]{\\section{Fragen zur Vorlesung (Dozent: #1, #2 Bögen)}}\n"
       b << "\\newcommand{\\kurskopf}[3]{\\section{Erhebungsgrundlage}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\fragenzurvorlesung}{\\section{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}{\\section{Fragen zum Übungsbetrieb}}\n"

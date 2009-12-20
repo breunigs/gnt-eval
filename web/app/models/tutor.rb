@@ -13,7 +13,8 @@ class Tutor < ActiveRecord::Base
 
     b = ''
     if boegenanzahl > 2
-      #b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
+      #gender = prof.gender == 1 ? "M" : "F"
+      #b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
       #b << "\\fragenzurvorlesung\n\n"
       
 #      form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
