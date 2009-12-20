@@ -130,6 +130,18 @@ namespace :images do
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
       
+      if File.exists?(File.join(d.directory, basename + '-vorlcomment.jpg'))
+        barcode = find_barcode_from_basename(basename)
+
+        course = CourseProf.find(barcode).course
+
+        p = CPic.new
+        p.course_id = course.id
+        p.basename = basename + '-vorlcomment.jpg'
+        p.save
+        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+      end
+      
     end
   end
   
