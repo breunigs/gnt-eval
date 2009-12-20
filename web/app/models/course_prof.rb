@@ -23,6 +23,7 @@ class CourseProf < ActiveRecord::Base
     this_eval = ['Mathematik', 'Physik'][course.faculty] + ' ' + course.semester.title
     
     boegenanzahl = count_forms({:barcode => barcode.to_i}) 
+
     if boegenanzahl > 0
       b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
       b << "\\fragenzurvorlesung\n\n"

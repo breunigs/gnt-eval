@@ -37,31 +37,32 @@ class Course < ActiveRecord::Base
       semester.title 
       
     boegenanzahl = count_forms({ :barcode => course_profs.map{ |cp|
-                                   cp.i_bcwc}})
-    
-    b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
-   
-    # TODO: semester/abschluss
-    
-    b << "\\zusammenfassung\n"
-    b << summary.to_s
-    b << "\n\\medskip\n\n"
-    
-    # vorlesungseval pro dozi
-    course_profs.each do |cp|
-      b << cp.eval_against_form(form, dbh).to_s
-    end
-    
-    # uebungen allgemein
-    b << "\\fragenzudenuebungen\n"
-    form.questions.find_all{ |q| q.section == 'tutoring'}.each do |q|
-      b << q.eval_to_tex(this_eval, course_profs.map { |cp| cp.i_bcwc
-                         }, form.db_table, @dbh).to_s
-    end
+                                   cp.barcode.to_i}})
+    if boegenanzahl > 0
+      b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
+      
+      # TODO: semester/abschluss
+      
+      b << "\\zusammenfassung\n"
+      b << summary.to_s
+      b << "\n\\medskip\n\n"
+      
+      # vorlesungseval pro dozi
+      course_profs.each do |cp|
+        b << cp.eval_against_form(form, dbh).to_s
+      end
+      
+      # uebungen allgemein
+      b << "\\fragenzudenuebungen\n"
+      form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}.each do |q|
+        b << q.eval_to_tex(this_eval, course_profs.map { |cp| cp.barcode.to_i
+                           }, form.db_table, @dbh).to_s
+      end
 
-    # TODO tutor_innen
-    tutors.each do |t|
-      b << t.eval_against_form(form, dbh).to_s
+      # TODO tutor_innen
+      tutors.each do |t|
+        b << t.eval_against_form(form, dbh).to_s
+      end
     end
     return b
   end

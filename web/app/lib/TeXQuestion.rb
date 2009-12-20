@@ -14,15 +14,18 @@ class TeXMultiQuestion
   
   def to_tex
     b = ""
-    b << "   \\parbox[t]{8.3cm}{\\raggedright #{@frage}}\n"
-    b << "   \\hspace{0.7cm}\n"
-    b << "   \\raisebox{.8em}{\\sffamily\\begin{tabular}[t]{|p{5.6cm}r|}"
-    b << "\\hline\n"
-    @antworten.each_pair do |q,a|
-      b << "     \\raggedright\\small #{q} & #{a} \\,\\%\\\\\\hline\n"
-    end
+    if @antworten.values.inject(0) { |x,y| x+y } > 0
+
+      b << "   \\parbox[t]{8.3cm}{\\raggedright #{@frage}}\n"
+      b << "   \\hspace{0.7cm}\n"
+      b << "   \\raisebox{.8em}{\\sffamily\\begin{tabular}[t]{|p{5.6cm}r|}"
+      b << "\\hline\n"
+      @antworten.each_pair do |q,a|
+        b << "     \\raggedright\\small #{q} & #{a} \\,\\%\\\\\\hline\n"
+      end
     
-    b << "   \\end{tabular}}\n\n"
+      b << "   \\end{tabular}}\n\n"
+    end
     return b
   end
 end

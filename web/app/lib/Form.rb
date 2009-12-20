@@ -92,7 +92,7 @@ class Question
   end
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
   def section
-    if @db_column.nil?
+    if @db_column.nil? || @donotuse == 1
       return 'this is no question in a traditional sense'
     end
     first_letter = (@db_column.to_s)[0].chr
@@ -166,11 +166,12 @@ class Question
     else
       antw, anz, m, m_a, s, s_a = single_q({:barcode => bc},
                                            {}, self)
-
-      t = TeXSingleQuestion.new(text, ltext, rtext, antw,
-                                anz, m, m_a, s, s_a)
-
+      if anz > 0
+        t = TeXSingleQuestion.new(text, ltext, rtext, antw,
+                                  anz, m, m_a, s, s_a)
+        
       b << t.to_tex
+      end
     end
     return b
   end

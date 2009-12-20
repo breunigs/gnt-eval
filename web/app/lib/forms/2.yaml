@@ -672,7 +672,7 @@ pages:
     - !ruby/object:Box
       choice: "1"
       height: 0
-      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{perfectly}"
+      text: "perfectly"
       width: 0
       x: 22237977
       y: 21118865
@@ -1050,7 +1050,7 @@ pages:
     active: true
     failchoice: -1
     nochoice: 
-    qtext: "Please give an overall mark for the lecture: \hspace  {5cm}\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{(1 = very good, 6 = insufficient)}"
+    qtext: "Please give an overall mark for the lecture"
     save_as: ""
     type: square
     db_column: v22

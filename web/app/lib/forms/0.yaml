@@ -435,7 +435,7 @@ pages:
     active: true
     failchoice: -1
     nochoice: 
-    qtext: "Welcher Anteil der Studenten, die am Anfang an der Vorlesung teilgenommen haben, ist deiner Sch\IeC {\"a}tzung nach noch dabei?"
+    qtext: "Welcher Anteil der StudentInnen, die am Anfang an der Vorlesung teilgenommen haben, ist deiner Sch\IeC {\"a}tzung nach noch dabei?"
     save_as: ""
     type: square
     db_column: v5
@@ -664,7 +664,7 @@ pages:
     active: true
     failchoice: -1
     nochoice: 
-    qtext: "Ist die Vorlesung an den \emph  {richtigen} Stellen ausf\IeC {\"u}hrlich?"
+    qtext: "Ist die Vorlesung an den \\emph {richtigen} Stellen ausf\IeC {\"u}hrlich?"
     save_as: ""
     type: square
     db_column: v11
@@ -1127,6 +1127,7 @@ pages:
     nochoice: 
     choice: 
     qtext: "Ist dir an der Veranstaltung zus\IeC {\"a}tzlich noch etwas aufgefallen? (Falls ja, bitte Stichworte angeben)"
+    donotuse: 1
     save_as: "-vorlcomment"
     type: text
     db_column: "vcomment"
@@ -1198,21 +1199,21 @@ pages:
     - !ruby/object:Box
       choice: "2"
       height: 0
-      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{zu wenig Gruppen}"
+      text: "zu wenig Gruppen"
       width: 0
       x: 25314701
       y: 36158801
     - !ruby/object:Box
       choice: "3"
       height: 0
-      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Anmelde\discretionary {-}{}{}modalit\IeC {\"a}ten}"
+      text: "Anmelde\discretionary {-}{}{}modalit\IeC {\"a}ten"
       width: 0
       x: 28764356
       y: 36158801
     - !ruby/object:Box
       choice: "4"
       height: 0
-      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Termin\discretionary {-}{}{}konflikte}"
+      text: "Termin\discretionary {-}{}{}konflikte"
       width: 0
       x: 32214010
       y: 36158801
@@ -1547,7 +1548,7 @@ pages:
     - !ruby/object:Box
       choice: "3"
       height: 0
-      text: "\relax \fontsize  {8}{9}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Vorlesung nachbearbeite}n"
+      text: "Vorlesung nachbearbeiten"
       width: 0
       x: 35756904
       y: 18163679
@@ -1744,6 +1745,7 @@ pages:
     save_as: "-tutorcomment"
     type: text
     db_column: "ucomment"
+    donotuse: 1
     boxes:
     - !ruby/object:Box
       type: start
