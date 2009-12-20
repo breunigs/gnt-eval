@@ -14,7 +14,11 @@ class Semester < ActiveRecord::Base
     b = ''
 
     cs = courses.find_all{ |c| c.faculty == faculty }.sort{ |x,y| x.title <=> y.title }
-
+    
+    # now this IS a global variable, and we just set it for performance reasons. it is a
+    # list of all barcodes corresponding to faculty and semester.
+    $facultybarcodes = cs.map{ |c| c.course_profs.map { |cp| cp.barcode.to_i }}.flatten
+    
     # FunkyDBBits setup
     @dbh = dbh
     @db_table = cs.map { |c| c.form.to_form.db_table }.uniq

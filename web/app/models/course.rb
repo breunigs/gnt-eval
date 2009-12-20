@@ -53,11 +53,12 @@ class Course < ActiveRecord::Base
         b << cp.eval_against_form(form, dbh).to_s
       end
       
-      # uebungen allgemein
+      # uebungen allgemein, immer alles relativ zur fakultät!
       b << "\\fragenzudenuebungen\n"
+      specific = { :barcode => course_profs.map{ |cp| cp.barcode.to_i } }
+      general = { :barcode => $facultybarcodes }
       form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}.each do |q|
-        b << q.eval_to_tex(this_eval, course_profs.map { |cp| cp.barcode.to_i
-                           }, form.db_table, @dbh).to_s
+        b << q.eval_to_tex(specific, general, form.db_table, @dbh).to_s
       end
 
       # TODO tutor_innen

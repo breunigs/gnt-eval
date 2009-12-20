@@ -384,6 +384,12 @@ namespace :summary do
         c.summary = c.summary.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
         c.save
       end
+      c.tutors.each do |t|
+        if not t.comment.nil?
+          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+          t.save
+        end
+      end
     end
   end
 end

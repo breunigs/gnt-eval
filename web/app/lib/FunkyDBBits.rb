@@ -42,7 +42,10 @@ module FunkyDBBits
       sth.execute(*h.values)
       sth.fetch_array { |r| result = r }
     rescue
-      puts q
+      p q
+      p h
+      p t
+      p additional
       raise "SQL-Error"
     end
     if result.count == 1

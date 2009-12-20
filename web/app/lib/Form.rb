@@ -149,7 +149,9 @@ class Question
   end
 
 
-  def eval_to_tex(this_eval, bc, db_table, dbh)
+  # h: hash correspoding to specific (!) where clause
+  # g: hash corresponding to general (!) where clause
+  def eval_to_tex(h, g, db_table, dbh)
     @dbh = dbh
     @db_table = db_table
 
@@ -157,15 +159,14 @@ class Question
 
     if @db_column.is_a?(Array)
 
-      answers = multi_q({:barcode => bc}, self)
+      answers = multi_q(h, self)
 
       t = TeXMultiQuestion.new(@qtext, answers)
       b << t.to_tex
 
       # single-q
     else
-      antw, anz, m, m_a, s, s_a = single_q({:barcode => bc},
-                                           {}, self)
+      antw, anz, m, m_a, s, s_a = single_q(h, g, self)
       if anz > 0
         t = TeXSingleQuestion.new(text, ltext, rtext, antw,
                                   anz, m, m_a, s, s_a)

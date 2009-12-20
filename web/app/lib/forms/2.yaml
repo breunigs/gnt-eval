@@ -11,6 +11,7 @@ pages:
     save_as: ""
     type: square
     db_column: tutnum
+    donotuse: 1
     boxes:
     - !ruby/object:Box
       x: 2576187

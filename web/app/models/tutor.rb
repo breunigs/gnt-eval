@@ -13,12 +13,17 @@ class Tutor < ActiveRecord::Base
 
     b = ''
     if boegenanzahl > 2
-      #b << "\\profkopf{#{prof.fullname}}{#{boegenanzahl}}\n\n"
-      #b << "\\fragenzurvorlesung\n\n"
+      b << "\\section{#{abbr_name}}\n\n"
       
-#      form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
-#        b << q.eval_to_tex(this_eval, barcode.to_i, form.db_table, @dbh)
-#      end
+      specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
+      general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}
+      form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
+        b << q.eval_to_tex(specific, general, form.db_table, @dbh)
+      end
+      if not comment.to_s.empty?
+        b << "\\paragraph{Kommentare}"
+        b << comment.to_s
+      end
     end
     return b
   end
