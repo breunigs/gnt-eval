@@ -375,6 +375,19 @@ namespace :pdf do
   end
 end
 
+namespace :summary do 
+  desc "fix some often encountered tex-errors in the summaries"
+  task :fixtex do 
+    $curSem.courses.each do |c|
+      if not c.summary.nil?
+        # _ -> \_, '" -> "', `" -> "`
+        c.summary = c.summary.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+        c.save
+      end
+    end
+  end
+end
+
 rule '.pdf' => '.tex' do |t|
   3.times do
     err = `cd "#{File.dirname(t.source)}";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -halt-on-error "#{File.basename(t.source)}" 2>&1`
