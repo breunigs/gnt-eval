@@ -30,19 +30,10 @@ def word_wrap(txt, col = 80)
       "\\1\\3\n")
 end
 
-def find_page(filename)
-  r = `zbarimg --xml #{$zbarCmd} #{filename} 2>/dev/null`
-  if not r.empty?
-    return r.strip.match(/^.*num='(\d)'.*/m)[1].to_i
-  else
-    return nil
-  end
-end
-
 def find_barcode(filename)
-  r = `zbarimg #{$zbarCmd} #{filename} 2>/dev/null`
+  r = `./helfer/zbarimg_hackup/zbarimg #{$zbarCmd} #{filename}`
   if not r.empty?
-    return r.strip.match(/^.*:(.*)$/)[1].to_i
+    return r.strip.match(/^([0-9]+)/)[1].to_i
   else
     return nil
   end
@@ -146,52 +137,27 @@ namespace :images do
   
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
-    puts "Try this:"
-    puts "for i in *.tif; do ~/seee/helfer/bogendrehensortieren.rb $i;done"
-    raise "This is defunctional and has serious memory leakage"
     Dir.glob(File.join(d.directory, '*.tif')) do |f|
+      unless File.writable?(f)
+        puts "No write access, cancelling."
+        break
+      end
+    
       basename = File.basename(f, '.tif')
-      pages = ImageList.new(f)
-
-      changed_smth = nil
-
       barcode = (find_barcode(f).to_f / 10).floor.to_i
-      page = find_page(f)
 
-      if barcode.nil? || page.nil? || (not CourseProf.exists?(barcode))
+      if barcode.nil? || (not CourseProf.exists?(barcode))
         puts "bizarre #{basename}, exiting"
         File.makedirs('tmp/images/bizarre')
-        File.copy(f, 'tmp/images/bizarre')
+        File.move(f, 'tmp/images/bizarre')
         next
       end
 
-      # is the barcode on the first page
-      if page != 0
-        pages.reverse!
-        puts "switched #{basename}"
-      end
-
-      # is the barcode on the upper half of the first page?
-      tmp_filename = "/tmp/bgndrhn_#{basename}_#{Time.now.to_i}.tif"
-
-      pages[0].crop(0, 0, 2480, 1000).write(tmp_filename)
-
-      # the barcode is not at the top
-      if find_barcode(tmp_filename).nil?
-        pages.map! { |i| i.rotate(180) }
-        puts "flipped #{basename}"
-      end
-
-      File.delete(tmp_filename)
-
       form = CourseProf.find(barcode).course.form
-
       File.makedirs("tmp/images/#{form}")
+      File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
-      pages.write(File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
-
-      puts "Wrote #{form}/#{basename} (#{barcode})"
-
+      puts "Moved to #{form}/#{basename} (#{barcode})"
     end
   end
 end
