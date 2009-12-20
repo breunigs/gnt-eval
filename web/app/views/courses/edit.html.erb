@@ -46,6 +46,11 @@
   <p>
     <%= f.submit "Update" %>
   </p>
+
+<% for p in @course.c_pics %>
+<img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.tutcomments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
+<% end %>
+
 <% end %>
 
 <%= link_to 'Show', @course %> |
