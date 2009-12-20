@@ -13,7 +13,7 @@ class Semester < ActiveRecord::Base
   def evaluate(faculty, dbh)
     b = ''
 
-    cs = courses.find_all{ |c| c.faculty == faculty }
+    cs = courses.find_all{ |c| c.faculty == faculty }.sort{ |x,y| x.title <=> y.title }
 
     # FunkyDBBits setup
     @dbh = dbh

@@ -88,11 +88,9 @@ module FunkyDBBits
     anzahl = count_forms(h, " AND (#{q.db_column.join('+')} > 0)")
     answers = Hash.new
     if anzahl > 0
-      p q.db_column.sort
       q.db_column.sort.each_index do |i|
         c = q.db_column.sort[i]
         bxs = q.boxes.sort{ |x,y| x.choice <=> y.choice }
-        p bxs.map{ |b| b.text }
         answers[bxs[i].text] = ( count_forms(h, " AND #{c} > " +
                                      '0').to_f * 100 / anzahl.to_f + 0.5
                                    ).to_i   
