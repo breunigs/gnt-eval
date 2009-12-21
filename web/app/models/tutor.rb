@@ -22,7 +22,11 @@ class Tutor < ActiveRecord::Base
       b << q.eval_to_tex(specific, general, form.db_table, @dbh)
     end
     if not comment.to_s.empty?
-      b << "\\paragraph{Kommentare}"
+      if form.isEnglish?
+        b << "\\paragraph{Comments}"
+      else
+        b << "\\paragraph{Kommentare}"
+      end
       b << comment.to_s
     end
     return b, boegenanzahl

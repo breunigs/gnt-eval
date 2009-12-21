@@ -41,51 +41,64 @@ class Course < ActiveRecord::Base
                                    cp.barcode.to_i}})
     return '' unless boegenanzahl > 0
     puts "   #{title}"
-    b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
+    isEn = form.isEnglish? ? "E" : "D"
+    notspecified = (form.isEnglish? ? "not specified" : "keine Angabe")
+    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
     
     # Semesterverteilung
     b << "\\hfill\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{Semesterverteilung:}} \\\\[.2em]\n"
+    b << "  \\multicolumn{2}{l}{\\textbf{"+(form.isEnglish? ? "semester distribution" : "Semesterverteilung" )+":}} \\\\[.2em]\n"
     # FIXME: get length automatically?
     1.upto(16) do |i|
       num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
                                 :semester => i}) 
       next if num == 0
-      b << i.to_s + ". Fachsemester: & " + num.to_s + "\\\\ \n"
+      lang_sem = form.isEnglish? ? "Academic Term" : "Fachsemester"
+      b << i.to_s + ". #{lang_sem}: & " + num.to_s + "\\\\ \n"
     end
     num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
                                 :semester => 0}) 
-    b << "keine Angabe: & " + num.to_s + "\\\\ \n" if num > 0
+    b << notspecified + ": & " + num.to_s + "\\\\ \n" if num > 0
     b << "\\end{tabular}\\hfill\n"
     
     # Hauptfach
     b << "\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{Studiengänge:}}\\\\[.2em]\n"
+    b << "  \\multicolumn{2}{l}{\\textbf{"+ (form.isEnglish? ? "degree course" : "Studiengänge") + ":}}\\\\[.2em]\n"
     # FIXME: Get directly from TeX?
-    matchn = ["Mathematik", "Physik", "Informatik", "S"]
-    matchm = ["Diplom", "Lehramt", "Bachelor" , "Master", "Promotion", "S"]
+    if form.isEnglish?
+      matchn = [notspecified, "Mathematics", "Physics", "Comp. Sc."]
+      matchm = ["", "Diploma", "Edu. Degree", "Bachelor" , "Master", "Ph.D."]
+    else
+      matchn = [notspecified, "Mathematik", "Physik", "Informatik"]
+      matchm = ["", "Diplom", "Lehramt", "Bachelor" , "Master", "Promotion"]    
+    end
     all = 0
-    sonst = 0
-    1.upto(4) do |n|
-      1.upto(6) do |m|
+    keinang = 0
+    0.upto(matchn.length) do |n|
+      0.upto(matchm.length) do |m|
         num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
                                 :hauptfach => n, :studienziel => m}) 
         next if num == 0
         all += num
-        # check for 'sonstige' and group them together
-        if n == 4 || m == 6
-          sonst += num
+        # check for 'sonstige' and skip
+        if n == matchn.length || m == matchm.length
+          next
+        end
+        
+        # check for 'keine Angabe' and group them together
+        if n == 0 || m == 0
+          keinang += num
           next
         end
         # print matches
-        b << matchn[n-1] + " " + matchm[m-1] + ": & " + num.to_s + "\\\\ \n"
+        b << matchn[n] + " " + matchm[m] + ": & " + num.to_s + "\\\\ \n"
       end
     end
-    b << "Sonstige: & " + sonst.to_s + "\\\\ \n" if sonst > 0
-    b << "keine Angabe: & " + (boegenanzahl-all).to_s + "\\\\ \n" if boegenanzahl != all
+    b << (form.isEnglish? ? "other" : "Sonstige") + ": & " + (boegenanzahl-all).to_s + "\\\\ \n"  if boegenanzahl != all
+    b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
     b << "\\end{tabular}\\hfill\\null\n\n"
     
-    b << "\\zusammenfassung\n"
+    b << "\\zusammenfassung{" + (form.isEnglish? ? "Summary" : "Zusammenfassung" ) + "}\n"
     b << summary.to_s
     b << "\n\\medskip\n\n"
     
@@ -98,7 +111,7 @@ class Course < ActiveRecord::Base
     ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
     return b if ugquest.empty?
     
-    b << "\\fragenzudenuebungen\n"
+    b << "\\fragenzudenuebungen{"+ (form.getStudyGroupsHeader) +"}\n"
     specific = { :barcode => course_profs.map{ |cp| cp.barcode.to_i } }
     general = { :barcode => $facultybarcodes }
     ugquest.each do |q|
@@ -108,10 +121,10 @@ class Course < ActiveRecord::Base
     return b if tutors.empty?
 
     c = ''
-    c << "\\uebersichtuebungsgruppen\n"
+    c << "\\uebersichtuebungsgruppen{"+form.getStudyGroupsOverview+"}\n"
     c << "\\begin{tabular}[b]{lr}\n"
     c << "\\hline\n"
-    c << "Tutor & Bögen \\\\ \n"
+    c << form.getStudyGroupsOverviewHeader + " \\\\ \n"
     c << "\\hline\n"
     cc = ''
     found = false
@@ -139,6 +152,7 @@ end
 
 class Integer
   def to_form
-    YAML::load(File.read('/home/oliver/seee/lib/forms/' + self.to_s + '.yaml'))
+    p = File.join(File.dirname(__FILE__), "..", '/lib/forms/' + self.to_s + '.yaml')
+    YAML::load(File.read(p))
   end
 end

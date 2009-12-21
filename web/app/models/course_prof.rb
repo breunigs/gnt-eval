@@ -26,8 +26,9 @@ class CourseProf < ActiveRecord::Base
 
     # FIXME: Shouldn't this be larger than 2?
     return '' unless boegenanzahl > 0
-    gender = prof.gender == 1 ? "M" : "F"
-    b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
+       
+    vorlhead = form.getLecturerHeader(prof.fullname, prof.gender, boegenanzahl)
+    b << "\\profkopf{#{vorlhead}}\n\n"
     # b << "\\fragenzurvorlesung\n\n"
     
     specific = { :barcode => barcode.to_i }

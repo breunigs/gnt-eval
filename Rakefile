@@ -373,7 +373,19 @@ namespace :pdf do
     
     Rake::Task["clean".to_sym].invoke
   end
-
+  
+  desc "makes the result pdfs preliminary"
+  task :make_preliminary do
+    Dir.glob("./tmp/[^orl]*[WS]S*.tex") do |d|
+      d = File.basename(d)
+      dn = "orl_" + d.gsub('tex', 'pdf')
+      puts "Working on " + d
+      `sed 's/title{Lehrevaluation/title{vorl"aufige Lehrevaluation/' ./tmp/#{d} | sed 's/Ergebnisse der Vorlesungsumfrage/nicht zur Weitergabe/'  > ./tmp/orl_#{d}`
+      Rake::Task[("tmp/" + dn).to_sym].invoke
+      `pdftk ./tmp/#{dn} background ./helfer/wasserzeichen.pdf output ./tmp/preliminary_#{d.gsub('tex', 'pdf')}`
+      `rm -f ./tmp/orl_*`
+    end
+  end
 
   desc "create pdf-file for a certain semester"
   task :semester, :semester_id, :needs => 'db:connect' do |t, a|
