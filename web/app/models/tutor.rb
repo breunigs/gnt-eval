@@ -11,21 +11,21 @@ class Tutor < ActiveRecord::Base
     boegenanzahl = count_forms({:barcode => course.course_profs.map{ |cp| cp.barcode.to_i},
                                 :tutnum => tutnum}) 
 
+
+    return '', nil unless boegenanzahl > 2
     b = ''
-    if boegenanzahl > 2
-      b << "\\section{#{abbr_name}}\n\n"
-      
-      specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
-      general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}
-      form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
-        b << q.eval_to_tex(specific, general, form.db_table, @dbh)
-      end
-      if not comment.to_s.empty?
-        b << "\\paragraph{Kommentare}"
-        b << comment.to_s
-      end
+    b << "\\section{#{abbr_name}}\n\n"
+    
+    specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
+    general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}
+    form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
+      b << q.eval_to_tex(specific, general, form.db_table, @dbh)
     end
-    return b
+    if not comment.to_s.empty?
+      b << "\\paragraph{Kommentare}"
+      b << comment.to_s
+    end
+    return b, boegenanzahl
   end
   
   def tutnum

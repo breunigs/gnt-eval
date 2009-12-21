@@ -36,6 +36,7 @@ module FunkyTeXBits
       b << "\\newcommand{\\kurskopf}[3]{\\clearpage\n\\chapter{#1 bei #2}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\fragenzurvorlesung}{\\section*{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}{\\section*{Fragen zum Übungsbetrieb}}\n"
+      b << "\\newcommand{\\uebersichtuebungsgruppen}{\\section*{Übersicht der Übungsgrupppen}}\n"
       b << "\\newcommand{\\zusammenfassung}{\\paragraph{Zusammenfassung}}\n"
       b << "\\title{Lehrevaluation\\\\#{evalname}}\n"
       b << "\\date{\\today}\n"
@@ -45,6 +46,7 @@ module FunkyTeXBits
       b << "\\newcommand{\\kurskopf}[3]{\\section{Erhebungsgrundlage}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\fragenzurvorlesung}{\\section{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}{\\section{Fragen zum Übungsbetrieb}}\n"
+      b << "\\newcommand{\\uebersichtuebungsgruppen}{\\section{Übersicht der Übungsgrupppen}}\n"
       b << "\\newcommand{\\zusammenfassung}{\\section{Zusammenfassung}}\n"
       b << "\\title{\\Large{Ergebnis der Evaluation}\\\\\\huge{#{evalname}}\\\\\\vspace{0.1cm}\\large{($dozent)}\\vspace{1.2cm}}\n"
       b << "\\date{\\today}"
@@ -72,7 +74,7 @@ module FunkyTeXBits
       b << "\\noindent\\begin{minipage}[b]{\\textwidth}\n"
       b << "\\textbf{Umfang dieser Evaluation:}\\par\\medskip\n"
       b << "\\begin{tabular}[b]{rl}\\hline\n"
-      b << "  #{c_courses} & Vorlesungen \\\\\n" +
+      b << "  #{c_courses} & Veranstaltungen \\\\\n" +
         "  #{c_profs} & Dozenten \\\\\n" +
         "  #{c_tutors} & Übungsgruppen\\\\\n" +
         "  #{c_forms} & ausgewertete Fragebögen\\\\\\hline"
@@ -92,20 +94,43 @@ module FunkyTeXBits
     return b
   end
   
+  def TeXVorwort(facultylong, semestershort, single = nil)
+    b = ''
+    
+    if single.nil?
+      b << '\chapter'
+    else
+      b << "\\pagebreak\n"
+      b << "\\section"
+    end
+    b << "{Vorwort}"
+    
+    semesterlong = semestershort.gsub("WS", "Wintersemester").gsub("SS", "Sommersemester")
+    b << "\\newcommand{\\facultylong}{#{facultylong}}\n"
+    b << "\\newcommand{\\semesterlong}{#{semesterlong}}\n"
+    b << "\\input{" + File.join(File.dirname(__FILE__), "../../../tex/vorwort.tex") + "}\n"
+    b
+  end
+  
   def TeXFuss(single = nil)
     b = ''
     
-    # if single.nil?
-    #   b << '\chapter'
-    # else
-    #   b << "\\pagebreak\n"
-    #   b << "\\section"
-    # end
+    if single.nil?
+      b << '\chapter'
+    else
+      b << "\\pagebreak\n"
+      b << "\\section"
+    end
     
-    # b << "{Die Fragebögen}\n"
-    # b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen1.pdf}\n\n"
-    # b << "\\begin{figure}\n"
-    # b << "\\includegraphics[height=.85\\textheight]{tmp/musterbogen2.pdf}\n\\end{figure}"
+    path = File.join(File.dirname(__FILE__), "../../../tmp/sample_sheets/sample_")
+    b << "{Die Fragebögen}\n"
+    [["Vorlesungsbogen (Deutsch)", 0, 2], ["Vorlesungsbogen (Englisch)", 2, 2], ["Seminarbogen", 3, 1]].each do |v|
+      b << "\\subsection*{#{v[0]}}"
+      1.upto(v[2]) do |i|
+        b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{v[1]}.pdf}}\n"
+        b << "\\clearpage"
+      end
+    end
     b << "\n\\end{document}\n"
  
     return b

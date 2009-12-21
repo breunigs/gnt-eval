@@ -25,17 +25,17 @@ class CourseProf < ActiveRecord::Base
     boegenanzahl = count_forms({:barcode => barcode.to_i}) 
 
     # FIXME: Shouldn't this be larger than 2?
-    if boegenanzahl > 0
-      gender = prof.gender == 1 ? "M" : "F"
-      b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
-#      b << "\\fragenzurvorlesung\n\n"
-      
-      specific = { :barcode => barcode.to_i }
-      general = { :barcode => $facultybarcodes }
-      form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-        b << q.eval_to_tex(specific, general, form.db_table, @dbh)
-      end
+    return '' unless boegenanzahl > 0
+    gender = prof.gender == 1 ? "M" : "F"
+    b << "\\profkopf#{gender}{#{prof.fullname}}{#{boegenanzahl}}\n\n"
+    # b << "\\fragenzurvorlesung\n\n"
+    
+    specific = { :barcode => barcode.to_i }
+    general = { :barcode => $facultybarcodes }
+    form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
+      b << q.eval_to_tex(specific, general, form.db_table, @dbh)
     end
+      
     return b
   end
   

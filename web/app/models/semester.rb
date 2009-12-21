@@ -29,6 +29,7 @@ class Semester < ActiveRecord::Base
     b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
                    c.profs.count }, cs.inject(0) { |sum, c| sum +
                    c.tutors.count }, anzahl_boegen)
+    b << TeXVorwort(['Mathematik und Informatik', 'Physik und Astronomie'][faculty], title)
 
     cs.each do |c|
       b << c.evaluate(dbh)
