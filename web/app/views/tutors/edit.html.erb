@@ -15,9 +15,13 @@
   <p>
     <%= f.submit "Update" %>
   </p>
+  
+  <div style="width:100%;height:200px;overflow:scroll">
 <% for p in @tutor.pics %>
-<img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
+    <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
 <% end %>
+    <hr color="#f00">
+  </div>
 <% end %>
 
 <%= link_to 'Show', @tutor %> |
