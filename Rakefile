@@ -438,13 +438,15 @@ namespace :summary do
   task :fixtex do 
     $curSem.courses.each do |c|
       if not c.summary.nil?
+        puts "Warning: Unescaped %-sign? @ " + c.title if c.summary.match(/[^\\]%/)
         # _ -> \_, '" -> "', `" -> "`
         c.summary = c.summary.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
         c.save
       end
       c.tutors.each do |t|
         if not t.comment.nil?
-          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+          puts "Warning: Unescaped %-sign? @ " + c.title + " / " + t.abbr_name if t.comment.match(/[^\\]%/)
+          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'').gsub("{itemsize}", "{itemize}")
           t.save
         end
       end
