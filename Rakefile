@@ -209,7 +209,7 @@ namespace :images do
 end
 
 namespace :print do
-  ## Nach Datum sortieren!
+  ## Nach Eval-Datum sortieren! (erleichtert dann das Eintüten)
 end
 
 namespace :mail do
@@ -431,6 +431,26 @@ namespace :pdf do
     end
     Rake::Task["clean".to_sym].invoke
   end
+end
+
+namespace :crap do
+    desc "prints non-existing ranking that does not exist"
+    task :rank, :needs => 'db:connect' do
+        query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_2` GROUP BY `barcode`) ORDER BY note ASC")
+        query.execute()
+        puts "Note\tStimmen\tVorlesung (Dozent)"
+        while row = query.fetch() do
+            cp = CourseProf.find(row[2])
+            print row[0]
+            print "\t"
+            print row[1].to_s.rjust(5)
+            print "\t"
+            print cp.course.title.ljust(60)
+            print "\t("
+            print cp.prof.fullname
+            puts ")"
+        end
+    end
 end
 
 namespace :summary do 
