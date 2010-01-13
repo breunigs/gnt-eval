@@ -72,7 +72,7 @@ end
 
 class Event
     def evalAlways?
-        self.type == "Grundvorlesung"
+        self.type == "Grundvorlesung" || self.type == "Kursvorlesung"
     end
 end
 
