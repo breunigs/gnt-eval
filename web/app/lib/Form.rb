@@ -242,9 +242,12 @@ class Form
   end
   
   def getStudyGroupsOverviewHeader
-    self.isEnglish? ? "Tutors & Questionnaires" : "Tutor & Bögen"
+    self.isEnglish? ? "Tutors & Questionnaires & Page" : "Tutor & Bögen & Seite"
   end
   
+  def getSheetCount
+    self.isEnglish? ? "submitted questionnaires" : "abgegebene Fragebögen"
+  end
   
 end
 

@@ -22,6 +22,7 @@ module FunkyTeXBits
     b << "\\usepackage[T1]{fontenc}\n"
     b << "\\usepackage{ngerman}\n"
     b << "\\usepackage{lmodern}\n"
+    b << "\\usepackage{longtable}\n"
     b << "\\usepackage[protrusion=true,expansion]{microtype}\n"
     b << "\\usepackage{graphicx}\n"
     b << "\\usepackage[pdftex,%\n"
