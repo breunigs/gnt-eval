@@ -1,6 +1,20 @@
 Der Seee ("Sieh! Es erleichtert Evaluationen!")
 ===============================================
 
+Diese Dokumentation ist, im Rückblick, nicht ganz einfach zu
+lesen. Das Projekt ist leider etwas komplex geworden und der Hang,
+dass alles ein Akronym sein muss, hilft auch nicht.
+
+Letztlich ist es nicht schwierig. Es ist nur viel und es hängt eng
+zusammen. Es ist ratsam, vor dem Lesen der Dokumentation sich etwas
+Ruby anzueignen. Ist objektorientierte Programmierung bekannt, ist die
+[Doku von Mats](http://www.rubyist.net/~slagell/ruby/) vielleicht ein
+sehr guter Einstieg. Die
+[Rails-Screencasts](http://rubyonrails.org/screencasts) sind auch sehr
+gut -- insbesondere, falls man noch nie mit einem Web-Framework
+gearbeitet hat. Keine Angst, beides ist einfach (und macht auch
+wirklich viel Spaß, sonst hätten wir das hier nie entwickelt).
+
 Übersicht
 ---------
 
@@ -77,21 +91,39 @@ Web-Frontend, eine Interactive Shell oder Skripte nach Vorbild des
 benutzt extensiv sog. "Object Relational Mapping" (ORM): Relationale
 Einträge in der Datenbank werden als Instanzen von Ruby-Klassen
 realisiert und sollten auch nur als solche Instanzen bearbeitet
-werden!
+werden! Am besten ist es, die Existenz der Datenbank "`seee`" als
+Implementationsdetail zu vergessen. Dass es sich im Grunde um eine
+relationale Datenbank handelt, ist wohlversteckt.
 
-Die zur Verfügung stehenden Klassen sind zum Beispiel `Prof`,
-`Semester`, `Course`, `Tutor` etc. Eine `rdoc`-Dokumentation der
-Ruby-Klassen und der Erweiterungen für die Auswertung gibt es
-hier[^4]. Sie gibt auch einen Überblick über innere Zusammenhänge.
+Die für das Webfrontend zur Verfügung stehenden spannenden Klassen
+sind zum `Prof`, `Semester`, `Course` und `Tutor`. Sie repräsentieren
+offensichtlich alle Daten, die eine Vorlesung hat: Es gibt in einem
+Semester viele Veranstaltungen, die je von ggf. mehreren Dozierenden
+mit ggf. mehreren Tutor_innen gehalten werden.
+
+Eine `rdoc`-Dokumentation der Ruby-Klassen und der Erweiterungen für
+die Auswertung gibt es hier[^4]. Sie gibt auch einen Überblick über
+innere Zusammenhänge (und offenbart, dass sich manche Menschen einfach
+nicht an Naming Conventions halten können). Bemerkenswert ist das
+Ruby-inhärente "principle of least surprise": Wie unten aus einer
+beispielhaften Session klar wird, verhalten sich die Objekte durchaus,
+wie man das erwartet. Geht es nur um Datenauswertung (werden also
+keine Daten überschrieben), ist es unmöglich, irgendwas kaputt zu
+machen. Erfahrungsgemäß macht der ein oder andere Runtime-Error mehr
+Spaß als die Doku zu lesen.
 
 Ein wichtiges Hilfsmittel ist die Interactive Shell. Sie wird durch
-Ausführen von `web/script/console` ausgeführt. Eine interactive
-Shell ermöglicht es, live auf die Datenbank und die Methoden des Seees
-zuzugreifen und Ruby-Code direkt ausführen zu können. Die interactive
-Shell ist -- für den regulären Betrieb -- eigentlich nicht
-notwendig. Eigentlich deshalb, weil sie sich bei unvorhergesehenen
-Problemen als immens nützlich erwiesen hat. Wichtig ist dieses
-Hilfsmittel, weil erfahrungsgemäß unvorhergesehen keinen
+Ausführen von `web/script/console` ausgeführt. Eine interactive Shell
+ermöglicht es, live auf die Datenbank und die Methoden des Seees
+zuzugreifen und Ruby-Code direkt ausführen zu können. Es handelt sich
+beinahe um die "normale" interaktive Ruby-Shell `irb`, nur dass ein
+paar Skripte ausgeführt werden, dass auch die ganze zusätzliche Magie
+funktioniert.
+
+Die interactive Shell ist -- für den regulären Betrieb -- eigentlich
+nicht notwendig. Eigentlich deshalb, weil sie sich bei
+unvorhergesehenen Problemen als immens nützlich erwiesen hat. Wichtig
+ist dieses Hilfsmittel, weil erfahrungsgemäß unvorhergesehen keinen
 Seltenheitswert genießt.
 
 Wir wollen uns aus diesem Grund ein paar Beispiele anschauen:
@@ -143,17 +175,20 @@ Alle Anfragen an die Evaluation dieser Vorlesung gehen dann an die
 gesamte Fachschaft.
 
 Änderungen an Objekten durch die Interactive Shell bewirken also
-Änderungen in der Datenbank. Die `destroy`-Methode löscht Objekte,
-ebenfalls auch aus der Datenbank.
+Änderungen in der Datenbank (genau, das war die Datenbank, die wir am
+Anfang vergessen wollten). Die `destroy`-Methode löscht Objekte,
+ebenfalls auch aus der Datenbank. Was in unserer Shell-Welt gelöscht
+wird, ist auch in der Webinterface-Welt gelöscht. Einfach, weil es die
+gleiche ist.
 
 ### Technische Aspekte
 
 Selbstverständlich wäre die Welt zu einfach, wäre der Seee im engeren
 Sinne ein normales RoR-Projekt. Das Web-Interface ist in der Tat ein
-sehr klassisches Projekt, das allerdings noch ein wenig Usability
-vertragen könnte. In diesem Web-Interface können Veranstaltungen
-angelegt etc. werden. Es gibt allerdings noch ein tolles Feature,
-das zwar nicht zum Auswertungsteil gehört, aber dennoch nicht im
+sehr klassisches Projekt (das allerdings noch ein wenig Usability
+vertragen könnte). In diesem Web-Interface können Veranstaltungen
+angelegt etc. werden. Es gibt allerdings noch ein tolles Feature, das
+zwar nicht zum Auswertungsteil gehört, aber dennoch nicht im
 Web-Interface zu bedienen ist, das:
 
 `Postoffice`
@@ -172,12 +207,12 @@ pull` in `/var/www-seee` auf MathPhys.
 Die Auswertung ist praktisch vollständig in den *Models*[^6]
 enthalten: `Semester` kann sich evaluieren, `Course` kann sich
 evaluieren usw. Evaluieren heißt in diesem Kontext, echten harten
-TeX-Output zu erzeugen, die Details erledigt `rake` (s.u.)
+TeX-Output zu erzeugen, um die Details kümmert sich `rake` (s.u.)
 
-Für die Auswertung bedarf es einiger Klassen und Methoden. Alles
-derartige ist im Verzeichnis `lib/` zu finden. Wie oben bereits
-erwähnt, gibt es eine mehr oder weniger ausführliche
-`rdoc`-Dokumentation zu alledem.
+Für die Auswertung bedarf es einiger Klassen und Methoden. Von denen
+ist im Webinterface praktisch nichts zu sehen. Alles derartige ist im
+Verzeichnis `lib/` zu finden. Wie oben bereits erwähnt, gibt es eine
+mehr oder weniger ausführliche `rdoc`-Dokumentation zu alledem.
 
 `Form.rb`
 :	enthält Klasse für Bogen inkl. Fragen und Boxen. Ein Objekt
@@ -193,7 +228,7 @@ erwähnt, gibt es eine mehr oder weniger ausführliche
 	darunter auch Averages etc. rausfischen und so.
 `rails_requirements.rb`
 :	Datei, die alles wichtige required. Wird von **Rails**
-	benutzt, dh eine Shell über `web/script/console` verfügt über
+	benutzt, d.h. eine Shell über `web/script/console` verfügt über
 	alle tollen neuen Features.
 `ext_requirements.rb, database.rb`
 :	möchte man von außen auf das ORM zugreifen, sollten diese
@@ -201,7 +236,6 @@ erwähnt, gibt es eine mehr oder weniger ausführliche
 
 Die wichtigesten Begebenheit sind derart kommentiert, dass `rdoc` zu
 passablen Ergebnissen führt.
-
 
 ### `rake` for the win
 
@@ -235,6 +269,14 @@ die möglichen Ziele (targets) aus. Ein möglicher Ablauf wäre:
 
 Die Backslashes um die eckigen Klammern werden in manchen Shells nicht
 benötigt.
+
+Bemerkenswert (d.h. in diesem Fall: eigentlich eine nicht so gute
+Idee, aber warum halt auch nicht) ist vielleicht, dass das Rakefile im
+Root-Verzeichnis des Repositories auch die Pest steuert.
+
+Als letzter Hinweis: Ruby wurde nicht ohne Grund ausgewählt. "Read the
+source" ist bei diesem Projekt keine spöttische Bemerkung, sondern
+häufig ein kurzer und prägnanter Weg, einiges zu verstehen.
 
 [^1]: [mathphys.fsk.uni-heidelberg.de/seee](https://mathphys.fsk.uni-heidelberg.de/seee)
 [^2]: [Ruby-on-Rails-Doku](http://rubyonrails.org/documentation),
