@@ -10,8 +10,8 @@ class Tutor < ActiveRecord::Base
     @db_table = form.db_table
 
     return '', nil unless boegenanzahl(@dbh) > 2
-    b = ''
-    b << "\\section{#{abbr_name}}\n\n"
+    b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
+    b << "#{form.getSheetCount}: #{boegenanzahl}\n\n"
     
     specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
     general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}

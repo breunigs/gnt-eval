@@ -181,6 +181,7 @@ end
 def getProfs(id)
     profs = Array.new
     root = getXML('getDozenten?vtid=' + id.to_s)
+
     root.elements.each do |p|
         profid = Integer(p.elements[getPrefix + ":id"].text)
         name = p.elements[getPrefix + ":name"].text.strip
@@ -281,6 +282,7 @@ end
 
 # Helper function that will list the professors for each date comma
 # separated. Dates are separated by newlines.
+# Warning: This function destroys the given input!
 def listProfs(array)
     s=""
     array.each do |a|
@@ -296,6 +298,31 @@ def listProfs(array)
         end
         s << "<br>"
     end
+    s
+end
+
+def printYamlKummerKasten(data, faculty)
+    s = "---\n"
+    s << "events:\n"
+    data.each do |d|
+        case d.type
+            when /vorlesung/i then type = "Vorlesung"
+            when /seminar/i   then type = "Seminar"
+            #when /praktikum/i then type = "Praktikum" # Skipped anyway
+            when /blockkurs/i then type = "Blockkurs"
+            else next
+        end
+    
+        profs = d.profs.flatten.uniq
+        profs = profs.collect { |x| "{mail:" + x.mail + ", name: " + x.name + "}" }
+    
+        s << "  - type: " + type + "\n"
+        s << "    name: " + d.name.gsub(/\([a-z\s,.]+\)$/i, "") + "\n"
+        s << "    profs: [" + profs.join(",") + "]\n"
+        s << "    sem:  " + @semester.to_s + "\n"
+        s << "    fach: " + faculty.to_s + "\n"
+    end
+    
     s
 end
 
@@ -375,8 +402,14 @@ end
 mathe = getTree(18842)
 physik = getTree(20862)
 
+# do not fix the order of these! printFinalList calls 
+# listProfs in a way that will destruct the data sets.
+# Or you /could/ fix either of these functions.
 getFile('lsf_parser_mathe_pre.html', true).puts printPreList(mathe)
 getFile('lsf_parser_physik_pre.html', true).puts printPreList(physik)
+
+getFile('lsf_parser_mathe_kummerkasten.yaml', true).puts printYamlKummerKasten(mathe, "mathe")
+getFile('lsf_parser_physik_kummerkasten.yaml', true).puts printYamlKummerKasten(physik, "physik")
 
 getFile('lsf_parser_mathe_final.html', true).puts printFinalList(mathe)
 getFile('lsf_parser_physik_final.html', true).puts printFinalList(physik)

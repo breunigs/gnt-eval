@@ -484,7 +484,8 @@ namespace :summary do
       c.tutors.each do |t|
         if not t.comment.nil?
           puts "Warning: Unescaped %-sign? @ " + c.title + " / " + t.abbr_name if t.comment.match(/[^\\]%/)
-          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'').gsub("{itemsize}", "{itemize}")
+          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+          t.comment = t.comment.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{").gsub("/end{", "\\end{").gsub("/item ", "\\item ")
           t.save
         end
       end
