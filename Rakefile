@@ -431,6 +431,24 @@ namespace :pdf do
     end
     Rake::Task["clean".to_sym].invoke
   end
+  
+  desc "Create tutor blacklist for current semester"
+  task :blacklist, :needs => 'db:connect' do     
+    class Float
+      def rtt
+        return ((self*10).round.to_f)/10
+      end
+    end
+    class NilClass
+      def rtt
+        return nil
+      end
+    end
+    tutors = $curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
+    tutors.each do |t|
+      puts [t.abbr_name, t.course.title[0,20], t.profit($dbh).rtt, t.teacher($dbh).rtt, t.competence($dbh).rtt, t.preparation($dbh).rtt, t.boegenanzahl($dbh)].join(' & ') + '\\\\'
+    end
+  end
 end
 
 namespace :crap do
