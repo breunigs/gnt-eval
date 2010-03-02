@@ -96,7 +96,7 @@ Implementationsdetail zu vergessen. Dass es sich im Grunde um eine
 relationale Datenbank handelt, ist wohlversteckt.
 
 Die für das Webfrontend zur Verfügung stehenden spannenden Klassen
-sind zum `Prof`, `Semester`, `Course` und `Tutor`. Sie repräsentieren
+sind `Prof`, `Semester`, `Course` und `Tutor`. Sie repräsentieren
 offensichtlich alle Daten, die eine Vorlesung hat: Es gibt in einem
 Semester viele Veranstaltungen, die je von ggf. mehreren Dozierenden
 mit ggf. mehreren Tutor_innen gehalten werden.
