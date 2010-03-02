@@ -433,9 +433,34 @@ namespace :pdf do
   end
 end
 
+namespace :helper do
+    desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
+    task :lsfparse do
+        puts "Finding IDs…"
+        require 'net/http'
+        url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+        
+        req = Net::HTTP.get_response(URI.parse(url))
+        mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
+        physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
+        
+        dir = "tmp/lsfparse/"
+        File.makedirs(dir)
+        
+        puts "Mathe…"
+        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
+        puts "Physik…"
+        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+        
+        puts
+        puts "All Done. Have a look in #{dir}"
+    end
+end
+
 namespace :crap do
     desc "does not print non-existing ranking that does not exist"
     task :rank, :needs => 'db:connect' do
+        # One query to RANK THEM ALL!
         query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_2` GROUP BY `barcode`) ORDER BY note ASC")
         query.execute()
         puts "Note\tStimmen\tVorlesung (Dozent)"

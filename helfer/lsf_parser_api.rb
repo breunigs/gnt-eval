@@ -1,23 +1,60 @@
 #!/usr/bin/ruby
 
+# Getting a 403 error thrown when running the script?
+# This helper script will only run properly from whitelisted IPs
+# This is not a limitation by the script, but a security measure
+# by the LSF service.
+# I asked if subdomains could be whitelisted, so this would be IP
+# independent, but they were still in testing as of writing.
+# Currently the following IP has been whitelisted: 129.206.91.26
+# If this ever changes, please contact
+#     "Reinhard Schmidt" <reinhard.schmidt@urz.uni-heidelberg.de>
+# who is in charge of this LSF service.
+
+if ARGV.empty? || ARGV.length != 2
+    puts "USAGE: ./lsf_parser_api.rb NAME URL"
+    puts "The URL can be obtained by copying the link for one of the"
+    puts "faculties listed here:"
+    puts "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+    puts
+    puts "Ensure that you have selected the right semester, otherwise"
+    puts "you will get old data."
+    exit
+else
+    @name = ARGV[0].gsub(/[^a-z0-9_-]/, "")
+    crap = ARGV[1].scan(/root[0-9]([0-9]{5})=[0-9]{5,}\|([0-9]{5,})/)
+    @semester = crap[0][0]
+    @rootid = crap[0][1]
+    if @semester.nil? || @rootid.nil? || @semester.empty? || @rootid.empty? || @name.nil? || @name.empty?
+        puts "Couldn't extract semester and root id. Please fix"
+        puts "the script's code".
+        exit
+    end
+    @semester = @semester.to_i
+    @rootid = @rootid.to_i
+end
+
 require 'rubygems'
 require 'pp'
 require 'date'
 require 'net/http'
 require 'rexml/document'
 
-# semester
+# semester, now auto-detected from input
 # summer term 2009 == 20091
 # winter term 2009/10 == 20092
 # Example: semester=20092
-@semester=20092;
+#@semester=20101;
 
 # URL to LSF Service
 @hostUrl="http://lsf.uni-heidelberg.de/axis2/services/LSFService/"
 # root tree IDs that identify the (sub-)tree of interest. You can find
 # them in the html-LSF by having a look at the URL of root categories.
-# maths: 18842
-# physics 20862
+# Here's an example URL for maths in WS 2009/2010, with the number of
+# interest highlighted:
+# http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&
+#     trex=step&root120092=18890|18842&P.vx=mittel
+#                                ^^^^^
 
 @debug = true
 
@@ -33,6 +70,16 @@ require 'rexml/document'
 # The time is directly parsed into a string
 class Event < Struct.new(:id, :name, :times, :rooms, :profs, :type, :facul); end
 class Prof  < Struct.new(:id, :name, :mail, :tele); end
+
+class Prof
+    def mailhref
+        if mail.nil? || mail.empty?
+            self.name
+        else
+            "<a href=\"mailto:#{self.mail}\">#{self.name}</a>"
+        end
+    end
+end
 
 class String
     # Make downcase support German umlauts
@@ -82,7 +129,7 @@ end
 # So we need to get the prefix manually here.
 def getPrefix
     return @prefix unless @prefix.nil?
-    root = getXML('getUeberschr?ueid=18842&semester=' + @semester.to_s)
+    root = getXML('getUeberschr?ueid=' + @rootid.to_s + '&semester=' + @semester.to_s)
     raise AssertionFailure.new("Couldn't get prefix") unless root.elements.size >= 2
 
     @prefix=root.elements[1].elements[1].prefix
@@ -92,9 +139,12 @@ end
 # parameters
 def getXML(parameters)
     url = @hostUrl + parameters
-
     req = Net::HTTP.get_response(URI.parse(url))
-    req.error! unless req.is_a?(Net::HTTPSuccess)
+    unless req.is_a?(Net::HTTPSuccess)
+        puts "XML failure!"
+        puts "URL: " + url
+        req.error!
+    end
 
     REXML::Document.new(req.body).root
 end
@@ -291,12 +341,14 @@ def listProfs(array)
             next
         end
 
-        fst = a.shift
-        s = '<a href="'+fst.mail+'">'+fst.name+'</a>'
-        a.each do |e|
-            s << ", " + '<a href="'+e.mail+'">'+e.name+'</a>'
-        end
-        s << "<br>"
+        #fst = a.shift
+        #s = '<a href="mailto:'+fst.mail+'">'+fst.name+'</a>'
+        #a.each do |e|
+        #    s << ", " + '<a href="mailto:'+e.mail+'">'+e.name+'</a>'
+        #end
+        tmp = Array.new
+        a.each { |e| tmp << e.mailhref }
+        s << tmp.join(", ") + "<br>"
     end
     s
 end
@@ -399,17 +451,11 @@ def getFile(name = nil, delete = false)
     return File.new(name, "a")
 end
 
-mathe = getTree(18842)
-physik = getTree(20862)
+data = getTree(@rootid)
 
 # do not fix the order of these! printFinalList calls 
 # listProfs in a way that will destruct the data sets.
 # Or you /could/ fix either of these functions.
-getFile('lsf_parser_mathe_pre.html', true).puts printPreList(mathe)
-getFile('lsf_parser_physik_pre.html', true).puts printPreList(physik)
-
-getFile('lsf_parser_mathe_kummerkasten.yaml', true).puts printYamlKummerKasten(mathe, "mathe")
-getFile('lsf_parser_physik_kummerkasten.yaml', true).puts printYamlKummerKasten(physik, "physik")
-
-getFile('lsf_parser_mathe_final.html', true).puts printFinalList(mathe)
-getFile('lsf_parser_physik_final.html', true).puts printFinalList(physik)
+getFile("lsf_parser_#{@name}_pre.html", true).puts printPreList(data)
+getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
+getFile("lsf_parser_#{@name}_final.html", true).puts printFinalList(data)
