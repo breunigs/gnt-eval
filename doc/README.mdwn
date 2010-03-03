@@ -39,9 +39,8 @@ Was ist der "Seee"?
 Als Seee ("Sieh! Es erleichtert Evaluationen!") wird einerseits im
 Großen das gesamte Framework der Evaluation bezeichnet, welche alle in
 der Übersicht aufgeführten Schritte umfasst. In dieser Verwendung
-umfasst der Seee aber noch die "PEST" ("Praktische
-EvaluationsSofTware"), welche aus den ausgefüllten Bögen
-digitalisierte Einträge erstellt.
+umfasst der Seee aber noch die "PEST" ("Praktisches Evaluations ScripT"),
+welche aus den ausgefüllten Bögen digitalisierte Einträge erstellt.
 
 Im engeren Sinne meint "Seee" ein Webfrontend, mit dem die
 Veranstaltungen, die beumfragt werden sollen, gesammelt werden und das
