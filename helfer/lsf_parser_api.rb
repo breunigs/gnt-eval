@@ -382,6 +382,7 @@ def printFinalList(data)
     data.sort! { |x,y| x.name <=> y.name }
 
     s = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'
+    s << 'Wenn Du eine Veranstaltung evalen willst, schreibst Du Deinen Namen in das Feld "wer evalt?" <b><i><u>U N D</u></i></b> schätzt die Anzahl der Hörer.<br/><br/>Wenn Dir noch eine Veranstaltung auffallen sollte, bei der es GAR KEINEN Sinn ergibt sie zu evalen, streiche sie durch.<br/><br/>'
     s << "<table border=1 cellspacing=0 cellpadding=0>";
     s << "<tr>"
     s << "<th>Name</th>"
@@ -400,7 +401,7 @@ def printFinalList(data)
         s << '<td>' + listProfs(d.profs) + '</td>'
         s << '<td>&nbsp;</td>'
         s << '<td>&nbsp;</td>'
-        s << "</tr>\n"
+        s << "</tr>\n\n"
     end
 
     s << '</table>'
@@ -415,13 +416,14 @@ def printPreList(data)
     data.sort! { |x,y| x.type <=> y.type }
 
     s = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'
+    s << "Markiere zu evaluierende Veranstaltungen mit einem X.<br/>Streiche Veranstaltungen, die auf keinen Fall evaluiert werden sollen/können.<br/>Prüfe insbesondere die automatisch ausgewählten Veranstaltungen und streiche ggf. das (?) dahinter.<br/><br/>"
     s << "<table border=1 cellspacing=0 cellpadding=0>";
     s << "<tr>"
     s << "<th style='width:50px;'>Soll Eval?</th>"
     s << "<th>Name</th>"
     s << "<th>Typ</th>"
     s << "<th>Dozent_in</th>"
-    s << "</tr>\n"
+    s << "</tr>\n\n"
 
     data.each do |d|
         allprofs = Array.new
@@ -429,7 +431,7 @@ def printPreList(data)
         s << '<tr>'
 
         if d.evalAlways? || allprofs.flatten.any? { |p| p.evalAlways? }
-            s << '<td style="text-align:center">X</td>'
+            s << '<td style="text-align:center">X&nbsp;&nbsp;(?)</td>'
         else
             s << '<td>&nbsp;</td>'
         end
