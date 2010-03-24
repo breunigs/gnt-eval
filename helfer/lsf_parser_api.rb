@@ -91,7 +91,7 @@ class String
     def isStopType?
         cmp = self.downcase
         case cmp
-            when "übung", "praktikum", "kolloquium", "hauptseminar", "colloquium", "prüfung":
+            when "übung", "praktikum", "kolloquium", "hauptseminar", "colloquium", "prüfung", "oberseminar":
                 return true
         end
         false
