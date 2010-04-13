@@ -473,6 +473,15 @@ namespace :helper do
         puts
         puts "All Done. Have a look in #{dir}"
     end
+  
+  desc "Generate lovely HTML output for our static website"
+  task :static_output do 
+    puts "<ul>"
+    $curSem.courses.each do |c|
+      puts "<li>#{c.title}; Tutoren: #{c.tutors.collect{ |t| t.abbr_name }.join(', ')}"
+    end
+    puts "</ul>"
+  end
 end
 
 namespace :crap do
