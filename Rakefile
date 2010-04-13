@@ -478,7 +478,12 @@ namespace :helper do
   task :static_output do 
     puts "<ul>"
     $curSem.courses.each do |c|
-      puts "<li>#{c.title}; Tutoren: #{c.tutors.collect{ |t| t.abbr_name }.join(', ')}"
+      tuts = c.tutors.collect{ |t| t.abbr_name }
+      profs = c.profs.collect{ |t| t.fullname }
+      print "<li><b>#{c.title}</b>"
+      print "; <i>#{profs.join(', ')}</i>" unless profs.empty?
+      print "; Tutoren: #{tuts.join(', ')}" unless tuts.empty?
+      puts "</li>"
     end
     puts "</ul>"
   end
