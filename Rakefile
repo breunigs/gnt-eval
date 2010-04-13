@@ -480,8 +480,8 @@ namespace :helper do
     $curSem.courses.each do |c|
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
-      print "<li><b>#{c.title}</b>"
-      print "; <i>#{profs.join(', ')}</i>" unless profs.empty?
+      print "<li><strong>#{c.title}</strong>"
+      print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
       print "; Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "</li>"
     end
