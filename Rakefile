@@ -481,14 +481,15 @@ namespace :helper do
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
-      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <b>#{c.title}</b>"
-      print "; <i>#{profs.join(', ')}</i>" unless profs.empty?
+      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
+      print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
       print "; Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "</li>"
     end
     puts "</ul>"
   end
 end
+
 
 namespace :crap do
     desc "does not print non-existing ranking that does not exist"
