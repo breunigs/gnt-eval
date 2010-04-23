@@ -20,7 +20,8 @@
 
 <p>
   <b>Form:</b>
-  <%=h @course.form %>
+  <%=h @course.form_id_to_name[@course.form] %>
+  (ID: <%=h @course.form %>)
 </p>
 
 <p>
@@ -83,14 +84,14 @@
     <b>Emails:</b>
     <ul>
       <li><%= link_to 'Email an <em>alle</em> Profs dieser
-		       Veranstaltung senden, dass sie an Description
-		       evaluiert werden', { :id => @course, :action =>
-		       'send_ankuendigungsmail'}, :confirm => "Ganz
-		       ganz sicher? Es gehen wirkliche richtige Emails
-		       raus!" %></li>
+               Veranstaltung senden, dass sie an Description
+               evaluiert werden', { :id => @course, :action =>
+               'send_ankuendigungsmail'}, :confirm => "Ganz
+               ganz sicher? Es gehen wirkliche richtige Emails
+               raus!" %></li>
       <li><%= link_to 'Email an den Evaluator', { :action =>
-	'send_ankuendigungsmail', :id => @course }, :confirm =>
-	'Es wird eine richtige Email versendet!'  %></li> 
+    'send_ankuendigungsmail', :id => @course }, :confirm =>
+    'Es wird eine richtige Email versendet!'  %></li>
     </ul>
   </fieldset>
 </p>-->
