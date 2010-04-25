@@ -56,7 +56,7 @@ class Course < ActiveRecord::Base
     puts "   #{title}"
     isEn = form.isEnglish? ? "E" : "D"
     notspecified = (form.isEnglish? ? "not specified" : "keine Angabe")
-    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}\n\n"
+    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}{#{id}}\n\n"
 
     # Semesterverteilung
     b << "\\hfill\\begin{tabular}[t]{lr}\n"
