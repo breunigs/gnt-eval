@@ -4,15 +4,16 @@ class Tutor < ActiveRecord::Base
   has_many :pics
   include FunkyDBBits
   include FunkyTeXBits
-  
+
   def eval_against_form(form, dbh)
     @dbh = dbh
     @db_table = form.db_table
+    boegen=boegenanzahl(@dbh)
 
-    return '', nil unless boegenanzahl(@dbh) > 2
+    return '', nil unless boegen > 2
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
-    b << "#{form.getSheetCount}: #{boegenanzahl}\n\n"
-    
+    b << "#{form.getSheetCount}: #{boegen}\n\n"
+
     specific = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum }
     general = { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i }}
     form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
@@ -26,46 +27,46 @@ class Tutor < ActiveRecord::Base
       end
       b << comment.to_s
     end
-    return b, boegenanzahl
+    return b, boegen
   end
-  
+
   def tutnum
     course.tutors.sort{ |x,y| x.id <=> y.id }.index(self) + 1
   end
-  
+
   def competence(dbh)
     @dbh = dbh
     @db_table = course.form.to_form.db_table
     competence_field = 'AVG(t2)'
     query(competence_field, { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum}, " AND t2 > 0").to_f
   end
-  
+
   def profit(dbh)
     @dbh = dbh
     @db_table = course.form.to_form.db_table
     profit_field = 'AVG(t10)'
     query(profit_field, { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum}, " AND t10 > 0").to_f
-    
+
   end
-  
+
   def teacher(dbh)
     @dbh = dbh
     @db_table = course.form.to_form.db_table
     teacher_field = 'AVG(t1)'
     query(teacher_field, { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum}, " AND t1 > 0").to_f
-    
+
   end
   def preparation(dbh)
     @dbh = dbh
     @db_table = course.form.to_form.db_table
     prep_field = 'AVG(t3)'
     query(prep_field, { :barcode => course.course_profs.map{ |cp| cp.barcode.to_i}, :tutnum => tutnum}, " AND t3 > 0").to_f
-    
+
   end
   def boegenanzahl(dbh)
     @dbh = dbh
     @db_table = course.form.to_form.db_table
     count_forms({:barcode => course.course_profs.map{ |cp| cp.barcode.to_i},
-                                :tutnum => tutnum}) 
+                                :tutnum => tutnum})
   end
 end
