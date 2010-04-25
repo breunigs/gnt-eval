@@ -549,19 +549,37 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-  3.times do
-    err = `cd "#{File.dirname(t.source)}";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -halt-on-error "#{File.basename(t.source)}" 2>&1`
+    filename="\"#{File.basename(t.source)}\""
+    texpath="cd \"#{File.dirname(t.source)}\";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
+    # -halt-on-error: stops TeX after the first errir
+    # -file-line-error: displays file and line where the error occured
+    # -draftmode: doesn't create PDF, which speeds up TeX. Still does
+    #             syntax-checking and toc-creation
+    optfast="-halt-on-error -file-line-error -draftmode"
+    optreal="-halt-on-error -file-line-error"
+
+    # run it once fast, to see if there are any syntax errors in the
+    # text and create first-run-toc
+    err = `#{texpath} #{optfast} #{filename} 2>&1`
     if $?.to_i != 0
-      puts "="*50
-      puts err
-      break
+        puts "="*50
+        puts err
+        puts "ERROR WRITING: #{t.name}"
+        puts "EXIT CODE: #{$?}"
+        puts "="*50
+        exit
     end
-  end
-  if $?.to_i == 0
-    puts "Wrote #{t.name}"
-  else
-    puts "ERROR WRITING: #{t.name}"
-    puts "EXIT CODE: #{$?}"
-    puts "="*50
-  end
+
+    # run it fast a second time, to get /all/ references correct
+    `#{texpath} #{optfast} #{filename} 2>&1`
+    # now all references should have been resolved. Run it a last time,
+    # but this time also output a pdf
+    `#{texpath} #{optreal} #{filename} 2>&1`
+
+    if $?.to_i == 0
+        puts "Wrote #{t.name}"
+    else
+        puts "Some other error occured. It shouldn't be TeX-related, as"
+        puts "it already passed one run. Well, happy debugging."
+    end
 end
