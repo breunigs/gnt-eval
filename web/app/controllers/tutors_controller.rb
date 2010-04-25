@@ -1,6 +1,6 @@
 class TutorsController < ApplicationController
   before_filter :load_course
-  
+
   def load_course
     if not params[:course_id].nil?
           @course = Course.find(params[:course_id])
@@ -10,7 +10,7 @@ class TutorsController < ApplicationController
   # GET /tutors.xml
   def index
     @tutors = @course.tutors.find(:all)
-    
+
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @tutors }
@@ -49,8 +49,13 @@ class TutorsController < ApplicationController
   # POST /tutors.xml
   def create
     @tutor = @course.tutors.build(params[:tutor])
+    existingTutors = @course.tutors.map { |x| x.abbr_name }
     par = params[:tutor]['abbr_name'].split(',').map!{ |x| x.strip }
-    par.each { |p| t = @course.tutors.build({'abbr_name'=>p} ); t.save }
+    par.uniq.each do |p|
+        next if existingTutors.include? p
+        t = @course.tutors.build({'abbr_name'=>p})
+        t.save
+    end
     respond_to do |format|
 #      if @tutor.save
         flash[:notice] = 'Tutor was successfully created.'

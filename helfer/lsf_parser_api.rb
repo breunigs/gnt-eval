@@ -366,11 +366,11 @@ def printYamlKummerKasten(data, faculty)
         end
     
         profs = d.profs.flatten.uniq
-        profs = profs.collect { |x| "{mail:" + x.mail + ", name: " + x.name + "}" }
+        profs = profs.collect { |x| "{mail: " + x.mail + ", name: " + x.name + "}" }
     
         s << "  - type: " + type + "\n"
-        s << "    name: " + d.name.gsub(/\([a-z\s,.]+\)$/i, "") + "\n"
-        s << "    profs: [" + profs.join(",") + "]\n"
+        s << "    name: \"" + d.name.gsub(/\([a-z\s,.]+\)$/i, "").gsub('"', "'") + "\"\n"
+        s << "    profs: [" + profs.join(", ") + "]\n"
         s << "    sem:  " + @semester.to_s + "\n"
         s << "    fach: " + faculty.to_s + "\n"
     end
