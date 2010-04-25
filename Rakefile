@@ -123,7 +123,7 @@ end
 
 namespace :images do
 
-  desc "Insert comment pictures from YAML/jpg in directory." +
+  desc "Insert comment pictures from YAML/jpg in directory. " +
        "Please supply all images to" +
        " /home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
   task :insertcomments, :directory do |t, d|
@@ -137,7 +137,7 @@ namespace :images do
 
         course = CourseProf.find(barcode).course
 
-        # first cross is 1 !
+        # first checkbox is 1! (0 means 'no choice')
         if tutnum > 0
           tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
           if tutnum > tutors.count
@@ -177,8 +177,14 @@ namespace :images do
         p.save
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
+    end # Dir glob
 
-    end
+    puts
+    puts "Please ensure that all comment pictures have been supplied to"
+    puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
+    puts "as that's where the web-seee will look for it."
+    puts "Be aware, that you can do so by running"
+    puts "\trake pest:copycomments"
   end
 
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
@@ -361,6 +367,12 @@ namespace :pest do
     system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
     system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}/\" \\;")
+
+    puts
+    puts "All comment pictures have been copied. If not already done so,"
+    puts "you need to make the web-seee know about them. Simply run"
+    puts "\trake images:insertcomments[directory]"
+    puts "for this. (needs path to the yaml-files)"
   end
 end
 
@@ -387,9 +399,10 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-file for a certain semester"
+  desc "create pdf-file for a certain semester (leave empty for current)"
   task :semester, :semester_id, :needs => 'db:connect' do |t, a|
-    s = Semester.find(a.semester_id)
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    s = Semester.find(sem)
     ['Mathematik', 'Physik'].each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
@@ -404,9 +417,10 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-form-files corresponding to blabla"
+  desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
-    s = Semester.find(a.semester_id)
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    s = Semester.find(sem)
     dirname = './tmp/'
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
         make_pdf_for(s, cp, dirname)
