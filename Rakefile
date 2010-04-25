@@ -56,7 +56,7 @@ end
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  # Barcode  
+  # Barcode
   filename = dir + "barcode"
   `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
   # TeX
@@ -66,15 +66,15 @@ def make_sample_sheet(form, hasTutors)
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ ($curSem.title) +'}' + "\n"
-    
+
     h << '\tutoren{ \mmm[1][Mustafa Mustermann] Mustafa Mustermann & \mmm[2][Fred Nurk] Fred Nurk & \mmm[3][Ashok Kumar] Ashok Kumar & \mmm[4][Juan Pérez] Juan Pérez & \mmm[5][Jakob Mierscheid] Jakob Mierscheid\\\\ \mmm[6][Iwan Iwanowitsch] Iwan Iwanowitsch & \mmm[7][Pierre Dupont] Pierre Dupont & \mmm[8][John Smith] John Smith & \mmm[9][Eddi Exzellenz] Eddi Exzellenz & \mmm[10][Joe Bloggs] Joe Bloggs\\\\ \mmm[11][John Doe] John Doe & \mmm[12][\ ] \  & \mmm[13][\ ] \  & \mmm[14][\ ] \  & \mmm[15][\ ] \  \\\\ \mmm[16][\ ] \ & \mmm[17][\ ] \  & \mmm[18][\ ] \  & \mmm[19][\ ] \  & \mmm[20][\ ] \ \\\\ \mmm[21][\ ] \  & \mmm[22][\ ] \  & \mmm[23][\ ] \  & \mmm[24][\ ] \  & \mmm[25][\ ] \ \\\\ \mmm[26][\ ] \  & \mmm[27][\ ] \  & \mmm[28][\ ] \  & \mmm[29][\ ] \  & \mmm[30][\ keine] \ keine\\ }' if hasTutors
-    
+
     h << '\begin{document}' + "\n"
     h << tex_head_for(form) + "\n\n\n"
     h << tex_questions_for(form) + "\n"
     h << '\end{document}'
   end
-  
+
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
 end
@@ -105,7 +105,7 @@ def make_pdf_for(s, cp, dirname)
       h << '}' + "\n"
     end
     h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form) + "\n\n\n" 
+    h << tex_head_for(cp.course.form) + "\n\n\n"
     h << tex_questions_for(cp.course.form) + "\n"
     h << '\end{document}'
     end
@@ -129,7 +129,7 @@ namespace :images do
   task :insertcomments, :directory do |t, d|
     Dir.glob(File.join(d.directory, '*.yaml')) do |f|
       basename = File.basename(f, '.yaml')
-      
+
       if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
@@ -165,7 +165,7 @@ namespace :images do
         p.save
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
-      
+
       if File.exists?(File.join(d.directory, basename + '-vorlcomment.jpg'))
         barcode = find_barcode_from_basename(basename)
 
@@ -177,10 +177,10 @@ namespace :images do
         p.save
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
-      
+
     end
   end
-  
+
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     Dir.glob(File.join(d.directory, '*.tif')) do |f|
@@ -188,7 +188,7 @@ namespace :images do
         puts "No write access, cancelling."
         break
       end
-    
+
       basename = File.basename(f, '.tif')
       barcode = (find_barcode(f).to_f / 10).floor.to_i
 
@@ -370,10 +370,10 @@ namespace :pdf do
     0.upto(3) do |i|
       make_sample_sheet(i, (i == 0 || i == 2))
     end
-    
+
     Rake::Task["clean".to_sym].invoke
   end
-  
+
   desc "makes the result pdfs preliminary"
   task :make_preliminary do
     Dir.glob("./tmp/[^orl]*[WS]S*.tex") do |d|
@@ -431,9 +431,9 @@ namespace :pdf do
     end
     Rake::Task["clean".to_sym].invoke
   end
-  
+
   desc "Create tutor blacklist for current semester"
-  task :blacklist, :needs => 'db:connect' do     
+  task :blacklist, :needs => 'db:connect' do
     class Float
       def rtt
         return ((self*10).round.to_f)/10
@@ -457,33 +457,33 @@ namespace :helper do
         puts "Finding IDs…"
         require 'net/http'
         url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
-        
+
         req = Net::HTTP.get_response(URI.parse(url))
         mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
         physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
-        
+
         dir = "tmp/lsfparse/"
         File.makedirs(dir)
-        
+
         puts "Mathe…"
         `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
         puts "Physik…"
         `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
-        
+
         puts
         puts "All Done. Have a look in #{dir}"
     end
-  
+
   desc "Generate lovely HTML output for our static website"
-  task :static_output do 
+  task :static_output do
     puts "<ul>"
-    $curSem.courses.each do |c|
+    $curSem.courses.sort {|x,y| x.title <=> y.title }.each do |c|
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
       print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
-      print "; Tutoren: #{tuts.join(', ')}" unless tuts.empty?
+      print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "</li>"
     end
     puts "</ul>"
@@ -512,9 +512,9 @@ namespace :crap do
     end
 end
 
-namespace :summary do 
+namespace :summary do
   desc "fix some often encountered tex-errors in the summaries"
-  task :fixtex do 
+  task :fixtex do
     $curSem.courses.each do |c|
       if not c.summary.nil?
         puts "Warning: Unescaped %-sign? @ " + c.title if c.summary.match(/[^\\]%/)
