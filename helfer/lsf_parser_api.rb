@@ -68,7 +68,7 @@ require 'rexml/document'
 
 # Define data structures for events and professors.
 # The time is directly parsed into a string
-class Event < Struct.new(:id, :name, :times, :rooms, :profs, :type, :facul); end
+class Event < Struct.new(:id, :name, :times, :rooms, :profs, :type, :facul, :sws); end
 class Prof  < Struct.new(:id, :name, :mail, :tele); end
 
 class Prof
@@ -194,10 +194,20 @@ def getEventList(id)
     events
 end
 
+# Will read the Semesterwochenstunden for a given event
+def getSWS(vorlID)
+    root = getXML('getVerDet?vid=' + vorlID.to_s)
+    root.elements.each do |data|
+        return data.elements[getPrefix + ":sws"].text.to_i
+    end
+    return 0
+end
+
 # Will read all the details like professor, room, time and so on for a
 # given event id. Returns nil if the event is/has a stoptype or stopname
 def getEvent(eventdata)
     id = Integer(eventdata[getPrefix + ':vorID'].text)
+    sws = getSWS(id)
 
     return nil unless @tempEvents[id].nil?
     @tempEvents[id] = true
@@ -214,7 +224,7 @@ def getEvent(eventdata)
     # also skip all events that do not provide necessary information
     return nil if times.empty? || rooms.empty? || profs.empty?
 
-    Event.new(id, name, times, rooms, profs, type, facul)
+    Event.new(id, name, times, rooms, profs, type, facul, sws)
 end
 
 # Gets a room's name for the given id
@@ -353,6 +363,23 @@ def listProfs(array)
     s
 end
 
+def printSWSSheet(data)
+    s = ""
+    data.each do |d|
+        allprofs = Array.new
+        allprofs << d.profs.flatten.uniq
+        num = 0
+        allprofs.each { |a| num += a.length }
+        # SWS   SWS*Profs    Typ   Name    Profs
+        s << d.sws.to_s + "\t"
+        s << (d.sws.to_i*num).to_s + "\t"
+        s << d.type + "\t"
+        s << d.name + "\t"
+        s << listProfs(allprofs).gsub(/<\/?[^>]*>/, "") + "\n"
+    end
+    s
+end
+
 def printYamlKummerKasten(data, faculty)
     s = "---\n"
     s << "events:\n"
@@ -364,17 +391,17 @@ def printYamlKummerKasten(data, faculty)
             when /blockkurs/i then type = "Blockkurs"
             else next
         end
-    
+
         profs = d.profs.flatten.uniq
         profs = profs.collect { |x| "{mail: " + x.mail + ", name: " + x.name + "}" }
-    
+
         s << "  - type: " + type + "\n"
         s << "    name: \"" + d.name.gsub(/\([a-z\s,.]+\)$/i, "").gsub('"', "'") + "\"\n"
         s << "    profs: [" + profs.join(", ") + "]\n"
         s << "    sem:  " + @semester.to_s + "\n"
         s << "    fach: " + faculty.to_s + "\n"
     end
-    
+
     s
 end
 
@@ -455,9 +482,10 @@ end
 
 data = getTree(@rootid)
 
-# do not fix the order of these! printFinalList calls 
+# do not fix the order of these! printFinalList calls
 # listProfs in a way that will destruct the data sets.
 # Or you /could/ fix either of these functions.
 getFile("lsf_parser_#{@name}_pre.html", true).puts printPreList(data)
 getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
 getFile("lsf_parser_#{@name}_final.html", true).puts printFinalList(data)
+getFile("lsf_parser_#{@name}_sws.txt", true).puts printSWSSheet(data)
