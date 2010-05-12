@@ -57,14 +57,14 @@ class TutorsController < ApplicationController
         t.save
     end
     respond_to do |format|
-#      if @tutor.save
+      if @tutor.save
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @tutor, :status => :created, :location => @course }
-#     else
-#        format.html { render :action => "new" }
-#        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
-#      end
+     else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
+      end
     end
   end
 
