@@ -53,8 +53,8 @@ class Postoffice < ActionMailer::Base
     content_type 'text/plain'
     sent_on Time.now
     
-    body[:course] = c
+    body[:title] = c.title
     body[:anrede] = profanrede(c)
-    body[:link] = faculty_links[c.faculty]
+    body[:link] = faculty_links[c.faculty] + '#nameddest=' + course_id.to_s
   end
 end
