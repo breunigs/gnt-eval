@@ -40,7 +40,10 @@ class Postoffice < ActionMailer::Base
     body[:anrede] = anrede
   end
   
-  def evalverschickung(course_id)
+  # verschickt die eval, will faculty_links ist array mit
+  # faculty_links[faculty] =
+  # 'http://mathphys.fsk.uni-heidelberg.de/~eval/.uieduie/Ich_bin_das_richtige_file.pdf'
+  def evalverschickung(course_id, faculty_links)
     c = Course.find(course_id)
     recipients c.profs.collect{ |p| p.email }.join(', ')
     from 'evaluation@mathphys.fsk.uni-heidelberg.de'
@@ -52,5 +55,6 @@ class Postoffice < ActionMailer::Base
     
     body[:course] = c
     body[:anrede] = profanrede(c)
+    body[:link] = faculty_links[c.faculty]
   end
 end
