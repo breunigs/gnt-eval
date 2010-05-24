@@ -31,6 +31,8 @@ RewriteRule ^([^.]+)$ $1.html [QSA]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ dispatch.cgi [QSA,L]
 
+
+RailsEnv production
 # In case Rails experiences terminal errors
 # Instead of displaying this message you can supply a file here which will be rendered instead
 # 
