@@ -169,7 +169,7 @@ class PESTOmr
         # These values mark the coordinates where the objects used
         # for detection should actually be in a perfectly scanned
         # document. They are hardcoded, since they never change.
-        leftcut = [178*@dpifix, 178*@dpifix]
+        leftcut = [178*@dpifix, 168*@dpifix]
         topcut = [170*@dpifix, 165*@dpifix]
 
         # This will contain the offset for each sheet
