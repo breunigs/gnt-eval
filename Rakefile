@@ -193,11 +193,12 @@ namespace :images do
     puts "\trake pest:copycomments"
   end
 
-  desc "Work on the .tif's in directory and sort'em to tmp/images/..."
+  desc "(0) Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
       puts "No directory given or directory does not exist."
     else
+      puts "Working directory is: #{d.directory}"
       Dir.glob(File.join(d.directory, '*.tif')) do |f|
         unless File.writable?(f)
           puts "No write access, cancelling."
@@ -266,7 +267,7 @@ namespace :pest do
       Dir.glob("#{f}*.tif") do |y|
         barcode = find_barcode_from_basename(File.basename(y, ".tif")) #find_barcode(y)/10
         cp = CourseProf.find(barcode)
-        make_pdf_for($curSem, cp, f)
+        make_pdf_for(cp.course.semester, cp, f)
         `mv -f "#{f + cp.get_filename}.yaml" "#{f}../#{File.basename(f)}.yaml"`
         break
       end
