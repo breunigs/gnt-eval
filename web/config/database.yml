@@ -14,7 +14,11 @@ test:
   encoding: utf8
   dbfile: db/test.db
 
+
 production:
-  adapter: sqlite3
+  adapter: mysql
   encoding: utf8
-  dbfile: db/prod.db
+  database: seee
+  username: seee
+  socket: /var/run/mysqld/mysqld.sock
+  password: uh8ieL8MSic1aiS0
