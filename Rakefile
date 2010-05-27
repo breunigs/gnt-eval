@@ -195,27 +195,31 @@ namespace :images do
 
   desc "Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
-    Dir.glob(File.join(d.directory, '*.tif')) do |f|
-      unless File.writable?(f)
-        puts "No write access, cancelling."
-        break
+    if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
+      puts "No directory given or directory does not exist."
+    else
+      Dir.glob(File.join(d.directory, '*.tif')) do |f|
+        unless File.writable?(f)
+          puts "No write access, cancelling."
+          break
+        end
+
+        basename = File.basename(f, '.tif')
+        barcode = (find_barcode(f).to_f / 10).floor.to_i
+
+        if barcode.nil? || (not CourseProf.exists?(barcode))
+          puts "bizarre #{basename}, exiting"
+          File.makedirs('tmp/images/bizarre')
+          File.move(f, 'tmp/images/bizarre')
+          next
+        end
+
+        form = CourseProf.find(barcode).course.form
+        File.makedirs("tmp/images/#{form}")
+        File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
+
+        puts "Moved to #{form}/#{basename} (#{barcode})"
       end
-
-      basename = File.basename(f, '.tif')
-      barcode = (find_barcode(f).to_f / 10).floor.to_i
-
-      if barcode.nil? || (not CourseProf.exists?(barcode))
-        puts "bizarre #{basename}, exiting"
-        File.makedirs('tmp/images/bizarre')
-        File.move(f, 'tmp/images/bizarre')
-        next
-      end
-
-      form = CourseProf.find(barcode).course.form
-      File.makedirs("tmp/images/#{form}")
-      File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
-
-      puts "Moved to #{form}/#{basename} (#{barcode})"
     end
   end
 end
