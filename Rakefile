@@ -79,6 +79,11 @@ def make_sample_sheet(form, hasTutors)
   Rake::Task[(filename + '.pdf').to_sym].invoke
 end
 
+def escapeForTeX(string)
+  # escapes & and % signs if not already done so
+  string.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
+end
+
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
     # first: the barcode
@@ -86,12 +91,12 @@ def make_pdf_for(s, cp, dirname)
     `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
 
     # second: the form
-    filename = dirname + cp.get_filename
+    filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
     File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dozent{' + cp.prof.fullname + '}' + "\n"
-    h << '\vorlesung{' + cp.course.title + '}' + "\n"
-    h << '\semester{' + s.title + '}' + "\n"
+    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
+    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
+    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
       h << '\tutoren{' + "\n"
@@ -99,6 +104,7 @@ def make_pdf_for(s, cp, dirname)
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
 
       tutoren.each_with_index do |t, i|
+        t = escapeForTeX(t)
         h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
       end
 
@@ -406,7 +412,7 @@ namespace :pdf do
     ['Mathematik', 'Physik'].each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
-      filename = f.gsub(' ','_') +'_'+ s.dirFriendlyName + '.tex'
+      filename = f.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
       File.open(dirname + filename, 'w') do |h|
         h.puts(s.evaluate(i, $dbh))
@@ -498,7 +504,7 @@ namespace :helper do
       print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
       print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
-      puts "</li>"
+      puts "<br/>&nbsp;</li>"
     end
     puts "</ul>"
   end
