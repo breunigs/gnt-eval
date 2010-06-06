@@ -50,14 +50,17 @@ class TutorsController < ApplicationController
   def create
     @tutor = @course.tutors.build(params[:tutor])
     existingTutors = @course.tutors.map { |x| x.abbr_name }
-    par = params[:tutor]['abbr_name'].split(',').map!{ |x| x.strip }
+    par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
+    failure = nil
     par.uniq.each do |p|
-        next if existingTutors.include? p
-        t = @course.tutors.build({'abbr_name'=>p})
-        t.save
+      next if existingTutors.include? p
+      t = @course.tutors.build({'abbr_name'=>p})
+      if not t.save
+        failure = true
+      end
     end
     respond_to do |format|
-      if @tutor.save
+      if failure.nil?
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @tutor, :status => :created, :location => @course }
