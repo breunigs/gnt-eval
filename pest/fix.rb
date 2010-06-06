@@ -11,9 +11,6 @@
 # in place, so once you close the script, no undo will be possible unless
 # you re-recognize the sheets.
 #
-# Known Bugs:
-# When the preload is active, hitting enter seems to have no effect
-#
 # Usage: fix.rb   working_dir
 
 require 'rubygems'
@@ -44,7 +41,6 @@ class PESTFix
         @files = []
         @dir = initGetWorkingDirectory
         @imgpath = ""
-        @preloadMePlease = nil
         @noChoiceDrawWidth = 40
         # Call writeYAML if you change this!
         @currentImage = -1
@@ -639,11 +635,13 @@ class PESTFix
 
         undoEnd
         a = @doc.questions
+        print "Direction: #{isPrev ? 'prev' : 'next'}   old quest: #{@currentQuestion}   "
         if isPrev
-            @currentQuestion = Math.max(a.size-1, @currentQuestion+1)
+            @currentQuestion = Math.max(0, @currentQuestion-1)
         else
-            @currentQuestion = Math.min(0, @currentQuestion-1)
+            @currentQuestion = Math.min(a.size-1, @currentQuestion+1)
         end
+        puts "new quest: #{@currentQuestion}"
         
         @group = a[@currentQuestion]
 
@@ -674,20 +672,20 @@ class PESTFix
     # Looks at all loaded @files and searches them for failed choices.
     # Selects the first failed question it finds. Pass true to look for
     # new files in the working directory if all loaded files are depleted
-    def questionFindFail(reparseDirectory = true, isPreload = false)
+    def questionFindFail(reparseDirectory = true)
         return unless @find_fail.sensitive?
-        @statusbar.push 99, "### PLEASE WAIT ### LOOKING FOR FAILED QUESTION ###" unless isPreload
+        @statusbar.push 99, "### PLEASE WAIT ### LOOKING FOR FAILED QUESTION ###"
         @cancelFindFail = false
         puts "Looking for wrongly answered question"
         # Deactivate while searching
         @find_fail.set_sensitive(false)
         undoEnd
 
-        writeYAML unless isPreload
+        writeYAML
 
         @files.each do |f|            
-            next if f[1] || (isPreload && @imgpath ==f[0])
-            isPreload ? processEvents : pulse
+            next if f[1]
+            pulse
             if @cancelFindFail
                 @statusbar.pop 99
                 return
@@ -704,10 +702,9 @@ class PESTFix
                 next if q.multi?
                 curImg = @files.index(f)
                 @find_fail.set_sensitive(true)
-                if !isPreload
-                    jumpToQuest(curImg, i)
-                    questionFindFailPreload
-                end
+
+                jumpToQuest(curImg, i)
+
                 @statusbar.pop 99                    
                 return curImg
             end
@@ -730,15 +727,6 @@ class PESTFix
         # Load at least some image if none has been displayed so far
         imagePrevNext(false) unless @doc
         return nil
-    end
-
-    # Finds the next failed question without jumping to it, instead pre-
-    # loads this image
-    def questionFindFailPreload        
-        @gtkThreadFindFail = Gtk.idle_add do
-            @preloadMePlease = questionFindFail(false, true)
-            sheetPreload
-        end
     end
 
     # Small helper function that avoids stalling the GUI when doing
@@ -783,13 +771,9 @@ class PESTFix
         oldImage = @currentImage
         if isPrev
             @currentImage-=1 if @currentImage > 0
-            @preloadMePlease = @currentImage - 1
         else
             @currentImage+=1 if @currentImage < (@files.length-1)
-            @preloadMePlease = @currentImage + 1
         end
-        
-        Gtk.idle_add { sheetPreload } 
 
         # Nothing changed, so we're already at the first/last image
         return if oldImage == @currentImage
@@ -834,79 +818,36 @@ class PESTFix
         f = @files[@currentImage]
         @imgpath = f[0]
 
-        # Check for preload
-        if @currentImage == @preloadID && @preloadIsDone
-            # We don't need to destroy @orig here since it is swapped
-            # with @preloadImage which gets destroyed later on
-            @orig, @preloadImage = @preloadImage, @orig
-            @doc = @preloadDoc
-            @yamlChanged = false
-            print "Pre-"
-        else
-            @orig.each { |x| x.destroy! } if @orig != nil
-            # Load new IMG            
-            dir = File.dirname(f[0])
-            file = File.basename(f[0], ".yaml")
-            img = dir + "/" + file + ".tif"
-
-            @doc = YAML::load(File.new(f[0]))
-            if !@doc
-                puts "ERROR: yaml file cannot be read or is broken: " + f[0]
-            end
-            @yamlChanged = false
-            
-            if File.exists?(img)
-                @orig = Magick::ImageList.new(img)
-                @dpifix = @orig[0].dpifix
-            else
-                # This is a small tweak that at least doesn't crash the
-                # application. It provides no info for the user what
-                # went wrong, but that shouldn't happen.
-                puts "ERROR: Image File not found: " + img
-                @orig = Magick::ImageList.new
-                @doc.pages.size.times do
-                    @orig << Magick::Image.new(2480, 3507) {
-                        self.background_color = 'grey'
-                    }
-                    @dpifix = 1
-                end
-            end
-            
-            
-        end
-
-        puts "Loading IMG+YAML " + f[0] + " (took: " + (Time.now-start_time).to_s + " s)"
-    end
-
-    # Loads the sheet given by @preloadMePlease into memory if possible
-    # The function is executed on the same thread as the caller, so avoid
-    # calling it when doing other processing. Try the following:
-    # <code>Gtk.idle_add { sheetPreload }</code>
-    def sheetPreload
-        # Don't preload the current or preloaded sheet
-        return if @currentImage == @preloadMePlease  || @preloadID == @preloadMePlease || !@preloadMePlease
-
-        # Mark the cache as invalid
-        @preloadIsDone = false
-        
-        # Don't preload non-existing sheets
-        return if @preloadMePlease <= 0 || @preloadMePlease > (@files.length-1)
-
-        start_time = Time.now
-        @preloadID = @preloadMePlease         
-        f = @files[@preloadMePlease]
-
-        @preloadImage.each { |x| x.destroy! } if @preloadImage != nil
-        
+        @orig.each { |x| x.destroy! } if @orig != nil
+        # Load new IMG            
         dir = File.dirname(f[0])
         file = File.basename(f[0], ".yaml")
         img = dir + "/" + file + ".tif"
+
+        @doc = YAML::load(File.new(f[0]))
+        if !@doc
+            puts "ERROR: yaml file cannot be read or is broken: " + f[0]
+        end
+        @yamlChanged = false
         
-        @preloadImage = Magick::ImageList.new(img)
-        @preloadDoc = YAML::load(File.new(f[0]))
-        
-        @preloadIsDone = true
-        puts "Preloading: " + f[0] + " (took: " + (Time.now-start_time).to_s + " s)"        
+        if File.exists?(img)
+            @orig = Magick::ImageList.new(img)
+            @dpifix = @orig[0].dpifix
+        else
+            # This is a small tweak that at least doesn't crash the
+            # application. It provides no info for the user what
+            # went wrong, but that shouldn't happen.
+            puts "ERROR: Image File not found: " + img
+            @orig = Magick::ImageList.new
+            @doc.pages.size.times do
+                @orig << Magick::Image.new(2480, 3507) {
+                    self.background_color = 'grey'
+                }
+                @dpifix = 1
+            end
+        end
+
+        puts "Loading IMG+YAML " + f[0] + " (took: " + (Time.now-start_time).to_s + " s)"
     end
 
     # This does most of the work related to generating the image. It
