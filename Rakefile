@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'lib/ext_requirements.rb'
