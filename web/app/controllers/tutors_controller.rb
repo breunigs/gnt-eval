@@ -48,7 +48,6 @@ class TutorsController < ApplicationController
   # POST /tutors
   # POST /tutors.xml
   def create
-    @tutor = @course.tutors.build(params[:tutor])
     existingTutors = @course.tutors.map { |x| x.abbr_name }
     par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
     failure = nil
