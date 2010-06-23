@@ -54,6 +54,10 @@ def tex_questions_for(form)
   ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][form]
 end
 
+def tex_none(form)
+  ['keine', 'keine', 'none', ''][form]
+end
+
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -100,9 +104,10 @@ def make_pdf_for(s, cp, dirname)
     h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
+      none = tex_none(cp.course.form)
       h << '\tutoren{' + "\n"
 
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
+      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
       tutoren.each_with_index do |t, i|
         t = escapeForTeX(t)
