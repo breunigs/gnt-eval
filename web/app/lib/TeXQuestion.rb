@@ -88,12 +88,13 @@ class TeXSingleQuestion
 
     # zweiten Balken nur ausgeben, wenn es überhaupt zweiten
     # Mittelwert resp. Std-Abweichung gibt
-    if @mittel_alle != 0 || @sigma_alle != 0
-      b << "          \\put(#{@a_mittel_pos},#{0-@y_offset}){\\circle{15}}\n"
+    if @mittel_alle != 0 || @sigma_alle != 0      
       b << "          \\put(#{@a_mittel_pos},#{0-@y_offset}){\\line(1,0){#{@var_a}}}\n"
       b << "          \\put(#{@a_mittel_pos},#{0-@y_offset}){\\line(-1,0){#{@var_a}}}\n"
       b << "          \\put(#{@a_mittel_pos-@var_a},#{-7-@y_offset}){\\line(0,1){14}}\n"
       b << "          \\put(#{@a_mittel_pos+@var_a},#{-7-@y_offset}){\\line(0,1){14}}\n"
+      b << "          \\put(#{@a_mittel_pos},#{0-@y_offset}){\\color{white}\\circle*{15}}\n"
+      b << "          \\put(#{@a_mittel_pos},#{0-@y_offset}){\\circle{15}}\n"
     end
     
     @antworten.each_index do |i|

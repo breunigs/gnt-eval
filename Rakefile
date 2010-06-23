@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'lib/ext_requirements.rb'
@@ -56,7 +57,7 @@ end
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  # Barcode  
+  # Barcode
   filename = dir + "barcode"
   `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
   # TeX
@@ -66,17 +67,22 @@ def make_sample_sheet(form, hasTutors)
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ ($curSem.title) +'}' + "\n"
-    
+
     h << '\tutoren{ \mmm[1][Mustafa Mustermann] Mustafa Mustermann & \mmm[2][Fred Nurk] Fred Nurk & \mmm[3][Ashok Kumar] Ashok Kumar & \mmm[4][Juan Pérez] Juan Pérez & \mmm[5][Jakob Mierscheid] Jakob Mierscheid\\\\ \mmm[6][Iwan Iwanowitsch] Iwan Iwanowitsch & \mmm[7][Pierre Dupont] Pierre Dupont & \mmm[8][John Smith] John Smith & \mmm[9][Eddi Exzellenz] Eddi Exzellenz & \mmm[10][Joe Bloggs] Joe Bloggs\\\\ \mmm[11][John Doe] John Doe & \mmm[12][\ ] \  & \mmm[13][\ ] \  & \mmm[14][\ ] \  & \mmm[15][\ ] \  \\\\ \mmm[16][\ ] \ & \mmm[17][\ ] \  & \mmm[18][\ ] \  & \mmm[19][\ ] \  & \mmm[20][\ ] \ \\\\ \mmm[21][\ ] \  & \mmm[22][\ ] \  & \mmm[23][\ ] \  & \mmm[24][\ ] \  & \mmm[25][\ ] \ \\\\ \mmm[26][\ ] \  & \mmm[27][\ ] \  & \mmm[28][\ ] \  & \mmm[29][\ ] \  & \mmm[30][\ keine] \ keine\\ }' if hasTutors
-    
+
     h << '\begin{document}' + "\n"
     h << tex_head_for(form) + "\n\n\n"
     h << tex_questions_for(form) + "\n"
     h << '\end{document}'
   end
-  
+
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
+end
+
+def escapeForTeX(string)
+  # escapes & and % signs if not already done so
+  string.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
 end
 
 # Creates form PDF file for given semester and CourseProf
@@ -86,12 +92,12 @@ def make_pdf_for(s, cp, dirname)
     `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
 
     # second: the form
-    filename = dirname + cp.get_filename
+    filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
     File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dozent{' + cp.prof.fullname + '}' + "\n"
-    h << '\vorlesung{' + cp.course.title + '}' + "\n"
-    h << '\semester{' + s.title + '}' + "\n"
+    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
+    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
+    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
       h << '\tutoren{' + "\n"
@@ -99,13 +105,14 @@ def make_pdf_for(s, cp, dirname)
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
 
       tutoren.each_with_index do |t, i|
+        t = escapeForTeX(t)
         h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
       end
 
       h << '}' + "\n"
     end
     h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form) + "\n\n\n" 
+    h << tex_head_for(cp.course.form) + "\n\n\n"
     h << tex_questions_for(cp.course.form) + "\n"
     h << '\end{document}'
     end
@@ -123,13 +130,13 @@ end
 
 namespace :images do
 
-  desc "Insert comment pictures from YAML/jpg in directory." +
+  desc "Insert comment pictures from YAML/jpg in directory. " +
        "Please supply all images to" +
        " /home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
   task :insertcomments, :directory do |t, d|
     Dir.glob(File.join(d.directory, '*.yaml')) do |f|
       basename = File.basename(f, '.yaml')
-      
+
       if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
@@ -137,7 +144,7 @@ namespace :images do
 
         course = CourseProf.find(barcode).course
 
-        # first cross is 1 !
+        # first checkbox is 1! (0 means 'no choice')
         if tutnum > 0
           tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
           if tutnum > tutors.count
@@ -165,7 +172,7 @@ namespace :images do
         p.save
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
-      
+
       if File.exists?(File.join(d.directory, basename + '-vorlcomment.jpg'))
         barcode = find_barcode_from_basename(basename)
 
@@ -177,33 +184,44 @@ namespace :images do
         p.save
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
-      
-    end
+    end # Dir glob
+
+    puts
+    puts "Please ensure that all comment pictures have been supplied to"
+    puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
+    puts "as that's where the web-seee will look for it."
+    puts "Be aware, that you can do so by running"
+    puts "\trake pest:copycomments"
   end
-  
-  desc "Work on the .tif's in directory and sort'em to tmp/images/..."
+
+  desc "(0) Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
-    Dir.glob(File.join(d.directory, '*.tif')) do |f|
-      unless File.writable?(f)
-        puts "No write access, cancelling."
-        break
+    if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
+      puts "No directory given or directory does not exist."
+    else
+      puts "Working directory is: #{d.directory}"
+      Dir.glob(File.join(d.directory, '*.tif')) do |f|
+        unless File.writable?(f)
+          puts "No write access, cancelling."
+          break
+        end
+
+        basename = File.basename(f, '.tif')
+        barcode = (find_barcode(f).to_f / 10).floor.to_i
+
+        if barcode.nil? || (not CourseProf.exists?(barcode))
+          puts "bizarre #{basename}, exiting"
+          File.makedirs('tmp/images/bizarre')
+          File.move(f, 'tmp/images/bizarre')
+          next
+        end
+
+        form = CourseProf.find(barcode).course.form
+        File.makedirs("tmp/images/#{form}")
+        File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
+
+        puts "Moved to #{form}/#{basename} (#{barcode})"
       end
-    
-      basename = File.basename(f, '.tif')
-      barcode = (find_barcode(f).to_f / 10).floor.to_i
-
-      if barcode.nil? || (not CourseProf.exists?(barcode))
-        puts "bizarre #{basename}, exiting"
-        File.makedirs('tmp/images/bizarre')
-        File.move(f, 'tmp/images/bizarre')
-        next
-      end
-
-      form = CourseProf.find(barcode).course.form
-      File.makedirs("tmp/images/#{form}")
-      File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
-
-      puts "Moved to #{form}/#{basename} (#{barcode})"
     end
   end
 end
@@ -250,7 +268,7 @@ namespace :pest do
       Dir.glob("#{f}*.tif") do |y|
         barcode = find_barcode_from_basename(File.basename(y, ".tif")) #find_barcode(y)/10
         cp = CourseProf.find(barcode)
-        make_pdf_for($curSem, cp, f)
+        make_pdf_for(cp.course.semester, cp, f)
         `mv -f "#{f + cp.get_filename}.yaml" "#{f}../#{File.basename(f)}.yaml"`
         break
       end
@@ -361,6 +379,12 @@ namespace :pest do
     system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
     system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}/\" \\;")
+
+    puts
+    puts "All comment pictures have been copied. If not already done so,"
+    puts "you need to make the web-seee know about them. Simply run"
+    puts "\trake images:insertcomments[directory]"
+    puts "for this. (needs path to the yaml-files)"
   end
 end
 
@@ -370,10 +394,10 @@ namespace :pdf do
     0.upto(3) do |i|
       make_sample_sheet(i, (i == 0 || i == 2))
     end
-    
+
     Rake::Task["clean".to_sym].invoke
   end
-  
+
   desc "makes the result pdfs preliminary"
   task :make_preliminary do
     Dir.glob("./tmp/[^orl]*[WS]S*.tex") do |d|
@@ -387,13 +411,14 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-file for a certain semester"
+  desc "create pdf-file for a certain semester (leave empty for current)"
   task :semester, :semester_id, :needs => 'db:connect' do |t, a|
-    s = Semester.find(a.semester_id)
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    s = Semester.find(sem)
     ['Mathematik', 'Physik'].each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
-      filename = f.gsub(' ','_') +'_'+ s.dirFriendlyName + '.tex'
+      filename = f.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
       File.open(dirname + filename, 'w') do |h|
         h.puts(s.evaluate(i, $dbh))
@@ -404,9 +429,10 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-form-files corresponding to blabla"
+  desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
-    s = Semester.find(a.semester_id)
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    s = Semester.find(sem)
     dirname = './tmp/'
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
         make_pdf_for(s, cp, dirname)
@@ -431,11 +457,70 @@ namespace :pdf do
     end
     Rake::Task["clean".to_sym].invoke
   end
+
+  desc "Create tutor blacklist for current semester"
+  task :blacklist, :needs => 'db:connect' do
+    class Float
+      def rtt
+        return ((self*10).round.to_f)/10
+      end
+    end
+    class NilClass
+      def rtt
+        return nil
+      end
+    end
+    tutors = $curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
+    tutors.each do |t|
+      puts [t.abbr_name, t.course.title[0,20], t.profit($dbh).rtt, t.teacher($dbh).rtt, t.competence($dbh).rtt, t.preparation($dbh).rtt, t.boegenanzahl($dbh)].join(' & ') + '\\\\'
+    end
+  end
 end
 
+namespace :helper do
+    desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
+    task :lsfparse do
+        puts "Finding IDs…"
+        require 'net/http'
+        url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+
+        req = Net::HTTP.get_response(URI.parse(url))
+        mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
+        physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
+
+        dir = "tmp/lsfparse/"
+        File.makedirs(dir)
+
+        puts "Mathe…"
+        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
+        puts "Physik…"
+        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+
+        puts
+        puts "All Done. Have a look in #{dir}"
+    end
+
+  desc "Generate lovely HTML output for our static website"
+  task :static_output do
+    puts "<ul>"
+    $curSem.courses.sort {|x,y| x.title <=> y.title }.each do |c|
+      tuts = c.tutors.collect{ |t| t.abbr_name }
+      profs = c.profs.collect{ |t| t.fullname }
+      hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
+      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
+      print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
+      print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
+      puts "<br/>&nbsp;</li>"
+    end
+    puts "</ul>"
+  end
+end
+
+
 namespace :crap do
-    desc "prints non-existing ranking that does not exist"
+    desc "does not print non-existing ranking that does not exist"
     task :rank, :needs => 'db:connect' do
+        # One query to RANK THEM ALL!
         query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_2` GROUP BY `barcode`) ORDER BY note ASC")
         query.execute()
         puts "Note\tStimmen\tVorlesung (Dozent)"
@@ -453,9 +538,9 @@ namespace :crap do
     end
 end
 
-namespace :summary do 
+namespace :summary do
   desc "fix some often encountered tex-errors in the summaries"
-  task :fixtex do 
+  task :fixtex do
     $curSem.courses.each do |c|
       if not c.summary.nil?
         puts "Warning: Unescaped %-sign? @ " + c.title if c.summary.match(/[^\\]%/)
@@ -466,7 +551,8 @@ namespace :summary do
       c.tutors.each do |t|
         if not t.comment.nil?
           puts "Warning: Unescaped %-sign? @ " + c.title + " / " + t.abbr_name if t.comment.match(/[^\\]%/)
-          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'').gsub("{itemsize}", "{itemize}")
+          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+          t.comment = t.comment.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{").gsub("/end{", "\\end{").gsub("/item ", "\\item ")
           t.save
         end
       end
@@ -475,19 +561,37 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-  3.times do
-    err = `cd "#{File.dirname(t.source)}";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex -halt-on-error "#{File.basename(t.source)}" 2>&1`
+    filename="\"#{File.basename(t.source)}\""
+    texpath="cd \"#{File.dirname(t.source)}\";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
+    # -halt-on-error: stops TeX after the first errir
+    # -file-line-error: displays file and line where the error occured
+    # -draftmode: doesn't create PDF, which speeds up TeX. Still does
+    #             syntax-checking and toc-creation
+    optfast="-halt-on-error -file-line-error -draftmode"
+    optreal="-halt-on-error -file-line-error"
+
+    # run it once fast, to see if there are any syntax errors in the
+    # text and create first-run-toc
+    err = `#{texpath} #{optfast} #{filename} 2>&1`
     if $?.to_i != 0
-      puts "="*50
-      puts err
-      break
+        puts "="*50
+        puts err
+        puts "ERROR WRITING: #{t.name}"
+        puts "EXIT CODE: #{$?}"
+        puts "="*50
+        exit
     end
-  end
-  if $?.to_i == 0
-    puts "Wrote #{t.name}"
-  else
-    puts "ERROR WRITING: #{t.name}"
-    puts "EXIT CODE: #{$?}"
-    puts "="*50
-  end
+
+    # run it fast a second time, to get /all/ references correct
+    `#{texpath} #{optfast} #{filename} 2>&1`
+    # now all references should have been resolved. Run it a last time,
+    # but this time also output a pdf
+    `#{texpath} #{optreal} #{filename} 2>&1`
+
+    if $?.to_i == 0
+        puts "Wrote #{t.name}"
+    else
+        puts "Some other error occured. It shouldn't be TeX-related, as"
+        puts "it already passed one run. Well, happy debugging."
+    end
 end

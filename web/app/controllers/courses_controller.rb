@@ -80,6 +80,10 @@ class CoursesController < ApplicationController
   # DELETE /courses/1.xml
   def destroy
     @course = Course.find(params[:id])
+    begin
+      @course.course_profs.each { |cp| cp.destroy }
+      @course.tutors.each { |t| t.destroy }
+    end
     @course.destroy
 
     respond_to do |format|

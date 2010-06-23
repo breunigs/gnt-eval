@@ -120,7 +120,8 @@ class PESTOmr
         start_time = Time.now
         print @spaces + "  Correcting Rotation" if @verbose
         @rad = []
-        @ilist.each do |img|
+        @ilist.each_with_index do |img,index|
+            next unless pageNeedsPositionData(index)
             topstart = findFirstPixelsFromLeft(sLeft, sTop, width, height, 9, img)
             botstart = findFirstPixelsFromLeft(sLeft, sBot, width, height, 9, img)
 
@@ -168,7 +169,7 @@ class PESTOmr
         # These values mark the coordinates where the objects used
         # for detection should actually be in a perfectly scanned
         # document. They are hardcoded, since they never change.
-        leftcut = [178*@dpifix, 178*@dpifix]
+        leftcut = [178*@dpifix, 168*@dpifix]
         topcut = [170*@dpifix, 165*@dpifix]
 
         # This will contain the offset for each sheet
@@ -189,6 +190,7 @@ class PESTOmr
         tWidth  = ( 400*@dpifix).to_i
         tHeight = ( 500*@dpifix).to_i
         0.upto(@numPages-1) do |i|
+            next unless pageNeedsPositionData(i)
             left = findFirstPixelsFromLeft(lLeft, lTop, lWidth, lHeight, leftThres[i], @ilist[i])
             top  =  findFirstPixelsFromTop(tLeft, tTop, tWidth, tHeight, topThres[i], @ilist[i])
 
@@ -379,17 +381,59 @@ class PESTOmr
         # Crop margins to remove black bars that appear due to rotated sheets
         s = 2*30*@dpifix
         i = @ilist[imgid]
-        i.fuzz = 0.25
-        c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim
+        c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim(true)
         return 0 if c.rows*c.columns < 500*@dpifix
-        # This algorithm is slow and error prone. FIXME FIXME FIXME
-        c = c.median_filter(0.05).trim
+        
+        c = c.resize(0.4)
+        step = 20*@dpifix
+        thres = 40
+        #     def blackPixels(x, y, width, height, img)
+        # Find left border
+        left = 0
+        while left < c.columns
+            break if blackPixels(left, 0, step, c.rows, c) > thres
+            left += step
+        end        
+        return 0 if left >= c.columns
+        puts left
+        
+        # Find right border
+        right = c.columns
+        while right > 0
+            break if blackPixels(right-step, 0, step, c.rows, c) > thres
+            right -= step
+        end        
+        return 0 if right < 0
+        #puts right
+        
+        # Find top border
+        top = 0
+        while top < c.rows
+            break if blackPixels(0, top, c.columns, step, c) > thres
+            top += step
+        end        
+        return 0 if top >= c.rows
+        #puts top
+        
+        # Find bottom border
+        bottom = c.rows
+        while bottom > 0
+            break if blackPixels(0, bottom-step, c.columns, step, c) > thres
+            bottom -= step
+        end        
+        return 0 if bottom < 0
+        #puts bottom
+        
+        c.crop!(left-10, top-10, right-left+20, bottom-top+20, true)
+        c.trim!(true)
+        
         return 0 if c.rows*c.columns < 500*@dpifix
         
         filename = @path + "/" + File.basename(@currentFile, ".tif")
         filename << group.saveas + ".jpg"
         puts @spaces + "    Saving Comment Image: " + filename if @verbose
-        c.resize(0.4).write filename
+        c.write filename
+
         return 1
     end
 
@@ -502,7 +546,7 @@ class PESTOmr
             begin
                 @draw.draw(@ilist[i]) if @debug
             rescue
-                puts @spaces + "Nothing to draw :(" if @debug
+                puts @spaces + "  Nothing to draw :(" if @debug
             end
         end
 
@@ -559,6 +603,13 @@ class PESTOmr
         fout = File.open(newfile, "w")
         fout.puts YAML::dump(@doc)
         fout.close
+    end
+    
+    # Finds if a given page for the currently loaded @doc requires
+    # knowledge about offset and rotation. 
+    def pageNeedsPositionData(id)
+        q = @doc.pages[id].questions
+        !(q.nil? || q.empty? || q.any? {|x| x.type == "text_wholepage"})
     end
 
     # Helper function that determines where the parsed data should go

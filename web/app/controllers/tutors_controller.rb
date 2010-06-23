@@ -1,6 +1,6 @@
 class TutorsController < ApplicationController
   before_filter :load_course
-  
+
   def load_course
     if not params[:course_id].nil?
           @course = Course.find(params[:course_id])
@@ -10,7 +10,7 @@ class TutorsController < ApplicationController
   # GET /tutors.xml
   def index
     @tutors = @course.tutors.find(:all)
-    
+
     respond_to do |format|
       format.html # index.html.erb
       format.xml  { render :xml => @tutors }
@@ -48,18 +48,25 @@ class TutorsController < ApplicationController
   # POST /tutors
   # POST /tutors.xml
   def create
-    @tutor = @course.tutors.build(params[:tutor])
-    par = params[:tutor]['abbr_name'].split(',').map!{ |x| x.strip }
-    par.each { |p| t = @course.tutors.build({'abbr_name'=>p} ); t.save }
+    existingTutors = @course.tutors.map { |x| x.abbr_name }
+    par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
+    failure = nil
+    par.uniq.each do |p|
+      next if existingTutors.include? p
+      t = @course.tutors.build({'abbr_name'=>p})
+      if not t.save
+        failure = true
+      end
+    end
     respond_to do |format|
-#      if @tutor.save
+      if failure.nil?
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @tutor, :status => :created, :location => @course }
-#     else
-#        format.html { render :action => "new" }
-#        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
-#      end
+     else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
+      end
     end
   end
 

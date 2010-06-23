@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 class Postoffice < ActionMailer::Base
-
+  def profanrede(course)
+    return course.profs.map{ |p| 'sehr ' + ['geehrte Frau',
+                                         'geehrter Herr'][p.gender] + 
+                              ' ' + p.surname.strip }.join(', ').
+             gsub(/^(\w)/) { $1.chars.first.capitalize }
+  end
+  
   def ankuendigungsmail(course_id)
     c = Course.find(course_id)
 
@@ -12,13 +18,9 @@ class Postoffice < ActionMailer::Base
     content_type 'text/plain'
     sent_on Time.now
     
-    anrede = c.profs.map{ |p| 'sehr ' + ['geehrte Frau',
-                                         'geehrter Herr'][p.gender] + 
-                              ' ' + p.surname.strip }.join(', ').
-             gsub(/^(\w)/) { $1.chars.first.capitalize }
     
     body[:course] = c
-    body[:anrede] = anrede
+    body[:anrede] = profanrede(c)
   end
 
   def erinnerungsmail(course_id)
@@ -36,5 +38,23 @@ class Postoffice < ActionMailer::Base
       gsub(/^(\w)/) { $1.chars.first.capitalize }
     body[:course] = c
     body[:anrede] = anrede
+  end
+  
+  # verschickt die eval, will faculty_links ist array mit
+  # faculty_links[faculty] =
+  # 'http://mathphys.fsk.uni-heidelberg.de/~eval/.uieduie/Ich_bin_das_richtige_file.pdf'
+  def evalverschickung(course_id, faculty_links)
+    c = Course.find(course_id)
+    recipients c.profs.collect{ |p| p.email }.join(', ')
+    from 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    bcc 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    subject 'Ergebnisse der diessemestrigen Vorlesungsumfrage'
+    headers 'Reply-To' => 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    content_type 'text/plain'
+    sent_on Time.now
+    
+    body[:title] = c.title
+    body[:anrede] = profanrede(c)
+    body[:link] = faculty_links[c.faculty] + '#nameddest=' + course_id.to_s
   end
 end
