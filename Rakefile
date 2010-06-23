@@ -514,6 +514,7 @@ namespace :helper do
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
       print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
+      print "; #{c.description}" unless c.description.empty?
       print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "<br/>&nbsp;</li>"
     end
