@@ -36,7 +36,7 @@
   </p>
   <p>
     <b>Faculty</b><br />
-    <%= f.select('faculty', {'Mathe/Info' => 0, 'Physik'=> 1}) %>
+    <%= collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}) %>
   </p>
   <p>
     <b>Summary</b><br />

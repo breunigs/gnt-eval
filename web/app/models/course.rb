@@ -4,6 +4,7 @@
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
   belongs_to :semester
+  belongs_to :faculty
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
@@ -47,8 +48,7 @@ class Course < ActiveRecord::Base
     @dbh = dbh
     @db_table = form.db_table
 
-    this_eval = ['Mathematik', 'Physik'][faculty] + ' ' +
-      semester.title
+    this_eval = faculty.longname + ' ' + semester.title
 
     boegenanzahl = count_forms({ :barcode => course_profs.map{ |cp|
                                    cp.barcode.to_i}})
