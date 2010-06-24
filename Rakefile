@@ -54,6 +54,10 @@ def tex_questions_for(form)
   ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][form]
 end
 
+def tex_none(form)
+  ['keine', 'keine', 'none', ''][form]
+end
+
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -100,9 +104,10 @@ def make_pdf_for(s, cp, dirname)
     h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
+      none = tex_none(cp.course.form)
       h << '\tutoren{' + "\n"
 
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
+      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
       tutoren.each_with_index do |t, i|
         t = escapeForTeX(t)
@@ -431,6 +436,7 @@ namespace :pdf do
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
+    `mkdir tmp` unless File.exists?('./tmp/')
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
     dirname = './tmp/'
@@ -509,6 +515,7 @@ namespace :helper do
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
       print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
+      print "; #{c.description}" unless c.description.empty?
       print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "<br/>&nbsp;</li>"
     end
