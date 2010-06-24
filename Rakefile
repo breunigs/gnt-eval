@@ -436,6 +436,7 @@ namespace :pdf do
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
+    `mkdir tmp` unless File.exists?('./tmp/')
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
     dirname = './tmp/'
