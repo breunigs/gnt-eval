@@ -20,7 +20,7 @@ class CourseProf < ActiveRecord::Base
     @db_table = form.db_table  
 
     b = ''
-    this_eval = course.faculty.longame + ' ' + course.semester.title
+    this_eval = course.faculty.longname + ' ' + course.semester.title
     
     boegenanzahl = count_forms({:barcode => barcode.to_i}) 
 

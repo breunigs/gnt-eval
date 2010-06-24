@@ -417,16 +417,16 @@ namespace :pdf do
   end
 
   desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => 'db:connect' do |t, a|
+  task :semester, :semester_id, :needs => ['db:connect', 'pdf:samplesheets'] do |t, a|
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
-    ['Mathematik', 'Physik'].each_with_index do |f,i|
+    Faculty.find(:all).each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
-      filename = f.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
+      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
       File.open(dirname + filename, 'w') do |h|
-        h.puts(s.evaluate(i, $dbh))
+        h.puts(s.evaluate(f, $dbh))
       end
 
       puts "Wrote #{dirname+filename}"
