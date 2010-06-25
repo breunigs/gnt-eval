@@ -521,6 +521,50 @@ namespace :helper do
     end
     puts "</ul>"
   end
+  
+  desc "Generate crappy output sorted by day for simplified packing"
+  task :packing_sheet do
+    crap = '<meta http-equiv="content-type" content=
+  "text/html; charset=utf-8"><style> td { border-right: 1px solid #000; } .odd { background: #eee; }</style><table>'
+    # used for sorting
+    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5]
+    # used for counting
+    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0]
+    d = $curSem.courses.sort do |x,y|
+      a = x.description.strip.downcase
+      b = y.description.strip.downcase
+      
+      if h[a[0..1]] > h[b[0..1]]
+        1
+      elsif h[a[0..1]] < h[b[0..1]]
+        -1
+      else
+        b <=> a
+      end
+    end
+    
+    odd = false
+    d.each do |c|
+       odd = !odd
+       count[c.description.strip[0..1].downcase] += 1
+       if odd
+         crap << "<tr>"
+       else
+         crap << "<tr class='odd'>"
+       end
+       crap << "<td>#{c.description}</td>"
+       crap << "<td>#{c.title}</td>"
+       crap << "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>"
+       crap << "<tr>"
+    end
+    crap << "</table><br><br>"
+    count.each { |k,v| crap << "#{k}: #{v}<br/>" }
+    `mkdir -p ./tmp/`
+    p = './tmp/mappen_packen.html'
+    File.open(p, 'w') {|f| f.write(crap) }
+    `x-www-browser #{p}`
+    puts "Wrote and opened #{p}"
+  end
 end
 
 
