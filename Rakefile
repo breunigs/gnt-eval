@@ -390,6 +390,10 @@ namespace :pest do
     puts "you need to make the web-seee know about them. Simply run"
     puts "\trake images:insertcomments[directory]"
     puts "for this. (needs path to the yaml-files)"
+    puts "Usually you want to run this for:"
+    puts "\tseee/tmp/images/0"
+    puts "\tseee/tmp/images/1"  
+    puts "\t..."  
   end
 end
 
