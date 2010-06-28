@@ -608,6 +608,7 @@ class PESTOmr
     # Finds if a given page for the currently loaded @doc requires
     # knowledge about offset and rotation. 
     def pageNeedsPositionData(id)
+        throw :documentHasTooFewPages_CheckForMissingPageBreak if @doc.pages[id].nil?
         q = @doc.pages[id].questions
         !(q.nil? || q.empty? || q.any? {|x| x.type == "text_wholepage"})
     end
@@ -656,7 +657,15 @@ class PESTOmr
                 puts  " (" + percentage + "%)"
             end
 
-            parseFile(file)
+            begin
+              parseFile(file)
+            rescue => e
+              puts @spaces + "FAILED: #{file}"
+              File.open("PEST_OMR_ERROR.log", 'a+') do |errlog| 
+                errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace}")
+              end
+              exit
+            end
 
             if @verbose
                 puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s"
