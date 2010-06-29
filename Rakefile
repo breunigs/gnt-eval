@@ -584,8 +584,9 @@ end
 namespace :crap do
     desc "does not print non-existing ranking that does not exist"
     task :rank, :needs => 'db:connect' do
+        s = $curSem.title.gsub(" ", "_")
         # One query to RANK THEM ALL!
-        query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_WS_2009_10_2` GROUP BY `barcode`) ORDER BY note ASC")
+        query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_2` GROUP BY `barcode`) ORDER BY note ASC")
         query.execute()
         puts "Note\tStimmen\tVorlesung (Dozent)"
         while row = query.fetch() do
