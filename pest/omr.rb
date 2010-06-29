@@ -625,12 +625,19 @@ class PESTOmr
 
         # Look for each file
         filesExist = false
+        msg = []
         files.delete_if do |file|
             fn = getNewFileName(file)
             fileExist = File.exist?(fn) && File.size(fn) > 0
-            puts @spaces + "  WARNING: File already exists: " + fn if fileExist
+            msg << @spaces + "  WARNING: File already exists: " + fn if fileExist
             fileExist
         end
+        if msg.size > 10
+          puts @spaces + "  WARNING: #{msg.size} files already exist and have been skipped."
+        else
+          puts msg.join("\n")
+        end
+        
         files
     end
 
@@ -664,6 +671,8 @@ class PESTOmr
               File.open("PEST_OMR_ERROR.log", 'a+') do |errlog| 
                 errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace}")
               end
+              puts "="*20
+              puts "OMR is EXITING! Fix this issue before attemping again!"
               exit
             end
 

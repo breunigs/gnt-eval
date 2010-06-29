@@ -1,5 +1,5 @@
 --- !ruby/object:Form
-db_table: evaldaten_WS_2009_10_0
+db_table: evaldaten_SS_2010_0
 lang_quest_for_vorl_f: "Fragen zur Vorlesung (Dozentin: #1, Bögen: #2)"
 lang_quest_for_vorl_m: "Fragen zur Vorlesung (Dozent: #1, Bögen: #2)"
 pages: 
