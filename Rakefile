@@ -127,6 +127,15 @@ def make_pdf_for(s, cp, dirname)
     `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
+# automatically calls rake -T when no task is given
+task :default do
+  puts "Choose your destiny:"
+  # remove first line because no one cares about the current directory
+  d = `rake -T`.split("\n")
+  d.shift
+  puts d.join("\n")
+end
+
 namespace :db do
   task :connect do
     $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
