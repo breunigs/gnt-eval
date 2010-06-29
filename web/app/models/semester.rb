@@ -13,7 +13,7 @@ class Semester < ActiveRecord::Base
   def evaluate(faculty, dbh)
     b = ''
 
-    cs = courses.find_all{ |c| c.faculty == faculty }.sort{ |x,y| x.title <=> y.title }
+    cs = courses.find_all{ |c| c.faculty_id == faculty.id }.sort{ |x,y| x.title <=> y.title }
     
     # now this IS a global variable, and we just set it for performance reasons. it is a
     # list of all barcodes corresponding to faculty and semester.
