@@ -1,0 +1,20 @@
+<h1>Listing faculties</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+
+<% for faculty in @faculties %>
+  <tr>
+    <td><%=h faculty.name %></td>
+    <td><%= link_to 'Show', faculty %></td>
+    <td><%= link_to 'Edit', edit_faculty_path(faculty) %></td>
+    <td><%= link_to 'Destroy', faculty, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New faculty', new_faculty_path %>

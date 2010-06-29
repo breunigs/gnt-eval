@@ -16,7 +16,7 @@
     <th>Faculty</th>
   </tr>
 
-<% for course in @courses.find_all{|c| c.semester.now? && c.faculty != 2}.sort_by { |c| c.title } %>
+<% for course in @courses.find_all{|c| c.semester.now? }.sort_by { |c| c.title } %>
   <tr style="<%= cycle('background: #efefef', 'background:#ffffff') %>">
     <td><%=h course.semester.title %></td>
     <td><%= link_to course.title, course %></td>
@@ -24,7 +24,7 @@
     <td><%=h course.evaluator %></td>
     <td><%=h course.profs.map { |p| p.fullname + " " } %></td>
     <td><%=h course.description %></td>
-    <td><%=h course.faculty %></td>
+    <td><%=h course.faculty.shortname %></td>
 <!--    <td><%= link_to 'Show', course %></td>-->
   </tr>
 <% end %>

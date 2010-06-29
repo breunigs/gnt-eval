@@ -54,6 +54,10 @@ def tex_questions_for(form)
   ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][form]
 end
 
+def tex_none(form)
+  ['keine', 'keine', 'none', ''][form]
+end
+
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -100,9 +104,10 @@ def make_pdf_for(s, cp, dirname)
     h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form != 3
+      none = tex_none(cp.course.form)
       h << '\tutoren{' + "\n"
 
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) + ["\\ keine"]
+      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
       tutoren.each_with_index do |t, i|
         t = escapeForTeX(t)
@@ -385,6 +390,10 @@ namespace :pest do
     puts "you need to make the web-seee know about them. Simply run"
     puts "\trake images:insertcomments[directory]"
     puts "for this. (needs path to the yaml-files)"
+    puts "Usually you want to run this for:"
+    puts "\tseee/tmp/images/0"
+    puts "\tseee/tmp/images/1"  
+    puts "\t..."  
   end
 end
 
@@ -412,16 +421,16 @@ namespace :pdf do
   end
 
   desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => 'db:connect' do |t, a|
+  task :semester, :semester_id, :needs => ['db:connect', 'pdf:samplesheets'] do |t, a|
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
-    ['Mathematik', 'Physik'].each_with_index do |f,i|
+    Faculty.find(:all).each_with_index do |f,i|
       dirname = './tmp/'
       `mkdir tmp` unless File.exists?('./tmp/')
-      filename = f.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
+      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
       File.open(dirname + filename, 'w') do |h|
-        h.puts(s.evaluate(i, $dbh))
+        h.puts(s.evaluate(f, $dbh))
       end
 
       puts "Wrote #{dirname+filename}"
@@ -431,6 +440,7 @@ namespace :pdf do
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
+    `mkdir tmp` unless File.exists?('./tmp/')
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
     dirname = './tmp/'
@@ -509,10 +519,55 @@ namespace :helper do
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
       print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
+      print "; #{c.description}" unless c.description.empty?
       print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
       puts "<br/>&nbsp;</li>"
     end
     puts "</ul>"
+  end
+  
+  desc "Generate crappy output sorted by day for simplified packing"
+  task :packing_sheet do
+    crap = '<meta http-equiv="content-type" content=
+  "text/html; charset=utf-8"><style> td { border-right: 1px solid #000; } .odd { background: #eee; }</style><table>'
+    # used for sorting
+    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5]
+    # used for counting
+    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0]
+    d = $curSem.courses.sort do |x,y|
+      a = x.description.strip.downcase
+      b = y.description.strip.downcase
+      
+      if h[a[0..1]] > h[b[0..1]]
+        1
+      elsif h[a[0..1]] < h[b[0..1]]
+        -1
+      else
+        b <=> a
+      end
+    end
+    
+    odd = false
+    d.each do |c|
+       odd = !odd
+       count[c.description.strip[0..1].downcase] += 1
+       if odd
+         crap << "<tr>"
+       else
+         crap << "<tr class='odd'>"
+       end
+       crap << "<td>#{c.description}</td>"
+       crap << "<td>#{c.title}</td>"
+       crap << "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>"
+       crap << "<tr>"
+    end
+    crap << "</table><br><br>"
+    count.each { |k,v| crap << "#{k}: #{v}<br/>" }
+    `mkdir -p ./tmp/`
+    p = './tmp/mappen_packen.html'
+    File.open(p, 'w') {|f| f.write(crap) }
+    `x-www-browser #{p}`
+    puts "Wrote and opened #{p}"
   end
 end
 

@@ -23,13 +23,13 @@ class Semester < ActiveRecord::Base
     @dbh = dbh
     @db_table = cs.map { |c| c.form.to_form.db_table }.uniq
 
-    evalname = ['Mathematik', 'Physik'][faculty] + ' ' + title
+    evalname = faculty.longname + ' ' + title
     anzahl_boegen = count_forms({})
 
     b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
                    c.profs.count }, cs.inject(0) { |sum, c| sum +
                    c.tutors.count }, anzahl_boegen)
-    b << TeXVorwort(['Mathematik und Informatik', 'Physik und Astronomie'][faculty], title)
+    b << TeXVorwort(faculty.longname, title)
 
     cs.each do |c|
       b << c.evaluate(dbh)

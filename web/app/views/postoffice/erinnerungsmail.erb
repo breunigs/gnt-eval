@@ -1,1 +1,34 @@
-erinnerungsmail.text.plain.erb
+<%= word_wrap(@anrede, 72) %>,
+
+bitte lies diese Mail ganz genau.
+
+Du hast des großartige Glück, im Zeitraum vom 28. Juni bis 2. Juli am
+
+	<%= @course.description %>
+
+die Veranstaltung
+
+	<%= @course.title %>
+
+bei
+
+	<%= @course.profs.map{ |p| p.fullname }.join(', ') %>
+	
+zu evaluieren. Sollten oben keine näheren Daten zur Veranstaltung
+stehen, so liegt das nicht etwa daran, dass das Eval-Team es verpennt
+hat, dir alle Informationen zusammen zu suchen, sondern einzig und
+allein daran, dass dich das Eval-Team dazu nötigen möchte, dich
+eigenständig im LSF nach den Infos zu erkundigen.
+
+Wie eine Eval genau funktioniert, solltest du eigentlich wissen. Wenn
+nicht, ist das auch nicht weiter schlimm. Wenn du die Mappe abholst,
+in der die ganzen Bögen sind, findest du da auch noch ein Eval-Howto.
+
+Auf eine Sache achte bitte ganz genau: Manche Veranstaltungen sind bei
+mehreren Dozent_innen. Die Übungsgruppen dürfen aber nur pro Person
+EIN MAL evaluiert werden. Also GANZ GENAU drauf hinweisen.
+
+Bei Problemen jeglicher Art antworte bitte umgehend auf diese E-Mail.
+
+Tata,
+Oliver.
