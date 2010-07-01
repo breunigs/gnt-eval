@@ -208,7 +208,7 @@ namespace :images do
     puts "\trake pest:copycomments"
   end
 
-  desc "(0) Work on the .tif's in directory and sort'em to tmp/images/..."
+  desc "(1) Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
       puts "No directory given or directory does not exist."
@@ -274,7 +274,7 @@ namespace :mail do
 end
 
 namespace :pest do
-  desc '(1) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
+  desc '(2) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
   task :getyamls, :needs => 'db:connect' do |t|
     # FIXME: This can surely be done simpler by directly finding
     # a form for the current semester
@@ -289,31 +289,35 @@ namespace :pest do
     end
   end
 
-  desc "(2) Create db tables for each form for the available YAML files"
+  # note: this is called automatically by yaml2db
+  desc "Create db tables for each form for the available YAML files"
   task :createtables, :needs => 'db:connect' do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
         name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
 
+        # Note that the barcode is only unique for each CourseProf, but
+        # not for each sheet. That's why path is used as unique key.
         q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
-        q += "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
-        q += "`barcode` INT(11) default NULL, "
+        q << "`path` VARCHAR(255) CHARACTER SET utf8 NOT NULL UNIQUE, "
+        q << "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+        q << "`barcode` INT(11) default NULL, "
 
         yaml.questions.each do |quest|
             next if quest.db_column.nil?
             if quest.db_column.is_a?(Array)
                 quest.db_column.each do |a|
-                    q += "`" + a + "` SMALLINT(6) UNSIGNED, "
+                    q << "`#{a}` SMALLINT(6) UNSIGNED, "
                 end
             else
-                q += '`'+ quest.db_column.to_s + "` SMALLINT(6) UNSIGNED, "
+                q << "`#{quest.db_column}` SMALLINT(6) UNSIGNED, "
             end
         end
-        q += "PRIMARY KEY (id)"
-        q += ");"
+        q << "PRIMARY KEY (id)"
+        q << ");"
 
         puts "Creating #{name}"
-        $dbh.execute(q)
+        $dbh.do(q)
     end
   end
 
@@ -331,17 +335,29 @@ namespace :pest do
       `./pest/fix.rb ./tmp/images/`
   end
 
-  desc "(5) Copies YAML data into database"
-  task :yaml2db, :needs => 'db:connect' do
-    Dir.glob("./tmp/images/[0-9]*/*.yaml").each do |f|
+  desc "(5) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."
+  task :yaml2db, :update, :needs => ['db:connect', 'pest:createtables'] do |t,a|
+
+    update = !a.update.nil? && a.update == "update"
+    puts "Will be updating already existing entries." if update
+
+    allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
+    count = allfiles.size
+
+    allfiles.each_with_index do |f, cc|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
+      table = "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
+
       keys = Array.new
       vals = Array.new
 
       # Get barcode
       keys << "barcode"
       vals << find_barcode_from_basename(File.basename(f, ".yaml")).to_s
+
+      keys << "path"
+      vals << f
 
       yaml.questions.each do |q|
         next if q.type == "text" || q.type == "text_wholepage"
@@ -360,19 +376,25 @@ namespace :pest do
           keys << q.db_column
         end
       end
-      q = "INSERT INTO `evaldaten_"
-      q << $curSem.dirFriendlyName
-      q << "_#{form}` ("
+
+      # If 'update' is specified we delete all existing entries and re-
+      # insert them later. Since `path` is UNIQUE insert queries will
+      # simply fail if the path already exists.
+      # Yes, this is cheap hack.
+      $dbh.do("DELETE FROM `#{table}` WHERE `path` = ?", f) if update
+
+      # "ignore" makes MySQL stop complaining about duplicate unique
+      # keys (path in our case)
+      q = "INSERT IGNORE INTO `#{table}` ("
       q << keys.join(", ")
       q << ") VALUES ("
-      q << vals.join(", ")
+      # inserts right amount of question marks for easy
+      # escaping
+      q << (["?"]*(vals.size)).join(", ")
       q << ")"
 
-      print "."
-      STDOUT.flush
-
       begin
-        $dbh.execute(q)
+        $dbh.do(q, *vals)
       rescue DBI::DatabaseError => e
         puts
         puts "Failed to insert #{form}/#{File.basename(f)}"
@@ -381,7 +403,14 @@ namespace :pest do
         puts "Error message: #{e.errstr}"
         puts "Error SQLSTATE: #{e.state}"
         puts
+        puts "Aborting."
+        exit
       end
+
+      perc = ((cc+1).to_f/count.to_f*100.0).to_i.to_s.rjust(3)
+      curr = (cc+1).to_s.rjust(count.to_s.size)
+      print "\r#{perc}% (#{curr}/#{count})"
+      STDOUT.flush
     end
     puts
     puts "Done!"
@@ -390,6 +419,7 @@ namespace :pest do
   desc "(6) Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."
+    # FIXME. This shouldn't be specified here
     system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
     system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}/\" \\;")
@@ -401,8 +431,8 @@ namespace :pest do
     puts "for this. (needs path to the yaml-files)"
     puts "Usually you want to run this for:"
     puts "\tseee/tmp/images/0"
-    puts "\tseee/tmp/images/1"  
-    puts "\t..."  
+    puts "\tseee/tmp/images/1"
+    puts "\t..."
   end
 end
 
@@ -534,7 +564,7 @@ namespace :helper do
     end
     puts "</ul>"
   end
-  
+
   desc "Generate crappy output sorted by day for simplified packing"
   task :packing_sheet do
     crap = '<meta http-equiv="content-type" content=
@@ -546,7 +576,7 @@ namespace :helper do
     d = $curSem.courses.sort do |x,y|
       a = x.description.strip.downcase
       b = y.description.strip.downcase
-      
+
       if h[a[0..1]] > h[b[0..1]]
         1
       elsif h[a[0..1]] < h[b[0..1]]
@@ -555,7 +585,7 @@ namespace :helper do
         b <=> a
       end
     end
-    
+
     odd = false
     d.each do |c|
        odd = !odd
