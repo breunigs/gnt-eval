@@ -111,7 +111,7 @@ class Course < ActiveRecord::Base
     b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
     b << "\\end{tabular}\\hfill\\null\n\n"
 
-    b << "\\zusammenfassung{" + (form.isEnglish? ? "Summary" : "Zusammenfassung" ) + "}\n"
+    b << "\\zusammenfassung{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n"
     b << summary.to_s
     b << "\n\\medskip\n\n"
 
