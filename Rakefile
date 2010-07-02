@@ -127,6 +127,15 @@ def make_pdf_for(s, cp, dirname)
     `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
+# Prints the current progress to the console without advancing one line
+# val: currently processed item
+# max: amount of items to process
+def printProgress(val, max)
+      percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
+      current = val.to_s.rjust(max.to_s.size)
+      print "\r#{percentage}% (#{current}/#{max})"
+end
+
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
@@ -149,12 +158,18 @@ namespace :images do
     dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
     puts "Working directory is #{dd}."
 
-    Dir.glob(File.join(dd, '*.yaml')) do |f|
+    # find all existing images for courses/profs and tutors
+    cpics = CPic.find(:all)
+    tpics = Pic.find(:all)
+
+    allfiles = Dir.glob(File.join(dd, '*.yaml'))
+    allfiles.each_with_index do |f, curr|
       basename = File.basename(f, '.yaml')
       curdir = File.dirname(f)
 
       # find comments for the tutors
-      if File.exists?(File.join(curdir, basename + '-tutorcomment.jpg'))
+      tname = basename + '-tutorcomment.jpg'
+      if File.exists?(File.join(curdir, tname)) && tpics.select { |x| x.basename == tname }.empty?
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
         barcode = find_barcode_from_basename(basename)
@@ -165,21 +180,22 @@ namespace :images do
         if tutnum > 0
           tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
           if tutnum > tutors.count
-            puts "Did nothing with #{basename}, #{tutnum} > #{tutors.count}"
+            $stderr.print "\nDid nothing with #{basename}, #{tutnum} > #{tutors.count}\n"
           else
             p = Pic.new
             p.tutor_id = tutors[tutnum-1].id
             p.basename = basename + '-tutorcomment.jpg'
             p.save
-            puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
+            #~ puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
           end
         else
-          puts "Did nothing with #{basename}, tutnum is #{tutnum}"
+          $stderr.print "\nDid nothing with #{basename}, tutnum is 0 (no choice made)\n"
         end
       end
 
       # finds comments for uhm… seminar sheet maybe?
-      if File.exists?(File.join(curdir, basename + '-comment.jpg'))
+      xname = basename + '-comment.jpg'
+      if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
@@ -188,11 +204,12 @@ namespace :images do
         p.course_id = course.id
         p.basename = basename + '-comment.jpg'
         p.save
-        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
 
       # insert comments for profs
-      if File.exists?(File.join(curdir, basename + '-vorlcomment.jpg'))
+      cname = basename + '-vorlcomment.jpg'
+      if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
@@ -201,8 +218,10 @@ namespace :images do
         p.course_id = course.id
         p.basename = basename + '-vorlcomment.jpg'
         p.save
-        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
+
+      printProgress(curr+1, allfiles.size)
     end # Dir glob
 
     puts
@@ -350,7 +369,7 @@ namespace :pest do
     allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
     count = allfiles.size
 
-    allfiles.each_with_index do |f, cc|
+    allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
       table = "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
@@ -413,9 +432,7 @@ namespace :pest do
         exit
       end
 
-      perc = ((cc+1).to_f/count.to_f*100.0).to_i.to_s.rjust(3)
-      curr = (cc+1).to_s.rjust(count.to_s.size)
-      print "\r#{perc}% (#{curr}/#{count})"
+      printProgress(curr + 1, count)
       STDOUT.flush
     end
     puts
@@ -435,7 +452,7 @@ namespace :pest do
     puts "you need to make the web-seee know about them. Simply run"
     puts "\trake images:insertcomments"
     puts "for this."
-  end
+23  end
 end
 
 namespace :pdf do
