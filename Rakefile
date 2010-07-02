@@ -257,7 +257,8 @@ namespace :images do
       puts "No directory given or directory does not exist."
     else
       puts "Working directory is: #{d.directory}"
-      Dir.glob(File.join(d.directory, '*.tif')) do |f|
+      files = Dir.glob(File.join(d.directory, '*.tif'))
+      files.each_with_index do |f, curr|
         unless File.writable?(f)
           puts "No write access, cancelling."
           break
@@ -277,7 +278,8 @@ namespace :images do
         File.makedirs("tmp/images/#{form}")
         File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
-        puts "Moved to #{form}/#{basename} (#{barcode})"
+        #~ puts "Moved to #{form}/#{basename} (#{barcode})"
+        printProgress(curr+1, files.size)
       end
     end
   end
