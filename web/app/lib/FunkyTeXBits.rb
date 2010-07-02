@@ -2,14 +2,8 @@
 # -*- coding: utf-8 -*-
 
 module FunkyTeXBits
-  def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
+  def praeambel(evalname, single = nil)
     b = ''
-
-    # FIXME: Need to encapsulate form stuff. I.e. if it's a seminar,
-    # a lecture and if it's German or English. The class should
-    # automatically provide appropriate strings for all language
-    # specifics
-
     if single.nil?
       b << "\\documentclass[pagesize,halfparskip-,headsepline," +
         "cleardoubleempty]{scrbook}\n"
@@ -55,6 +49,16 @@ module FunkyTeXBits
     end
 
     b << "\\begin{document}\n\n"
+  end
+
+  def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
+    b = ''
+
+    # FIXME: Need to encapsulate form stuff. I.e. if it's a seminar,
+    # a lecture and if it's German or English. The class should
+    # automatically provide appropriate strings for all language
+    # specifics
+    b << praeambel(evalname, single)
 
     if single.nil?
       b << "\\begin{titlepage}\n"
