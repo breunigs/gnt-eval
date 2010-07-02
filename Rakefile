@@ -676,7 +676,7 @@ namespace :summary do
     # correct common typos
     code = code.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{")
     code = code.gsub("/end{", "\\end{").gsub("/item ", "\\item ")
-    code = code.gsub("\\beign", "\\begin").gsub(/[.]{3,}/, "\\dots")
+    code = code.gsub("\\beign", "\\begin").gsub(/[.]{3,}/, "\\dots ")
     code
   end
 
