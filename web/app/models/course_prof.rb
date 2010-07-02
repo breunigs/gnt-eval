@@ -2,6 +2,7 @@
 class CourseProf < ActiveRecord::Base
   belongs_to :course
   belongs_to :prof
+  has_many :c_pics
   
   include FunkyDBBits
   

@@ -198,13 +198,13 @@ namespace :images do
       if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
         barcode = find_barcode_from_basename(basename)
 
-        course = CourseProf.find(barcode).course
+        course_prof = CourseProf.find(barcode)
 
         p = CPic.new
-        p.course_id = course.id
+        p.course_prof = course_prof
         p.basename = basename + '-comment.jpg'
         p.save
-        #~ puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course_prof.course.title} as #{p.id}"
       end
 
       # insert comments for profs
@@ -212,13 +212,13 @@ namespace :images do
       if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
         barcode = find_barcode_from_basename(basename)
 
-        course = CourseProf.find(barcode).course
+        course_prof = CourseProf.find(barcode)
 
         p = CPic.new
-        p.course_id = course.id
+        p.course_prof = course_prof
         p.basename = basename + '-vorlcomment.jpg'
         p.save
-        #~ puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course.title} as #{p.id}"
       end
 
       printProgress(curr+1, allfiles.size)
