@@ -144,14 +144,17 @@ end
 
 namespace :images do
 
-  desc "Insert comment pictures from YAML/jpg in directory. " +
-       "Please supply all images to" +
-       " /home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
-  task :insertcomments, :directory do |t, d|
-    Dir.glob(File.join(d.directory, '*.yaml')) do |f|
-      basename = File.basename(f, '.yaml')
+  desc "(6) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
+  task :insertcomments, :directory, :needs => 'pest:copycomments' do |t, d|
+    dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
+    puts "Working directory is #{dd}."
 
-      if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
+    Dir.glob(File.join(dd, '*.yaml')) do |f|
+      basename = File.basename(f, '.yaml')
+      curdir = File.dirname(f)
+
+      # find comments for the tutors
+      if File.exists?(File.join(curdir, basename + '-tutorcomment.jpg'))
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
         barcode = find_barcode_from_basename(basename)
@@ -175,7 +178,8 @@ namespace :images do
         end
       end
 
-      if File.exists?(File.join(d.directory, basename + '-comment.jpg'))
+      # finds comments for uhm… seminar sheet maybe?
+      if File.exists?(File.join(curdir, basename + '-comment.jpg'))
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
@@ -187,7 +191,8 @@ namespace :images do
         puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
       end
 
-      if File.exists?(File.join(d.directory, basename + '-vorlcomment.jpg'))
+      # insert comments for profs
+      if File.exists?(File.join(curdir, basename + '-vorlcomment.jpg'))
         barcode = find_barcode_from_basename(basename)
 
         course = CourseProf.find(barcode).course
@@ -204,7 +209,8 @@ namespace :images do
     puts "Please ensure that all comment pictures have been supplied to"
     puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
-    puts "Be aware, that you can do so by running"
+    puts "This should have been done for you automatically, but you can"
+    puts "run it again if it makes you feel better:"
     puts "\trake pest:copycomments"
   end
 
@@ -416,7 +422,7 @@ namespace :pest do
     puts "Done!"
   end
 
-  desc "(6) Copies extracted comments into eval directory"
+  desc "Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."
     # FIXME. This shouldn't be specified here
@@ -427,12 +433,8 @@ namespace :pest do
     puts
     puts "All comment pictures have been copied. If not already done so,"
     puts "you need to make the web-seee know about them. Simply run"
-    puts "\trake images:insertcomments[directory]"
-    puts "for this. (needs path to the yaml-files)"
-    puts "Usually you want to run this for:"
-    puts "\tseee/tmp/images/0"
-    puts "\tseee/tmp/images/1"
-    puts "\t..."
+    puts "\trake images:insertcomments"
+    puts "for this."
   end
 end
 
