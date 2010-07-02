@@ -672,28 +672,54 @@ end
 namespace :summary do
   def fixCommonTeXErrors(code)
     # _ -> \_, '" -> "', `" -> "`
-    code.gsub!(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
-    code.gsub!("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{")
-    code.gsub!("/end{", "\\end{").gsub("/item ", "\\item ")
-    code.gsub!("\\beign", "\\begin")
+    code = code.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+    # correct common typos
+    code = code.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{")
+    code = code.gsub("/end{", "\\end{").gsub("/item ", "\\item ")
+    code = code.gsub("\\beign", "\\begin").gsub(/[.]{3,}/, "\\dots")
     code
+  end
+
+  def warnAboutCommonTeXErrors(code)
+    msg = []
+    msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
+
+    begs = code.scan(/\\begin\{[a-z]+?\}/)
+    ends = code.scan(/\\end\{[a-z]+?\}/)
+    if  begs.count != ends.count
+        msg << "\\begin and \\end count differs. This is what has been found:"
+        msg << "\tBegins: #{begs.join("\t")}"
+        msg << "\tEnds:   #{ends.join("\t")}"
+    end
+
+    msg.collect { |x| "\t" + x }.join("\n")
   end
 
   desc "fix some often encountered tex-errors in the summaries"
   task :fixtex do
     $curSem.courses.each do |c|
       unless c.summary.nil?
-        puts "Warning: Unescaped %-sign? @ " + c.title if c.summary.match(/[^\\]%/)
         c.summary = fixCommonTeXErrors(c.summary)
         c.save
+
+        warn = warnAboutCommonTeXErrors(c.summary)
+        unless warn.empty?
+            puts "Warnings for: #{c.title}"
+            puts warn + "\n\n"
+        end
       end
 
       c.tutors.each do |t|
         next if t.comment.nil?
 
-        puts "Warning: Unescaped %-sign? @ " + c.title + " / " + t.abbr_name if t.comment.match(/[^\\]%/)
         t.comment = fixCommonTeXErrors(t.comment)
         t.save
+
+        warn = warnAboutCommonTeXErrors(t.comment)
+        unless warn.empty?
+            puts "Warnings for: #{c.title} / #{t.abbr_name}"
+            puts warn + "\n\n"
+        end
       end
     end
   end
