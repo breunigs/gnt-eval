@@ -78,11 +78,19 @@ end
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
+  filename = dir + "sample_" + form.to_s
+
+  if File.exists? filename+'.pdf'
+    puts "#{filename}.pdf already exists. Skipping."
+    return
+  end
+
+
   # Barcode
   filename = dir + "barcode"
   `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
   # TeX
-  filename = dir + "sample_" + form.to_s
+
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
