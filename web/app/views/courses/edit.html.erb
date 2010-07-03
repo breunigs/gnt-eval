@@ -47,13 +47,15 @@
     <%= f.submit "Update" %>
   </p>
 
-  <div style="width:100%;height:200px;overflow:scroll">
-<% for cp in @course.course_profs %>
-   Für <%= cp.prof.fullname %>:<br/>
-  <% for p in cp.c_pics %>
-    <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" " /><br/>
-  <% end %><br/><br/>
-<% end %>
+  <div class="commentview">
+    <% for cp in @course.course_profs %>
+      <span>Für <%= cp.prof.fullname %>:</span><br/>
+      <% for p in cp.c_pics %>
+        <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" " />
+        <br/>
+      <% end %>
+      <br/>
+    <% end %>
     <hr color="#f00">
   </div>
 
