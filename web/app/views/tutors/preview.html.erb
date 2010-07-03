@@ -1,0 +1,9 @@
+<h1>Previewing <%=@tutor.abbr_name %></h1>
+
+EXIT CODES:
+<%= @exitcodes.join(", ") %>
+<br/>
+<%= @error if @failed %>
+
+<%= "<img src=\"data:image/jpeg;base64,#{@base64}\"/>" unless @failed %>
+
