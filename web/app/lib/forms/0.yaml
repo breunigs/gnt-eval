@@ -482,7 +482,8 @@ pages:
     active: true
     failchoice: -1
     nochoice: 
-    qtext: "Stimmt das von der/dem Dozentinen erwartete Vorwissen mit deinem eigenen \IeC {\"u}berein?"
+    qtext: "Stimmt das von der/dem Dozentin/en erwartete Vorwissen mit deinem 
+eigenen \IeC {\"u}berein?"
     save_as: ""
     type: square
     db_column: v6

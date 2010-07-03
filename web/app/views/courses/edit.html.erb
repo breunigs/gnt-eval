@@ -40,7 +40,8 @@
   </p>
   <p>
     <b>Summary</b> (This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')<br />
-    <%= f.text_area :summary%>
+    <%= f.text_area(:summary, :style => 'width:99%')%>
+     <%= link_to 'Preview (also shows TeX errors, if any)', { :action => 'preview', :id => @course} %>
   </p>
 
   <p>

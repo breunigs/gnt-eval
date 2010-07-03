@@ -2,6 +2,50 @@
 # -*- coding: utf-8 -*-
 
 module FunkyTeXBits
+  def texpreview(code)
+    require 'digest'
+    head = praeambel("Blaming Someone For Bad LaTeX")
+    foot = "\\end{document}"
+
+    name = Digest::SHA512.hexdigest(code)
+    path = "/tmp/seee_preview_#{name}"
+
+    File.open(path + ".tex", 'w') do |f|
+      f.write(head)
+      f.write(code)
+      f.write(foot)
+    end
+
+    # FIXME should be centralized somewhere
+    pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
+    pdflatexCmd = "-halt-on-error -file-line-error -interaction=nonstopmode"
+
+    error = `cd /tmp/ && #{pdflatex} #{pdflatexCmd} #{path}.tex 2>&1`
+    exitcodes = []
+    exitcodes << $?.to_i
+    if $? == 0
+        error = `cd /tmp/ && pdfcrop #{path}.pdf #{path}-crop.pdf 2>&1`
+        exitcodes << $?.to_i
+        error << `convert -quality 90 -density 100 #{path}-crop.pdf #{path}.jpg  2>&1`
+        exitcodes << $?.to_i
+        unless File.exists?("#{path}.jpg")
+            error << `convert #{path}-*.jpg -append #{path}.jpg  2>&1`
+            exitcodes << $?.to_i
+        end
+        path = "#{path}.jpg"
+
+        require 'base64'
+        data = File.open(path, 'rb') { |f| f.read }
+        base64 = Base64.encode64(data)
+    end
+
+    `rm -f #{path}.*`
+
+    failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
+
+    return failed, exitcodes, error, base64
+  end
+
   def praeambel(evalname, single = nil)
     b = ''
     if single.nil?
