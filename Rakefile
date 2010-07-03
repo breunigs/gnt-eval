@@ -87,8 +87,8 @@ def make_sample_sheet(form, hasTutors)
 
 
   # Barcode
-  filename = dir + "barcode"
-  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
+  bcfile = dir + "barcode"
+  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{bcfile}.ps && ps2pdf #{bcfile}.ps #{bcfile}.pdf && pdfcrop #{bcfile}.pdf && rm #{bcfile}.ps && rm #{bcfile}.pdf && mv -f #{bcfile}-crop.pdf #{dir}barcode.pdf`
   # TeX
 
   File.open(filename + ".tex", "w") do |h|
