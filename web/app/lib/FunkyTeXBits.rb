@@ -43,7 +43,7 @@ module FunkyTeXBits
 
     failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
 
-    return failed, exitcodes, error.gsub("\n", "<br/>", base64
+    return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end
 
   def praeambel(evalname, single = nil)
