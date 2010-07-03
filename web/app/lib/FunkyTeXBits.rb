@@ -78,7 +78,7 @@ module FunkyTeXBits
       b << "\\newcommand{\\fragenzurvorlesung}{\\section*{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\zusammenfassung}[1]{\\paragraph{#1}}\n"
+      b << "\\newcommand{\\zusammenfassung}[1]{\\textbf{#1}}\n"
       b << "\\title{Lehrevaluation\\\\#{evalname}}\n"
       b << "\\date{\\today}\n"
     else

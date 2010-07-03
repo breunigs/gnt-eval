@@ -118,7 +118,7 @@ class Course < ActiveRecord::Base
       b << cp.eval_against_form(form, dbh).to_s
     end
 
-    b << "\\zusammenfassung{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}$~~$ \\\\ " # $~~$ is pseudo-text so LaTeX actually breaks after this title
+    b << "\\zusammenfassung{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n\n"
     b << summary.to_s
     b << "\n\\medskip\n\n"
 
