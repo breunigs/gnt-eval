@@ -118,9 +118,11 @@ class Course < ActiveRecord::Base
       b << cp.eval_against_form(form, dbh).to_s
     end
 
-    b << "\\zusammenfassung{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n\n"
-    b << summary.to_s
-    b << "\n\\medskip\n\n"
+    unless summary.to_s.strip.empty?
+      b << "\\commentsprof{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n\n"
+      b << summary.to_s
+      b << "\n\\medskip\n\n"
+    end
 
     # uebungen allgemein, immer alles relativ zur fakultät!
     ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}

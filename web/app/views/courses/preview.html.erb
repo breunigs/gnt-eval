@@ -1,9 +1,11 @@
+<% unless params[:quiet] %>
 <h1>Previewing <%=@course.title %></h1>
 
 EXIT CODES:
 <%= @exitcodes.join(", ") %>
 <br/>
 <%= @error if @failed %>
+<% end %>
 
-<%= "<img src=\"data:image/jpeg;base64,#{@base64}\"/>" unless @failed %>
+<%= "<img src=\"data:image/png;base64,#{@base64}\"/>" unless @failed || @base64.nil? || @base64.empty? %>
 

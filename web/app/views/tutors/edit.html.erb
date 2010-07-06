@@ -1,4 +1,5 @@
 <h1>Editing tutor</h1>
+<%= tutorShowLink %> | <%= tutorReturnLink %>
 
 <%= error_messages_for :tutor %>
 
@@ -11,10 +12,9 @@
   <p>
     <b>Comment</b> (This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')<br/>
     <%= f.text_area(:comment, :style => 'width:99%')%>
-     <%= link_to 'Preview (also shows TeX errors, if any)', { :action => 'preview', :id => @tutor} %>
   </p>
   <p>
-    <%= f.submit "Update" %>
+    <%= f.submit "Update and Preview" %>
   </p>
 
   <div class="commentview">
@@ -25,5 +25,4 @@
   </div>
 <% end %>
 
-<%= link_to 'Show', @tutor %> |
-<%= link_to 'Back', @course %>
+<%= tutorShowLink %> | <%= tutorReturnLink %>

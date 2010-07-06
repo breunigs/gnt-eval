@@ -19,11 +19,11 @@ class Tutor < ActiveRecord::Base
     form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
       b << q.eval_to_tex(specific, general, form.db_table, @dbh)
     end
-    if not comment.to_s.empty?
+    unless comment.to_s.strip.empty?
       if form.isEnglish?
-        b << "\\paragraph{Comments}"
+        b << "\\commentstutor{Comments}"
       else
-        b << "\\paragraph{Kommentare}"
+        b << "\\commentstutor{Kommentare}"
       end
       b << comment.to_s
     end

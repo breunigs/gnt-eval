@@ -2,46 +2,105 @@
 # -*- coding: utf-8 -*-
 
 module FunkyTeXBits
-  def texpreview(code)
-    require 'digest'
-    head = praeambel("Blaming Someone For Bad LaTeX")
-    foot = "\\end{document}"
+  def spellcheck(code)
+    # FIXME: this should be global once hunspell is installed
+    hunspell = "/home/stefan/hunspell/hunspell"
+    cdir = File.expand_path(File.dirname(File.dirname(__FILE__)))
+    pdic = "#{cdir}/lib/persdic.dic"
+    dics = "en_US,de_DE"
 
-    name = Digest::SHA512.hexdigest(code)
+    # check if hunspell is installed
+    `#{hunspell} --version`
+    unless $?.to_i == 0
+        logger.warn "Hunspell does not seem to be installed. Skipping spellcheck."
+        return code
+    end
+
+    # write code to tempfile
+    require 'digest'
+    name = Digest::SHA256.hexdigest(code)
+    path = "/tmp/seee_spellcheck_#{name}"
+    File.open("#{path}", 'w') {|f| f.write(code) }
+
+    # spell check!
+    words = `#{hunspell} -d #{dics} -p "#{pdic}" -l -t #{path}`.split("\n")
+    File.delete(path)
+
+    unless $?.to_i == 0
+        logger.warn "Hunspell failed for some reason. Skipping spellcheck."
+        return code
+    end
+
+    # highlight misspelled words
+    words.each do |w|
+        code.gsub!(/\b#{w}\b/, "\\spellingerror{#{w}}")
+    end
+
+    code
+  end
+
+  def texpreview(code)
+    return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
+
+    require 'digest'
+    name = Digest::SHA256.hexdigest(code)
     path = "/tmp/seee_preview_#{name}"
 
-    File.open(path + ".tex", 'w') do |f|
-      f.write(head)
-      f.write(code)
-      f.write(foot)
-    end
+    # will be overwritten on (re-)generation
+    failed = false
+    exitcodes = ['(cached image)']
+    error = ""
 
-    # FIXME should be centralized somewhere
-    pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
-    pdflatexCmd = "-halt-on-error -file-line-error -interaction=nonstopmode"
+    # see if it's cached, otherwise regenerate
+    unless File.exists?("#{path}.base64")
+        head = praeambel("Blaming Someone For Bad LaTeX")
+        head << "\\pagestyle{empty}"
+        foot = "\\end{document}"
 
-    error = `cd /tmp/ && #{pdflatex} #{pdflatexCmd} #{path}.tex 2>&1`
-    exitcodes = []
-    exitcodes << $?.to_i
-    if $? == 0
-        error = `cd /tmp/ && pdfcrop #{path}.pdf #{path}-crop.pdf 2>&1`
-        exitcodes << $?.to_i
-        error << `convert -quality 90 -density 100 #{path}-crop.pdf #{path}.jpg  2>&1`
-        exitcodes << $?.to_i
-        unless File.exists?("#{path}.jpg")
-            error << `convert #{path}-*.jpg -append #{path}.jpg  2>&1`
-            exitcodes << $?.to_i
+        File.open(path + ".tex", 'w') do |f|
+          f.write(head + spellcheck(code) + foot)
         end
-        path = "#{path}.jpg"
 
-        require 'base64'
-        data = File.open(path, 'rb') { |f| f.read }
-        base64 = Base64.encode64(data)
+        # FIXME should be centralized somewhere
+        pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
+        pdflatexCmd = "-halt-on-error -file-line-error -interaction=nonstopmode"
+
+        error = `cd /tmp/ && #{pdflatex} #{pdflatexCmd} #{path}.tex 2>&1`
+        exitcodes = []
+        exitcodes << $?.to_i
+        if $? == 0
+            # overwrite by design. Otherwise it's flooded with all
+            # the TeX output even though TeXing worked fine
+            error = `cd /tmp/ && pdfcrop #{path}.pdf #{path}-crop.pdf 2>&1`
+            exitcodes << $?.to_i
+            error << `convert -density 100 #{path}-crop.pdf #{path}.png  2>&1`
+            exitcodes << $?.to_i
+            # convert creates one image per page, so join them
+            # for easier processing
+            unless File.exists?("#{path}.png")
+                error << `convert #{path}-*.png -append #{path}.png  2>&1`
+                exitcodes << $?.to_i
+            end
+        end
+        failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
+
+        # convert to base64 and store to disk
+        if File.exists?("#{path}.png")
+            require 'base64'
+            data = File.open("#{path}.png", 'rb') { |f| f.read }
+            base64 = Base64.encode64(data)
+            File.open("#{path}.base64", 'w') {|f| f.write(base64) }
+        end
     end
 
-    `rm -f #{path}.*`
+    # only read from disk if the image has not been created above
+    if base64.nil? && File.exists?("#{path}.base64")
+        base64 = File.open("#{path}.base64", 'rb') { |f| f.read }
+    end
 
-    failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
+    # cleanup temp files
+    [".tex", ".pdf", ".out", ".log", "-crop.pdf", ".aux", ".png", \
+        "-0.png", "-1.png", "-2.png", "-3.png"].each { |c| `rm "#{path}#{c}"` }
 
     return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end
@@ -64,12 +123,14 @@ module FunkyTeXBits
     b << "\\usepackage{marvosym}\n"
     b << "\\usepackage[protrusion=true,expansion]{microtype}\n"
     b << "\\usepackage{graphicx}\n"
+    b << "\\usepackage{color}\n"
     b << "\\usepackage[pdftex,%\n"
     b << "  pdftitle={Lehrevaluation #{evalname}},%\n"
     b << "  pdfauthor={Fachschaft MathPhys, Universität Heidelberg},%\n"
     b << "  pdfborder=0 0 1, \n bookmarks=true,\n pdftoolbar=true,\n pdfmenubar=true,\n colorlinks=true,\n  linkcolor=black,\n citecolor=black,\n filecolor=black,\n urlcolor=black]{hyperref}\n\n"
     b << "\\author{Universität Heidelberg\\\\Fachschaft MathPhys}\n"
     b << "\\renewcommand{\\labelitemi}{-}\n"
+    b << "\\newcommand{\\spellingerror}[1]{\\textcolor{red}{#1}}\n"
 
     if single.nil?
       b << "\\newcommand{\\profkopf}[1]{\\section*{#1}}\n"
@@ -78,7 +139,8 @@ module FunkyTeXBits
       b << "\\newcommand{\\fragenzurvorlesung}{\\section*{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\zusammenfassung}[1]{\\textbf{#1}}\n"
+      b << "\\newcommand{\\commentsprof}[1]{\\textbf{#1}}\n"
+      b << "\\newcommand{\\commentstutor}[1]{\\textbf{#1}}\n"
       b << "\\title{Lehrevaluation\\\\#{evalname}}\n"
       b << "\\date{\\today}\n"
     else

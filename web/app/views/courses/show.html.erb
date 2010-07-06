@@ -1,7 +1,4 @@
-<%= link_to 'New', new_course_path %> |
-<%= link_to 'Edit', edit_course_path(@course) %> |
-<%= link_to 'Delete course', @course, :confirm => 'Ganz sicher?', :method => :delete %>|
-<%= link_to 'Back', courses_path %>
+<%= courseLinksForShowPage %>
 
 <p>
   <b>Semester:</b>
@@ -51,7 +48,11 @@
 <p>
   <b>Summary:</b>
   <fieldset>
-  <div class ="commentview" style="height:auto;max-height:150px;overflow:scroll"><%=h @course.summary %></div>
+  <!--
+    <div class ="commentview" style="height:auto;max-height:150px;overflow:scroll"><%=h @course.summary %></div>
+  -->
+      <iframe style="width:100%;height:10em;" src="<%= url_for({ :action => 'preview', :id => @course, :quiet => "yes"}) %>"></iframe>
+  <%= link_to 'Show preview in full', { :action => 'preview', :id => @course} %>
   </fieldset>
 </p>
 <p>
@@ -97,15 +98,18 @@
 </p>-->
 <p>
   <fieldset>
-  <b>Tutoren</b>
+  <b>Tutors</b>
   <table>
     <tr>
       <th>Name</th>
+      <th># Comments</th>
+      <th></th>
     </tr>
     <% for tutor in @course.tutors %>
-    <tr>
-      <td><%= link_to tutor.abbr_name, tutor %> (hat <%= tutor.pics.count %> Kommentare)</td>
-      <!--<td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor, :course_id => @course.id, :action => 'destroy'}, :confirm => 'Ganz sicher?', :method => :delete %></td>-->
+    <tr style="background: #<%= cycle('efefef', 'fff') %>">
+      <td><%= link_to tutor.abbr_name, edit_tutor_path(tutor) %></td>
+      <td style="text-align:center"><%= tutor.pics.count %></td>
+      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor, :course_id => @course.id, :action => 'destroy'}, :confirm => 'Ganz sicher?', :method => :delete %></td>
     </tr>
     <% end %>
     </table>
@@ -113,7 +117,5 @@
     <%= render :partial => @tutor = Tutor.new, :locals => { :button_name => 'Add' } %>
     </fieldset>
 </p>
-<%= link_to 'New', new_course_path %> |
-<%= link_to 'Edit', edit_course_path(@course) %> |
-<!--<%= link_to 'Delete course', @course, :confirm => 'Ganz sicher?', :method => :delete %>|-->
-<%= link_to 'Back', courses_path %>
+
+<%= courseLinksForShowPage %>
