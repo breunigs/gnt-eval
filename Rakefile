@@ -345,9 +345,10 @@ namespace :pest do
   # note: this is called automatically by yaml2db
   desc "Create db tables for each form for the available YAML files"
   task :createtables, :needs => 'db:connect' do
-    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+    Dir.glob("./lib/forms/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
-        name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
+        name = yaml.db_table
+        #name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
 
         # Note that the barcode is only unique for each CourseProf, but
         # not for each sheet. That's why path is used as unique key.
@@ -394,13 +395,23 @@ namespace :pest do
     update = !a.update.nil? && a.update == "update"
     puts "Will be updating already existing entries." if update
 
+    tables = {}
+    Dir.glob("./lib/forms/*.yaml") do |f|
+      form = File.basename(f, ".yaml")
+      yaml = YAML::load(File.read(f))
+      tables[form] = yaml.db_table
+    end
+    
+
     allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
     count = allfiles.size
+    
 
     allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
-      table = "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
+      table = tables[form] # "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
+      
 
       keys = Array.new
       vals = Array.new

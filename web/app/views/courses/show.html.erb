@@ -48,9 +48,6 @@
 <p>
   <b>Summary:</b>
   <fieldset>
-  <!--
-    <div class ="commentview" style="height:auto;max-height:150px;overflow:scroll"><%=h @course.summary %></div>
-  -->
       <iframe style="width:100%;height:10em;" src="<%= url_for({ :action => 'preview', :id => @course, :quiet => "yes"}) %>"></iframe>
   <%= link_to 'Show preview in full', { :action => 'preview', :id => @course} %>
   </fieldset>
@@ -67,7 +64,8 @@
     <tr>
       <td><%=h prof.fullname %></td>
       <td><%=h prof.email + ' (' + @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s + ')' %></td>
-      <!--<td><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof}, :method => :delete %></td>-->
+      <td><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof},
+        :confirm => "Really remove #{prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
       <td><%= link_to 'Form (cached)', { :action => 'get_pdf', :id => @course, :prof_id => prof} %></td>
       <td><%= link_to 'Form (regenerate)', { :action => 'get_fresh_pdf', :id => @course, :prof_id => prof} %></td>
     </tr>
@@ -76,7 +74,7 @@
   <% form_for :course, @course, :url => { :action => 'add_prof', :id => @course } do |f| %>
   <%= collection_select(:courses, :profs, Prof.find(:all, :order => 'surname'), :id, :surnamefirst) %>
   <%= submit_tag 'Add' %>
-  <%= link_to 'Neuer Prof', new_prof_path %>
+  <%= link_to 'Create New Prof', new_prof_path %>
   <% end %>
   </fieldset>
 </p><!--
@@ -109,7 +107,10 @@
     <tr style="background: #<%= cycle('efefef', 'fff') %>">
       <td><%= link_to tutor.abbr_name, edit_tutor_path(tutor) %></td>
       <td style="text-align:center"><%= tutor.pics.count %></td>
-      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor, :course_id => @course.id, :action => 'destroy'}, :confirm => 'Ganz sicher?', :method => :delete %></td>
+      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
+        :course_id => @course.id, :action => 'destroy'},
+        :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
+        :method => :delete %></td>
     </tr>
     <% end %>
     </table>
