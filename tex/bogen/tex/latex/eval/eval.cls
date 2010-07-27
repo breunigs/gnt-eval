@@ -62,36 +62,35 @@
 \write\posout{u questions:}
 }
 
-%Einstellungen für die Sprace, 0 für deutsch, 1 für englisch
+%Einstellungen für die Sprache, 0 für deutsch, 1 für englisch
 \newcommand{\lang}[1]{
 \write\posout{language:}
-\write\posout{u -}
 \ifthenelse{\equal{#1}{0}}{
-\write\posout{uu nspec: "keine Angabe"}
-\write\posout{uu dist: "Semesterverteilung"}
-\write\posout{uu term: "Fachsemester"}
-\write\posout{uu crs: "Studieng{\"a}nge"}
-\write\posout{uu sonst: "Sonstige"}
-\write\posout{uu frageb: "Abgegebene Frageb{\"o}gen"}
-\write\posout{uu fragenlec: "Fragen zur Vorlesung"}
-\write\posout{uu fragenue: "Fragen zum {\"U}bungsbetrieb"}
-\write\posout{uu overv: "{\"U}bersicht der {\"U}bungsgruppen"}
-\write\posout{uu tut: "Tutor"}
-\write\posout{uu boegen: "B{\"o}gen"}
-\write\posout{uu page: "Seite"}
+\write\posout{u nspec: "keine Angabe"}
+\write\posout{u dist: "Semesterverteilung"}
+\write\posout{u term: "Fachsemester"}
+\write\posout{u crs: "Studieng{\"a}nge"}
+\write\posout{u sonst: "Sonstige"}
+\write\posout{u frageb: "Abgegebene Frageb{\"o}gen"}
+\write\posout{u fragenlec: "Fragen zur Vorlesung"}
+\write\posout{u fragenue: "Fragen zum {\"U}bungsbetrieb"}
+\write\posout{u overv: "{\"U}bersicht der {\"U}bungsgruppen"}
+\write\posout{u tut: "Tutor"}
+\write\posout{u boegen: "B{\"o}gen"}
+\write\posout{u page: "Seite"}
 }{
-\write\posout{uu nspec:"not specified"}
-\write\posout{uu dist:"Semester Distribution"}
-\write\posout{uu term:"Academic Term"}
-\write\posout{uu crs:"Degree Course"}
-\write\posout{uu sonst:"Other"}
-\write\posout{uu frageb:"Submitted Questionnaires"}
-\write\posout{uu fragenlec:"Questions concerning the Lecture"}
-\write\posout{uu fragenue:"Questions concerning the Study Groups"}
-\write\posout{uu overv:"Overview of Study Groups"}
-\write\posout{uu tut:"Tutors"}
-\write\posout{uu boegen:"Questionnaires"}
-\write\posout{uu page:"Page"}
+\write\posout{u nspec:"not specified"}
+\write\posout{u dist:"Semester Distribution"}
+\write\posout{u term:"Academic Term"}
+\write\posout{u crs:"Degree Course"}
+\write\posout{u sonst:"Other"}
+\write\posout{u frageb:"Submitted Questionnaires"}
+\write\posout{u fragenlec:"Questions concerning the Lecture"}
+\write\posout{u fragenue:"Questions concerning the Study Groups"}
+\write\posout{u overv:"Overview of Study Groups"}
+\write\posout{u tut:"Tutors"}
+\write\posout{u boegen:"Questionnaires"}
+\write\posout{u page:"Page"}
 }
 }
 
