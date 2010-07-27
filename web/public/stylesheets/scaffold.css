@@ -72,3 +72,23 @@ div.progressBar div.background {
   width: 0%;
 }
 
+div.commentview {
+    width:100%;
+    height:230px;
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+
+div.commentview img {
+    max-width: 100%;
+    border-bottom: 2px solid #FFEE5A;
+    margin-bottom: 1em;
+}
+
+div.commentview span {
+    font-weight: bold;
+    padding-top: 0.3em;
+    border-top:2px solid #006D19;
+    margin-top:0.4em;
+    display: block;
+}

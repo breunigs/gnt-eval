@@ -4,6 +4,8 @@ require 'digest/md5'
 require 'ftools'
 
 class CoursesController < ApplicationController
+  include FunkyTeXBits
+
   # GET /courses
   # GET /courses.xml
   def index
@@ -40,6 +42,16 @@ class CoursesController < ApplicationController
   # GET /courses/1/edit
   def edit
     @course = Course.find(params[:id])
+  end
+
+  # GET /courses/1/preview
+  def preview
+    @course = Course.find(params[:id])
+    @failed, @exitcodes, @error, @base64 = texpreview(@course.summary)
+
+    respond_to do |format|
+      format.html # preview.html.erb
+    end
   end
 
   # POST /courses
@@ -91,53 +103,35 @@ class CoursesController < ApplicationController
       format.xml  { head :ok }
     end
   end
-  
+
   # DELETE /courses/drop_prof?course=1&prof=1
   def drop_prof
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
     @course.profs.delete(@prof)
-    
+
     respond_to do |format|
       format.html { redirect_to(@course) }
       format.xml { head :ok }
     end
   end
-  
+
   def add_prof
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:courses][:profs])
     @course.profs << @prof
-    
+
     respond_to do |format|
       format.html { redirect_to(@course) }
       format.xml { head :ok }
     end
   end
-  def get_direct_die_roms_stinken_pdf(c)
-    @course = c
-    workdir = '/var/www-seee/web/public/forms/'
-    hexdigest = Digest::SHA256.hexdigest(@course.id.to_s + @course.title)    
-    filename = @course.students.to_s + '_' + hexdigest
-    if not FileTest.exists?(workdir + filename + '.pdf')
-      b = Evalbogen.new
-      b.workdir = workdir
-      b.dozent = ''
-      b.tutoren = @course.tutors.map { |t| t.abbr_name}.reverse
-      b.semester = @course.semester.title
-      b.veranstaltung = @course.title
-      b.bogen_basefile = '99'
-      
-      b.output_to_file_and_compile(filename)
-    end    
-    
-    File.copy(workdir + filename + '.pdf', './' + @course.title + ' - ' + @course.id.to_s + ' - ' + @course.students.to_s + ' pcs.pdf')
-  end
+
   def get_direct_pdf(c,p)
     @course = c
     @prof = p
     workdir = '/var/www-seee/web/public/forms/'
-    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)    
+    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)
     filename = @course.students.to_s + '_' + hexdigest
     if not FileTest.exists?(workdir + filename + '.pdf')
       b = Evalbogen.new
@@ -149,22 +143,23 @@ class CoursesController < ApplicationController
       @course.form ||= 0
       b.bogen_basefile = @course.form.to_s
       b.barcodeid = "%07d" % @course.course_profs.find(:first, :conditions => { :prof_id => @prof.id }).id
-      b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf' 
+      b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf'
       b.generate_barcode
-      
+
       b.output_to_file_and_compile(filename)
-    end    
-    
+    end
+
     File.copy(workdir + filename + '.pdf', './' + @course.title + ' - ' + @prof.fullname + ' - ' + @course.students.to_s + ' pcs.pdf')
-  end  
+  end
 
 
   # GET /courses/get_pdf?course=1&prof_id=1
   def get_pdf
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
+    # FIXME: put somewhere else
     workdir = '/var/www-seee/web/public/forms/'
-    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)    
+    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)
     filename = @course.students.to_s + '_' + hexdigest
     if not FileTest.exists?(workdir + filename + '.pdf')
       b = Evalbogen.new
@@ -176,12 +171,12 @@ class CoursesController < ApplicationController
       @course.form ||= 0
       b.bogen_basefile = @course.form.to_s
       b.barcodeid = @course.course_profs.find(:first, :conditions => { :prof_id => @prof.id }).barcode
-      b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf' 
+      b.barcodefile = hexdigest + '_' + b.barcodeid + '_bcf'
       b.generate_barcode
-      
+
       b.output_to_file_and_compile(filename)
-    end    
-    
+    end
+
     respond_to do |f|
       f.html { send_file workdir + filename + '.pdf', :filename => @course.title + ' - ' + @prof.fullname + ' - ' + @course.students.to_s + ' pcs.pdf' }
       f.xml { head :ok }
@@ -191,7 +186,7 @@ class CoursesController < ApplicationController
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
     workdir = '/var/www-seee/web/public/forms/'
-    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)    
+    hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)
     filename = @course.students.to_s + '_' + hexdigest
     if FileTest.exists?(workdir + filename + '.pdf')
       File.delete(workdir + filename + '.pdf')
@@ -207,7 +202,7 @@ end
 #   b.tutoren=["Mustafa Msutermann", "MyPhi", "Specki", "Petra Meier",
 #    "Patricia Bayer", "Klothilde Müller", "Claire Grupe", "Armin
 #     Gibs", "Karsten Bier", "Etienne Mbe Mbock",
-#    "Sigfried-P. Weizenäcker"] 
+#    "Sigfried-P. Weizenäcker"]
 #   b.dozent = "Prof. Dr. hc. mul. M. Phys"
 #   b.veranstaltung = "Mein kleiner grüner Kaktus -- das Lied"
 #   b.semester = "SS 2008"
@@ -254,7 +249,7 @@ class Evalbogen
 \put(22,-37.3){\normalsize '+ @veranstaltung + '}
 \put(111,-37.3){\normalsize ' + @dozent + '}
 \put(177,-37.3){\normalsize '+ @semester +'}' + "\n"
-    
+
     # kaestchen malen und mit tutoren beschriften
 
     (0..5).each do |i|

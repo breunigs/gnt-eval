@@ -132,17 +132,17 @@ class Question
   def text
     @qtext
   end
-  
+
   # did the user fail to answer the question?
   def failed?
     return @value == @failchoice
   end
-    
+
   # didn't the user make any choice?
   def nochoice?
     return @value == @nochoice || (@value == 0 && @nochoice.nil?)
   end
-  
+
   # is this a multi-answer question?
   def multi?
     return @db_column.is_a?(Array)
@@ -151,8 +151,7 @@ class Question
 
   # h: hash correspoding to specific (!) where clause
   # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table, dbh)
-    @dbh = dbh
+  def eval_to_tex(h, g, db_table)
     @db_table = db_table
 
     b = ''
@@ -170,7 +169,7 @@ class Question
       if anz > 0
         t = TeXSingleQuestion.new(text, ltext, rtext, antw,
                                   anz, m, m_a, s, s_a)
-        
+
       b << t.to_tex
       end
     end
@@ -204,11 +203,11 @@ class Form
 
   # database table to use for this form
   attr_accessor :db_table
-  
+
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
   attr_reader :english
-  
+
   def initialize(pages = [], db_table = '')
     @pages = pages
     @db_table = db_table
@@ -218,36 +217,34 @@ class Form
   def questions
     @pages.collect { |p| p.questions }.flatten
   end
-  
+
   def isEnglish?
     return (not (@english.nil? || @english.to_s != "1"))
   end
-  
+
   def getLecturerHeader(name, gender, sheetsCount)
-    @lang_quest_for_vorl_f = "FIXME (Dozentin: #1, #2 Bögen)" if @lang_quest_for_vorl_f.nil? || @lang_quest_for_vorl_f.empty? 
-    @lang_quest_for_vorl_m = "FIXME (Dozent: #1, #2 Bögen)" if @lang_quest_for_vorl_m.nil? || @lang_quest_for_vorl_m.empty?
     if gender == 0 # Note: same as in database
       @lang_quest_for_vorl_f.gsub(/#1/, name).gsub(/#2/, sheetsCount.to_s)
     else
       @lang_quest_for_vorl_m.gsub(/#1/, name).gsub(/#2/, sheetsCount.to_s)
     end
   end
-  
+
   def getStudyGroupsHeader
     self.isEnglish? ? "Questions concerning the study groups" : "Fragen zum Übungsbetrieb"
   end
-  
+
   def getStudyGroupsOverview
     self.isEnglish? ? "Overview of study groups" : "Übersicht der Übungsgrupppen"
   end
-  
+
   def getStudyGroupsOverviewHeader
     self.isEnglish? ? "Tutors & Questionnaires & Page" : "Tutor & Bögen & Seite"
   end
-  
+
   def getSheetCount
     self.isEnglish? ? "submitted questionnaires" : "abgegebene Fragebögen"
   end
-  
+
 end
 

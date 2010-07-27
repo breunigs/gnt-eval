@@ -7,18 +7,20 @@
 
 <table>
   <tr>
-    <th>Semester</th>
-    <th>Title</th>
-    <th>Students</th>
-    <th>Evaluated by</th>
-    <th>Profs</th>
-    <th>Description</th>
-    <th>Faculty</th>
+    <!--<th>Semester</th>-->
+    <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
+    <th <%= sort_class(x) %>>
+        <%= sort_link(x) %>
+    </th>
+    <% end %>
   </tr>
 
-<% for course in @courses.find_all{|c| c.semester.now? }.sort_by { |c| c.title } %>
-  <tr style="<%= cycle('background: #efefef', 'background:#ffffff') %>">
-    <td><%=h course.semester.title %></td>
+<%
+courses = sort_helper(@courses.find_all{|c| c.semester.now? })
+
+for course in courses %>
+  <tr style="background: #<%= cycle('efefef', 'fff') %>">
+    <!--<td><%=h course.semester.title %></td>-->
     <td><%= link_to course.title, course %></td>
     <td><%=h course.students %></td>
     <td><%=h course.evaluator %></td>

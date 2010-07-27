@@ -1,10 +1,32 @@
 # -*- coding: utf-8 -*-
+
+# some config stuff
+
+# Increase density and disable all other barcodes for perf wins
+$zbarCmd = " --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 "
+
+$pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
+# -halt-on-error: stops TeX after the first error
+# -file-line-error: displays file and line where the error occured
+# -draftmode: doesn't create PDF, which speeds up TeX. Still does
+#             syntax-checking and toc-creation
+# -interaction=nonstopmode prevents from asking for stuff on the
+#             console which regularily occurs for missing packages
+$pdflatexFastCmd = "-halt-on-error -file-line-error -draftmode -interaction=nonstopmode"
+$pdflatexRealCmd = "-halt-on-error -file-line-error"
+
+# you probably want to hack the :copycomments task and specify where
+# to copy the images so they may be found
+
+
+
 require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'lib/ext_requirements.rb'
-require 'dbi'
+require 'lib/FunkyDBBits.rb'
 require 'pp'
+
 
 # need for parsing yaml into database
 require 'yaml'
@@ -17,14 +39,10 @@ include Magick
 
 
 require 'rake/clean'
-
-CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc')
-
+CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
 
 $curSem = Semester.find(:all).find{ |s| s.now? }
 
-# Increase density and disable all other barcodes for perf wins
-$zbarCmd = " --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 "
 
 def word_wrap(txt, col = 80)
     txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
@@ -61,11 +79,19 @@ end
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  # Barcode
-  filename = dir + "barcode"
-  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dir}barcode.pdf`
-  # TeX
   filename = dir + "sample_" + form.to_s
+
+  if File.exists? filename+'.pdf'
+    puts "#{filename}.pdf already exists. Skipping."
+    return
+  end
+
+
+  # Barcode
+  bcfile = dir + "barcode"
+  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{bcfile}.ps && ps2pdf #{bcfile}.ps #{bcfile}.pdf && pdfcrop #{bcfile}.pdf && rm #{bcfile}.ps && rm #{bcfile}.pdf && mv -f #{bcfile}-crop.pdf #{dir}barcode.pdf`
+  # TeX
+
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
@@ -127,6 +153,16 @@ def make_pdf_for(s, cp, dirname)
     `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
+# Prints the current progress to the console without advancing one line
+# val: currently processed item
+# max: amount of items to process
+def printProgress(val, max)
+      percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
+      current = val.to_s.rjust(max.to_s.size)
+      print "\r#{percentage}% (#{current}/#{max})"
+      STDOUT.flush
+end
+
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
@@ -138,20 +174,29 @@ end
 
 namespace :db do
   task :connect do
-    $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+    $dbh = FunkyDBBits.dbh
   end
 end
 
 namespace :images do
 
-  desc "Insert comment pictures from YAML/jpg in directory. " +
-       "Please supply all images to" +
-       " /home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
-  task :insertcomments, :directory do |t, d|
-    Dir.glob(File.join(d.directory, '*.yaml')) do |f|
-      basename = File.basename(f, '.yaml')
+  desc "(6) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
+  task :insertcomments, :directory, :needs => 'pest:copycomments' do |t, d|
+    dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
+    puts "Working directory is #{dd}."
 
-      if File.exists?(File.join(d.directory, basename + '-tutorcomment.jpg'))
+    # find all existing images for courses/profs and tutors
+    cpics = CPic.find(:all)
+    tpics = Pic.find(:all)
+
+    allfiles = Dir.glob(File.join(dd, '*.yaml'))
+    allfiles.each_with_index do |f, curr|
+      basename = File.basename(f, '.yaml')
+      curdir = File.dirname(f)
+
+      # find comments for the tutors
+      tname = basename + '-tutorcomment.jpg'
+      if File.exists?(File.join(curdir, tname)) && tpics.select { |x| x.basename == tname }.empty?
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
         barcode = find_barcode_from_basename(basename)
@@ -162,59 +207,67 @@ namespace :images do
         if tutnum > 0
           tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
           if tutnum > tutors.count
-            puts "Did nothing with #{basename}, #{tutnum} > #{tutors.count}"
+            $stderr.print "\rDid nothing with #{basename}, #{tutnum} > #{tutors.count}\n"
           else
             p = Pic.new
             p.tutor_id = tutors[tutnum-1].id
             p.basename = basename + '-tutorcomment.jpg'
             p.save
-            puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
+            #~ puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
           end
         else
-          puts "Did nothing with #{basename}, tutnum is #{tutnum}"
+          $stderr.print "\rDid nothing with #{basename}, tutnum is 0 (no choice made)\n"
         end
       end
 
-      if File.exists?(File.join(d.directory, basename + '-comment.jpg'))
+      # finds comments for uhm… seminar sheet maybe?
+      xname = basename + '-comment.jpg'
+      if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
         barcode = find_barcode_from_basename(basename)
 
-        course = CourseProf.find(barcode).course
+        course_prof = CourseProf.find(barcode)
 
         p = CPic.new
-        p.course_id = course.id
+        p.course_prof = course_prof
         p.basename = basename + '-comment.jpg'
         p.save
-        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course_prof.course.title} as #{p.id}"
       end
 
-      if File.exists?(File.join(d.directory, basename + '-vorlcomment.jpg'))
+      # insert comments for profs
+      cname = basename + '-vorlcomment.jpg'
+      if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
         barcode = find_barcode_from_basename(basename)
 
-        course = CourseProf.find(barcode).course
+        course_prof = CourseProf.find(barcode)
 
         p = CPic.new
-        p.course_id = course.id
+        p.course_prof = course_prof
         p.basename = basename + '-vorlcomment.jpg'
         p.save
-        puts "Inserted #{p.basename} for #{course.title} as #{p.id}"
+        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course.title} as #{p.id}"
       end
+
+      printProgress(curr+1, allfiles.size)
     end # Dir glob
 
     puts
     puts "Please ensure that all comment pictures have been supplied to"
     puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
-    puts "Be aware, that you can do so by running"
+    puts "This should have been done for you automatically, but you can"
+    puts "run it again if it makes you feel better:"
     puts "\trake pest:copycomments"
   end
 
-  desc "(0) Work on the .tif's in directory and sort'em to tmp/images/..."
+  desc "(1) Work on the .tif's in directory and sort'em to tmp/images/..."
   task :sortandalign, :directory do |t, d|
     if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
       puts "No directory given or directory does not exist."
     else
       puts "Working directory is: #{d.directory}"
-      Dir.glob(File.join(d.directory, '*.tif')) do |f|
+      files = Dir.glob(File.join(d.directory, '*.tif'))
+      files.each_with_index do |f, curr|
         unless File.writable?(f)
           puts "No write access, cancelling."
           break
@@ -234,7 +287,8 @@ namespace :images do
         File.makedirs("tmp/images/#{form}")
         File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
-        puts "Moved to #{form}/#{basename} (#{barcode})"
+        #~ puts "Moved to #{form}/#{basename} (#{barcode})"
+        printProgress(curr+1, files.size)
       end
     end
   end
@@ -274,7 +328,7 @@ namespace :mail do
 end
 
 namespace :pest do
-  desc '(1) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
+  desc '(2) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
   task :getyamls, :needs => 'db:connect' do |t|
     # FIXME: This can surely be done simpler by directly finding
     # a form for the current semester
@@ -289,31 +343,36 @@ namespace :pest do
     end
   end
 
-  desc "(2) Create db tables for each form for the available YAML files"
+  # note: this is called automatically by yaml2db
+  desc "Create db tables for each form for the available YAML files"
   task :createtables, :needs => 'db:connect' do
-    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+    Dir.glob("./lib/forms/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
-        name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
+        name = yaml.db_table
+        #name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
 
+        # Note that the barcode is only unique for each CourseProf, but
+        # not for each sheet. That's why path is used as unique key.
         q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
-        q += "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
-        q += "`barcode` INT(11) default NULL, "
+        q << "`path` VARCHAR(255) CHARACTER SET utf8 NOT NULL UNIQUE, "
+        q << "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+        q << "`barcode` INT(11) default NULL, "
 
         yaml.questions.each do |quest|
             next if quest.db_column.nil?
             if quest.db_column.is_a?(Array)
                 quest.db_column.each do |a|
-                    q += "`" + a + "` SMALLINT(6) UNSIGNED, "
+                    q << "`#{a}` SMALLINT(6) UNSIGNED, "
                 end
             else
-                q += '`'+ quest.db_column.to_s + "` SMALLINT(6) UNSIGNED, "
+                q << "`#{quest.db_column}` SMALLINT(6) UNSIGNED, "
             end
         end
-        q += "PRIMARY KEY (id)"
-        q += ");"
+        q << "PRIMARY KEY (id)"
+        q << ");"
 
         puts "Creating #{name}"
-        $dbh.execute(q)
+        $dbh.do(q)
     end
   end
 
@@ -331,17 +390,39 @@ namespace :pest do
       `./pest/fix.rb ./tmp/images/`
   end
 
-  desc "(5) Copies YAML data into database"
-  task :yaml2db, :needs => 'db:connect' do
-    Dir.glob("./tmp/images/[0-9]*/*.yaml").each do |f|
+  desc "(5) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."
+  task :yaml2db, :update, :needs => ['db:connect', 'pest:createtables'] do |t,a|
+
+    update = !a.update.nil? && a.update == "update"
+    puts "Will be updating already existing entries." if update
+
+    tables = {}
+    Dir.glob("./lib/forms/*.yaml") do |f|
+      form = File.basename(f, ".yaml")
+      yaml = YAML::load(File.read(f))
+      tables[form] = yaml.db_table
+    end
+
+
+    allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
+    count = allfiles.size
+
+
+    allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
+      table = tables[form] # "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
+
+
       keys = Array.new
       vals = Array.new
 
       # Get barcode
       keys << "barcode"
       vals << find_barcode_from_basename(File.basename(f, ".yaml")).to_s
+
+      keys << "path"
+      vals << f
 
       yaml.questions.each do |q|
         next if q.type == "text" || q.type == "text_wholepage"
@@ -360,19 +441,25 @@ namespace :pest do
           keys << q.db_column
         end
       end
-      q = "INSERT INTO `evaldaten_"
-      q << $curSem.dirFriendlyName
-      q << "_#{form}` ("
+
+      # If 'update' is specified we delete all existing entries and re-
+      # insert them later. Since `path` is UNIQUE insert queries will
+      # simply fail if the path already exists.
+      # Yes, this is cheap hack.
+      $dbh.do("DELETE FROM `#{table}` WHERE `path` = ?", f) if update
+
+      # "ignore" makes MySQL stop complaining about duplicate unique
+      # keys (path in our case)
+      q = "INSERT IGNORE INTO `#{table}` ("
       q << keys.join(", ")
       q << ") VALUES ("
-      q << vals.join(", ")
+      # inserts right amount of question marks for easy
+      # escaping
+      q << (["?"]*(vals.size)).join(", ")
       q << ")"
 
-      print "."
-      STDOUT.flush
-
       begin
-        $dbh.execute(q)
+        $dbh.do(q, *vals)
       rescue DBI::DatabaseError => e
         puts
         puts "Failed to insert #{form}/#{File.basename(f)}"
@@ -381,15 +468,20 @@ namespace :pest do
         puts "Error message: #{e.errstr}"
         puts "Error SQLSTATE: #{e.state}"
         puts
+        puts "Aborting."
+        exit
       end
+
+      printProgress(curr + 1, count)
     end
     puts
     puts "Done!"
   end
 
-  desc "(6) Copies extracted comments into eval directory"
+  desc "Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."
+    # FIXME. This shouldn't be specified here
     system("login_gruppe_home eval mkdir -p \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
     system("login_gruppe_home eval find \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"/home/eval/public_html/.comments/#{$curSem.dirFriendlyName}/\" \\;")
@@ -397,18 +489,16 @@ namespace :pest do
     puts
     puts "All comment pictures have been copied. If not already done so,"
     puts "you need to make the web-seee know about them. Simply run"
-    puts "\trake images:insertcomments[directory]"
-    puts "for this. (needs path to the yaml-files)"
-    puts "Usually you want to run this for:"
-    puts "\tseee/tmp/images/0"
-    puts "\tseee/tmp/images/1"  
-    puts "\t..."  
-  end
+    puts "\trake images:insertcomments"
+    puts "for this."
+23  end
 end
 
 namespace :pdf do
   desc "create samples for all available sheets for printing or inclusion. "
   task :samplesheets do
+    # FIXME: automatically determine correct number
+    # or TeX all files given
     0.upto(3) do |i|
       make_sample_sheet(i, (i == 0 || i == 2))
     end
@@ -430,21 +520,27 @@ namespace :pdf do
   end
 
   desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => ['db:connect', 'pdf:samplesheets'] do |t, a|
+  task :semester, :semester_id, :needs => ['pdf:samplesheets'] do |t, a|
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
+
+    dirname = './tmp/'
+    FileUtils.mkdir_p(dirname)
+    threads = []
     Faculty.find(:all).each_with_index do |f,i|
-      dirname = './tmp/'
-      `mkdir tmp` unless File.exists?('./tmp/')
       filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
+      # this operation is /not/ thread safe
       File.open(dirname + filename, 'w') do |h|
-        h.puts(s.evaluate(f, $dbh))
+        h.puts(s.evaluate(f))
       end
 
       puts "Wrote #{dirname+filename}"
-      Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
+      threads << Thread.new do
+        Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
+      end
     end
+    threads.each { |t| t.join }
   end
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
@@ -478,7 +574,7 @@ namespace :pdf do
   end
 
   desc "Create tutor blacklist for current semester"
-  task :blacklist, :needs => 'db:connect' do
+  task :blacklist do
     class Float
       def rtt
         return ((self*10).round.to_f)/10
@@ -491,7 +587,7 @@ namespace :pdf do
     end
     tutors = $curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
     tutors.each do |t|
-      puts [t.abbr_name, t.course.title[0,20], t.profit($dbh).rtt, t.teacher($dbh).rtt, t.competence($dbh).rtt, t.preparation($dbh).rtt, t.boegenanzahl($dbh)].join(' & ') + '\\\\'
+      puts [t.abbr_name, t.course.title[0,20], t.profit.rtt, t.teacher.rtt, t.competence.rtt, t.preparation.rtt, t.boegenanzahl].join(' & ') + '\\\\'
     end
   end
 end
@@ -534,7 +630,7 @@ namespace :helper do
     end
     puts "</ul>"
   end
-  
+
   desc "Generate crappy output sorted by day for simplified packing"
   task :packing_sheet do
     crap = '<meta http-equiv="content-type" content=
@@ -546,7 +642,7 @@ namespace :helper do
     d = $curSem.courses.sort do |x,y|
       a = x.description.strip.downcase
       b = y.description.strip.downcase
-      
+
       if h[a[0..1]] > h[b[0..1]]
         1
       elsif h[a[0..1]] < h[b[0..1]]
@@ -555,7 +651,7 @@ namespace :helper do
         b <=> a
       end
     end
-    
+
     odd = false
     d.each do |c|
        odd = !odd
@@ -604,54 +700,124 @@ namespace :crap do
 end
 
 namespace :summary do
+  def fixCommonTeXErrors(code)
+    # _ -> \_, '" -> "', `" -> "`
+    code = code.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+    # correct common typos
+    code = code.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{")
+    code = code.gsub("/end{", "\\end{").gsub("/item ", "\\item ")
+    code = code.gsub("\\beign", "\\begin").gsub(/[.]{3,}/, "\\dots ")
+    code
+  end
+
+  def warnAboutCommonTeXErrors(code)
+    msg = []
+    msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
+
+    begs = code.scan(/\\begin\{[a-z]+?\}/)
+    ends = code.scan(/\\end\{[a-z]+?\}/)
+    if  begs.count != ends.count
+        msg << "\\begin and \\end count differs. This is what has been found:"
+        msg << "\tBegins: #{begs.join("\t")}"
+        msg << "\tEnds:   #{ends.join("\t")}"
+    end
+
+    msg.collect { |x| "\t" + x }.join("\n")
+  end
+
   desc "fix some often encountered tex-errors in the summaries"
   task :fixtex do
     $curSem.courses.each do |c|
-      if not c.summary.nil?
-        puts "Warning: Unescaped %-sign? @ " + c.title if c.summary.match(/[^\\]%/)
-        # _ -> \_, '" -> "', `" -> "`
-        c.summary = c.summary.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
+      unless c.summary.nil?
+        c.summary = fixCommonTeXErrors(c.summary)
         c.save
+
+        warn = warnAboutCommonTeXErrors(c.summary)
+        unless warn.empty?
+            puts "Warnings for: #{c.title}"
+            puts warn + "\n\n"
+        end
       end
+
       c.tutors.each do |t|
-        if not t.comment.nil?
-          puts "Warning: Unescaped %-sign? @ " + c.title + " / " + t.abbr_name if t.comment.match(/[^\\]%/)
-          t.comment = t.comment.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
-          t.comment = t.comment.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{").gsub("/end{", "\\end{").gsub("/item ", "\\item ")
-          t.save
+        next if t.comment.nil?
+
+        t.comment = fixCommonTeXErrors(t.comment)
+        t.save
+
+        warn = warnAboutCommonTeXErrors(t.comment)
+        unless warn.empty?
+            puts "Warnings for: #{c.title} / #{t.abbr_name}"
+            puts warn + "\n\n"
         end
       end
     end
+  end
+
+  # Puts the given content into a blame file and adds basic
+  # header and footer. Immediately TeXes the file and reports
+  # error code
+  def testTeXCode(content)
+    include FunkyTeXBits
+    head = praeambel("Blaming Someone For Bad LaTeX")
+    foot = "\\end{document}"
+
+    File.open("./tmp/blame.tex", 'w') do |f|
+        f.write(head)
+        f.write(content)
+        f.write(foot)
+    end
+
+    `cd ./tmp/ && #{$pdflatex} #{$pdflatexFastCmd} blame.tex 2>&1`
+    $?
+  end
+
+  desc "find comment fields with broken LaTeX code"
+  task :blame do
+    $curSem.courses.each_with_index do |c, i|
+      unless c.summary.nil? || c.summary.empty?
+        if testTeXCode(c.summary) != 0
+            puts "\rTeXing course comments failed: #{c.title}"
+        end
+      end
+
+      c.tutors.each do |t|
+        next if t.comment.nil? || t.comment.empty?
+        if testTeXCode(t.comment) != 0
+            puts "\rTeXing tutor  comments failed: #{c.title} / #{t.abbr_name} "
+        end
+      end
+      printProgress(i + 1, $curSem.courses.size)
+    end
+    puts "\nIf there were errors you might want to try"
+    puts "\trake summary:fixtex"
+    puts "first before fixing manually."
   end
 end
 
 rule '.pdf' => '.tex' do |t|
     filename="\"#{File.basename(t.source)}\""
-    texpath="cd \"#{File.dirname(t.source)}\";/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
-    # -halt-on-error: stops TeX after the first errir
-    # -file-line-error: displays file and line where the error occured
-    # -draftmode: doesn't create PDF, which speeds up TeX. Still does
-    #             syntax-checking and toc-creation
-    optfast="-halt-on-error -file-line-error -draftmode"
-    optreal="-halt-on-error -file-line-error"
+    texpath="cd \"#{File.dirname(t.source)}\";#{$pdflatex}"
+
 
     # run it once fast, to see if there are any syntax errors in the
     # text and create first-run-toc
-    err = `#{texpath} #{optfast} #{filename} 2>&1`
+    err = `#{texpath} #{$pdflatexFastCmd} #{filename} 2>&1`
     if $?.to_i != 0
-        puts "="*50
+        puts "="*60
         puts err
-        puts "ERROR WRITING: #{t.name}"
+        puts "\n\n\nERROR WRITING: #{t.name}"
         puts "EXIT CODE: #{$?}"
-        puts "="*50
+        puts "="*60
+        puts "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
         exit
     end
 
     # run it fast a second time, to get /all/ references correct
-    `#{texpath} #{optfast} #{filename} 2>&1`
+    `#{texpath} #{$pdflatexFastCmd} #{filename} 2>&1`
     # now all references should have been resolved. Run it a last time,
     # but this time also output a pdf
-    `#{texpath} #{optreal} #{filename} 2>&1`
+    `#{texpath} #{$pdflatexRealCmd} #{filename} 2>&1`
 
     if $?.to_i == 0
         puts "Wrote #{t.name}"

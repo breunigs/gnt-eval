@@ -1,3 +1,7 @@
+<%= tutorEditLink %> | <%= tutorReturnLink %>
+
+<h1>Showing Tutor</h1>
+
 <p>
   <b>Course:</b>
   <%=h @tutor.course.title %>
@@ -9,13 +13,11 @@
 </p>
 
 <p>
-  <b>Comment</b><br/>
-  <%=h @tutor.comment %>
+  <b>Comment</b><pre>
+<%=h @tutor.comment %>
+  </pre>
 </p>
 
-<% for p in @tutor.pics %>
-<img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @tutor.course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
-<% end %>
+<iframe style="width:100%;height:30em;" src="<%= url_for({ :action => 'preview', :id => @tutor}) %>"></iframe>
 
-<%= link_to 'Edit', edit_tutor_path(@tutor) %> |
-<%= link_to 'Back', Course.find(@tutor.course_id) %>
+<%= tutorEditLink %> | <%= tutorReturnLink %>

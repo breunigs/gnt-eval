@@ -1,4 +1,5 @@
 <h1>Editing tutor</h1>
+<%= tutorShowLink %> | <%= tutorReturnLink %>
 
 <%= error_messages_for :tutor %>
 
@@ -10,19 +11,18 @@
 
   <p>
     <b>Comment</b> (This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')<br/>
-    <%= f.text_area :comment %>
+    <%= f.text_area(:comment, :style => 'width:99%')%>
   </p>
   <p>
-    <%= f.submit "Update" %>
+    <%= f.submit "Update and Preview" %>
   </p>
-  
-  <div style="width:100%;height:200px;overflow:scroll">
+
+  <div class="commentview">
 <% for p in @tutor.pics %>
-    <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" width="1000" /><br/>
+    <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" /><br/>
 <% end %>
     <hr color="#f00">
   </div>
 <% end %>
 
-<%= link_to 'Show', @tutor %> |
-<%= link_to 'Back', @course %>
+<%= tutorShowLink %> | <%= tutorReturnLink %>

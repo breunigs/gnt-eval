@@ -1,6 +1,8 @@
 class TutorsController < ApplicationController
   before_filter :load_course
 
+  include FunkyTeXBits
+
   def load_course
     if not params[:course_id].nil?
           @course = Course.find(params[:course_id])
@@ -43,6 +45,16 @@ class TutorsController < ApplicationController
   def edit
     @tutor = Tutor.find(params[:id])
     @course = Course.find(@tutor.course_id)
+  end
+
+  # GET /tutors/1/preview
+  def preview
+    @tutor = Tutor.find(params[:id])
+    @failed, @exitcodes, @error, @base64 = texpreview(@tutor.comment)
+
+    respond_to do |format|
+      format.html # preview.html.erb
+    end
   end
 
   # POST /tutors

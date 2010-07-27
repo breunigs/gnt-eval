@@ -8,7 +8,6 @@ class Course < ActiveRecord::Base
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
-  has_many :c_pics
   validates_presence_of :semester_id
   validates_numericality_of :students
 
@@ -34,6 +33,7 @@ class Course < ActiveRecord::Base
       pre_format = fscontact
     end
 
+    # FIXME: store somewhere else
     pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@mathphys.fsk.uni-heidelberg.de'}.join(',')
   end
 
@@ -41,18 +41,26 @@ class Course < ActiveRecord::Base
     course_profs.map { |cp| cp.barcode_with_checksum }
   end
 
-  def eval_against_form(form, dbh)
+  def barcodes
+    course_profs.map{ |cp| cp.barcode.to_i }
+  end
+
+  def getReturnedSheets
+    @db_table = form.to_form.db_table
+    count_forms({ :barcode => barcodes})
+  end
+
+  def eval_against_form(form)
     b = ''
 
     # setup for FunkyDBBits
-    @dbh = dbh
     @db_table = form.db_table
 
     this_eval = faculty.longname + ' ' + semester.title
 
-    boegenanzahl = count_forms({ :barcode => course_profs.map{ |cp|
-                                   cp.barcode.to_i}})
-    return '' unless boegenanzahl > 0
+    boegenanzahl = count_forms({ :barcode => barcodes})
+    return '' if boegenanzahl == 0
+
     puts "   #{title}"
     isEn = form.isEnglish? ? "E" : "D"
     notspecified = (form.isEnglish? ? "not specified" : "keine Angabe")
@@ -61,16 +69,18 @@ class Course < ActiveRecord::Base
     # Semesterverteilung
     b << "\\hfill\\begin{tabular}[t]{lr}\n"
     b << "  \\multicolumn{2}{l}{\\textbf{"+(form.isEnglish? ? "semester distribution" : "Semesterverteilung" )+":}} \\\\[.2em]\n"
-    # FIXME: get length automatically?
-    1.upto(16) do |i|
-      num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
-                                :semester => i})
+
+    lang_sem = form.isEnglish? ? "Academic Term" : "Fachsemester"
+
+    # finds all different semesters for this course and counts them
+    sems = get_distinct_values("semester", {:barcode => barcodes}).sort
+    (sems-[0]).each do |i|
+      num = count_forms({:barcode => barcodes, :semester => i})
       next if num == 0
-      lang_sem = form.isEnglish? ? "Academic Term" : "Fachsemester"
+
       b << i.to_s + ". #{lang_sem}: & " + num.to_s + "\\\\ \n"
     end
-    num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
-                                :semester => 0})
+    num = count_forms({:barcode => barcodes, :semester => 0})
     b << notspecified + ": & " + num.to_s + "\\\\ \n" if num > 0
     b << "\\end{tabular}\\hfill\n"
 
@@ -89,8 +99,7 @@ class Course < ActiveRecord::Base
     keinang = 0
     0.upto(matchn.length) do |n|
       0.upto(matchm.length) do |m|
-        num = count_forms({:barcode => course_profs.map{ |cp| cp.barcode.to_i},
-                                :hauptfach => n, :studienziel => m})
+        num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
         next if num == 0
         all += num
         # check for 'sonstige' and skip
@@ -111,13 +120,15 @@ class Course < ActiveRecord::Base
     b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
     b << "\\end{tabular}\\hfill\\null\n\n"
 
-    b << "\\zusammenfassung{" + (form.isEnglish? ? "Summary" : "Zusammenfassung" ) + "}\n"
-    b << summary.to_s
-    b << "\n\\medskip\n\n"
-
     # vorlesungseval pro dozi
     course_profs.each do |cp|
-      b << cp.eval_against_form(form, dbh).to_s
+      b << cp.eval_against_form(form).to_s
+    end
+
+    unless summary.to_s.strip.empty?
+      b << "\\commentsprof{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n\n"
+      b << summary.to_s
+      b << "\n\\medskip\n\n"
     end
 
     # uebungen allgemein, immer alles relativ zur fakultät!
@@ -125,10 +136,10 @@ class Course < ActiveRecord::Base
     return b if ugquest.empty?
 
     b << "\\fragenzudenuebungen{"+ (form.getStudyGroupsHeader) +"}\n"
-    specific = { :barcode => course_profs.map{ |cp| cp.barcode.to_i } }
+    specific = { :barcode => barcodes }
     general = { :barcode => $facultybarcodes }
     ugquest.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, @dbh).to_s
+      b << q.eval_to_tex(specific, general, form.db_table).to_s
     end
 
     return b if tutors.empty?
@@ -143,7 +154,7 @@ class Course < ActiveRecord::Base
     cc = ''
     found = false
     tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
-      text, anz = t.eval_against_form(form, dbh)
+      text, anz = t.eval_against_form(form)
       next if anz.nil?
       c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
       cc << text.to_s
@@ -152,14 +163,15 @@ class Course < ActiveRecord::Base
     return b unless found
     c << "\\hline\n"
     c << "\\end{longtable}"
-    b << c
+    # only print table if there are at least two tutors
+    b << c if tutors.size > 1
     b << cc
 
     return b
   end
 
-  def evaluate(dbh)
-    eval_against_form(form.to_form, dbh)
+  def evaluate
+    eval_against_form(form.to_form)
   end
 
 end
