@@ -87,14 +87,15 @@ class Course < ActiveRecord::Base
     # Hauptfach
     b << "\\begin{tabular}[t]{lr}\n"
     b << "  \\multicolumn{2}{l}{\\textbf{"+ (form.isEnglish? ? "degree course" : "Studiengänge") + ":}}\\\\[.2em]\n"
-    # FIXME: Get directly from TeX?
-    if form.isEnglish?
-      matchn = [notspecified, "Mathematics", "Physics", "Comp. Sc."]
-      matchm = ["", "Diploma", "Edu. Degree", "Bachelor" , "Master", "Ph.D."]
-    else
-      matchn = [notspecified, "Mathematik", "Physik", "Informatik"]
-      matchm = ["", "Diplom", "Lehramt", "Bachelor" , "Master", "Promotion"]
-    end
+
+    # grab the description text for each checkbox from the form
+    matchn = [notspecified] + form.get_question("hauptfach").get_choices
+    matchm = [""] + form.get_question("studienziel").get_choices
+    # remove "sonstiges" or "other" from the end of the array because
+    # otherwise we get pretty useless combinations
+    matchn.pop
+    matchm.pop
+
     all = 0
     keinang = 0
     0.upto(matchn.length) do |n|

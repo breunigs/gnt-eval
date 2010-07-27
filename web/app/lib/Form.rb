@@ -90,6 +90,7 @@ class Question
   def size
     return @boxes.count
   end
+
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
   def section
     if @db_column.nil? || @donotuse == 1
@@ -104,6 +105,7 @@ class Question
       return 'uebungsgruppenbetrieb'
     end
   end
+
   # is the question active?
   def active?
     if not @active.nil?
@@ -126,6 +128,11 @@ class Question
   #rightmost choice
   def rtext
     @boxes.last.text
+  end
+
+  # collect all possible choices and return as array
+  def get_choices
+    @boxes.collect { |x| x.text }
   end
 
   # question itself
@@ -218,6 +225,11 @@ class Form
     @pages.collect { |p| p.questions }.flatten
   end
 
+  def get_question(db_column)
+    questions.find { |q| q.db_column == db_column }
+  end
+
+  # FIXME kill this
   def isEnglish?
     return (not (@english.nil? || @english.to_s != "1"))
   end
