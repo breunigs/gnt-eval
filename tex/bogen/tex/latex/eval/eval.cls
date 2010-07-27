@@ -62,6 +62,39 @@
 \write\posout{u questions:}
 }
 
+%Einstellungen für die Sprace, 0 für deutsch, 1 für englisch
+\newcommand{\lang}[1]{
+\write\posout{language:}
+\write\posout{u -}
+\ifthenelse{\equal{#1}{0}}{
+\write\posout{uu nspec: "keine Angabe"}
+\write\posout{uu dist: "Semesterverteilung"}
+\write\posout{uu term: "Fachsemester"}
+\write\posout{uu crs: "Studieng{\"a}nge"}
+\write\posout{uu sonst: "Sonstige"}
+\write\posout{uu frageb: "Abgegebene Frageb{\"o}gen"}
+\write\posout{uu fragenlec: "Fragen zur Vorlesung"}
+\write\posout{uu fragenue: "Fragen zum {\"U}bungsbetrieb"}
+\write\posout{uu overv: "{\"U}bersicht der {\"U}bungsgruppen"}
+\write\posout{uu tut: "Tutor"}
+\write\posout{uu boegen: "B{\"o}gen"}
+\write\posout{uu page: "Seite"}
+}{
+\write\posout{uu nspec:"not specified"}
+\write\posout{uu dist:"Semester Distribution"}
+\write\posout{uu term:"Academic Term"}
+\write\posout{uu crs:"Degree Course"}
+\write\posout{uu sonst:"Other"}
+\write\posout{uu frageb:"Submitted Questionnaires"}
+\write\posout{uu fragenlec:"Questions concerning the Lecture"}
+\write\posout{uu fragenue:"Questions concerning the Study Groups"}
+\write\posout{uu overv:"Overview of Study Groups"}
+\write\posout{uu tut:"Tutors"}
+\write\posout{uu boegen:"Questionnaires"}
+\write\posout{uu page:"Page"}
+}
+}
+
 \def\mm[#1][#2]{\write\posout{uu- !ruby/object:Box}
  \write\posout{uuu choice: "#1"}
  \write\posout{uuu height: 0}
@@ -314,6 +347,7 @@
 
 \newcommand{\kopf}[1]{
 \write\posout{--- !ruby/object:Form}
+\lang{0}
 \write\posout{db_table: evaldaten_ss09}
 \write\posout{pages: }
 \write\posout{- !ruby/object:Page }
@@ -332,23 +366,22 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \tut
  \end{tabular}
 \\[1em] }{}
+%Der "Sonstige" Kram wird übrigens im See gefoltert, aufgeschlitzt und in den Fluss geworfen...
 \bluu[Studienziel][studienziel]
 \hspace{-0.9cm}\textbf{Studienziel:} \\[0.3em]
 \bxss[1][Diplom] Diplom \hfill \bxs[2][Lehramt] Lehramt \hfill \bxs[3][Bachelor] Bachelor \hfill \bxs[4][Master] Master \hfill \bxs[5][Promotion] Promotion \hfill \bxs[6][Sonstiges] Sonstiges \vspace{1.6cm} \\
 \bluu[Hauptfach][hauptfach]
 \hspace{-0.9cm}\textbf{1. Hauptfach:} \\[0.01em]
-\bxss[1][Mathe] Mathe \hspace{0.8cm} \bxs[2][Physik] Physik \hspace{0.9375cm} \bxs[3][Informatik] Informatik \hfill \bxs[5][Sonstiges] Sonstiges \vspace{1cm} \\
+\bxss[1][Mathematik] Mathematik \hspace{0.04cm} \bxs[2][Physik] Physik \hspace{0.9375cm} \bxs[3][Informatik] Informatik \hfill \bxs[5][Sonstiges] Sonstiges \vspace{1cm} \\
 \bluu[Fachsemester][semester]
 \hspace{-0.9cm}\textbf{Fachsemester:} \\[0.4em]
 \bxss[1][1]\hspace{-0.5em}1\hfill \bxss[2][2]\hspace{-0.5em}2\hfill \bxss[3][3]\hspace{-0.5em}3 \hfill \bxss[4][4]\hspace{-0.5em}4 \hfill \bxss[5][5]\hspace{-0.5em}5 \hfill \bxss[6][6]\hspace{-0.5em}6 \hfill \bxss[7][7]\hspace{-0.5em}7 \hfill \bxss[8][8]\hspace{-0.5em}8 \hfill \bxss[9][9]\hspace{-0.5em}9 \hfill \bxss[10][10]\hspace{-0.5em}10 \hfill \bxss[11][11]\hspace{-0.5em}11 \hfill \bxss[12][12]\hspace{-0.5em}12 \hfill \bxss[13][13]\hspace{-0.5em}13 \hfill \bxss[14][14]\hspace{-0.5em}14 \hfill \bxss[15][15]\hspace{-0.5em}15 \hfill \bxss[16][>15]\hspace{-0.5em}>15 \\
 \vspace{4cm}
 }
 
-
-
-
 \newcommand{\engkopf}[1]{
 \write\posout{--- !ruby/object:Form}
+\lang{1}
 \write\posout{db_table: evaldaten_ss09}
 \write\posout{pages: }
 \write\posout{- !ruby/object:Page }
