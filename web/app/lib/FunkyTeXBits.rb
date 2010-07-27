@@ -3,8 +3,7 @@
 
 module FunkyTeXBits
   def spellcheck(code)
-    # FIXME: this should be global once hunspell is installed
-    hunspell = "/home/stefan/hunspell/hunspell"
+    hunspell = Seee::Config.application_paths[:hunspell]
     cdir = File.expand_path(File.dirname(File.dirname(__FILE__)))
     pdic = "#{cdir}/lib/persdic.dic"
     dics = "en_US,de_DE"
