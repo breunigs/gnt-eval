@@ -57,24 +57,20 @@ module FunkyTeXBits
           f.write(head + spellcheck(code) + foot)
         end
 
-        # FIXME should be centralized somewhere
-        pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
-        pdflatexCmd = "-halt-on-error -file-line-error -interaction=nonstopmode"
-
-        error = `cd /tmp/ && #{pdflatex} #{pdflatexCmd} #{path}.tex 2>&1`
+        error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_fast]} #{path}.tex 2>&1`
         exitcodes = []
         exitcodes << $?.to_i
         if $? == 0
             # overwrite by design. Otherwise it's flooded with all
             # the TeX output even though TeXing worked fine
-            error = `cd /tmp/ && pdfcrop #{path}.pdf #{path}-crop.pdf 2>&1`
+            error = `cd /tmp/ && #{Seee::Config.application_path[:pdfcrop]} #{path}.pdf #{path}-crop.pdf 2>&1`
             exitcodes << $?.to_i
-            error << `convert -density 100 #{path}-crop.pdf #{path}.png  2>&1`
+            error << `#{Seee::Config.application_path[:convert]} -density 100 #{path}-crop.pdf #{path}.png  2>&1`
             exitcodes << $?.to_i
             # convert creates one image per page, so join them
             # for easier processing
             unless File.exists?("#{path}.png")
-                error << `convert #{path}-*.png -append #{path}.png  2>&1`
+                error << `#{Seee::Config.application_path[:convert]} #{path}-*.png -append #{path}.png  2>&1`
                 exitcodes << $?.to_i
             end
         end

@@ -9,8 +9,9 @@ module FunkyDBBits
   require 'dbi'
   def self.dbh
     return @dbh if !@dbh.nil? && @dbh.connected?
-    # FIXME: This should be stored somewhere else
-    @dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+    @dbh = DBI.connect("DBI:#{Seee::Config.external_database[:dbi_handler]}:#{Seee::Config.external_database[:database]}",
+             Seee::Config.external_database[:username],
+             Seee::Config.external_database[:password])
   end
 
   # convenience function so dbh can be accessed directly

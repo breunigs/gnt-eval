@@ -5,13 +5,21 @@ require 'active_support'
 
 module Seee
   module Config
-    mattr_accessor :application_paths, :file_paths, :commands
+    mattr_accessor :application_paths, :file_paths, :commands, :external_database
 
     # Die sollten recht selbsterklärend sein
     @@application_paths = {
       :hunspell => '/usr/bin/env hunspell',
       :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
-      :zbar => 'GOTTA DO THIS'
+      :zbar => 'FIXME'
+    }
+
+    # Externe Datenbank, in der die wirklichen Evaldaten gespeichert sind
+    @@external_database = {
+      :dbi_handler => 'Mysql',
+      :username => 'eval',
+      :password => 'E-Wahl',
+      :database => 'eval'
     }
 
     @@file_paths = {
@@ -30,12 +38,7 @@ module Seee
     }
 
     # Spezielle Kommandos, die ggf. rechtespezifisch sind, also nicht
-    # nur application_paths. FIXME: command[:hunspell] sollte, falls
-    # nicht gesetzt, auf appliction_paths defaulten
-
-    texmfdir = File.dirname(Pathname.new(__FILE__).realpath)
-    texmfdir = File.join(texmfdir, "..", "..", "..", "tex", "bogen")
-    texmfdir = File.expand_path(texmfdir)
+    # nur application_paths.
 
     @@commands = {
       :find_comment_image_directory => 'login_gruppe_home eval find',
@@ -49,7 +52,7 @@ module Seee
       #             syntax-checking and toc-creation
       # -interaction=nonstopmode prevents from asking for stuff on the
       #             console which regularily occurs for missing packages
-      :pdflatex => "TEXMFHOME=#{texmfdir} #{@@application_paths[:pdflatex]}"}
+      :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}"}
     @@commands.merge!({
       :pdflatex_fast => @@commands[:pdflatex].to_s + ' -halt-on-error -file-line-error -draftmode -interaction=nonstopmode',
       :pdflatex_real => @@commands[:pdflatex].to_s + ' -halt-on-error -file-line-error',
@@ -61,6 +64,15 @@ module Seee
     # einfach mit dem Applikationspfad
     def @@commands.default(key=nil)
       @@application_paths[key]
+    end
+
+    # Sind Pfade nicht gesetzt, defaulte auf /usr/bin/env
+    def @@application_paths.default(key=nil)
+      if not key.nil?
+        "/usr/bin/env #{key.to_s}"
+      else
+        nil
+      end
     end
   end
 end
