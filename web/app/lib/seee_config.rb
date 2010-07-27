@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 require 'active_support'
+require 'pathname'
 
 module Seee
   module Config
@@ -31,7 +32,7 @@ module Seee
                      File.join(
                        File.dirname(Pathname.new(__FILE__).realpath),
                          '..', '..', '..', 'tex', 'bogen')),
-      
+
       :hunspell_personal_dic => File.join(
                                   File.dirname(Pathname.new(__FILE__).realpath),
                                   'persdic.dic')
@@ -44,7 +45,7 @@ module Seee
       :find_comment_image_directory => 'login_gruppe_home eval find',
       :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
 
-      :hunspell => @@application_paths[:hunspell] + ' -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}',
+      :hunspell => @@application_paths[:hunspell] + " -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
 
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
