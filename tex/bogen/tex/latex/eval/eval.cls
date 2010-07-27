@@ -8,6 +8,8 @@
 }
 \ProcessOptions\relax 
 
+\DeclareOption{engl}{\def\head{muu}}
+
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{amssymb} 
@@ -119,10 +121,10 @@
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
- \def\vorlesungsfragen{\input{/home/jasper/texlive/fragen/fragen}}
- \def\vorlesungenglisch{\input{/home/jasper/texlive/fragen/vorlesung_englisch}}
- \def\seminarfragen{\input{/home/jasper/texlive/fragen/fragen_seminar}}
- \def\struktur{\input{/home/jasper/Uni/texlive/fragen/fragen_struktur3}}
+ \def\vorlesungsfragen{\input{fragen}}
+ \def\vorlesungenglisch{\input{vorlesung_englisch}}
+ \def\seminarfragen{\input{fragen_seminar}}
+ \def\struktur{\input{fragen_struktur3}}
 
 \def\blu[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
