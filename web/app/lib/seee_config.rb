@@ -6,7 +6,7 @@ require 'pathname'
 
 module Seee
   module Config
-    mattr_accessor :application_paths, :file_paths, :commands, :external_database
+    mattr_accessor :application_paths, :file_paths, :commands, :external_database, :settings
 
     # Die sollten recht selbsterklärend sein
     @@application_paths = {
@@ -25,9 +25,9 @@ module Seee
 
     @@settings = {
       # FQDN des standard-empfängers
-      :standard_mail_domain = 'mathphys.fsk.uni-heidelberg.de',
-      :standard_mail_from = 'evaluation@mathphys.fsk.uni-heidelberg.de',
-      :standard_mail_bcc = 'evaluation@mathphys.fsk.uni-heidelberg.de'
+      :standard_mail_domain => 'mathphys.fsk.uni-heidelberg.de',
+      :standard_mail_from => 'evaluation@mathphys.fsk.uni-heidelberg.de',
+      :standard_mail_bcc => 'evaluation@mathphys.fsk.uni-heidelberg.de'
     }
     @@file_paths = {
       # Verzeichnis, in dem die Kommentarbilder gespeichert
