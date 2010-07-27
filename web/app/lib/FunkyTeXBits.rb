@@ -100,7 +100,7 @@ module FunkyTeXBits
 
     # cleanup temp files
     [".tex", ".pdf", ".out", ".log", "-crop.pdf", ".aux", ".png", \
-        "-0.png", "-1.png", "-2.png", "-3.png"].each { |c| `rm "#{path}#{c}"` }
+        "-0.png", "-1.png", "-2.png", "-3.png"].each { |c| `rm -f "#{path}#{c}"` }
 
     return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end

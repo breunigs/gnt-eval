@@ -10,17 +10,16 @@ class Semester < ActiveRecord::Base
   include FunkyTeXBits
   include FunkyDBBits
 
-  def evaluate(faculty, dbh)
+  def evaluate(faculty)
     b = ''
 
     cs = courses.find_all{ |c| c.faculty_id == faculty.id }.sort{ |x,y| x.title <=> y.title }
-    
+
     # now this IS a global variable, and we just set it for performance reasons. it is a
     # list of all barcodes corresponding to faculty and semester.
     $facultybarcodes = cs.map{ |c| c.course_profs.map { |cp| cp.barcode.to_i }}.flatten
-    
+
     # FunkyDBBits setup
-    @dbh = dbh
     @db_table = cs.map { |c| c.form.to_form.db_table }.uniq
 
     evalname = faculty.longname + ' ' + title
@@ -32,7 +31,7 @@ class Semester < ActiveRecord::Base
     b << TeXVorwort(faculty.longname, title)
 
     cs.each do |c|
-      b << c.evaluate(dbh)
+      b << c.evaluate
     end
 
     b << TeXFuss()
@@ -48,12 +47,12 @@ class Semester < ActiveRecord::Base
   def dirFriendlyName
     title.gsub(' ', '_').gsub('/', '_')
   end
-  
+
   def dirfriendly_title
     dirFriendlyName
   end
 
-  def eval_against_form!(faculty, form, dbh)
-    puts eval_against_form(faculty, form, dbh)
+  def eval_against_form!(faculty, form)
+    puts eval_against_form(faculty, form)
   end
 end

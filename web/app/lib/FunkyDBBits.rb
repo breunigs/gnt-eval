@@ -4,6 +4,21 @@
 module FunkyDBBits
   attr :dbh, :db_table
 
+  # Automatically connect to external database when required
+  # and cache that connection
+  require 'dbi'
+  def self.dbh
+    return @dbh if !@dbh.nil? && @dbh.connected?
+    puts "Connecting to eval-data database"
+    # FIXME: This should be stored somewhere else
+    @dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+  end
+
+  # convenience function so dbh can be accessed directly
+  def dbh
+    FunkyDBBits.dbh
+  end
+
   # query fields, where-hash and additional clauses
   # does caching, see uncached_query_single_table
   def query_single_table(f, h, t, additional = '', cache = true)
@@ -12,8 +27,8 @@ module FunkyDBBits
     $cached_results ||= { }
 
     if cache == true
-      $cached_results[[@dbh, @db_table]] ||= { }
-      $cached_results[[@dbh, @db_table]][[f, h, t, additional]] ||=
+      $cached_results[[dbh, @db_table]] ||= { }
+      $cached_results[[dbh, @db_table]][[f, h, t, additional]] ||=
         uncached_query_single_table(f, h, t, additional)
     else
       uncached_query_single_table(f, h, t, additional)
@@ -37,7 +52,8 @@ module FunkyDBBits
     end
 
     result = nil
-    sth = @dbh.prepare(q)
+    sth = dbh.prepare(q)
+    #~ `echo "#{q} << #{h.values.join(", ")}"`
     begin
       sth.execute(*h.values)
       result = []

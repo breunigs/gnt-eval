@@ -7,7 +7,7 @@
 
 <table>
   <tr>
-    <th>Semester</th>
+    <!--<th>Semester</th>-->
     <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
     <th <%= sort_class(x) %>>
         <%= sort_link(x) %>
@@ -20,7 +20,7 @@ courses = sort_helper(@courses.find_all{|c| c.semester.now? })
 
 for course in courses %>
   <tr style="background: #<%= cycle('efefef', 'fff') %>">
-    <td><%=h course.semester.title %></td>
+    <!--<td><%=h course.semester.title %></td>-->
     <td><%= link_to course.title, course %></td>
     <td><%=h course.students %></td>
     <td><%=h course.evaluator %></td>

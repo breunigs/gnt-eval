@@ -24,8 +24,9 @@ require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'lib/ext_requirements.rb'
-require 'dbi'
+require 'lib/FunkyDBBits.rb'
 require 'pp'
+
 
 # need for parsing yaml into database
 require 'yaml'
@@ -173,7 +174,7 @@ end
 
 namespace :db do
   task :connect do
-    $dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
+    $dbh = FunkyDBBits.dbh
   end
 end
 
@@ -401,17 +402,17 @@ namespace :pest do
       yaml = YAML::load(File.read(f))
       tables[form] = yaml.db_table
     end
-    
+
 
     allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
     count = allfiles.size
-    
+
 
     allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
       table = tables[form] # "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
-      
+
 
       keys = Array.new
       vals = Array.new
@@ -496,6 +497,8 @@ end
 namespace :pdf do
   desc "create samples for all available sheets for printing or inclusion. "
   task :samplesheets do
+    # FIXME: automatically determine correct number
+    # or TeX all files given
     0.upto(3) do |i|
       make_sample_sheet(i, (i == 0 || i == 2))
     end
@@ -517,21 +520,27 @@ namespace :pdf do
   end
 
   desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => ['db:connect', 'pdf:samplesheets'] do |t, a|
+  task :semester, :semester_id, :needs => ['pdf:samplesheets'] do |t, a|
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
     s = Semester.find(sem)
+
+    dirname = './tmp/'
+    FileUtils.mkdir_p(dirname)
+    threads = []
     Faculty.find(:all).each_with_index do |f,i|
-      dirname = './tmp/'
-      `mkdir tmp` unless File.exists?('./tmp/')
       filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
 
+      # this operation is /not/ thread safe
       File.open(dirname + filename, 'w') do |h|
-        h.puts(s.evaluate(f, $dbh))
+        h.puts(s.evaluate(f))
       end
 
       puts "Wrote #{dirname+filename}"
-      Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
+      threads << Thread.new do
+        Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
+      end
     end
+    threads.each { |t| t.join }
   end
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
@@ -565,7 +574,7 @@ namespace :pdf do
   end
 
   desc "Create tutor blacklist for current semester"
-  task :blacklist, :needs => 'db:connect' do
+  task :blacklist do
     class Float
       def rtt
         return ((self*10).round.to_f)/10
@@ -578,7 +587,7 @@ namespace :pdf do
     end
     tutors = $curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
     tutors.each do |t|
-      puts [t.abbr_name, t.course.title[0,20], t.profit($dbh).rtt, t.teacher($dbh).rtt, t.competence($dbh).rtt, t.preparation($dbh).rtt, t.boegenanzahl($dbh)].join(' & ') + '\\\\'
+      puts [t.abbr_name, t.course.title[0,20], t.profit.rtt, t.teacher.rtt, t.competence.rtt, t.preparation.rtt, t.boegenanzahl].join(' & ') + '\\\\'
     end
   end
 end

@@ -33,6 +33,7 @@ class Course < ActiveRecord::Base
       pre_format = fscontact
     end
 
+    # FIXME: store somewhere else
     pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@mathphys.fsk.uni-heidelberg.de'}.join(',')
   end
 
@@ -40,16 +41,22 @@ class Course < ActiveRecord::Base
     course_profs.map { |cp| cp.barcode_with_checksum }
   end
 
-  def eval_against_form(form, dbh)
+  def barcodes
+    course_profs.map{ |cp| cp.barcode.to_i }
+  end
+
+  def getReturnedSheets
+    @db_table = form.to_form.db_table
+    count_forms({ :barcode => barcodes})
+  end
+
+  def eval_against_form(form)
     b = ''
 
     # setup for FunkyDBBits
-    @dbh = dbh
     @db_table = form.db_table
 
     this_eval = faculty.longname + ' ' + semester.title
-
-    barcodes = course_profs.map{ |cp| cp.barcode.to_i}
 
     boegenanzahl = count_forms({ :barcode => barcodes})
     return '' if boegenanzahl == 0
@@ -115,7 +122,7 @@ class Course < ActiveRecord::Base
 
     # vorlesungseval pro dozi
     course_profs.each do |cp|
-      b << cp.eval_against_form(form, dbh).to_s
+      b << cp.eval_against_form(form).to_s
     end
 
     unless summary.to_s.strip.empty?
@@ -132,7 +139,7 @@ class Course < ActiveRecord::Base
     specific = { :barcode => barcodes }
     general = { :barcode => $facultybarcodes }
     ugquest.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, @dbh).to_s
+      b << q.eval_to_tex(specific, general, form.db_table).to_s
     end
 
     return b if tutors.empty?
@@ -147,7 +154,7 @@ class Course < ActiveRecord::Base
     cc = ''
     found = false
     tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
-      text, anz = t.eval_against_form(form, dbh)
+      text, anz = t.eval_against_form(form)
       next if anz.nil?
       c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
       cc << text.to_s
@@ -163,8 +170,8 @@ class Course < ActiveRecord::Base
     return b
   end
 
-  def evaluate(dbh)
-    eval_against_form(form.to_form, dbh)
+  def evaluate
+    eval_against_form(form.to_form)
   end
 
 end

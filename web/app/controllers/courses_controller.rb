@@ -126,25 +126,7 @@ class CoursesController < ApplicationController
       format.xml { head :ok }
     end
   end
-  def get_direct_die_roms_stinken_pdf(c)
-    @course = c
-    workdir = '/var/www-seee/web/public/forms/'
-    hexdigest = Digest::SHA256.hexdigest(@course.id.to_s + @course.title)
-    filename = @course.students.to_s + '_' + hexdigest
-    if not FileTest.exists?(workdir + filename + '.pdf')
-      b = Evalbogen.new
-      b.workdir = workdir
-      b.dozent = ''
-      b.tutoren = @course.tutors.map { |t| t.abbr_name}.reverse
-      b.semester = @course.semester.title
-      b.veranstaltung = @course.title
-      b.bogen_basefile = '99'
 
-      b.output_to_file_and_compile(filename)
-    end
-
-    File.copy(workdir + filename + '.pdf', './' + @course.title + ' - ' + @course.id.to_s + ' - ' + @course.students.to_s + ' pcs.pdf')
-  end
   def get_direct_pdf(c,p)
     @course = c
     @prof = p
@@ -175,6 +157,7 @@ class CoursesController < ApplicationController
   def get_pdf
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
+    # FIXME: put somewhere else
     workdir = '/var/www-seee/web/public/forms/'
     hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)
     filename = @course.students.to_s + '_' + hexdigest
