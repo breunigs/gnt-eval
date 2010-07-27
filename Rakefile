@@ -1,20 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# some config stuff
-
-# Increase density and disable all other barcodes for perf wins
-$zbarCmd = " --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 "
-
-$pdflatex = "/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex"
-# -halt-on-error: stops TeX after the first error
-# -file-line-error: displays file and line where the error occured
-# -draftmode: doesn't create PDF, which speeds up TeX. Still does
-#             syntax-checking and toc-creation
-# -interaction=nonstopmode prevents from asking for stuff on the
-#             console which regularily occurs for missing packages
-$pdflatexFastCmd = "-halt-on-error -file-line-error -draftmode -interaction=nonstopmode"
-$pdflatexRealCmd = "-halt-on-error -file-line-error"
-
 # you probably want to hack the :copycomments task and specify where
 # to copy the images so they may be found
 
@@ -50,7 +35,7 @@ def word_wrap(txt, col = 80)
 end
 
 def find_barcode(filename)
-  r = `./helfer/zbarimg_hackup/zbarimg #{$zbarCmd} #{filename}`
+  r = `#{Seee::Config.commands[:zbar]} #{filename}`
   if not r.empty?
     return r.strip.match(/^([0-9]+)/)[1].to_i
   else
@@ -767,7 +752,7 @@ namespace :summary do
         f.write(foot)
     end
 
-    `cd ./tmp/ && #{$pdflatex} #{$pdflatexFastCmd} blame.tex 2>&1`
+    `cd ./tmp/ && #{Seee::Config.commands[:pdflatex_fast]} blame.tex 2>&1`
     $?
   end
 
@@ -796,12 +781,12 @@ end
 
 rule '.pdf' => '.tex' do |t|
     filename="\"#{File.basename(t.source)}\""
-    texpath="cd \"#{File.dirname(t.source)}\";#{$pdflatex}"
+    texpath="cd \"#{File.dirname(t.source)}\";" 
 
 
     # run it once fast, to see if there are any syntax errors in the
     # text and create first-run-toc
-    err = `#{texpath} #{$pdflatexFastCmd} #{filename} 2>&1`
+    err = `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
     if $?.to_i != 0
         puts "="*60
         puts err
@@ -813,10 +798,10 @@ rule '.pdf' => '.tex' do |t|
     end
 
     # run it fast a second time, to get /all/ references correct
-    `#{texpath} #{$pdflatexFastCmd} #{filename} 2>&1`
+    `#{texpath} #{Seee::Config.commands[:pdflatex_fast] #{filename} 2>&1`
     # now all references should have been resolved. Run it a last time,
     # but this time also output a pdf
-    `#{texpath} #{$pdflatexRealCmd} #{filename} 2>&1`
+    `#{texpath} #{Seee::Config.commands[:pdflatex_real]} #{filename} 2>&1`
 
     if $?.to_i == 0
         puts "Wrote #{t.name}"
