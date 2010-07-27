@@ -157,7 +157,8 @@ class CoursesController < ApplicationController
   def get_pdf
     @course = Course.find(params[:id])
     @prof = Prof.find(params[:prof_id])
-    # FIXME: put somewhere else
+    # FIXME: wir brauchen eigentlich keinen absoluten pfad, der
+    # relative public/forms sollte ausreichen
     workdir = '/var/www-seee/web/public/forms/'
     hexdigest = Digest::SHA256.hexdigest(@prof.fullname + @course.title)
     filename = @course.students.to_s + '_' + hexdigest
