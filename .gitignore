@@ -1,3 +1,7 @@
+helfer/lsf_parser_*
+helfer/HiWIS_*.csv
+helfer/HiWIS_*.xls
+helfer/2* Tutoren Physik.txt
 tmp/
 web/log/database.log
-
+web/log/development.log
