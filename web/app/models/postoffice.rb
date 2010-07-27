@@ -11,10 +11,10 @@ class Postoffice < ActionMailer::Base
     c = Course.find(course_id)
 
     recipients c.profs.collect{ |p| p.email }.join(', ')
-    from 'evaluation@mathphys.fsk.uni-heidelberg.de'
-    cc 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    from Seee::Config.settings[:standard_mail_from]
+    bcc Seee::Config.settings[:standard_mail_bcc]
     subject "Evaluation Ihrer Veranstaltung '#{c.title}'"
-    headers 'Reply-To' => 'evaluation@mathphys.fsk.uni-heidelberg.de'    
+    headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
     sent_on Time.now
     
@@ -27,10 +27,10 @@ class Postoffice < ActionMailer::Base
     c = Course.find(course_id)
     
     recipients c.fs_contact_addresses
-    from 'evaluation@mathphys.fsk.uni-heidelberg.de'
-    bcc 'eval@oth.dea.aleph0.de'
+    from Seee::Config.settings[:standard_mail_from]
+    bcc Seee::Config.settings[:standard_mail_bcc]
     subject "Dein Glück, die Veranstaltung '#{c.title}' evaluieren zu dürfen"
-    headers 'Reply-To' => 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
     sent_on Time.now
     
@@ -46,10 +46,10 @@ class Postoffice < ActionMailer::Base
   def evalverschickung(course_id, faculty_links)
     c = Course.find(course_id)
     recipients c.profs.collect{ |p| p.email }.join(', ')
-    from 'evaluation@mathphys.fsk.uni-heidelberg.de'
-    bcc 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    from Seee::Config.settings[:standard_mail_from]
+    bcc Seee::Config.settings[:standard_mail_bcc]
     subject 'Ergebnisse der diessemestrigen Vorlesungsumfrage'
-    headers 'Reply-To' => 'evaluation@mathphys.fsk.uni-heidelberg.de'
+    headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
     sent_on Time.now
     

@@ -25,7 +25,9 @@ module Seee
 
     @@settings = {
       # FQDN des standard-empfängers
-      :standard_mail_domain = 'mathphys.fsk.uni-heidelberg.de'
+      :standard_mail_domain = 'mathphys.fsk.uni-heidelberg.de',
+      :standard_mail_from = 'evaluation@mathphys.fsk.uni-heidelberg.de',
+      :standard_mail_bcc = 'evaluation@mathphys.fsk.uni-heidelberg.de'
     }
     @@file_paths = {
       # Verzeichnis, in dem die Kommentarbilder gespeichert
@@ -40,6 +42,7 @@ module Seee
       :hunspell_personal_dic => File.join(
                                   File.dirname(Pathname.new(__FILE__).realpath),
                                   'persdic.dic')
+
     }
 
     # Spezielle Kommandos, die ggf. rechtespezifisch sind, also nicht
