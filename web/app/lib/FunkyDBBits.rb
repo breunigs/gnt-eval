@@ -9,7 +9,6 @@ module FunkyDBBits
   require 'dbi'
   def self.dbh
     return @dbh if !@dbh.nil? && @dbh.connected?
-    puts "Connecting to eval-data database"
     # FIXME: This should be stored somewhere else
     @dbh = DBI.connect('DBI:Mysql:eval', 'eval', 'E-Wahl')
   end
