@@ -57,7 +57,7 @@ module FunkyTeXBits
           f.write(head + spellcheck(code) + foot)
         end
 
-        error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_fast]} #{path}.tex 2>&1`
+        error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
         exitcodes = []
         exitcodes << $?.to_i
         if $? == 0
