@@ -23,6 +23,10 @@ module Seee
       :database => 'eval'
     }
 
+    @@settings = {
+      # FQDN des standard-empfängers
+      :standard_mail_domain = 'mathphys.fsk.uni-heidelberg.de'
+    }
     @@file_paths = {
       # Verzeichnis, in dem die Kommentarbilder gespeichert
       # werden. Hat dann pro Semester Unterordner.

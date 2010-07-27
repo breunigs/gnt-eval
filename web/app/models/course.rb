@@ -34,7 +34,7 @@ class Course < ActiveRecord::Base
     end
 
     # FIXME: store somewhere else
-    pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@mathphys.fsk.uni-heidelberg.de'}.join(',')
+    pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@' + Seee::Config.settings[:standard_mail_domain]}.join(',')
   end
 
   def barcodes_with_checksum
