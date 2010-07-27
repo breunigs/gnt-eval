@@ -798,7 +798,7 @@ rule '.pdf' => '.tex' do |t|
     end
 
     # run it fast a second time, to get /all/ references correct
-    `#{texpath} #{Seee::Config.commands[:pdflatex_fast] #{filename} 2>&1`
+   `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
     # now all references should have been resolved. Run it a last time,
     # but this time also output a pdf
     `#{texpath} #{Seee::Config.commands[:pdflatex_real]} #{filename} 2>&1`
