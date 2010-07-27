@@ -63,14 +63,14 @@ module FunkyTeXBits
         if $? == 0
             # overwrite by design. Otherwise it's flooded with all
             # the TeX output even though TeXing worked fine
-            error = `cd /tmp/ && #{Seee::Config.application_path[:pdfcrop]} #{path}.pdf #{path}-crop.pdf 2>&1`
+            error = `cd /tmp/ && #{Seee::Config.application_paths[:pdfcrop]} #{path}.pdf #{path}-crop.pdf 2>&1`
             exitcodes << $?.to_i
-            error << `#{Seee::Config.application_path[:convert]} -density 100 #{path}-crop.pdf #{path}.png  2>&1`
+            error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}-crop.pdf #{path}.png  2>&1`
             exitcodes << $?.to_i
             # convert creates one image per page, so join them
             # for easier processing
             unless File.exists?("#{path}.png")
-                error << `#{Seee::Config.application_path[:convert]} #{path}-*.png -append #{path}.png  2>&1`
+                error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
                 exitcodes << $?.to_i
             end
         end
