@@ -223,8 +223,6 @@ class Form
   end
 
   def getLecturerHeader(name, gender, sheetsCount)
-    @lang_quest_for_vorl_f = "FIXME (Dozentin: #1, #2 Bögen)" if @lang_quest_for_vorl_f.nil? || @lang_quest_for_vorl_f.empty?
-    @lang_quest_for_vorl_m = "FIXME (Dozent: #1, #2 Bögen)" if @lang_quest_for_vorl_m.nil? || @lang_quest_for_vorl_m.empty?
     if gender == 0 # Note: same as in database
       @lang_quest_for_vorl_f.gsub(/#1/, name).gsub(/#2/, sheetsCount.to_s)
     else

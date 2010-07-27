@@ -136,7 +136,6 @@ module FunkyTeXBits
       b << "\\newcommand{\\profkopf}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\kurskopfD}[4]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 bei #2}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\kurskopfE}[4]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 by #2}\nsubmitted questionnaires: #3}\n"
-      b << "\\newcommand{\\fragenzurvorlesung}{\\section*{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\commentsprof}[1]{\\textbf{#1}}\n"
@@ -147,7 +146,6 @@ module FunkyTeXBits
       b << "\\newcommand{\\profkopf}[1]{\\section{#1}}\n"
       b << "\\newcommand{\\kurskopfD}[4]{\\pdfdest name{#4} xyz%\n\\section{Erhebungsgrundlage}\nAbgegebene Fragebögen: #3}\n"
       b << "\\newcommand{\\kurskopfE}[4]{\\pdfdest name{#4} xyz%\n\\section{frame of survey}\nsubmitted questionnaires: #3}\n"
-      b << "\\newcommand{\\fragenzurvorlesung}{\\section{Fragen zur Vorlesung}}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section{#1}}\n"
       b << "\\newcommand{\\zusammenfassung}[1]{\\section{#1}}\n"
@@ -237,6 +235,7 @@ module FunkyTeXBits
 
     path = File.join(File.dirname(__FILE__), "../../../tmp/sample_sheets/sample_")
     b << "{Die Fragebögen}\n"
+    # FIXME: mit der Formklasse Syncen iwie…
     [["Vorlesungsbogen (Deutsch)", 0, 2], ["Vorlesungsbogen (Englisch)", 2, 2], ["Seminarbogen", 3, 1]].each do |v|
       b << "\\subsection*{#{v[0]}}"
       1.upto(v[2]) do |i|
