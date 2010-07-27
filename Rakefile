@@ -22,7 +22,6 @@ require 'ftools'
 
 include Magick
 
-
 require 'rake/clean'
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
 

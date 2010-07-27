@@ -12,7 +12,7 @@ module Seee
     @@application_paths = {
       :hunspell => '/usr/bin/env hunspell',
       :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
-      :zbar => 'FIXME'
+      :zbar => File.join(RAILS_ROOT, '..', 'helfer', 'zbarimg_hackup', 'zbarimg')
     }
 
     # Externe Datenbank, in der die wirklichen Evaldaten gespeichert sind
@@ -34,14 +34,9 @@ module Seee
       # werden. Hat dann pro Semester Unterordner.
       :comment_images_public_dir => '/home/eval/public_html/.comments/',
 
-      :texmfdir => File.expand_path(
-                     File.join(
-                       File.dirname(Pathname.new(__FILE__).realpath),
-                         '..', '..', '..', 'tex', 'bogen')),
+      :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(
-                                  File.dirname(Pathname.new(__FILE__).realpath),
-                                  'persdic.dic')
+      :hunspell_personal_dic => File.join(RAILS_ROOT, 'persdic.dic')
 
     }
 
