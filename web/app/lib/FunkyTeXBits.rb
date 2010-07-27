@@ -4,9 +4,6 @@
 module FunkyTeXBits
   def spellcheck(code)
     hunspell = Seee::Config.application_paths[:hunspell]
-    cdir = File.expand_path(File.dirname(File.dirname(__FILE__)))
-    pdic = "#{cdir}/lib/persdic.dic"
-    dics = "en_US,de_DE"
 
     # check if hunspell is installed
     `#{hunspell} --version`
@@ -22,7 +19,7 @@ module FunkyTeXBits
     File.open("#{path}", 'w') {|f| f.write(code) }
 
     # spell check!
-    words = `#{hunspell} -d #{dics} -p "#{pdic}" -l -t #{path}`.split("\n")
+    words = `#{Seee::Config.commands[:hunspell]} -l -t #{path}`.split("\n")
     File.delete(path)
 
     unless $?.to_i == 0

@@ -17,14 +17,22 @@ module Seee
     @@file_paths = {
       # Verzeichnis, in dem die Kommentarbilder gespeichert
       # werden. Hat dann pro Semester Unterordner.
-      :comment_images_public_dir => '/home/eval/public_html/.comments/'
+      :comment_images_public_dir => '/home/eval/public_html/.comments/',
+
+      :texmfdir => File.expand_path(
+                     File.join(
+                       File.dirname(Pathname.new(__FILE__).realpath),
+                         '..', '..', '..', 'tex', 'bogen')),
+      
+      :hunspell_personal_dic => File.join(
+                                  File.dirname(Pathname.new(__FILE__).realpath),
+                                  'persdic.dic')
     }
 
     # Spezielle Kommandos, die ggf. rechtespezifisch sind, also nicht
     # nur application_paths. FIXME: command[:hunspell] sollte, falls
     # nicht gesetzt, auf appliction_paths defaulten
 
-    # Korrektes TexMF finden
     texmfdir = File.dirname(Pathname.new(__FILE__).realpath)
     texmfdir = File.join(texmfdir, "..", "..", "..", "tex", "bogen")
     texmfdir = File.expand_path(texmfdir)
@@ -32,6 +40,8 @@ module Seee
     @@commands = {
       :find_comment_image_directory => 'login_gruppe_home eval find',
       :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
+
+      :hunspell => @@application_paths[:hunspell] + ' -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}',
 
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
