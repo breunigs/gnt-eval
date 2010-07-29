@@ -52,6 +52,11 @@ class Question
   # postfix when saving file
   attr_accessor :save_as
 
+  # special care: boolean, true falls extra liebe benoetigt wird
+  # (tutoren, studienfach, semesterzahl)
+
+  attr_accessor :special_care
+
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='', save_as = '')
 
@@ -71,7 +76,7 @@ class Question
 
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
   def section
-    if @db_column.nil? || @donotuse == 1
+    if @db_column.nil? || @special_care == 1
       return 'this is no question in a traditional sense'
     end
     first_letter = (@db_column.to_s)[0].chr
@@ -133,6 +138,35 @@ class Question
     return @db_column.is_a?(Array)
   end
 
+  # ausgabe einer einzelnen frage ans tex
+  def to_tex
+    #     \qvm{Gibt es Probleme mit dem mündlichen Vortrag? Wenn ja, welche?}{
+    # keine}{zu leiss
+    # e Verstärkeranlage}{mangelnde Sprachkenntnisse}{Studis zu
+    # laut}{sonstige}{v18}
+
+    # hier könnte ein echter algorithmus hin
+    # FIXME: kommentarfelder
+
+    unless @special_care
+      '\q' + ['i','ii','iii','iv','v','vi'][@boxes.count-1] +
+        (multi? ? 'm' : '') +  '{' + text + '}' + boxes.map{|b| '{' +
+        b.text.to_s + '}'}.join('') + '{' + tex_db_column + '}' +
+        "\n\n"
+    else
+      ''
+    end
+  end
+
+  def tex_db_column
+    if multi?
+      c = @db_column.first
+      c[0,c.length-1]
+    else
+      @db_column
+    end
+  end
+  
 end
 
 
@@ -165,15 +199,6 @@ class AbstractForm
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
   attr_reader :english
-
-  # naming convention
-
-  alias :is_english? :isEnglish?
-  alias :lecturer_head :getLecturerHead
-  alias :study_groups_header :getStudyGroupsHeader
-  alias :study_groups_overview :getStudyGroupsOverview
-  alias :study_groups_overview_heades :getStudyGroupsOverviewHeader
-  alias :sheet_count :getSheetCount
 
   def initialize(pages = [], db_table = '')
     @pages = pages
@@ -217,6 +242,15 @@ class AbstractForm
   def getSheetCount
     self.isEnglish? ? "submitted questionnaires" : "abgegebene Fragebögen"
   end
+
+    # naming convention
+
+  alias :is_english? :isEnglish?
+  alias :lecturer_header :getLecturerHeader
+  alias :study_groups_header :getStudyGroupsHeader
+  alias :study_groups_overview :getStudyGroupsOverview
+  alias :study_groups_overview_heades :getStudyGroupsOverviewHeader
+  alias :sheet_count :getSheetCount
 
 end
 

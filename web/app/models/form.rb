@@ -13,6 +13,8 @@ class Form < ActiveRecord::Base
     $stdout = sio
     pp abstract_form
     $stdout = orig
-    sio.string
+
+    # aber bitte ohne die ids
+    sio.string.gsub(/0x[^\s]*/,'')
   end
 end

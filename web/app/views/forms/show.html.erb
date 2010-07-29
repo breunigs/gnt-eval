@@ -10,7 +10,7 @@
 
 <p>
   <b>Content:</b><pre>
-  <%=h @form.pretty_abstract_form %></pre>
+  <%=h @form.pretty_abstract_form.gsub(/0x[^\s]*/,'') %></pre>
 </p>
 
 
