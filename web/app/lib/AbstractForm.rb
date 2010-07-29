@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
@@ -214,6 +215,15 @@ class AbstractForm
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
   attr_reader :english
+
+  # naming convention
+
+  alias :is_english? :isEnglish?
+  alias :lecturer_head :getLecturerHead
+  alias :study_groups_header :getStudyGroupsHeader
+  alias :study_groups_overview :getStudyGroupsOverview
+  alias :study_groups_overview_heades :getStudyGroupsOverviewHeader
+  alias :sheet_count :getSheetCount
 
   def initialize(pages = [], db_table = '')
     @pages = pages
