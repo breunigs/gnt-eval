@@ -1,0 +1,24 @@
+<h1>Editing form</h1>
+
+<% form_for(@form) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.label :semester %><br />
+    <%= f.text_field :semester %>
+  </p>
+  <p>
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </p>
+  <p>
+    <%= f.label :content %><br />
+    <%= f.text_area :content %>
+  </p>
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @form %> |
+<%= link_to 'Back', forms_path %>

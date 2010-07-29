@@ -1,0 +1,18 @@
+<p>
+  <b>Semester:</b>
+  <%=h @form.semester %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%=h @form.name %>
+</p>
+
+<p>
+  <b>Content:</b>
+  <%=h @form.content %>
+</p>
+
+
+<%= link_to 'Edit', edit_form_path(@form) %> |
+<%= link_to 'Back', forms_path %>

@@ -1,0 +1,11 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  semester: 
+  name: MyString
+  content: MyText
+
+two:
+  semester: 
+  name: MyString
+  content: MyText
