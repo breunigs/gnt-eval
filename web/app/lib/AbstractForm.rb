@@ -1,4 +1,4 @@
-# = Form.rb - Everything you need to have an abstract form
+# = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
 # - Form: Basic class containing pages and dbtable
@@ -203,7 +203,7 @@ end
 # main form, list of pages and (ATM) dbtable.
 #
 
-class Form
+class AbstractForm
 
   # list of pages
   attr_accessor :pages
