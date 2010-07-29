@@ -9,9 +9,8 @@
 
 <% for form in @forms %>
   <tr>
-    <td><%=h form.semester %></td>
+    <td><%=h form.semester.title %></td>
     <td><%=h form.name %></td>
-    <td><%=h form.content %></td>
     <td><%= link_to 'Show', form %></td>
     <td><%= link_to 'Edit', edit_form_path(form) %></td>
     <td><%= link_to 'Destroy', form, :confirm => 'Are you sure?', :method => :delete %></td>

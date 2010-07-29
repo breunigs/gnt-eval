@@ -1,4 +1,4 @@
---- !ruby/object:Form
+--- !ruby/object:AbstractForm
 db_table: evaldaten_SS_2010_0
 lang_quest_for_vorl_f: "Fragen zur Vorlesung (Dozentin: #1, Bögen: #2)"
 lang_quest_for_vorl_m: "Fragen zur Vorlesung (Dozent: #1, Bögen: #2)"

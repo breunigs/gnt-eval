@@ -2,9 +2,9 @@
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
-# - Form: Basic class containing pages and dbtable
+# - AbstractForm: Basic class containing pages and dbtable
 # - Page: Containing list of questions on that particular page
-# - Question: see class
+# - Question: see class.
 # - Box: see class
 #
 # We won't do no eval stuff in here, this is _just_ the abstract
@@ -14,37 +14,23 @@
 # This is a box on a printed form. Nothing more.
 class Box
 
-  # value to insert into database
+  # value to insert into database if cross is here
   attr_accessor :choice
-
-  # coordinates
-  attr_accessor :x,:y
-
-  # size
-  attr_accessor :width, :height
 
   # what is the _meaning_ of this box
   attr_accessor :text
 
-  # special value for easier LaTeX sheet generation
+  # special value for easier LaTeX sheet generation, e.g. square or comment
   attr_accessor :type
 
-
-  def initialize(c, x, y, w, h, t)
+  def initialize(c, t)
     @choice = c
-    @x = x
-    @y = y
-    @width = w
-    @height = h
     @text = t
-    @type = ""
   end
 end
 
 # This is a question on a printed form. Nothing more.
 class Question
-  include FunkyDBBits
-
   # list of boxes
   attr_accessor :boxes
 
@@ -63,18 +49,11 @@ class Question
   # into which field to write the result (use a list for multiple choice questions!)
   attr_accessor :db_column
 
-  # active question? (defaults to true)
-  attr_accessor :active
-
   # postfix when saving file
   attr_accessor :save_as
 
-  # the field where OMR saves the selected box
-  attr_accessor :value
-
   def initialize(boxes = [], qtext='', failchoice=-1,
-                 nochoice=nil, type='square', db_column='',
-                 active=true, save_as = '')
+                 nochoice=nil, type='square', db_column='', save_as = '')
 
     @boxes = boxes
     @qtext = qtext
@@ -82,9 +61,7 @@ class Question
     @nochoice = nochoice
     @type = type
     @db_column = db_column
-    @active = active
     @save_as = save_as
-    @value = nil
   end
 
   # how many choices are there?
@@ -156,37 +133,10 @@ class Question
     return @db_column.is_a?(Array)
   end
 
-
-  # h: hash correspoding to specific (!) where clause
-  # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table)
-    @db_table = db_table
-
-    b = ''
-
-    if @db_column.is_a?(Array)
-
-      answers = multi_q(h, self)
-
-      t = TeXMultiQuestion.new(@qtext, answers)
-      b << t.to_tex
-
-      # single-q
-    else
-      antw, anz, m, m_a, s, s_a = single_q(h, g, self)
-      if anz > 0
-        t = TeXSingleQuestion.new(text, ltext, rtext, antw,
-                                  anz, m, m_a, s, s_a)
-
-      b << t.to_tex
-      end
-    end
-    return b
-  end
 end
 
 
-# this is actually just needed for the OMR to distinguish between
+# this is actually just needed for OMR/TeX to distinguish between
 # pages
 #
 

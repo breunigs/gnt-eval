@@ -430,7 +430,7 @@ namespace :pest do
       # insert them later. Since `path` is UNIQUE insert queries will
       # simply fail if the path already exists.
       # Yes, this is cheap hack.
-      $dbh.do("DELETE FROM `#{table}` WHERE `path` = ?", f) if update
+      $dbh.do('DELETE FROM `' + table.to_s +'` WHERE `path` = ? ', f) if update
 
       # "ignore" makes MySQL stop complaining about duplicate unique
       # keys (path in our case)

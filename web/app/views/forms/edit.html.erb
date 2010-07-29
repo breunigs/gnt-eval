@@ -5,13 +5,14 @@
 
   <p>
     <%= f.label :semester %><br />
-    <%= f.text_field :semester %>
+    <%= select_tag 'form[semester_id]', options_from_collection_for_select(Semester.find(:all), :id, :title, Semester.find(:all).last.id) %>
   </p>
   <p>
     <%= f.label :name %><br />
     <%= f.text_field :name %>
   </p>
   <p>
+    ## FIXME: klickibunti
     <%= f.label :content %><br />
     <%= f.text_area :content %>
   </p>
