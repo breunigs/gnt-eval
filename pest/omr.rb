@@ -30,7 +30,8 @@ require cdir + '/helper.boxtools.rb'
 require cdir + '/helper.constants.rb'
 require cdir + '/helper.misc.rb'
 
-require cdir + '/../lib/rails_requirements.rb'
+require cdir + '/../lib/FunkyDBBits.rb'
+require cdir + '/../lib/Form.rb'
 
 # bp stands for "black percentage" and holds how much pixels in this
 # box are black. mx and my define the inner, top left corner of the
@@ -128,6 +129,10 @@ class PESTOmr
             # Calculate angle in radians
             @rad << Math.atan((botstart - topstart).to_f/(sBot - sTop - height).to_f)
 
+            #~ puts (@rad.last*RAD2DEG).to_s + " vs "+ ((@rad.last*RAD2DEG + 0.1)).to_s
+            #~ l = @rad.last
+            #~ @rad << ((l*RAD2DEG + 0.1)*DEG2RAD)
+
             if @debug
                 # Careful! This draws into the images before they are
                 # completely recognized. If it intersects with a checkbox
@@ -140,14 +145,14 @@ class PESTOmr
                 draw.line(topstart, sTop, topstart, sTop+height)
                 draw.line(botstart, sBot, botstart, sBot+height)
                 draw.text(10*@dpifix, 35*@dpifix, (@rad.last*RAD2DEG).to_s)
-                
+
                 draw.fill_opacity(0.05)
                 draw.stroke_opacity(0)
                 draw.rectangle(sLeft, sTop, topstart, sTop+height)
                 draw.rectangle(sLeft, sBot, botstart, sBot+height)
                 draw.fill_opacity(1)
                 draw.stroke_opacity(1)
-                
+
                 draw.draw(img)
             end
         end
@@ -180,8 +185,9 @@ class PESTOmr
         # failing due to some black pixels
         leftThres = [9, 9]
         topThres = [20, 20]
-        
+
         lTop    = ( 200*@dpifix).to_i
+        lBot    = (2650*@dpifix).to_i
         lLeft   = (  40*@dpifix).to_i
         lWidth  = ( 500*@dpifix).to_i
         lHeight = ( 400*@dpifix).to_i
@@ -215,8 +221,18 @@ class PESTOmr
 
             # The offset detection is done at points that are affected
             # by rotation. We take this into account here.
-            top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
-            left += left - calcSkew(i, left, lTop/2)[0]
+            #~ top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
+
+            # Depending on the direction of the rotation either a point
+            # at the top or bottom of the sheet should be used as refer-
+            # ence.
+            if @rad[i]*RAD2DEG > 0
+                left += left - calcSkew(i, left, lTop/2)[0]
+                top +=  top- calcSkew(i, tLeft + tWidth, top)[1]
+            else
+                left += left - calcSkew(i, left, lBot)[0]
+                top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
+            end
 
             @leftoff[i] = left - leftcut[i]
             @topoff[i]  = top  -  topcut[i]
@@ -314,6 +330,7 @@ class PESTOmr
             # radius for each checkbox
             if @debug
                 @draw.stroke("black")
+                @draw.fill("black")
                 @draw.fill_opacity(1)
                 @draw.text(x+(SQUARE_SEARCH[0]+5)*@dpifix, y+20*@dpifix, ((bp * 100).round.to_f / 100).to_s)
 
@@ -374,7 +391,7 @@ class PESTOmr
             else        return group.failchoice
         end
     end
-    
+
     # Assumes a whole page for commentary. Crops a margin to remove any black
     # bars and then trims to any text if there.
     def typeTextWholePageParse(imgid, group)
@@ -383,7 +400,7 @@ class PESTOmr
         i = @ilist[imgid]
         c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim(true)
         return 0 if c.rows*c.columns < 500*@dpifix
-        
+
         c = c.resize(0.4)
         step = 20*@dpifix
         thres = 40
@@ -393,42 +410,42 @@ class PESTOmr
         while left < c.columns
             break if blackPixels(left, 0, step, c.rows, c) > thres
             left += step
-        end        
+        end
         return 0 if left >= c.columns
         puts left
-        
+
         # Find right border
         right = c.columns
         while right > 0
             break if blackPixels(right-step, 0, step, c.rows, c) > thres
             right -= step
-        end        
+        end
         return 0 if right < 0
         #puts right
-        
+
         # Find top border
         top = 0
         while top < c.rows
             break if blackPixels(0, top, c.columns, step, c) > thres
             top += step
-        end        
+        end
         return 0 if top >= c.rows
         #puts top
-        
+
         # Find bottom border
         bottom = c.rows
         while bottom > 0
             break if blackPixels(0, bottom-step, c.columns, step, c) > thres
             bottom -= step
-        end        
+        end
         return 0 if bottom < 0
         #puts bottom
-        
+
         c.crop!(left-10, top-10, right-left+20, bottom-top+20, true)
         c.trim!(true)
-        
+
         return 0 if c.rows*c.columns < 500*@dpifix
-        
+
         filename = @path + "/" + File.basename(@currentFile, ".tif")
         filename << group.saveas + ".jpg"
         puts @spaces + "    Saving Comment Image: " + filename if @verbose
@@ -589,11 +606,11 @@ class PESTOmr
             img.write dbgFlnm
             puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
         end
-        
+
         if @cancelProcessing
             print @spaces + "  Found boxes to be out of bounds. Moving to bizzare:"
             print @spaces + "  " + File.basename(file)
-            dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/") 
+            dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
             File.makedirs(dir)
             File.move(file, File.join(dir, File.basename(file)))
             return
@@ -604,9 +621,9 @@ class PESTOmr
         fout.puts YAML::dump(@doc)
         fout.close
     end
-    
+
     # Finds if a given page for the currently loaded @doc requires
-    # knowledge about offset and rotation. 
+    # knowledge about offset and rotation.
     def pageNeedsPositionData(id)
         throw :documentHasTooFewPages_CheckForMissingPageBreak if @doc.pages[id].nil?
         q = @doc.pages[id].questions
@@ -637,7 +654,7 @@ class PESTOmr
         else
           puts msg.join("\n")
         end
-        
+
         files
     end
 
@@ -668,7 +685,7 @@ class PESTOmr
               parseFile(file)
             rescue => e
               puts @spaces + "FAILED: #{file}"
-              File.open("PEST_OMR_ERROR.log", 'a+') do |errlog| 
+              File.open("PEST_OMR_ERROR.log", 'a+') do |errlog|
                 errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace}")
               end
               puts "="*20
@@ -713,7 +730,7 @@ class PESTOmr
         if !File.exists?(@omrsheet)
             puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
             exit
-        end 
+        end
         doc = YAML::load(File.read(@omrsheet))
 
         @dbtable = doc.db_table
@@ -723,7 +740,7 @@ class PESTOmr
     # Loads the YAML file and converts LaTeX's scalepoints into pixels
     def loadYAMLsheet
         doc = YAML::load(File.read(@omrsheet))
-        doc.pages.each do |p| 
+        doc.pages.each do |p|
             next if p.questions.nil?
             p.questions.each do |q|
                 next if q.boxes.nil?
@@ -763,7 +780,7 @@ class PESTOmr
             opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { overwrite = true }
 
             opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| cores = c }
-            
+
             opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
 
             opts.on("-i", "--indent SPACES", Integer, "How much the messages should be indented.", "Will be automatically set for the additionally spawned processes when using multiple cores in oder to keep it readable for humans.") { |i| @spaces = " "*i }
@@ -786,7 +803,7 @@ class PESTOmr
             puts "Specified PATH is not a directory"
             exit
         end
-        
+
         files = []
 
         # If no list of files is given, look at the given working
@@ -796,14 +813,14 @@ class PESTOmr
         else
             ARGV.each { |f| files << @path + "/" + f }
         end
-        
+
         # Unless set manually, grab a sample image and use it to calculate the
         # DPI
         if @dpifix.nil?
             list = Magick::ImageList.new(files[0])
             @dpifix = list[0].dpifix
         end
-        
+
         # All set? Ready, steady, parse!
         parseOMRSheet
 
@@ -836,7 +853,7 @@ class PESTOmr
                 # spawned instances are indented. Quite useful to keep
                 # the console output readable.
                 i = " -i " + (corecount*35).to_s
-                system("ruby "+ File.dirname(__FILE__) +"/omr.rb " + sheet + path + i + 
+                system("ruby "+ File.dirname(__FILE__) +"/omr.rb " + sheet + path + i +
 v + d + o + list + " &")
             end
         end
