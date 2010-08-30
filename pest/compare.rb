@@ -106,7 +106,7 @@ workf.each do |f|
         end
     end
 
-    if diffs > 10
+    if diffs > 3
         puts File.basename(f).ljust(length) + " has #{diffs} diffs."
     end
 end
