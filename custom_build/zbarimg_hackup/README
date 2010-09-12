@@ -1,0 +1,19 @@
+This is the source of zbar[1] with a hacked zbarimg that suits our needs.
+No other parts of the code have been touched, so it really looks ugly and
+it requires a ton of dependencies to build. 
+
+The commands/files of interest are:
+make -- also builds the hackup
+/zbarimg/zbarimg.c -- the source code
+/zbarimg/.libs/zbarimg -- the executable without that bash crap
+
+Note that you can easily build ZBarimg using 'rake magick:buildZBar' in
+the seee-root directory.
+
+Intended usage is a follows:
+	zbarimg <imagefile>
+It will print the found barcode to STDOUT, the image will be rotated
+and flipped as required IN PLACE. If no barcode can be found, an
+error code unequal to 0 will be returned.
+
+[1] http://zbar.sourceforge.net/

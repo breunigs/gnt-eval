@@ -785,8 +785,10 @@ end
 namespace :magick do
     srcImgMagick = Seee::Config.custom_builds[:src_img_magick]
     srcRMagick = Seee::Config.custom_builds[:src_r_magick]
+    srcZBar = Seee::Config.custom_builds[:src_zbar]
     bldImgMagick = Seee::Config.custom_builds[:bld_img_magick]
     bldRMagick = Seee::Config.custom_builds[:bld_r_magick]
+    bldZBar = Seee::Config.custom_builds[:bld_zbar]
 
     # useful functions
     def exitOnError(text)
@@ -800,20 +802,23 @@ namespace :magick do
 
     # all-in-one magic
     desc "Does 'just what you want' in a single step"
-    task :all, :needs => ["magick:build", "magick:clean", "magick:version"]
+    task :all, :needs => ["magick:build", "magick:clean"] do
+        # run in extra shell so the config-variables get updated
+        system("rake magick:version")
+    end
 
     # combined operation
-    desc "build custom imagemagick and rmagick"
-    task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick"] do
+    desc "build custom ImageMagick, RMagick, ZBar"
+    task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick", "magick:buildZBar"] do
         puts
         puts bold "Built process finished successfully."
     end
 
-    desc "run clean && distclean for custom imagemagick and rmagick"
-    task :clean, :needs => ["magick:cleanImageMagick", "magick:cleanRMagick"]
+    desc "run clean && distclean for custom ImageMagick, RMagick, ZBar"
+    task :clean, :needs => ["magick:cleanImageMagick", "magick:cleanRMagick", "magick:cleanZBar"]
 
-    desc "remove (uninstall) custom imagemagick and rmagick"
-    task :remove, :needs =>  ["magick:removeImageMagick", "magick:removeRMagick"]
+    desc "remove (uninstall) custom ImageMagick, RMagick, ZBar"
+    task :remove, :needs =>  ["magick:removeImageMagick", "magick:removeRMagick", "magick:removeZBar"]
 
 
     # imagemagick stuff
@@ -823,7 +828,7 @@ namespace :magick do
         puts bold "#### Building ImageMagick"
 
         puts bold "#### Configure..."
-        system("#{cdir} && ./configure --prefix=#{bldImgMagick} --with-quantum-depth=8 --without-perl --without-magick-plus-plus")
+        system("#{cdir} && ./configure --prefix=#{bldImgMagick} --with-quantum-depth=8 --without-perl --without-magick-plus-plus --with-gnu-ld --without-dps --without-fpx --with-modules --disable-largefile --with-bzlib=yes --with-x=yes")
         exitOnError("configuring ImageMagick failed")
 
         puts bold "#### Make..."
@@ -844,7 +849,7 @@ namespace :magick do
     end
 
     desc "remove (uninstall) custom ImageMagick"
-    task :removeImageMagick, :needs => "magick:removeRMagick" do
+    task :removeImageMagick, :needs => ["magick:removeRMagick", "magick:removeZBar"] do
         puts
         puts bold "Removing custom ImageMagick"
         system("rm -rf #{bldImgMagick}")
@@ -901,7 +906,46 @@ namespace :magick do
         system("rm -rf #{bldRMagick}")
     end
 
+    # zbar stuff
+    desc "build custom ZBar (using custom imagemagick)"
+    task :buildZBar, :needs => "magick:removeZBar" do
+        exec = "cd #{srcZBar}"
+        exec << " && export PKG_CONFIG_PATH=#{bldImgMagick}/lib/pkgconfig"
+        exec << " && export LDFLAGS=\" -Wl,-z,defs\""
+        puts bold "#### Building ZBar"
 
+        puts bold "#### Configure..."
+        system("#{exec} && ./configure --prefix=#{bldZBar} --without-gtk --without-python --without-qt --without-jpeg --without-xv --with-gnu-ld --disable-video --enable-codes=ean --disable-pthread --without-xshm")
+        exitOnError("configuring ZBar failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
+
+        puts bold "#### Make..."
+        system("#{exec} && make")
+        exitOnError("making ZBar failed")
+
+        puts bold "#### Make install..."
+        system("#{exec} && make install")
+        exitOnError("installing ZBar failed")
+
+        puts
+        puts
+        puts "NOTE: Removing built zbar-libs in favor of global ones. For some reason the global ones are significantly faster and I can't find the issue. At least this is true for 0.8+dfsg-3 vs. 0.10+* as included in Debian/lenny (libzbar0) and Seee."
+        system("rm -rf #{bldZBar}/lib")
+
+        puts
+        puts bold "ZBar has been successfully built."
+    end
+
+    desc "clean ZBar compilation files"
+    task :cleanZBar do
+        system("cd #{srcZBar} && make clean && make distclean")
+    end
+
+    desc "remove (uninstall) custom ZBar"
+    task :removeZBar do
+        puts
+        puts bold "Removing custom ZBar"
+        system("rm -rf #{bldZBar}")
+    end
 
     desc "Get version info if all built/installed ImageMagick/RMagick and what will be used"
     task :version do
@@ -918,10 +962,10 @@ namespace :magick do
         puts
         puts bold "RMagick uses:"
         puts `ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
-        puts
 
-        # find path for installed rmagick
+        # find path for installed rmagick/zbar
         rmagickrb = Seee::Config.custom_builds[:rmagick_rb]
+        zbar = Seee::Config.application_paths[:zbar]
         puts
         puts
         puts bold "CUSTOM versions:"
@@ -933,6 +977,10 @@ namespace :magick do
         puts
         puts bold "RMagick uses:"
         puts `ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
+        puts
+        puts bold "ZBarImg reports:"
+        puts `#{zbar} --version #{nob}`.strip
+        puts "Note: ZBarImg is always custom built, therefore there is no global version. If no ImageMagick version is reported, this likely means it will use the shared libraries in /usr."
     end
 end
 
