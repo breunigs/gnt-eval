@@ -42,6 +42,10 @@ def find_barcode(filename)
   end
 end
 
+def bold(text)
+	"\e[1m#{text}\e[0m"
+end
+
 def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
@@ -778,9 +782,163 @@ namespace :summary do
   end
 end
 
+namespace :magick do
+    srcImgMagick = Seee::Config.custom_builds[:src_img_magick]
+    srcRMagick = Seee::Config.custom_builds[:src_r_magick]
+    bldImgMagick = Seee::Config.custom_builds[:bld_img_magick]
+    bldRMagick = Seee::Config.custom_builds[:bld_r_magick]
+
+    # useful functions
+    def exitOnError(text)
+        return if $?.exitstatus == 0
+        puts
+        puts bold("#"*15)
+        puts text
+        puts
+        exit 1
+    end
+
+    # all-in-one magic
+    desc "Does 'just what you want' in a single step"
+    task :all, :needs => ["magick:build", "magick:clean", "magick:version"]
+
+    # combined operation
+    desc "build custom imagemagick and rmagick"
+    task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick"] do
+        puts
+        puts bold "Built process finished successfully."
+    end
+
+    desc "run clean && distclean for custom imagemagick and rmagick"
+    task :clean, :needs => ["magick:cleanImageMagick", "magick:cleanRMagick"]
+
+    desc "remove (uninstall) custom imagemagick and rmagick"
+    task :remove, :needs =>  ["magick:removeImageMagick", "magick:removeRMagick"]
+
+
+    # imagemagick stuff
+    desc "build custom ImageMagick (using quantum-depth=8)"
+    task :buildImageMagick, :needs => "magick:removeImageMagick" do
+        cdir = "cd #{srcImgMagick}"
+        puts bold "#### Building ImageMagick"
+
+        puts bold "#### Configure..."
+        system("#{cdir} && ./configure --prefix=#{bldImgMagick} --with-quantum-depth=8 --without-perl --without-magick-plus-plus")
+        exitOnError("configuring ImageMagick failed")
+
+        puts bold "#### Make..."
+        system("#{cdir} && make")
+        exitOnError("making ImageMagick failed")
+
+        puts bold "#### Make install..."
+        system("#{cdir} && make install")
+        exitOnError("installing ImageMagick failed")
+
+        puts
+        puts bold "ImageMagick has been successfully built."
+    end
+
+    desc "clean ImageMagick compilation files"
+    task :cleanImageMagick do
+        system("cd #{srcImgMagick} && make clean && make distclean")
+    end
+
+    desc "remove (uninstall) custom ImageMagick"
+    task :removeImageMagick, :needs => "magick:removeRMagick" do
+        puts
+        puts bold "Removing custom ImageMagick"
+        system("rm -rf #{bldImgMagick}")
+    end
+
+
+    # rmagick stuff
+    desc "build custom RMagick (using the custom built ImageMagick)"
+    task :buildRMagick, :needs => "magick:removeRMagick" do
+        exec = "export PATH=#{bldImgMagick}/bin:/usr/bin"
+        # so compiling works
+        exec << " && export LD_LIBRARY_PATH=#{bldImgMagick}/lib"
+        # hard links the path in the binary (saves us from fiddling with
+        # LD_LIBRARY_PATH later, when running other ruby instances)
+        exec << " && export LD_RUN_PATH=#{bldImgMagick}/lib"
+        exec << " && cd #{srcRMagick}"
+        puts bold "#### Building RMagick"
+
+        puts bold "#### Configure..."
+        system("#{exec} && ruby setup.rb config --prefix=#{bldRMagick} --disable-htmldoc")
+        exitOnError("configuring RMagick failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
+
+        puts bold "#### Setup..."
+        system("#{exec} && ruby setup.rb setup")
+        exitOnError("Setting up RMagick failed")
+
+        puts bold "#### Install..."
+        system("#{exec} && ruby setup.rb install --prefix=#{bldRMagick}")
+        exitOnError("Installing RMagick failed")
+
+
+        # we cannot use :rmagick_rb here yet, because the file may not
+        # have existed before, thus the variable would be nil
+        rb = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick.rb"))[0]
+        so = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick2.so"))[0]
+        # hardcode paths into RMagick.rb to be able to simply require
+        # this file and use the custom ImageMagick version
+        system("sed -i \"s:require 'RMagick2.so':require '#{so}':\" #{rb}")
+
+        puts
+        puts bold "RMagick has been successfully built."
+    end
+
+    desc "clean RMagick compilation files"
+    task :cleanRMagick do
+        system("cd #{srcRMagick} && ruby setup.rb clean")
+        system("cd #{srcRMagick} && ruby setup.rb distclean")
+    end
+
+    desc "remove (uninstall) custom RMagick"
+    task :removeRMagick do
+        puts
+        puts bold "Removing custom RMagick"
+        system("rm -rf #{bldRMagick}")
+    end
+
+
+
+    desc "Get version info if all built/installed ImageMagick/RMagick and what will be used"
+    task :version do
+        noi = ' || echo "not (properly?) installed"'
+        nob = ' || echo "not (properly?) built"'
+
+        puts
+        puts bold "GLOBAL versions:"
+        puts bold "ImageMagick:"
+        puts `convert -version #{noi}`.strip
+        puts
+        puts bold "RMagick:"
+        puts `ruby -r RMagick -e"puts Magick::Version" #{noi}`.strip
+        puts
+        puts bold "RMagick uses:"
+        puts `ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
+        puts
+
+        # find path for installed rmagick
+        rmagickrb = Seee::Config.custom_builds[:rmagick_rb]
+        puts
+        puts
+        puts bold "CUSTOM versions:"
+        puts bold "ImageMagick:"
+        puts `#{bldImgMagick}/bin/convert -version #{nob}`.strip
+        puts
+        puts bold "RMagick:"
+        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
+        puts
+        puts bold "RMagick uses:"
+        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
+    end
+end
+
 rule '.pdf' => '.tex' do |t|
     filename="\"#{File.basename(t.source)}\""
-    texpath="cd \"#{File.dirname(t.source)}\";" 
+    texpath="cd \"#{File.dirname(t.source)}\";"
 
 
     # run it once fast, to see if there are any syntax errors in the

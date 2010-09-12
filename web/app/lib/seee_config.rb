@@ -6,7 +6,7 @@ require 'pathname'
 
 module Seee
   module Config
-    mattr_accessor :application_paths, :file_paths, :commands, :external_database, :settings
+    mattr_accessor :application_paths, :file_paths, :commands, :external_database, :settings, :custom_builds
 
     # Die sollten recht selbsterklärend sein
     @@application_paths = {
@@ -14,6 +14,30 @@ module Seee
       :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
       :zbar => File.join(RAILS_ROOT, '..', 'helfer', 'zbarimg_hackup', 'zbarimg')
     }
+
+    # Pfade für die custom-ImageMagick/RMagick Builds
+    @@custom_builds = {
+      # Unterordner, in dem alles gespeichert wird
+      :dir => File.join(RAILS_ROOT, "..", "custom_build"),
+    }
+    @@custom_builds.merge!({
+      # Pfade zum source code. Das * verhindert, dass man bei jedem
+      # Versionsupdate die Config ändern muss
+      :src_img_magick => File.join(@@custom_builds[:dir], "ImageMagick*"),
+      :src_r_magick => File.join(@@custom_builds[:dir], "RMagick*"),
+
+      # Pfade, wohin die Programme installiert werden. Sollte nicht mit
+      # dem * von oben matchen
+      :bld_img_magick => File.join(@@custom_builds[:dir], "build_imagemagick"),
+      :bld_r_magick => File.join(@@custom_builds[:dir], "build_rmagick"),
+    })
+    @@custom_builds.merge!({
+      # Findet den Pfad der custom RMagick.rb, wenn diese installiert ist,
+      # ansonsten nil. Eigentlich keine Einstellung, aber trotzdem ein guter
+      # um sie aufzubewahren.
+      :rmagick_rb => Dir.glob(File.join(@@custom_builds[:bld_r_magick], "**", "RMagick.rb"))[0],
+      # siehe auch @@file_paths[:rmagick]
+    })
 
     # Externe Datenbank, in der die wirklichen Evaldaten gespeichert sind
     @@external_database = {
@@ -36,8 +60,11 @@ module Seee
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(RAILS_ROOT, 'persdic.dic')
+      :hunspell_personal_dic => File.join(RAILS_ROOT, 'persdic.dic'),
 
+      # Benutze die angepasste RMagick Version wenn möglich, ansonsten
+      # falle auf die globale Version zurück (gedacht für "require")
+      :rmagick => @@custom_builds[:rmagick_rb] || "RMagick"
     }
 
     # Spezielle Kommandos, die ggf. rechtespezifisch sind, also nicht

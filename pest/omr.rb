@@ -18,13 +18,19 @@
 cdir = File.dirname(__FILE__)
 
 require 'rubygems'
-require 'RMagick'
 require 'optparse'
 require 'yaml'
 require 'pp'
 require 'narray'
 require 'ftools'
 require 'tempfile'
+
+# This allows loading the custom ImageMagick/RMagick version if it has
+# been built. We avoid starting rails (which is slow) by manually
+# defining RAILS_ROOT because we know where it is relative to this file.
+RAILS_ROOT = "#{cdir}/../web"
+require cdir + '/../lib/seee_config.rb'
+require Seee::Config.file_paths[:rmagick]
 
 require cdir + '/helper.array.rb'
 require cdir + '/helper.boxtools.rb'
@@ -33,6 +39,8 @@ require cdir + '/helper.misc.rb'
 
 require cdir + '/../lib/FunkyDBBits.rb'
 require cdir + '/../lib/Form.rb'
+
+
 
 # bp stands for "black percentage" and holds how much pixels in this
 # box are black. mx and my define the inner, top left corner of the
@@ -86,7 +94,7 @@ class PESTOmr
             return 0
         end
         nrect = NArray.to_na(rect)
-        nrect.size - (nrect.sum / 65535)
+        nrect.size - (nrect.sum / Magick::QuantumRange)
     end
 
     # This function finds the first line of pixels whose black-% is
@@ -723,7 +731,7 @@ class PESTOmr
 
     # Iterates a list of filenames and parses each. Checks for existing
     # files if told so and does all that "processing time" yadda yadda.
-    def parseFilenames(files, overwrite)
+    def parseFilenames(files)
         i = 0
         f = Float.induced_from(files.length)
         allfile = f.to_i.to_s
@@ -818,15 +826,16 @@ class PESTOmr
         doc
     end
 
-    # Reads the commandline arguments and decides which routines to call
+    # Reads the commandline arguments and does some basic sanity checking
+    # Returns non-empty list of files to be processed.
     def parseArguments
         # Define useful default values
-        @omrsheet = nil
-        @path     = nil
-        overwrite = false
-        @debug    = false
-        dpi       = 300.0
-        cores     = 1
+        @omrsheet  = nil
+        @path      = nil
+        @overwrite = false
+        @debug     = false
+        dpi        = 300.0
+        @cores     = 1
 
         # Option Parser
         opt = OptionParser.new do |opts|
@@ -839,13 +848,13 @@ class PESTOmr
 
             opts.separator("")
             opts.separator("OPTIONAL ARGUMENTS:")
-            opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { overwrite = true }
+            opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { @overwrite = true }
 
-            opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| cores = c }
+            opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| @cores = c }
 
             opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
 
-            opts.on("-v", "--verbose", "Print more output (not recommended with cores > 1)") { @verbose = true }
+            opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
 
             opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.") { @debug = true }
 
@@ -866,8 +875,8 @@ class PESTOmr
 
         # Verbose and multicore processing don't really work together,
         # the output is just too ugly.
-        if @verbose
-            cores = 1
+        if @verbose && @cores > 1
+            @cores = 1
             puts "WARNING: Disabled multicore processing because verbose is enabled."
         end
 
@@ -885,54 +894,32 @@ class PESTOmr
         end
 
         # Warn the user about existing files
-        files = checkForExistingFiles(files) if !overwrite
+        files = checkForExistingFiles(files) if !@overwrite
 
         if files.empty?
             puts "All files have been processed already. Exiting."
             exit
         end
 
-        if cores > 1
-            delegateWork(files, cores, overwrite)
-        else
-            # Unless set manually, grab a sample image and use it to
-            # calculate the DPI
-            if @dpifix.nil?
-                list = Magick::ImageList.new(files[0])
-                @dpifix = list[0].dpifix
-            end
-
-            # All set? Ready, steady, parse!
-            parseOMRSheet
-
-            # Iterates over the given filenames and recognizes them
-            begin
-                parseFilenames(files, overwrite)
-            rescue SystemExit, Interrupt
-                puts
-                puts "Exiting."
-                exit
-            end
-        end
+        files
     end
 
-    # Splits the given files for the given amount of cores and reports
-    # the status of each sub-process.
-    def delegateWork(files, cores, overwrite)
-        puts "Owning FormPro, " + cores.to_s + " sheets at a time"
+    # Splits the given file and reports the status of each sub-process.
+    def delegateWork(files)
+        puts "Owning FormPro, " + @cores.to_s + " sheets at a time"
         # The array is split unequally because the spawned processes
         # generally take longer than the main process. This tweak
         # ensures the processes run about equally long and therefore
         # produce the fastest output
-        #splitFiles = files.Chunk(cores)
+        #splitFiles = files.Chunk(@cores)
         # Above does not seem to imply using NArray
-        splitFiles = files.chunk(cores)
+        splitFiles = files.chunk(@cores)
 
         path = " -p " + @path.gsub(/(?=\s)/, "\\")
         sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
-        d = @debug    ? " -d " : " "
-        v = @verbose  ? " -v " : " "
-        o = overwrite ? " -o " : " "
+        d = @debug     ? " -d " : " "
+        v = @verbose   ? " -v " : " "
+        o = @overwrite ? " -o " : " "
 
         tmpfiles = []
         threads = []
@@ -992,12 +979,50 @@ class PESTOmr
         puts "Done."
     end
 
+    # Report if a 'unsuitable' ImageMagick version will be used
+    def checkMagickVersion
+        return if Magick::Magick_version.include?("Q8")
+        puts
+        puts "WARNING: ImageMagick version does not seem to be compiled"
+        puts "with --quantum-depth=8. This will make processing slower."
+        puts "Try running 'rake magick:all' to build a custom version"
+        puts "with all neccessary flags set. Version as reported:"
+        puts Magick::Magick_version
+        puts
+    end
+
     # Class Constructor
     def initialize
         # required for multi core processing. Otherwise the data will
         # not be written to the tempfiles before the sub-process exits.
         STDOUT.sync = true
-        parseArguments
+        files = parseArguments
+        checkMagickVersion
+
+        # Let other ruby instances do the hard work for multi core...
+        if @cores > 1
+            delegateWork(files)
+        # or do it in this instance for single core processing
+        else
+            # Unless set manually, grab a sample image and use it to
+            # calculate the DPI
+            if @dpifix.nil?
+                list = Magick::ImageList.new(files[0])
+                @dpifix = list[0].dpifix
+            end
+
+            # All set? Ready, steady, parse!
+            parseOMRSheet
+
+            # Iterates over the given filenames and recognizes them
+            begin
+                parseFilenames(files)
+            rescue SystemExit, Interrupt
+                puts
+                puts "Exiting."
+                exit
+            end
+        end
     end
 end
 
