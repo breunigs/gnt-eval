@@ -63,7 +63,7 @@ module FunkyDBBits
       p h
       p t
       p additional
-      raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}"
+      raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}). Query was: #{q}"
     end
     # try to return values directly, if only one row and value
     # have been selected
