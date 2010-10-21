@@ -14,15 +14,21 @@
 # Usage: fix.rb   working_dir
 
 require 'rubygems'
-require 'RMagick'
 require 'gtk2'
 require 'tempfile'
 require 'yaml'
 require 'pp'
 require 'ftools'
 
-
 cdir = File.dirname(__FILE__)
+
+# This allows loading the custom ImageMagick/RMagick version if it has
+# been built. We avoid starting rails (which is slow) by manually
+# defining RAILS_ROOT because we know where it is relative to this file.
+RAILS_ROOT = "#{cdir}/../web"
+require cdir + '/../lib/seee_config.rb'
+require Seee::Config.file_paths[:rmagick]
+
 require File.join(cdir, 'helper.array.rb')
 require File.join(cdir, 'helper.boxtools.rb')
 require File.join(cdir, 'helper.constants.rb')
@@ -45,7 +51,7 @@ class PESTFix
         # Call writeYAML if you change this!
         @currentImage = -1
         @yamlChanged = false
-        
+
         parseDirectory
         initGui
 
@@ -81,7 +87,7 @@ class PESTFix
             #puts "Loading predefined file ans question:"
             #puts @startUpImg + " " + @startUpQuest.to_s
             return File.dirname(path)
-        end        
+        end
 
         dialog = Gtk::FileChooserDialog.new("Select Working Directory",
                  nil,
@@ -135,7 +141,7 @@ class PESTFix
             @startUpImg = @files.index([@startUpImg, false])
             puts " @ " + @startUpImg.to_s
         end
-        
+
         puts "found new files! :D" if newfiles
         puts "but found nothing new :(" if !newfiles
 
@@ -151,7 +157,7 @@ class PESTFix
         quest = "(Q: " + @currentQuestion.to_s + ") "
         @window.set_title title + count + quest + "    "+ @imgpath
     end
-    
+
     # Moves the current file to ../bizarre from its current location
     # Also deletes the YAML file because it's probably wrong anyway
     def markAsBizarre
@@ -159,17 +165,17 @@ class PESTFix
       biz = File.join(File.dirname(@imgpath), "../bizarre/")
       sheet = File.basename(File.dirname(@imgpath))
       cdir = File.dirname(__FILE__)
-      
+
       File.move(tif, biz)
       File.delete(@imgpath)
-      
+
       # Automatically create debug output for the affected file
       system("#{cdir}/omr.rb -o -v -d -s #{cdir}/../tmp/images/#{sheet}.yaml -p #{cdir}/../tmp/images/bizarre " + File.basename(@imgpath, ".yaml") + ".tif&")
-      
+
       # Changing the internal structures is hell, so just restart the program
       system("./pest/fix.rb ./tmp/images/ &")
       Gtk.main_quit
-      Process.exit 
+      Process.exit
     end
 
     # Contains definitions for all the toolbar buttons and sets them up
@@ -184,7 +190,7 @@ class PESTFix
         @img_prev.set_label "Prev. Sheet"
         @img_prev.set_tooltip_text "Load Previous Sheet (HOME)"
         @img_prev.signal_connect "clicked" do imagePrevNext(true) end
-        
+
         @img_next = Gtk::ToolButton.new(Gtk::Stock::GO_FORWARD)
         @img_next.set_label "Next Sheet"
         @img_next.set_tooltip_text "Load Next Image (END)"
@@ -201,19 +207,19 @@ class PESTFix
         @quest_next.set_tooltip_text "View the Next Question (CTRL + DOWN ARROW) (PAGE DOWN)"
         @quest_next.signal_connect "clicked" do questionPrevNext(false) end
         @quest_next.set_sensitive(false)
-        
+
         @answr_prev = Gtk::ToolButton.new(Gtk::Stock::GOTO_FIRST)
         @answr_prev.set_label "Prev. Answer"
         @answr_prev.set_tooltip_text "Select the Previous/Lefthand Answer (LEFT/UP ARROW)"
         @answr_prev.signal_connect "clicked" do answerPrev end
         @answr_prev.set_sensitive(false)
-        
+
         @answr_next = Gtk::ToolButton.new(Gtk::Stock::GOTO_LAST)
         @answr_next.set_label "Next Answer"
         @answr_next.set_tooltip_text "Select the Next/Righthand Answer (RIGHT/DOWN ARROW)"
         @answr_next.signal_connect "clicked" do answerNext end
         @answr_next.set_sensitive(false)
-        
+
         @find_fail = Gtk::ToolButton.new(Gtk::Stock::FIND)
         @find_fail.set_label "Find Failed Question"
         @find_fail.set_tooltip_text "Finds an Improperly Answered Question (ENTER)"
@@ -223,19 +229,19 @@ class PESTFix
         parse_again.set_label "Find New Files"
         parse_again.set_tooltip_text "Parse Working Directory Again for New Files (CTRL + R)"
         parse_again.signal_connect "clicked" do parseDirectory end
-        
+
         mark_as_bizarre = Gtk::ToolButton.new(Gtk::Stock::NO)
         mark_as_bizarre.set_label "Mark file bizarr"
         mark_as_bizarre.set_tooltip_text "Mark the current file as bizarre, i.e. if it's scanned incorrectly."
         mark_as_bizarre.signal_connect "clicked" do markAsBizarre end
-        
-        
-        
+
+
+
         #sql = Gtk::ToolButton.new(Gtk::Stock::SAVE_AS)
         #sql.set_label "Export as SQL"
         #sql.set_tooltip_text "Export the current datasheet as SQL file (CTRL + S)"
         #sql.signal_connect "clicked" do exportAsSql end
-        
+
         quit = Gtk::ToolButton.new(Gtk::Stock::QUIT)
         quit.set_tooltip_text "Exits the Application (CTRL + Q)"
         quit.signal_connect "clicked" do quitApp end
@@ -244,9 +250,9 @@ class PESTFix
         @prog.text = "If this moves, you stop!"
         @prog.set_pulse_step(0.025)
         pulse
-        
+
         # Setup actual toolbar
-        toolbar = Gtk::Toolbar.new  
+        toolbar = Gtk::Toolbar.new
         toolbar.set_toolbar_style Gtk::Toolbar::Style::BOTH
         c = -1
         toolbar.insert((c+=1), @undo)
@@ -271,7 +277,7 @@ class PESTFix
         space = Gtk::ToolItem.new.add((Gtk::VBox.new false, 2))
         space.set_expand(true)
         toolbar.insert((c+=1), space)
-        
+
         toolbar.insert((c+=1), Gtk::ToolItem.new.add(@prog))
 
         toolbar
@@ -291,9 +297,9 @@ class PESTFix
             # for when eating pizza (or watching porn). It's located at:
             # QWERTZ: üöä#
             # QWERTY: [;'\
-            # NEO2DE: ßdy\ 
+            # NEO2DE: ßdy\
             h = event.hardware_keycode
-            
+
             # UNDO
             if(isCtrl && k == g::GDK_z) || k == g::GDK_BackSpace then undo end
 
@@ -304,7 +310,7 @@ class PESTFix
             # QUESTIONS UP/DOWN
             if(isCtrl && k == g::GDK_Up)   || k == g::GDK_Page_Up   then questionPrevNext(true) end
             if(isCtrl && k == g::GDK_Down) || k == g::GDK_Page_Down then questionPrevNext(false) end
-            
+
             # ANSWERS
             if event.keyval == Gdk::Keyval::GDK_Left  || h == 47 then answerPrev end
             if event.keyval == Gdk::Keyval::GDK_Right || h == 51 then answerNext end
@@ -332,11 +338,11 @@ class PESTFix
                 imageUpdate
                 answerButtonCheck
             end
-            
+
             # QUIT
             if isCtrl && k == g::GDK_q then quitApp end
 
-            @window.signal_emit_stop('key_press_event') 
+            @window.signal_emit_stop('key_press_event')
         end
     end
 
@@ -374,19 +380,19 @@ class PESTFix
         # Set Window Title Defaults and so on
         titleUpdate
         @window.signal_connect "destroy" do quitApp end
-    
+
         # Center us for non-tiling WMs
         @window.set_window_position Gtk::Window::POS_CENTER
-    
+
         # Keyboard Shortcuts
         initAccelerators
 
         # Setup GUI elements in order of appearance
         toolbar = initToolbar
-        
+
         @statusbar = Gtk::Statusbar.new
         @statusbar.push 0, "Select Answer: arrow keys  #  Find next failed-question: Enter  #  Other shortcuts: See tooltips  #  Nerd shortcuts: see source"
-        
+
         @area = Gtk::DrawingArea.new
         @area.signal_connect "expose_event" do imageDraw end
 
@@ -400,7 +406,7 @@ class PESTFix
         help << "the question as unanswered."
         @quickHelp = Gtk::Label.new(help)
         @quickHelp.set_wrap true
-        
+
         # Now lets put it all together
         vbox = Gtk::VBox.new false
         vbox.pack_start toolbar, false
@@ -432,7 +438,7 @@ class PESTFix
         writeYAML
         @currentImage = image
         @currentQuestion = quest_num >= 0 ? quest_num : 0
-        
+
         puts "Jumping to: IMG " + image.to_s + " | QUEST " + @currentQuestion.to_s
 
         sheetLoad
@@ -458,7 +464,7 @@ class PESTFix
         @undo.set_sensitive false if @undoActions.empty?
         # Reset the checked state so findFailed finds this again
         @files[undo[0]][1] = false
-        @yamlChanged = true      
+        @yamlChanged = true
         jumpToQuest(undo[0], undo[1], undo[2])
         @find_fail.set_sensitive(true)
         @statusbar.push 4, "Undid last change"
@@ -509,7 +515,7 @@ class PESTFix
 
         titleUpdate
     end
-    
+
     # Checks if the answer buttons need to be en/disabled and does so
     def answerButtonCheck
         if !@doc || !@currentImage || !@currentQuestion || !@group
@@ -542,7 +548,7 @@ class PESTFix
             # We've found the currently selected answer
             cur = b
         end
-        
+
         @answr_prev.set_sensitive(true)
         @answr_next.set_sensitive(n)
     end
@@ -576,7 +582,7 @@ class PESTFix
                 answerChanged
                 break
             end
-            
+
             next if @group.value != b.choice && !found && !isBadAnsw
             found = true
             amount -= 1
@@ -596,7 +602,7 @@ class PESTFix
         return if !@answr_prev.sensitive?
         undoCommit
         found = false
-        
+
         @group.boxes.reverse_each do |b|
             #puts "Group1: "+b.choice.to_s
             # If the boxes don't have a choice attribute, it's probably
@@ -608,7 +614,7 @@ class PESTFix
                 @group.value = @group.nochoice || 0
                 break
             end
-            
+
             next if @group.value != b.choice && !found
             found = true
             amount -= 1
@@ -642,7 +648,7 @@ class PESTFix
             @currentQuestion = Math.min(a.size-1, @currentQuestion+1)
         end
         puts "new quest: #{@currentQuestion}"
-        
+
         @group = a[@currentQuestion]
 
         findPageForQuestion
@@ -683,7 +689,7 @@ class PESTFix
 
         writeYAML
 
-        @files.each do |f|            
+        @files.each do |f|
             next if f[1]
             pulse
             if @cancelFindFail
@@ -705,12 +711,12 @@ class PESTFix
 
                 jumpToQuest(curImg, i)
 
-                @statusbar.pop 99                    
+                @statusbar.pop 99
                 return curImg
             end
             f[1] = true
         end
-        @statusbar.pop 99        
+        @statusbar.pop 99
 
         # This is basically a convenient function that automatically looks
         # for new YAML files. Makes correcting while still parsing much
@@ -719,7 +725,7 @@ class PESTFix
             parseDirectory
             return questionFindFail(false)
         end
-        
+
         # ok, all files seem to have passed
         @find_fail.set_sensitive(false)
         undoStart
@@ -777,11 +783,11 @@ class PESTFix
 
         # Nothing changed, so we're already at the first/last image
         return if oldImage == @currentImage
-        
+
         imageButtonCheck
 
         @imgpath = @files.length > @currentImage ? @files[@currentImage][0] : ""
-        
+
         sheetLoad
         #questionFirst
         imageUpdate
@@ -813,13 +819,13 @@ class PESTFix
         # No change, so don't bother
         return if @currentDisplayedImage == @currentImage
         start_time = Time.now
-        
+
         @currentDisplayedImage = @currentImage
         f = @files[@currentImage]
         @imgpath = f[0]
 
         @orig.each { |x| x.destroy! } if @orig != nil
-        # Load new IMG            
+        # Load new IMG
         dir = File.dirname(f[0])
         file = File.basename(f[0], ".yaml")
         img = dir + "/" + file + ".tif"
@@ -829,7 +835,7 @@ class PESTFix
             puts "ERROR: yaml file cannot be read or is broken: " + f[0]
         end
         @yamlChanged = false
-        
+
         if File.exists?(img)
             @orig = Magick::ImageList.new(img)
             @dpifix = @orig[0].dpifix
@@ -864,12 +870,12 @@ class PESTFix
         draw = Magick::Draw.new
 
         draw.font_weight = 100
-        draw.pointsize = 20           
+        draw.pointsize = 20
 
         # Draws the "no choice" checkbox
         draw.fill("white")
         draw.stroke("black")
-        draw.rectangle(0, 0, @noChoiceDrawWidth, @noChoiceDrawWidth)    
+        draw.rectangle(0, 0, @noChoiceDrawWidth, @noChoiceDrawWidth)
         if @group.nochoice?
             draw.fill("green")
             draw.stroke("green")
@@ -900,7 +906,7 @@ class PESTFix
             by = b.y
             #bw = b.width
             #bh = b.height
-            
+
             draw.rectangle(bx-x, by-y, bx-x+w, by-y+h)
         end
 
@@ -908,7 +914,7 @@ class PESTFix
 
         # Create a new copy that we can waste
         img = @orig[imgid].crop(x, y, width, height)
-        
+
         # Apply boxes
         #threadDrawImage.join
         draw.draw(img)
@@ -921,7 +927,7 @@ class PESTFix
         begin
             # Writing TIFs is fastest, so obviously use TIF. Takes
             # ~0.08s which is about three times faster
-            img.write("tif:"+ temp.path)    
+            img.write("tif:"+ temp.path)
             @pixbuf = Gdk::Pixbuf.new(temp.path)
         rescue
             # However some of these are broken for no apparent reason
@@ -930,19 +936,19 @@ class PESTFix
             # as fast as an optimized in-memory path, so our loss isn't
             # too bad
             puts "BORKEN! BORKEN! ImageMagick/RMagick wrote a corrupted TIF again"
-            img.write("jpg:"+ temp.path)    
+            img.write("jpg:"+ temp.path)
             @pixbuf = Gdk::Pixbuf.new(temp.path)
         end
-        
+
         # This was the old method. Without the thumbail stuff it took
         # ~0.27s, reducing the size speeded it up to ~0.18s for each
         # load. It's still too slow and it's a noticeable delay for the
         # user
         #img.thumbnail!(0.5)
         #blob = img.to_blob{self.depth=8; self.format="RGB"}
-        #@pixbuf = Gdk::Pixbuf.new(blob, @gdkrgb, false, 8, 
+        #@pixbuf = Gdk::Pixbuf.new(blob, @gdkrgb, false, 8,
         #                          img.columns, img.rows, img.columns*3)
-        
+
         puts " (took: " + (Time.now-start_time).to_s + " s)"
 
         # Invalidate area if possible. This may not be the case when the
@@ -958,7 +964,7 @@ class PESTFix
     # the actual image changed
     def imageDraw
         return if @pixbuf == nil
-        
+
         #start_time = Time.now
         gc = @window.style.fg_gc(@area.state)
 

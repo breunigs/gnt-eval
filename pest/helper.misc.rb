@@ -24,14 +24,8 @@ class Integer
     end
 end
 
-class Float
-    def makePos
-        self.to_i.makePos 
-    end
-end
-
 class Magick::Image
     def dpifix
-        (self.rows / 3507.0).round
+        (self.rows / 3508.0).round
     end
 end

@@ -1,4 +1,4 @@
-#!/usr/bin/ruby1.9
+#!/usr/bin/ruby
 
 # PEST
 # Praktisches Evaluations ScripT ( >> FormPro)
@@ -18,7 +18,11 @@
 # Fix: Specifiy if you want to open the FIX component for each
 # difference. Goto the next difference by closing the FIX component
 
-require 'helper.array.rb'
+cdir = File.dirname(__FILE__)
+
+require cdir + '/helper.array.rb'
+require cdir + '/../lib/FunkyDBBits.rb'
+require cdir + '/../lib/Form.rb'
 require 'yaml'
 
 workdir = ARGV.shift
@@ -37,14 +41,18 @@ end
 # We cannot know that the elements will be in the same order. So this
 # small function finds the matching group for a given dbfield
 def findGroup(docc, gr)
-    docc['page'].allChildren.each { |x| return x if x['dbfield'] == gr }
+    docc.questions.each { |x| return x if x.db_column == gr }
     nil
 end
 
 
-count = 0 
+count = 0
 # Open work folder...
 workf = Dir.glob(workdir + "/*.yaml")
+
+length = 0
+workf.each { |x| x = File.basename(x).length; length = x if x > length }
+
 # ... and check each file
 workf.each do |f|
     # if it is valid
@@ -60,26 +68,34 @@ workf.each do |f|
         next
     end
 
+    `diff "#{f}" "#{c}" | grep "value:"`
+    if $?.exitstatus == 1
+       #~ puts File.basename(c) + ":\t Quick check shows no difference, skipping."
+       next
+    end
+
     # Load both sheet
     docw = YAML::load(File.new(f))
     docc = YAML::load(File.new(c))
 
+    diffs = 0
     # Compare each against each
-    docw['page'].allChildren.each do |work|
+    docw.questions.each do |work|
         # Find the same question in the other sheet
-        comp = findGroup(docc, work['dbfield'])
-        comp['value'] = nil if !comp
-        next if work['value'] == comp['value']
+        comp = findGroup(docc, work.db_column)
+        #~ comp.value = nil if !comp
+        next if work.value == comp.value
 
         count += 1
-        
+        diffs += 1
+
         # Print differences
-        print File.basename(c) + ":\t"
-        print work['dbfield'][0..5] + ":\t"
-        print work['value'].to_s
-        print "\tvs\t"
-        print comp['value'].to_s
-        puts "\t(work vs comp)"
+        #~ print File.basename(c) + ":\t"
+        #~ print work.db_column[0..5] + ":\t"
+        #~ print work.value.to_s
+        #~ print "\tvs\t"
+        #~ print comp.value.to_s
+        #~ puts "\t(work vs comp)"
 
         # Allow for fix. Next difference by closing the FIX app.
         if fix
@@ -88,6 +104,10 @@ workf.each do |f|
             # So we exit as well because the user wanted to cancel this.
             exit if $? != 0
         end
+    end
+
+    if diffs > 3
+        puts File.basename(f).ljust(length) + " has #{diffs} diffs."
     end
 end
 
