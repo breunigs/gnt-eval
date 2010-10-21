@@ -47,7 +47,12 @@ class Course < ActiveRecord::Base
 
   def getReturnedSheets
     @db_table = form.to_form.db_table
-    count_forms({ :barcode => barcodes})
+
+    if not profs.empty?
+      count_forms({ :barcode => barcodes})
+    else
+      return 0
+    end
   end
 
   def eval_against_form(form)
