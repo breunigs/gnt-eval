@@ -64,6 +64,47 @@ def tex_none(form)
   ['keine', 'keine', 'none', ''][form]
 end
 
+# Generates the a pdf file with the barcode in the specified location
+def generate_barcode(barcode, path)
+  path = File.expand_path(path)
+  #puts "Creating barcode \"#{barcode}\" in #{path}"
+  require 'tmpdir'
+  tmp = Dir.mktmpdir("seee-barcode-")
+  Dir.chdir(tmp) do
+    `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o barcode.ps`
+    `ps2pdf barcode.ps barcode.pdf`
+    bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f barcode.pdf 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)[1].strip
+    File.open("barcode2.tex", "w") do |h|
+      h << "\\csname pdfmapfile\\endcsname{}\n"
+      h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
+      h << "  \\count0=#1\\relax\n"
+      h << "  \\setbox0=\\hbox{%\n"
+      h << "    \\pdfximage page #1{barcode.pdf}%\n"
+      h << "    \\pdfrefximage\\pdflastximage\n"
+      h << "  }%\n"
+      h << "  \\pdfhorigin=-#2bp\\relax\n"
+      h << "  \\pdfvorigin=#3bp\\relax\n"
+      h << "  \\pdfpagewidth=#4bp\\relax\n"
+      h << "  \\advance\\pdfpagewidth by -#2bp\\relax\n"
+      h << "  \\pdfpageheight=#5bp\\relax\n"
+      h << "  \\advance\\pdfpageheight by -#3bp\\relax\n"
+      h << "  \\ht0=\\pdfpageheight\n"
+      h << "  \\shipout\\box0\\relax\n"
+      h << "}\n"
+      h << "\\page 1 [#{bbox}]\n"
+      h << "\\csname @@end\\endcsname\n"
+      h << "\\end\n"
+    end
+    `#{Seee::Config.application_paths[:pdftex]} -halt-on-error barcode2.tex`
+    if $?.exitstatus != 0
+      puts "Could not create \"#{barcode}\" in \"#{path}\". Aborting."
+      puts `cat barcode2.log`
+      exit 1
+    end
+    `mv -f barcode2.pdf "#{path}"`
+  end
+end
+
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -74,12 +115,7 @@ def make_sample_sheet(form, hasTutors)
     return
   end
 
-
-  # Barcode
-  bcfile = dir + "barcode"
-  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{bcfile}.ps && ps2pdf #{bcfile}.ps #{bcfile}.pdf && pdfcrop #{bcfile}.pdf && rm #{bcfile}.ps && rm #{bcfile}.pdf && mv -f #{bcfile}-crop.pdf #{dir}barcode.pdf`
-  # TeX
-
+  generate_barcode("00000000", dir + "barcode.pdf")
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
@@ -106,8 +142,7 @@ end
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
     # first: the barcode
-    filename = dirname + cp.barcode
-    `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
+    generate_barcode(cp.barcode, dirname + "barcode.pdf")
 
     # second: the form
     filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
@@ -241,7 +276,7 @@ namespace :images do
 
     puts
     puts "Please ensure that all comment pictures have been supplied to"
-    puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
+    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]} /#{$curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
     puts "This should have been done for you automatically, but you can"
     puts "run it again if it makes you feel better:"
@@ -988,11 +1023,10 @@ rule '.pdf' => '.tex' do |t|
     filename="\"#{File.basename(t.source)}\""
     texpath="cd \"#{File.dirname(t.source)}\";"
 
-
     # run it once fast, to see if there are any syntax errors in the
     # text and create first-run-toc
     err = `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
-    if $?.to_i != 0
+    if $?.exitstatus != 0
         puts "="*60
         puts err
         puts "\n\n\nERROR WRITING: #{t.name}"
@@ -1008,7 +1042,7 @@ rule '.pdf' => '.tex' do |t|
     # but this time also output a pdf
     `#{texpath} #{Seee::Config.commands[:pdflatex_real]} #{filename} 2>&1`
 
-    if $?.to_i == 0
+    if $?.exitstatus == 0
         puts "Wrote #{t.name}"
     else
         puts "Some other error occured. It shouldn't be TeX-related, as"
