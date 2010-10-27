@@ -71,7 +71,7 @@ def generate_barcode(barcode, path)
   require 'tmpdir'
   tmp = Dir.mktmpdir("seee-barcode-")
   Dir.chdir(tmp) do
-    `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o barcode.ps`
+    `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
     `ps2pdf barcode.ps barcode.pdf`
     bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f barcode.pdf 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)[1].strip
     File.open("barcode2.tex", "w") do |h|
@@ -147,28 +147,28 @@ def make_pdf_for(s, cp, dirname)
     # second: the form
     filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
     File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
-    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
-    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
-    # FIXME: insert check for tutors.empty? and also sort them into a different directory!
-    if cp.course.form != 3
-      none = tex_none(cp.course.form)
-      h << '\tutoren{' + "\n"
+      h << '\documentclass[ngerman]{eval}' + "\n"
+      h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
+      h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
+      h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
+      # FIXME: insert check for tutors.empty? and also sort them into a different directory!
+      if cp.course.form != 3
+        none = tex_none(cp.course.form)
+        h << '\tutoren{' + "\n"
 
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
+        tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
-      tutoren.each_with_index do |t, i|
-        t = escapeForTeX(t)
-        h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
+        tutoren.each_with_index do |t, i|
+          t = escapeForTeX(t)
+          h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
+        end
+
+        h << '}' + "\n"
       end
-
-      h << '}' + "\n"
-    end
-    h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form) + "\n\n\n"
-    h << tex_questions_for(cp.course.form) + "\n"
-    h << '\end{document}'
+      h << '\begin{document}' + "\n"
+      h << tex_head_for(cp.course.form) + "\n\n\n"
+      h << tex_questions_for(cp.course.form) + "\n"
+      h << '\end{document}'
     end
     puts "Wrote #{filename}.tex"
     Rake::Task[(filename + '.pdf').to_sym].invoke
@@ -615,27 +615,34 @@ namespace :pdf do
 end
 
 namespace :helper do
-    desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
-    task :lsfparse do
-        puts "Finding IDs…"
-        require 'net/http'
-        url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+  desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
+  task :lsfparse do
+    puts "Finding IDs…"
+    require 'net/http'
+    url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
 
-        req = Net::HTTP.get_response(URI.parse(url))
-        mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
-        physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
+    req = Net::HTTP.get_response(URI.parse(url))
+    mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
+    physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
 
-        dir = "tmp/lsfparse/"
-        File.makedirs(dir)
+    dir = "tmp/lsfparse/"
+    File.makedirs(dir)
 
-        puts "Mathe…"
-        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
-        puts "Physik…"
-        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+    puts "Mathe…"
+    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
+    puts "Physik…"
+    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
 
-        puts
-        puts "All Done. Have a look in #{dir}"
-    end
+    puts
+    puts "All Done. Have a look in #{dir}"
+  end
+
+  desc "Grabs the current list of tutors from uebungen.physik.uni-hd.de and puts them into a human readable file"
+  task :tutors_physics do
+    `cd tmp && ./../helfer/physik_tutoren.rb`
+    require 'date'
+    Date.today.strftime("Schau mal in tmp/%Y-%m-%d Tutoren Physik.txt")
+  end
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
