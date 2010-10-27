@@ -646,6 +646,7 @@ namespace :helper do
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
+    puts $curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
     puts "<ul>"
     $curSem.courses.sort {|x,y| x.title <=> y.title }.each do |c|
       tuts = c.tutors.collect{ |t| t.abbr_name }
