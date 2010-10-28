@@ -652,7 +652,7 @@ namespace :helper do
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
-      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
+      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title.gsub("&", "&amp;")}</strong>"
       print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
       print "; #{c.description}" unless c.description.empty?
       print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?

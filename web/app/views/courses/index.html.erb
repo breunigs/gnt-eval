@@ -22,9 +22,9 @@ for course in courses %>
   <tr style="background: #<%= cycle('efefef', 'fff') %>">
     <!--<td><%=h course.semester.title %></td>-->
     <td><%= link_to course.title, course %></td>
-    <td><%=h course.students %></td>
+    <td style="color: <%= course.students == 999 ? "red" : "black" %>"><%=h course.students %></td>
     <td><%=h course.evaluator %></td>
-    <td><%=h course.profs.map { |p| p.fullname + " " } %></td>
+    <td><%=h course.profs.collect { |p| p.fullname }.join(", ") %></td>
     <td><%=h course.description %></td>
     <td><%=h course.faculty.shortname %></td>
 <!--    <td><%= link_to 'Show', course %></td>-->
