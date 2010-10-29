@@ -615,6 +615,11 @@ namespace :pdf do
 end
 
 namespace :helper do
+  desc "Creates required amount of copies /within/ a PDF file. This saves you from having to specify the amount of copies when printing each form manually."
+  task :multiply_pdfs do
+    system("./helfer/multiply_pdfs.rb tmp")
+  end
+
   desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
   task :lsfparse do
     puts "Finding IDs…"
