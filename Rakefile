@@ -189,10 +189,7 @@ end
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
-  # remove first line because no one cares about the current directory
-  d = `rake -T`.split("\n")
-  d.shift
-  puts d.join("\n")
+  system("rake -sT")
 end
 
 namespace :db do
@@ -315,10 +312,6 @@ namespace :images do
       end
     end
   end
-end
-
-namespace :print do
-  ## Nach Eval-Datum sortieren! (erleichtert dann das Eintüten)
 end
 
 namespace :mail do
@@ -671,12 +664,15 @@ namespace :helper do
     crap = '<meta http-equiv="content-type" content=
   "text/html; charset=utf-8"><style> td { border-right: 1px solid #000; } .odd { background: #eee; }</style><table>'
     # used for sorting
-    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5]
+    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "??", 6]
     # used for counting
-    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0]
+    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0, "??", 0]
     d = $curSem.courses.sort do |x,y|
       a = x.description.strip.downcase
       b = y.description.strip.downcase
+
+      a = "??" if a.length < 2 || !h.include?(a[0..1])
+      b = "??" if b.length < 2 || !h.include?(b[0..1])
 
       if h[a[0..1]] > h[b[0..1]]
         1
@@ -690,7 +686,9 @@ namespace :helper do
     odd = false
     d.each do |c|
        odd = !odd
-       count[c.description.strip[0..1].downcase] += 1
+       day = c.description.strip[0..1].downcase
+       day = "??" if day.length < 2 || !count.include?(day[0..1])
+       count[day] += 1
        if odd
          crap << "<tr>"
        else

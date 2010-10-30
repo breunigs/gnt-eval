@@ -92,3 +92,7 @@ div.commentview span {
     margin-top:0.4em;
     display: block;
 }
+
+tr:hover {
+  outline: 1px dotted #666;
+}

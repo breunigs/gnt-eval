@@ -39,8 +39,8 @@
     <%= select_tag 'course[faculty_id]', options_from_collection_for_select(Faculty.find(:all), :id, :shortname) %>
   </p>
   <p>
-    <%= f.submit "Create" %>
+    <%= f.submit "Create new course" %>
   </p>
 <% end %>
 
-<%= link_to 'Back', courses_path %>
+<%= link_to 'Return to course list', courses_path %>
