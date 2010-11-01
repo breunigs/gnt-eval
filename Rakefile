@@ -642,6 +642,17 @@ namespace :helper do
     Date.today.strftime("Schau mal in tmp/%Y-%m-%d Tutoren Physik.txt")
   end
 
+  desc "Tries to find suitable files in ./tmp that might contain tutor/lecutre information for the maths fac."
+  task :tutors_maths do
+    Dir.chdir("tmp")
+    ymls = Dir.glob("*.yml") + Dir.glob("mues*.yaml") + Dir.glob("lect*.yaml")
+    csv = Dir.glob("Hiwi*.csv")
+    xls = Dir.glob("Hiwi*.xls")
+    files = '"'+(ymls + csv + xls).join('" "')+'"'
+    puts "Files found: #{files}"
+    #system("./../helfer/mathe_tutoren.rb #{files}")
+  end
+
   desc "Generate lovely HTML output for our static website"
   task :static_output do
     puts $curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
