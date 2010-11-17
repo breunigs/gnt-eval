@@ -656,18 +656,60 @@ namespace :helper do
   desc "Generate lovely HTML output for our static website"
   task :static_output do
     puts $curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
-    puts "<ul>"
-    $curSem.courses.sort {|x,y| x.title <=> y.title }.each do |c|
+    # Sort by faculty first, then by course title
+    sorted = $curSem.courses.sort do |x,y|
+      if x.faculty_id == y.faculty_id
+        x.title <=> y.title
+      else
+        x.faculty_id <=> y.faculty_id
+      end
+    end
+    facs = Faculty.find(:all)
+    fac_id = -1
+
+    def printTD(stuff, join = ", ", extra = "")
+      s = "<td>" if extra.empty?
+      s = "<td style=\"#{extra}\">" unless extra.empty?
+      if stuff.is_a? Array
+        s << stuff.join(join) unless stuff.empty?
+      elsif stuff.is_a? String
+        s << stuff
+      end
+      s << "</td>"
+      s
+    end
+
+    odd = true
+    sorted.each do |c|
+      # faculty changed, so print header
+      if fac_id != c.faculty_id
+        fname = facs.find { |f| f.id == c.faculty_id }.longname
+        puts "</table>" unless fac_id == -1
+        puts "<h2>#{fname}</h2>"
+        puts "<table class=\"aligntop\" summary=\"Veranstaltungen der Fakultät für #{fname}\">"
+        puts "<tr class=\"odd\">"
+        puts "<th></th>"
+        puts "<th>Veranstaltung</th>"
+        puts "<th>DozentInnen</th>"
+        puts "<th>Wann?</th>"
+        puts "<th>Tutoren</th></tr>"
+      end
+      puts "<tr>" if odd
+      puts "<tr class=\"odd\">" if !odd
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
-      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title.gsub("&", "&amp;")}</strong>"
-      print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
-      print "; #{c.description}" unless c.description.empty?
-      print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
-      puts "<br/>&nbsp;</li>"
+
+      puts printTD(hasEval)
+      puts printTD(c.title.gsub("&", "&amp;"))
+      puts printTD(profs, "<br/>", "white-space: nowrap")
+      puts printTD(c.description)
+      puts printTD(tuts)
+      puts "</tr>"
+      fac_id = c.faculty_id
+      odd = !odd
     end
-    puts "</ul>"
+    puts "</table>"
   end
 
   desc "Generate crappy output sorted by day for simplified packing"
