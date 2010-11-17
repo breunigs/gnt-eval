@@ -409,30 +409,39 @@ def printFinalList(data)
     data.sort! { |x,y| x.name <=> y.name }
 
     s = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'
-    s << 'Wenn Du eine Veranstaltung evalen willst, schreibst Du Deinen Namen in das Feld "wer evalt?" <b><i><u>U N D</u></i></b> schätzt die Anzahl der Hörer.<br/><br/>Wenn Dir noch eine Veranstaltung auffallen sollte, bei der es GAR KEINEN Sinn ergibt sie zu evalen, streiche sie durch.<br/><br/>'
+    s << "<b>How To:</b><br/><b>1.</b> ankreuzen WANN Du evalst;<br/><b>2.</b> Deinen MathPhys-Account <i>oder</i> Deine E-Mail, falls Du keinen Acc hast;<br/><b>3.</b> Die Hörer schätzen.<br/><br/><b>Deine Verantwortung:</b><br/>- der Bogen im Seee stimmt (Dt/En, VL/Seminar);<br/>- Hörerzahl im Seee stimmt;<br/>- Du sorgst in der Evalwoche ggf. für Ersatz, falls Du nicht kannst;<br/>- Du klüngelst mit den Profs bei Sonderwünschen<br/>"
     s << "<table border=1 cellspacing=0 cellpadding=0>";
     s << "<tr>"
     s << "<th>Name</th>"
-    s << "<th>Zeit</th>"
-    s << "<th style='width:220px;overflow:hidden'>Raum</th>"
     s << "<th>Dozent_in</th>"
-    s << "<th style='width:100px;'>Wer evalt?</th>"
+    s << "<th style='width:220px;overflow:hidden'>Raum</th>"
+    s << "<th>Zeit</th>"    
+    s << "<th style='width:100px;'>AccName?</th>"
     s << "<th style='width:50px;'>Hörer?</th>"
+    s << "</tr>\n"
+    
+     s << "<tr>"
+    s << "<td><b>Beispielveranstaltung</b></td>"
+    s << "<td>Evalteam</td>"
+    s << "<td style='width:220px;overflow:hidden'>FS Raum</td>"
+    s << "<td>[&nbsp;&nbsp;] Mi, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup><br>[X] Mo, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup></td>"    
+    s << "<td style='width:100px;'>evaluation@</td>"
+    s << "<td style='width:50px;'>&nbsp;37</td>"
     s << "</tr>\n"
 
     data.each do |d|
         s << '<tr>'
-        s << '<td>' + d.name + '</td>'
-        s << '<td>' + d.times.join("<br>") + '</td>'
-        s << '<td>' + d.rooms.join("<br>") + '</td>'
+        s << '<td style="max-width:10cm;overflow:hidden">' + d.name + '</td>'
         s << '<td>' + listProfs(d.profs) + '</td>'
+        s << '<td>' + d.rooms.join("<br>") + '</td>'
+        s << '<td>' + d.times.collect{|x| "[&nbsp;&nbsp;] #{x}"}.join("<br>") + '</td>'
         s << '<td>&nbsp;</td>'
         s << '<td>&nbsp;</td>'
         s << "</tr>\n\n"
     end
 
     s << '</table>'
-
+    s << '<br/>Veranstaltung absolut sinnlos zu evalen? Streiche sie!'
     s
 end
 
