@@ -58,6 +58,8 @@ class Tutor < ActiveRecord::Base
 
   end
   def sheetcount
+    # Otherwise the SQL query will not work
+    return 0 if course.profs.empty?
     @db_table = course.form.to_form.db_table
     count_forms({:barcode => course.barcodes, :tutnum => tutnum})
   end
