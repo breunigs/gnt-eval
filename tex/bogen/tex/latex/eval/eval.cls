@@ -8,7 +8,7 @@
 }
 \ProcessOptions\relax 
 
-\DeclareOption{engl}{\def\head{muu}}
+%\DeclareOption{engl}{\def\head{muu}}
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
