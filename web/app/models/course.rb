@@ -33,7 +33,6 @@ class Course < ActiveRecord::Base
       pre_format = fscontact
     end
 
-    # FIXME: store somewhere else
     pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@' + Seee::Config.settings[:standard_mail_domain]}.join(',')
   end
 
@@ -55,21 +54,14 @@ class Course < ActiveRecord::Base
     end
   end
 
-  def eval_against_form(form)
+  def eval_lecture_head(form)
     b = ''
 
-    # setup for FunkyDBBits
-    @db_table = form.db_table
+    sheets = getReturnedSheets
 
-    this_eval = faculty.longname + ' ' + semester.title
-
-    boegenanzahl = count_forms({ :barcode => barcodes})
-    return '' if boegenanzahl == 0
-
-    puts "   #{title}"
     isEn = form.isEnglish? ? "E" : "D"
     notspecified = (form.isEnglish? ? "not specified" : "keine Angabe")
-    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{boegenanzahl}}{#{id}}\n\n"
+    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}\n\n"
 
     # Semesterverteilung
     b << "\\hfill\\begin{tabular}[t]{lr}\n"
@@ -122,30 +114,54 @@ class Course < ActiveRecord::Base
         b << matchn[n] + " " + matchm[m] + ": & " + num.to_s + "\\\\ \n"
       end
     end
-    b << (form.isEnglish? ? "other" : "Sonstige") + ": & " + (boegenanzahl-all).to_s + "\\\\ \n"  if boegenanzahl != all
+    b << (form.isEnglish? ? "other" : "Sonstige") + ": & " + (sheets-all).to_s + "\\\\ \n"  if sheets != all
     b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
     b << "\\end{tabular}\\hfill\\null\n\n"
+
+    b
+  end
+
+  def eval_against_form(form)
+    # if this course doesn't have any lecturers it cannot have been
+    # evaluated, since the sheets are coded with the course_prof id
+    # Return early to avoid problems.
+    return "" if profs.empty?
+
+    b = ''
+
+    # setup for FunkyDBBits
+    @db_table = form.db_table
+
+    puts "   #{title}"
+    b << eval_lecture_head(form)
 
     # vorlesungseval pro dozi
     course_profs.each do |cp|
       b << cp.eval_against_form(form).to_s
     end
 
-    unless summary.to_s.strip.empty?
-      b << "\\commentsprof{" + (form.isEnglish? ? "Comments" : "Kommentare" ) + "}\n\n"
-      b << summary.to_s
-      b << "\n\\medskip\n\n"
-    end
+    # Do not print a "too few sheets" message here because if there are
+    # to few sheets, it will have been printed for at least one lecturer
+    # above already.
+    if getReturnedSheets >= Seee::Config.settings[:minimum_sheets_required]
+      unless summary.to_s.strip.empty?
+        b << "\\commentsprof{#{form.isEnglish? ? "Comments" : "Kommentare"}}\n\n"
+        b << "{ \\small\\emph{Hinweis:} Bei den Kommentaren handelt es sich um Einzelmeinungen, die immer in Relation zur Gesamthörerzahl gesetzt werden sollten.}\n\n" if !form.isEnglish?
+        b << "{ \\small\\emph{Note: } Each comment is an individual opinion and should be considered in relation to the total number of students.}\n\n" if form.isEnglish?
+        b << summary.to_s
+        b << "\n\\medskip\n\n"
+      end
 
-    # uebungen allgemein, immer alles relativ zur fakultät!
-    ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
-    return b if ugquest.empty?
+      # uebungen allgemein, immer alles relativ zur fakultät!
+      ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
+      return b if ugquest.empty?
 
-    b << "\\fragenzudenuebungen{"+ (form.getStudyGroupsHeader) +"}\n"
-    specific = { :barcode => barcodes }
-    general = { :barcode => $facultybarcodes }
-    ugquest.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table).to_s
+      b << "\\fragenzudenuebungen{"+ (form.getStudyGroupsHeader) +"}\n"
+      specific = { :barcode => barcodes }
+      general = { :barcode => $facultybarcodes }
+      ugquest.each do |q|
+        b << q.eval_to_tex(specific, general, form.db_table).to_s
+      end
     end
 
     return b if tutors.empty?

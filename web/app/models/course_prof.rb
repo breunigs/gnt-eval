@@ -19,15 +19,16 @@ class CourseProf < ActiveRecord::Base
     @db_table = form.db_table
 
     b = ''
-    this_eval = course.faculty.longname + ' ' + course.semester.title
 
-    boegenanzahl = count_forms({:barcode => barcode.to_i})
+    sheetCount = count_forms({:barcode => barcode.to_i})
 
-    # FIXME: Shouldn't this be larger than 2?
-    return '' unless boegenanzahl > 0
-
-    vorlhead = form.getLecturerHeader(prof.fullname, prof.gender, boegenanzahl)
+    vorlhead = form.getLecturerHeader(prof.fullname, prof.gender, sheetCount)
     b << "\\profkopf{#{vorlhead}}\n\n"
+
+    if sheetCount < Seee::Config.settings[:minimum_sheets_required]
+      return b + form.getTooFewQuestionnaires(sheetCount) + "\n\n"
+    end
+
     # b << "\\fragenzurvorlesung\n\n"
 
     specific = { :barcode => barcode.to_i }

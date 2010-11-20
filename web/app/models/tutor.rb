@@ -8,8 +8,14 @@ class Tutor < ActiveRecord::Base
   def eval_against_form(form)
     @db_table = form.db_table
 
-    return '', nil unless sheetcount > 2
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
+
+    if sheetcount < Seee::Config.settings[:minimum_sheets_required]
+      b << form.getTooFewQuestionnaires(sheetcount)
+      b << "\n\n"
+      return b, sheetcount
+    end
+
     b << "#{form.getSheetCount}: #{sheetcount}\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }

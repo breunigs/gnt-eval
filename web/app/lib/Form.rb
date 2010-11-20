@@ -258,5 +258,18 @@ class Form
     self.isEnglish? ? "submitted questionnaires" : "abgegebene Fragebögen"
   end
 
+  def getNoQuestionnaires
+    self.isEnglish? \
+      ? "No questionnaires have been submitted." \
+      : "Es wurden keine Fragebögen abgegeben."
+  end
+
+  def getTooFewQuestionnaires(c)
+    return self.getNoQuestionnaires if c == 0
+
+    self.isEnglish? \
+      ? "Only #{c} questionnaire#{c==1? 's':''} have been submitted. In order to retain the participant#{c==1? '’s':'s’'} anonymity the results have been excluded." \
+      : "Es wurde#{c==1? '':'n'} nur #{c} Frage#{c==1? 'bogen':'bögen'} abgegeben. Um die Anonymität de#{c==1? 's':'r'} Teilnehmer#{c==1? 's':''} zu wahren, wurden die Ergebnisse ausgelassen."
+  end
 end
 
