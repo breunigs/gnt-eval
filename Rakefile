@@ -552,7 +552,7 @@ namespace :pdf do
 
       puts "Wrote #{dirname+filename}"
       threads << Thread.new do
-        Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
+        Rake::Task[(dirname+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
       end
     end
     threads.each { |t| t.join }
