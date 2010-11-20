@@ -534,28 +534,46 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => ['pdf:samplesheets'] do |t, a|
-    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
-    s = Semester.find(sem)
+  # This is a helper function that will create the result PDF file for a
+  # given semester and faculty_id in the specified directory.
+  def evaluate(semester_id, faculty_id, directory)
+      f = Faculty.find(faculty_id)
+      s = Semester.find(semester_id)
 
-    dirname = './tmp/'
-    FileUtils.mkdir_p(dirname)
-    threads = []
-    Faculty.find(:all).each_with_index do |f,i|
-      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
+      puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
+      puts "Could not find specified smeester (id = #{semester_id})" if s.nil?
+      return if f.nil? || s.nil?
 
-      # this operation is /not/ thread safe
-      File.open(dirname + filename, 'w') do |h|
+      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
+      filename << '_'+ s.dirFriendlyName + '.tex'
+
+      File.open(directory + filename, 'w') do |h|
         h.puts(s.evaluate(f))
       end
 
-      puts "Wrote #{dirname+filename}"
-      threads << Thread.new do
-        Rake::Task[(dirname+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
-      end
+      puts "Wrote #{directory+filename}"
+      Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
+  end
+
+  desc "create report pdf file for a given semester and faculty (leave empty for: sem = current, fac = all)"
+  task :semester, :semester_id, :faculty_id, :needs => ['pdf:samplesheets'] do |t, a|
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+
+    dirname = './tmp/'
+    FileUtils.mkdir_p(dirname)
+
+    # we have been given a specific faculty, so evaluate it and exit.
+    if not a.faculty_id.nil?
+      evaluate(sem, a.faculty_id, dirname)
+      exit
     end
-    threads.each { |t| t.join }
+
+    # no faculty specified, just find all and process them in parallel.
+    Faculty.find(:all).each do |f|
+      job = fork { exec "rake pdf:semester[#{sem},#{f.id}]" }
+      # we don't want to wait for the process to finish
+      Process.detach(job)
+    end
   end
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"

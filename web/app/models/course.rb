@@ -201,6 +201,9 @@ end
 class Integer
   def to_form
     p = File.join(File.dirname(__FILE__), "..", '/lib/forms/' + self.to_s + '.yaml')
-    YAML::load(File.read(p))
+    # Cache YAML sheets in a global variable to avoid loading them again
+    $loaded_yaml_sheets ||= {}
+    $loaded_yaml_sheets[p] ||= YAML::load(File.read(p))
+    $loaded_yaml_sheets[p]
   end
 end
