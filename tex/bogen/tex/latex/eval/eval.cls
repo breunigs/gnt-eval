@@ -1,14 +1,12 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{eval}[2009/09/22 Evaluationsbögen]
 
-\LoadClass[9pt,twoside]{scrartcl} 
+\LoadClass[twoside,8pt]{scrartcl} 
 
 \DeclareOption*{%
 \PassOptionsToClass{\CurrentOption}{scrartcl}%
 }
 \ProcessOptions\relax 
-
-%\DeclareOption{engl}{\def\head{muu}}
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
@@ -27,7 +25,11 @@
 \RequirePackage{microtype}
 \RequirePackage{tokeniz0r}
 \RequirePackage{tgheros}
+\RequirePackage[breakall]{truncate}
 \renewcommand{\rmdefault}{\sfdefault}
+
+\renewcommand{\TruncateMarker}{\textasciitilde}
+
 
 \date{}
 \pagestyle{fancy}
@@ -38,7 +40,7 @@
 
 \renewcommand{\baselinestretch}{1}
 \setlength\tabcolsep{0pt}
-\geometry{left=9mm,right=9mm, top=1cm, bottom=1cm}
+\geometry{left=9mm,right=9mm, top=0.8cm, bottom=0.8cm}
 \setlength\parindent{0pt} 
 
 \newwrite\posout
@@ -108,6 +110,7 @@
  \write\posout{uuu text: "#2"}
  \write\posout{uuu width: 0}
  \vspace{-0.3cm}
+ \truncate{3cm}{#2}
 }
 
 \def\bx{\huge{$\Box$}\normalsize\SaveMyYPos}
@@ -121,8 +124,8 @@
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
- \def\vorlesungsfragen{\input{fragen}}
- \def\vorlesungenglisch{\input{vorlesung_englisch}}
+ \def\vorlesungsfragen{\input{fragenneu}}
+ \def\vorlesungenglisch{\input{vorlesung_englisch_neu}}
  \def\seminarfragen{\input{fragen_seminar}}
  \def\struktur{\input{fragen_struktur3}}
 
@@ -176,7 +179,7 @@
     	\write\posout{uu save_as: "#3"}
     	\write\posout{uu type: text}
     	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{1.5cm}
+	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vfill%\vspace{1.5cm}
 	\write\posout{uuu height: #4}
  	\write\posout{uuu width: 39020584}
 }
@@ -362,22 +365,22 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \\[0.3em]
   \ifthenelse{\equal{#1}{1}}{
 \bluu[\"{U}bungsgruppe][tutnum]
-\hspace{-0.9cm}\textbf{\"{U}bungsgruppe:}\\[0.2em]
+\hspace{-0.8cm}\textbf{\"{U}bungsgruppe:}\\[0.2em]
 \begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
 \tut
  \end{tabular}
 \\[1em] }{}
 %Der "Sonstige" Kram wird �brigens im See gefoltert, aufgeschlitzt und in den Fluss geworfen...
 \bluu[Studienziel][studienziel]
-\hspace{-0.9cm}\textbf{Studienziel:} \\[0.3em]
-\bxss[1][Diplom] Diplom \hfill \bxs[2][Lehramt] Lehramt \hfill \bxs[3][Bachelor] Bachelor \hfill \bxs[4][Master] Master \hfill \bxs[5][Promotion] Promotion \hfill \bxs[6][Sonstiges] Sonstiges \vspace{1.6cm} \\
+\hspace{-0.8cm}\textbf{Studienziel:} \\[0.3em]
+\bxss[1][Diplom] Diplom \hfill \bxs[2][Lehramt] Lehramt \hfill \bxs[3][Bachelor] Bachelor \hfill \bxs[4][Master] Master \hfill \bxs[5][Promotion] Promotion \hfill \bxs[6][Sonstiges] Sonstiges \vspace{1.45cm} \\
 \bluu[Hauptfach][hauptfach]
-\hspace{-0.9cm}\textbf{1. Hauptfach:} \\[0.01em]
+\hspace{-0.8cm}\textbf{1. Hauptfach:} \\[0.01em]
 \bxss[1][Mathematik] Mathematik \hspace{0.04cm} \bxs[2][Physik] Physik \hspace{0.9375cm} \bxs[3][Informatik] Informatik \hfill \bxs[5][Sonstiges] Sonstiges \vspace{1cm} \\
 \bluu[Fachsemester][semester]
-\hspace{-0.9cm}\textbf{Fachsemester:} \\[0.4em]
+\hspace{-0.8cm}\textbf{Fachsemester:} \\[0.4em]
 \bxss[1][1]\hspace{-0.5em}1\hfill \bxss[2][2]\hspace{-0.5em}2\hfill \bxss[3][3]\hspace{-0.5em}3 \hfill \bxss[4][4]\hspace{-0.5em}4 \hfill \bxss[5][5]\hspace{-0.5em}5 \hfill \bxss[6][6]\hspace{-0.5em}6 \hfill \bxss[7][7]\hspace{-0.5em}7 \hfill \bxss[8][8]\hspace{-0.5em}8 \hfill \bxss[9][9]\hspace{-0.5em}9 \hfill \bxss[10][10]\hspace{-0.5em}10 \hfill \bxss[11][11]\hspace{-0.5em}11 \hfill \bxss[12][12]\hspace{-0.5em}12 \hfill \bxss[13][13]\hspace{-0.5em}13 \hfill \bxss[14][14]\hspace{-0.5em}14 \hfill \bxss[15][15]\hspace{-0.5em}15 \hfill \bxss[16][>15]\hspace{-0.5em}>15 \\
-\vspace{4cm}
+\vspace{3.7cm}
 }
 
 \newcommand{\engkopf}[1]{
@@ -395,19 +398,19 @@ This survey is carried out by the committee of studies in cooperation with the F
 \textbf{Titel:} \vor \hfill\textbf{Lecturer:} \doz \hfill\textbf{Semester:} \sem \\[0.2em]
   \ifthenelse{\equal{#1}{1}}{
 \bluu[Übungsgruppe][tutnum]
-\hspace{-0.9cm}\textbf{Study Group:}\\[0.2em]
+\hspace{-0.8cm}\textbf{Study Group:}\\[0.2em]
 \begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
 \tut
  \end{tabular}
 \\[0.7em] }{}
 \bluu[Studienziel][studienziel]
-\hspace{-0.9cm}\textbf{Pursued degree:} \\[0.3em]
+\hspace{-0.8cm}\textbf{Pursued degree:} \\[0.3em]
 \bxss[1][Diploma] Diploma \hfill \bxs[2][Edu. Degree] Edu. Degree \hfill \bxs[3][Bachelor] Bachelor \hfill \bxs[4][Master] Master \hfill \bxs[5][Ph.D.] Ph.D. \hfill \bxs[6][other] other \vspace{1.6cm} \\
 \bluu[Hauptfach][hauptfach]
-\hspace{-0.9cm}\textbf{Major:} \\[0.01em]
-\bxss[1][Mathematics] Mathematics \hspace{0.185cm} \bxs[2][Physics] Physics \hspace{1.52cm} \bxs[3][Comp. Sc.] Comp. Sc. \hfill \bxs[5][other] other \vspace{1.1cm} \\
+\hspace{-0.8cm}\textbf{Major:} \\[0.01em]
+\bxss[1][Mathematics] Mathematics \hspace{0.545cm} \bxs[2][Physics] Physics \hspace{1.74cm} \bxs[3][Computer Science] Computer Science \hfill \bxs[5][other] other \vspace{1.1cm} \\
 \bluu[Academic Term:][semester]
-\hspace{-0.9cm}\textbf{Academic Term:} \\[0.4em]
+\hspace{-0.8cm}\textbf{Academic Term:} \\[0.4em]
 \bxss[1][1]\hspace{-0.5em}1\hfill \bxss[2][2]\hspace{-0.5em}2\hfill \bxss[3][3]\hspace{-0.5em}3 \hfill \bxss[4][4]\hspace{-0.5em}4 \hfill \bxss[5][5]\hspace{-0.5em}5 \hfill \bxss[6][6]\hspace{-0.5em}6 \hfill \bxss[7][7]\hspace{-0.5em}7 \hfill \bxss[8][8]\hspace{-0.5em}8 \hfill \bxss[9][9]\hspace{-0.5em}9 \hfill \bxss[10][10]\hspace{-0.5em}10 \hfill \bxss[11][11]\hspace{-0.5em}11 \hfill \bxss[12][12]\hspace{-0.5em}12 \hfill \bxss[13][13]\hspace{-0.5em}13 \hfill \bxss[14][14]\hspace{-0.5em}14 \hfill \bxss[15][15]\hspace{-0.5em}15 \hfill \bxss[16][>15]\hspace{-0.5em}>15 \\
 \vspace{4cm}
 }
