@@ -392,7 +392,7 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \write\posout{- !ruby/object:Page }
 \write\posout{u questions: }
 
-\ifthenelse{\equal{#1}{1}}{\Huge{Survey Regarding the Quality of Teaching}\normalsize}{\Huge{Lehrevaluation--Seminare}\normalsize}\hfill\includegraphics[width=3cm,height=1.5cm]{\barc}\\ %\vspace{0.1cm}
+\ifthenelse{\equal{#1}{1}}{\Huge{Survey Regarding the Quality of Teaching}\normalsize}{\Huge{Lehrevaluation--Seminare}\normalsize}\hfill\includegraphics[width=3cm,height=1.5cm]{barcode.pdf}\\ %\vspace{0.1cm}
 
 This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly.\vspace{0.1cm}
 
