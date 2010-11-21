@@ -118,17 +118,17 @@
 \def\bxss[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{-0.43cm}\huge{$\Box$}\normalsize\SaveMyYPos}
 %\def\bxs[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{0.5em}{$\bigcirc$}\normalsize\SaveMyYPos}
 
-\newcommand{\barcode}[1]{\def\barc{#1}}
+%\newcommand{\barcode}[1]{\def\barc{#1}}
 \newcommand{\Typ}[1]{\def\typ{#1}}
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
- \def\vorlesungsfragen{\input{bogen/fragen/fragenneu}}
- \def\vorlesungenglisch{\input{./bogen/fragen/vorlesung_englisch_neu}}
- \def\seminarfragen{\input{bogen/fragen/fragen_seminar}}
- \def\struktur{\input{bogen/fragen/fragen_struktur3}}
+ \def\vorlesungsfragen{\input{fragenneu}}
+ \def\vorlesungenglisch{\input{vorlesung_englisch_neu}}
+ \def\seminarfragen{\input{fragen_seminar}}
+ \def\struktur{\input{fragen_struktur3}}
 
 \def\blu[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
