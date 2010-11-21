@@ -129,10 +129,10 @@ class PESTOmr
     # rotated.
     def findRotation
         sLeft = (  40*@dpifix).to_i
-        sTop  = ( 200*@dpifix).to_i
+        sTop  = ( 180*@dpifix).to_i
         sBot  = (2650*@dpifix).to_i
         width = ( 250*@dpifix).to_i
-        height= ( 400*@dpifix).to_i
+        height= ( 300*@dpifix).to_i
 
         start_time = Time.now
         print "  Correcting Rotation" if @verbose
@@ -186,8 +186,8 @@ class PESTOmr
         # These values mark the coordinates where the objects used
         # for detection should actually be in a perfectly scanned
         # document. They are hardcoded, since they never change.
-        leftcut = [166*@dpifix, 168*@dpifix]
-        topcut = [172*@dpifix, 165*@dpifix]
+        leftcut = [168*@dpifix, 168*@dpifix]
+        topcut = [145*@dpifix, 139*@dpifix]
 
         # This will contain the offset for each sheet
         @leftoff = [0,0]
@@ -198,13 +198,13 @@ class PESTOmr
         leftThres = [9, 9]
         topThres = [20, 20]
 
-        lTop    = ( 200*@dpifix).to_i
+        lTop    = ( 180*@dpifix).to_i
         lBot    = (2650*@dpifix).to_i
         lLeft   = (  40*@dpifix).to_i
         lWidth  = ( 500*@dpifix).to_i
-        lHeight = ( 400*@dpifix).to_i
+        lHeight = ( 300*@dpifix).to_i
         tLeft   = (2000*@dpifix).to_i
-        tTop    = (  50*@dpifix).to_i
+        tTop    = (  40*@dpifix).to_i
         tWidth  = ( 400*@dpifix).to_i
         tHeight = ( 500*@dpifix).to_i
         0.upto(@numPages-1) do |i|
@@ -907,12 +907,6 @@ class PESTOmr
     # Splits the given file and reports the status of each sub-process.
     def delegateWork(files)
         puts "Owning FormPro, " + @cores.to_s + " sheets at a time"
-        # The array is split unequally because the spawned processes
-        # generally take longer than the main process. This tweak
-        # ensures the processes run about equally long and therefore
-        # produce the fastest output
-        #splitFiles = files.Chunk(@cores)
-        # Above does not seem to imply using NArray
         splitFiles = files.chunk(@cores)
 
         path = " -p " + @path.gsub(/(?=\s)/, "\\")
