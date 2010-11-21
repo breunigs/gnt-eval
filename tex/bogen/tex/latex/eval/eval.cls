@@ -204,7 +204,7 @@
 %\def\Source{#8,}
 \bluu[#1][#8]
 \begin{minipage}{15cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.5cm}>{\centering}p{1.5cm}>{\centering}p{1.5cm}>{\centering}p{1.5cm}>{\centering}p{1.5cm}p{0cm}}
+ \begin{tabular}{p{10cm}>{\centering}p{1.48cm}>{\centering}p{1.45cm}>{\centering}p{1.46cm}>{\centering}p{1.47cm}>{\centering}p{1.45cm}>{\centering}p{1.4cm}p{0cm}}
 \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] & \bxs[6][#7] &\\
    & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7 & \\
 \bottomrule
