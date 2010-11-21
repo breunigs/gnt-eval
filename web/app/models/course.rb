@@ -25,6 +25,14 @@ class Course < ActiveRecord::Base
     form_id_to_name.each_pair { |k,v| hash[v] = k }
     hash
   end
+  
+  def form_name
+    form_id_to_name[self.form] || "form #{self.form} doesn't exist"
+  end
+  
+  def form_id
+    self.form
+  end
 
   def fs_contact_addresses
     if fscontact.empty?
