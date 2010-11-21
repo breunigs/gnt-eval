@@ -1,7 +1,10 @@
-helfer/lsf_parser_*
+helfer/lsf_parser_*.html
+helfer/lsf_parser_*.yaml
 helfer/HiWIS_*.csv
 helfer/HiWIS_*.xls
 helfer/2* Tutoren Physik.txt
 tmp/
 web/log/database.log
 web/log/development.log
+custom_build/build_*
+PEST_OMR_ERROR.log

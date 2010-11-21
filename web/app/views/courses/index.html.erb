@@ -1,8 +1,8 @@
 <h1>Listing courses of <%=h Semester.find(:all).find{|s| s.now?}.title %></h1>
 <p>
-  <%= link_to 'New course', new_course_path %> |
-  <%= link_to 'New Prof', new_prof_path %> |
-  <%= link_to 'New semester', new_semester_path %>
+  <%= link_to 'Prof List', :controller => "profs", :action => "index" %> |
+  <%= link_to 'Semester List', :controller => "semesters", :action => "index" %> |
+  <%= link_to 'New course', new_course_path %>
 </p>
 
 <table>
@@ -20,14 +20,12 @@ courses = sort_helper(@courses.find_all{|c| c.semester.now? })
 
 for course in courses %>
   <tr style="background: #<%= cycle('efefef', 'fff') %>">
-    <!--<td><%=h course.semester.title %></td>-->
     <td><%= link_to course.title, course %></td>
-    <td><%=h course.students %></td>
+    <td style="color: <%= course.students == 999 ? "red" : "black" %>"><%=h course.students %></td>
     <td><%=h course.evaluator %></td>
-    <td><%=h course.profs.map { |p| p.fullname + " " } %></td>
+    <td><%=h course.profs.collect { |p| p.fullname }.join(", ") %></td>
     <td><%=h course.description %></td>
     <td><%=h course.faculty.shortname %></td>
-<!--    <td><%= link_to 'Show', course %></td>-->
   </tr>
 <% end %>
 </table>

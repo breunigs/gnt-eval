@@ -18,19 +18,29 @@
 cdir = File.dirname(__FILE__)
 
 require 'rubygems'
-require 'RMagick'
 require 'optparse'
 require 'yaml'
 require 'pp'
 require 'narray'
 require 'ftools'
+require 'tempfile'
+
+# This allows loading the custom ImageMagick/RMagick version if it has
+# been built. We avoid starting rails (which is slow) by manually
+# defining RAILS_ROOT because we know where it is relative to this file.
+RAILS_ROOT = "#{cdir}/../web"
+require cdir + '/../lib/seee_config.rb'
+require Seee::Config.file_paths[:rmagick]
 
 require cdir + '/helper.array.rb'
 require cdir + '/helper.boxtools.rb'
 require cdir + '/helper.constants.rb'
 require cdir + '/helper.misc.rb'
 
-require cdir + '/../lib/rails_requirements.rb'
+require cdir + '/../lib/FunkyDBBits.rb'
+require cdir + '/../lib/Form.rb'
+
+
 
 # bp stands for "black percentage" and holds how much pixels in this
 # box are black. mx and my define the inner, top left corner of the
@@ -51,25 +61,32 @@ class PESTOmr
     def blackPercentage(x, y, width, height, img)
         black = blackPixels(x, y, width, height, img)
         all = (width*height).to_f
-        return (black/all*100.0)
+        black/all*100.0
     end
 
     # Counts the black pixels in the given area and image.
-    def blackPixels(x, y, width, height, img)
+    # Set fix to true if out-ouf-bounds requests should not trigger an
+    # error and be handled gracefully
+    def blackPixels(x, y, width, height, img, fix = false)
+        if fix
+            return 0 if x >= img.columns || y >= img.rows
+            x = x.makePos
+            y = y.makePos
+            width = x + width > img.columns ? img.columns - x : width
+            height = y + height > img.rows ? img.rows - y : height
+            return 0 if width <= 0 || height <= 0
+        end
         begin
             rect = img.export_pixels(x, y, width, height, "G")
         rescue
             # This occurs when we specified invalid geometry: i.e. zero
-            # width or height or reuqesting pixels outside the image.
+            # width or height or requesting pixels outside the image.
             # Output some nice debugging data and just return 0.
             if @debug
-                puts "\nx: " + x.to_s
-                puts "y: " + y.to_s
-                puts "w: " + width.to_s
-                puts "h: " + height.to_s
-                puts "g: " + @group['dbvalue'] if @group
-                puts img.inspect
-                puts @ilist.inspect
+                puts
+                puts "x: #{x.to_s.ljust(10)} y: #{y}".strip
+                puts "\nw: #{width.to_s.ljust(10)} h: #{height}".strip
+                puts "g: " + @currentQuestion
             else
                 puts "Critical Error: Invalid Geometry"
                 @cancelProcessing = true
@@ -77,7 +94,7 @@ class PESTOmr
             return 0
         end
         nrect = NArray.to_na(rect)
-        nrect.size - (nrect.sum / 65535)
+        nrect.size - (nrect.sum / Magick::QuantumRange)
     end
 
     # This function finds the first line of pixels whose black-% is
@@ -112,13 +129,13 @@ class PESTOmr
     # rotated.
     def findRotation
         sLeft = (  40*@dpifix).to_i
-        sTop  = ( 200*@dpifix).to_i
+        sTop  = ( 180*@dpifix).to_i
         sBot  = (2650*@dpifix).to_i
         width = ( 250*@dpifix).to_i
-        height= ( 400*@dpifix).to_i
+        height= ( 300*@dpifix).to_i
 
         start_time = Time.now
-        print @spaces + "  Correcting Rotation" if @verbose
+        print "  Correcting Rotation" if @verbose
         @rad = []
         @ilist.each_with_index do |img,index|
             next unless pageNeedsPositionData(index)
@@ -140,14 +157,14 @@ class PESTOmr
                 draw.line(topstart, sTop, topstart, sTop+height)
                 draw.line(botstart, sBot, botstart, sBot+height)
                 draw.text(10*@dpifix, 35*@dpifix, (@rad.last*RAD2DEG).to_s)
-                
+
                 draw.fill_opacity(0.05)
                 draw.stroke_opacity(0)
                 draw.rectangle(sLeft, sTop, topstart, sTop+height)
                 draw.rectangle(sLeft, sBot, botstart, sBot+height)
                 draw.fill_opacity(1)
                 draw.stroke_opacity(1)
-                
+
                 draw.draw(img)
             end
         end
@@ -160,7 +177,7 @@ class PESTOmr
     # top left corner is the same for every sheet)
     def findOffset
         start_time = Time.now
-        print @spaces + "  Determining Offset" if @verbose
+        print "  Determining Offset" if @verbose
 
         # FIXME: Move this somewhere else in order to support more than
         # two pages without changing code
@@ -169,8 +186,8 @@ class PESTOmr
         # These values mark the coordinates where the objects used
         # for detection should actually be in a perfectly scanned
         # document. They are hardcoded, since they never change.
-        leftcut = [178*@dpifix, 168*@dpifix]
-        topcut = [170*@dpifix, 165*@dpifix]
+        leftcut = [168*@dpifix, 168*@dpifix]
+        topcut = [145*@dpifix, 139*@dpifix]
 
         # This will contain the offset for each sheet
         @leftoff = [0,0]
@@ -180,13 +197,14 @@ class PESTOmr
         # failing due to some black pixels
         leftThres = [9, 9]
         topThres = [20, 20]
-        
-        lTop    = ( 200*@dpifix).to_i
+
+        lTop    = ( 180*@dpifix).to_i
+        lBot    = (2650*@dpifix).to_i
         lLeft   = (  40*@dpifix).to_i
         lWidth  = ( 500*@dpifix).to_i
-        lHeight = ( 400*@dpifix).to_i
+        lHeight = ( 300*@dpifix).to_i
         tLeft   = (2000*@dpifix).to_i
-        tTop    = (  50*@dpifix).to_i
+        tTop    = (  40*@dpifix).to_i
         tWidth  = ( 400*@dpifix).to_i
         tHeight = ( 500*@dpifix).to_i
         0.upto(@numPages-1) do |i|
@@ -215,19 +233,24 @@ class PESTOmr
 
             # The offset detection is done at points that are affected
             # by rotation. We take this into account here.
-            top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
-            left += left - calcSkew(i, left, lTop/2)[0]
+            #~ top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
+
+            # Depending on the direction of the rotation either a point
+            # at the top or bottom of the sheet should be used as refer-
+            # ence.
+            if @rad[i]*RAD2DEG > 0
+                left += left - calcSkew(i, left, lTop/2)[0]
+                top +=  top- calcSkew(i, tLeft + tWidth, top)[1]
+            else
+                left += left - calcSkew(i, left, lBot)[0]
+                top +=  top - calcSkew(i, tLeft + tWidth/2, top)[1]
+            end
 
             @leftoff[i] = left - leftcut[i]
             @topoff[i]  = top  -  topcut[i]
 
             # Draw the rotation-corrected lines
             if @debug
-                #draw.stroke("green")
-                #draw.fill("green")
-                #draw.rectangle(-1*@leftoff[i], 0, -1*@leftoff[i]+5, 400)
-                #draw.rectangle(0, -1*@topoff[i], 400, -1*@topoff[i]+5)
-
                 draw.fill("magenta")
                 draw.stroke("magenta")
                 draw.line(left, lTop, left, lTop+lHeight)
@@ -264,35 +287,66 @@ class PESTOmr
             # Find the pre-printed box
             mx = findFirstPixelsFromLeft(x, y, (SQUARE_SEARCH[0]/2)*@dpifix, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid]).makePos
 
-
-            # We didn't really find anything and got the maximum value
-            # returned. Let's rather look a few pixels left or above for
-            # the box
-            maxCorr = 2
-            while mx == x+(SQUARE_SEARCH[0]/2)*@dpifix && maxCorr > 0 && x > 0
+            # If we get the right end of the search area returned, we
+            # probably didn't find anything, but stopped searching. It
+            # is more likely that we started search too far to the right
+            # in the first place. Thus, try again starting "more left".
+            # Similar if we succeed right away: We know we are somewhere
+            # on the line, but we need the left start.
+            maxCorr = 3
+            interval = (SQUARE_SEARCH[0]/2)*@dpifix
+            while (mx == x+interval || mx == x) && maxCorr > 0 && x > 0
                 x = (x-(SQUARE_STROKE*2)*@dpifix).makePos
-                mx = findFirstPixelsFromLeft(x, y, (SQUARE_SEARCH[0]/2)*@dpifix, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid])
+                mx = findFirstPixelsFromLeft(x, y, interval, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid])
                 maxCorr -= 1
             end
 
-            my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid]).makePos
+            # Hopefully we have found a vertical line of the box by now.
+            # However, we do not yet know if we found the left or right
+            # one. Therefore we peek to the left and right and try to
+            # find the other vertical bar of the box.
+            # width, height, left, right, top, bottom
+            w = SQUARE_STROKE*@dpifix*4
+            h = SQUARE_SEARCH[1]*@dpifix
+            l = mx - (SQUARE_SIZE + SQUARE_STROKE)*@dpifix
+            r = mx + (SQUARE_SIZE - SQUARE_STROKE)*@dpifix
+            t = y - SQUARE_STROKE*@dpifix
+
+            lbp = blackPercentage(l, t, w, h, @ilist[imgid])
+            rbp = blackPercentage(r, t, w, h, @ilist[imgid])
+
+            # if this is true, we found the right bar. Since we need the
+            # left one, we start a search once more
+            if lbp > rbp
+                mx = findFirstPixelsFromLeft(l, t, w, h, 50, @ilist[imgid])
+            end
+
+            # Draw where the correct line has been found
+            if @debug
+                @draw.stroke("green")
+                @draw.fill("green")
+                @draw.line(mx, t, mx, t+h)
+            end
+
+            my = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid]).makePos
             # This is not a typo:        ^^
             # If we managed to find left already, we have better chances
             # of finding the correct top. If we found a wrong left we're
             # doomed anyway
 
             maxCorr = 3
-            while my == y + (SQUARE_SEARCH[1]/2)*@dpifix && maxCorr > 0 && y > 0
+            interval = (SQUARE_SEARCH[1]/2)*@dpifix
+            while my == y + interval && maxCorr > 0 && y > 0
                 y = (y-(SQUARE_STROKE*2)*@dpifix).makePos
-                my  = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid])
+                my = findFirstPixelsFromTop(mx, y, SQUARE_SEARCH[0]*@dpifix, interval, 50, @ilist[imgid])
                 maxCorr -= 1
             end
-
-            # Ensure positive values
-            x = x.makePos
-            y = y.makePos
-            mx = mx.makePos
-            my = my.makePos
+#~
+            #~ tbp = blackPercentage(mx, my-h, w, h, @ilist[imgid])
+            #~ bbp = blackPercentage(mx, my, w, h, @ilist[imgid])
+            #~ if tbp > bbp
+                #~ my = findFirstPixelsFromTop(mx, my-h, SQUARE_SEARCH[0]*@dpifix, interval, 50, @ilist[imgid])
+            #~ end
 
             # Save corrected values to sheet so the FIX component doesn't
             # need to re-calculate this
@@ -314,6 +368,7 @@ class PESTOmr
             # radius for each checkbox
             if @debug
                 @draw.stroke("black")
+                @draw.fill("black")
                 @draw.fill_opacity(1)
                 @draw.text(x+(SQUARE_SEARCH[0]+5)*@dpifix, y+20*@dpifix, ((bp * 100).round.to_f / 100).to_s)
 
@@ -346,21 +401,55 @@ class PESTOmr
         # dirt. This might result in undetected checkmarks but no answer
         # is preferable over a wrong one.
         thresholds.pop if group.boxes.size == 1
+        # Upper limit. All checked boxes with a black percentage above
+        # this threshold are disregarded if and only if there is more
+        # than one checkmark. Single choice questions above this thres-
+        # hold are marked as failed and thus presented to the user.
+        # Multiple choice questions will be handled like there was no
+        # upper limit if this occurs.
+        thres_max = 90
 
         threshold  = -1
         thresholds.each do |t|
             # Save for debugging uses
             threshold = t
             group.boxes.each do |box|
-                checks << box.choice if box.bp > t
+                checks << box if box.bp > t
             end
             break if checks.size >= 1
         end
 
-        # Draws the red/green boxes for each answer
+        result = nil
+
+        # it's a single choice question and the upper limit has been
+        # reached. Mark it as failed.
+        if group.boxes.size == 1 && checks.size == 1 && checks[0].bp > thres_max
+            result = group.failchoice
+        end
+
+        # it's a multiple choice question. Remove all checkmarks that
+        # are above the threshold but only if there are at least two
+        # checkmarks (catches the case where someone used a fat marker)
+        if group.boxes.size >= 2 && checks.size >= 2
+            checks.delete_if { |x| x.bp > thres_max }
+            # We lost all checkmarks… let's ask the user
+            result = group.failchoice if checks.empty?
+        end
+
+        # Cover all normal cases
+        result = case checks.length
+            when 0 then group.nochoice
+            when 1 then checks[0].choice
+            else        group.failchoice
+        end unless result
+
+        # Draws the red/green/yellow boxes for each answer
         if @debug
             group.boxes.each do |box|
-                color = box.bp > threshold ? "green" : "red"
+                # only draw a yellow box if the checkmark has been
+                # dismissed due to its high black percentage.
+                color = box.bp > thres_max ? "yellow" : "red"
+                color = "green" if checks.include?(box)
                 @draw.fill(color)
                 @draw.fill_opacity(0.3)
                 @draw.stroke(color)
@@ -368,13 +457,9 @@ class PESTOmr
             end
         end
 
-        case checks.length
-            when 0 then return group.nochoice
-            when 1 then return checks[0]
-            else        return group.failchoice
-        end
+        result
     end
-    
+
     # Assumes a whole page for commentary. Crops a margin to remove any black
     # bars and then trims to any text if there.
     def typeTextWholePageParse(imgid, group)
@@ -383,7 +468,7 @@ class PESTOmr
         i = @ilist[imgid]
         c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim(true)
         return 0 if c.rows*c.columns < 500*@dpifix
-        
+
         c = c.resize(0.4)
         step = 20*@dpifix
         thres = 40
@@ -393,45 +478,45 @@ class PESTOmr
         while left < c.columns
             break if blackPixels(left, 0, step, c.rows, c) > thres
             left += step
-        end        
+        end
         return 0 if left >= c.columns
         puts left
-        
+
         # Find right border
         right = c.columns
         while right > 0
             break if blackPixels(right-step, 0, step, c.rows, c) > thres
             right -= step
-        end        
+        end
         return 0 if right < 0
         #puts right
-        
+
         # Find top border
         top = 0
         while top < c.rows
             break if blackPixels(0, top, c.columns, step, c) > thres
             top += step
-        end        
+        end
         return 0 if top >= c.rows
         #puts top
-        
+
         # Find bottom border
         bottom = c.rows
         while bottom > 0
             break if blackPixels(0, bottom-step, c.columns, step, c) > thres
             bottom -= step
-        end        
+        end
         return 0 if bottom < 0
         #puts bottom
-        
+
         c.crop!(left-10, top-10, right-left+20, bottom-top+20, true)
         c.trim!(true)
-        
+
         return 0 if c.rows*c.columns < 500*@dpifix
-        
+
         filename = @path + "/" + File.basename(@currentFile, ".tif")
         filename << group.saveas + ".jpg"
-        puts @spaces + "    Saving Comment Image: " + filename if @verbose
+        puts "    Saving Comment Image: " + filename if @verbose
         c.write filename
 
         return 1
@@ -467,7 +552,7 @@ class PESTOmr
             box.x = x
             box.y = y
 
-            bp += blackPixels(x, y, box.width, box.height, @ilist[imgid])
+            bp += blackPixels(x, y, box.width, box.height, @ilist[imgid], true)
 
             if @debug
                 color = bp > limit ? "green" : "red"
@@ -486,7 +571,7 @@ class PESTOmr
         # Save the comment as extra file if possible/required
         if !group.saveas.empty? && bp > limit
             if @verbose
-                print @spaces + "    Saving Comment Image: "
+                print "    Saving Comment Image: "
                 puts group.saveas
             end
             filename = @path + "/" + File.basename(@currentFile, ".tif")
@@ -508,7 +593,7 @@ class PESTOmr
     # directly into the loaded sheet.
     def recoImage
         start_time = Time.now
-        puts @spaces + "  Recognizing Image" if @verbose
+        puts "  Recognizing Image" if @verbose
 
         max = Math::min(@ilist.length, @numPages) - 1
 
@@ -529,6 +614,7 @@ class PESTOmr
             end
 
             @doc.pages[i].questions.each do |g|
+                @currentQuestion = g.db_column
                 case g.type
                     when "square" then
                         # width, height and threshold are predefined for squares
@@ -546,11 +632,11 @@ class PESTOmr
             begin
                 @draw.draw(@ilist[i]) if @debug
             rescue
-                puts @spaces + "  Nothing to draw :(" if @debug
+                puts "  Nothing to draw :(" if @debug
             end
         end
 
-        puts @spaces + "    (took: " + (Time.now-start_time).to_s + " s)" if @verbose
+        puts "    (took: " + (Time.now-start_time).to_s + " s)" if @verbose
     end
 
     # Does all of the overhead work required to be able to recognize an
@@ -560,7 +646,7 @@ class PESTOmr
         @cancelProcessing = false
         file = file.gsub(/\.yaml:?$/, ".tif")
         if !File.exists?(file) || File.zero?(file)
-            puts @spaces + "WARNING: File not found: " + file
+            puts "WARNING: File not found: " + file
             return
         end
 
@@ -568,10 +654,10 @@ class PESTOmr
         newfile = getNewFileName(file)
 
         start_time = Time.now
-        print @spaces + "  Loading Image: " + file if @verbose
+        print "  Loading Image: " + file if @verbose
 
         # Load image and yaml sheet
-        @doc = loadYAMLsheet # YAML::load(File.new(@omrsheet))
+        @doc = loadYAMLsheet
         @ilist = Magick::ImageList.new(file)
         puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
 
@@ -584,16 +670,18 @@ class PESTOmr
         if @debug
             start_time = Time.now
             img = @ilist.append(false)
+            #~ img = img.scale(0.5)
             dbgFlnm = newfile.gsub(/\.yaml$/, "_DEBUG.jpg")
-            print @spaces + "  Saving Image: " + dbgFlnm if @verbose
-            img.write dbgFlnm
+            print "  Saving Image: " + dbgFlnm if @verbose
+            img.write(dbgFlnm) { self.quality = 75 }
             puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
         end
-        
+
         if @cancelProcessing
-            print @spaces + "  Found boxes to be out of bounds. Moving to bizzare:"
-            print @spaces + "  " + File.basename(file)
-            dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/") 
+            puts
+            puts "  Found boxes to be out of bounds. Moving to bizzare:"
+            puts "  " + File.basename(file)
+            dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
             File.makedirs(dir)
             File.move(file, File.join(dir, File.basename(file)))
             return
@@ -604,9 +692,9 @@ class PESTOmr
         fout.puts YAML::dump(@doc)
         fout.close
     end
-    
+
     # Finds if a given page for the currently loaded @doc requires
-    # knowledge about offset and rotation. 
+    # knowledge about offset and rotation.
     def pageNeedsPositionData(id)
         throw :documentHasTooFewPages_CheckForMissingPageBreak if @doc.pages[id].nil?
         q = @doc.pages[id].questions
@@ -621,7 +709,7 @@ class PESTOmr
     # Checks for existing files and issues a warning if so. Returns a
     # list of non-exisitng files
     def checkForExistingFiles(files)
-        puts @spaces + "Checking for existing files" if @verbose
+        puts "Checking for existing files" if @verbose
 
         # Look for each file
         filesExist = false
@@ -629,21 +717,21 @@ class PESTOmr
         files.delete_if do |file|
             fn = getNewFileName(file)
             fileExist = File.exist?(fn) && File.size(fn) > 0
-            msg << @spaces + "  WARNING: File already exists: " + fn if fileExist
+            msg << "  WARNING: File already exists: " + fn if fileExist
             fileExist
         end
         if msg.size > 10
-          puts @spaces + "  WARNING: #{msg.size} files already exist and have been skipped."
+          puts "  WARNING: #{msg.size} files already exist and have been skipped."
         else
           puts msg.join("\n")
         end
-        
+
         files
     end
 
     # Iterates a list of filenames and parses each. Checks for existing
     # files if told so and does all that "processing time" yadda yadda.
-    def parseFilenames(files, overwrite)
+    def parseFilenames(files)
         i = 0
         f = Float.induced_from(files.length)
         allfile = f.to_i.to_s
@@ -660,24 +748,24 @@ class PESTOmr
             percentage = (i/f*100.0).to_i.to_s
 
             if @verbose
-                print @spaces + "Processing File " + curfile + "/" + allfile
+                print "Processing File " + curfile + "/" + allfile
                 puts  " (" + percentage + "%)"
             end
 
             begin
               parseFile(file)
             rescue => e
-              puts @spaces + "FAILED: #{file}"
-              File.open("PEST_OMR_ERROR.log", 'a+') do |errlog| 
+              puts "FAILED: #{file}"
+              File.open("PEST_OMR_ERROR.log", 'a+') do |errlog|
                 errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace}")
               end
               puts "="*20
-              puts "OMR is EXITING! Fix this issue before attemping again!"
+              puts "OMR is EXITING! Fix this issue before attemping again! (See PEST_OMR_ERROR.log)"
               exit
             end
 
             if @verbose
-                puts @spaces + "  Processing Time: " + (Time.now-file_time).to_s + " s"
+                puts "  Processing Time: " + (Time.now-file_time).to_s + " s"
                 puts ""
             end
 
@@ -688,23 +776,23 @@ class PESTOmr
                 filesLeft = (files.length-rlFiles)
                 timeleft = ((timePerFile*filesLeft/60)+0.5).to_i.to_s
                 if @verbose
-                    puts @spaces + "Time remaining: " + timeleft + " m"
+                    puts "Time remaining: " + timeleft + " m"
                 else
-                    puts @spaces + timeleft + " m left (" + percentage + "%, " + curfile + "/" + allfile + ")"
+                    puts timeleft + " m left (" + percentage + "%, " + curfile + "/" + allfile + ")"
                 end
             end
         end
 
         # Print some nice stats
-        puts ""
-        puts ""
-        puts ""
-        puts ""
+        puts
+        puts
+        puts
+        puts
         t = Time.now-overall_time
         f = files.length - skippedFiles
-        print @spaces + "Total Time: " + (t/60).to_s + " m "
+        print "Total Time: " + (t/60).to_s + " m "
         puts "(for " + f.to_s + " files)"
-        puts @spaces + "(that's " + (t/f).to_s + " s per file)"
+        puts "(that's " + (t/f).to_s + " s per file)"
     end
 
     # Parses the given OMR sheet and extracts globally interesting data.
@@ -713,7 +801,7 @@ class PESTOmr
         if !File.exists?(@omrsheet)
             puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
             exit
-        end 
+        end
         doc = YAML::load(File.read(@omrsheet))
 
         @dbtable = doc.db_table
@@ -723,7 +811,7 @@ class PESTOmr
     # Loads the YAML file and converts LaTeX's scalepoints into pixels
     def loadYAMLsheet
         doc = YAML::load(File.read(@omrsheet))
-        doc.pages.each do |p| 
+        doc.pages.each do |p|
             next if p.questions.nil?
             p.questions.each do |q|
                 next if q.boxes.nil?
@@ -731,23 +819,23 @@ class PESTOmr
                     b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
                     b.height = b.height/SP_TO_PX*@dpifix unless b.height.nil?
                     b.x = b.x / SP_TO_PX*@dpifix
-                    b.y = 3507.0*@dpifix - (b.y / SP_TO_PX*@dpifix)
+                    b.y = 3508.0*@dpifix - (b.y / SP_TO_PX*@dpifix)
                 end
             end
         end
         doc
     end
 
-    # Reads the commandline arguments and decides which routines to call
+    # Reads the commandline arguments and does some basic sanity checking
+    # Returns non-empty list of files to be processed.
     def parseArguments
         # Define useful default values
-        @omrsheet = nil
-        @path     = nil
-        overwrite = false
-        @debug    = false
-        @spaces   = "  "
-        dpi      = 300.0
-        cores     = 1
+        @omrsheet  = nil
+        @path      = nil
+        @overwrite = false
+        @debug     = false
+        dpi        = 300.0
+        @cores     = 1
 
         # Option Parser
         opt = OptionParser.new do |opts|
@@ -760,15 +848,13 @@ class PESTOmr
 
             opts.separator("")
             opts.separator("OPTIONAL ARGUMENTS:")
-            opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { overwrite = true }
+            opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { @overwrite = true }
 
-            opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| cores = c }
-            
+            opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| @cores = c }
+
             opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
 
-            opts.on("-i", "--indent SPACES", Integer, "How much the messages should be indented.", "Will be automatically set for the additionally spawned processes when using multiple cores in oder to keep it readable for humans.") { |i| @spaces = " "*i }
-
-            opts.on("-v", "--verbose", "Print more output (not recommended with cores > 1)") { @verbose = true }
+            opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
 
             opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.") { @debug = true }
 
@@ -786,74 +872,152 @@ class PESTOmr
             puts "Specified PATH is not a directory"
             exit
         end
-        
-        files = []
 
+        # Verbose and multicore processing don't really work together,
+        # the output is just too ugly.
+        if @verbose && @cores > 1
+            @cores = 1
+            puts "WARNING: Disabled multicore processing because verbose is enabled."
+        end
+
+        files = []
         # If no list of files is given, look at the given working
         # directory.
         if ARGV.empty?
             files = Dir.glob(@path + "/*.tif")
+            if files.empty?
+                puts "No tif images found in #{@path}. Exiting."
+                exit
+            end
         else
             ARGV.each { |f| files << @path + "/" + f }
         end
-        
-        # Unless set manually, grab a sample image and use it to calculate the
-        # DPI
-        if @dpifix.nil?
-            list = Magick::ImageList.new(files[0])
-            @dpifix = list[0].dpifix
-        end
-        
-        # All set? Ready, steady, parse!
-        parseOMRSheet
 
         # Warn the user about existing files
-        files = checkForExistingFiles(files) if !overwrite
+        files = checkForExistingFiles(files) if !@overwrite
 
-        if cores > 1
-            puts "Owning FormPro, " + cores.to_s + " sheets at a time"
-            # The array is split unequally because the spawned processes
-            # generally take longer than the main process. This tweak
-            # ensures the processes run about equally long and therefore
-            # produce the fastest output
-            #splitFiles = files.Chunk(cores)
-            # Above does not seem to imply using NArray
-            splitFiles = files.chunk(cores)
-
-            files = splitFiles.shift
-            path = " -p " + @path.gsub(/(?=\s)/, "\\")
-            sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
-            d = @debug    ? " -d " : " "
-            v = @verbose  ? " -v " : " "
-            o = overwrite ? " -o " : " "
-            corecount = 0
-            splitFiles.each do |f|
-                corecount += 1
-                next if f.empty?
-                list = ""
-                f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
-                # This is the amount of spaces the output of newly
-                # spawned instances are indented. Quite useful to keep
-                # the console output readable.
-                i = " -i " + (corecount*35).to_s
-                system("ruby "+ File.dirname(__FILE__) +"/omr.rb " + sheet + path + i + 
-v + d + o + list + " &")
-            end
+        if files.empty?
+            puts "All files have been processed already. Exiting."
+            exit
         end
 
-        # Iterates over the given filenames and recognizes them
-        parseFilenames(files, overwrite)
+        files
+    end
+
+    # Splits the given file and reports the status of each sub-process.
+    def delegateWork(files)
+        puts "Owning FormPro, " + @cores.to_s + " sheets at a time"
+        splitFiles = files.chunk(@cores)
+
+        path = " -p " + @path.gsub(/(?=\s)/, "\\")
+        sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
+        d = @debug     ? " -d " : " "
+        v = @verbose   ? " -v " : " "
+        o = @overwrite ? " -o " : " "
+
+        tmpfiles = []
+        threads = []
+
+        corecount = 0
+        splitFiles.each do |f|
+            corecount += 1
+            next if f.empty?
+
+            tmp = Tempfile.new("pest-omr-status-#{corecount}")
+            tmpfiles << tmp
+
+            list = ""
+            f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
+            # This is the amount of spaces the output of newly
+            # spawned instances are indented. Quite useful to keep
+            # the console output readable.
+            #~ i = " -i " + (corecount*35).to_s
+            threads << Thread.new do
+                `ruby #{File.dirname(__FILE__)}/omr.rb #{sheet} #{path} #{v} #{d} #{o} #{list} &> #{tmp.path}`
+            end
+        end
+        puts
+
+        STDOUT.sync = false
+        begin
+            printProgress(tmpfiles)
+        rescue SystemExit, Interrupt
+            puts
+            puts
+            puts "Halting processing threads..."
+            threads.each { |x| x.kill }
+            puts "Exiting."
+            STDOUT.flush
+            exit
+        end
+    end
+
+    # prints the progress that is printed into the given tmpfiles.
+    # Returns once all tmpfiles are deleted
+    def printProgress(tmpfiles)
+        while Thread.list.length > 1
+            tmpfiles.reject! { |x| !File.exists?(x) }
+            print "\r"
+            tmpfiles.each_with_index do |x, i|
+                dat = `tail -n 1 #{x.path}`.strip
+                if i == tmpfiles.size - 1
+                    print dat
+                else
+                    print dat.ljust([dat.length+10, 50].max)
+                end
+            end
+
+            STDOUT.flush
+            sleep 1
+        end
+        puts "Done."
+    end
+
+    # Report if a 'unsuitable' ImageMagick version will be used
+    def checkMagickVersion
+        return if Magick::Magick_version.include?("Q8")
+        puts
+        puts "WARNING: ImageMagick version does not seem to be compiled"
+        puts "with --quantum-depth=8. This will make processing slower."
+        puts "Try running 'rake magick:all' to build a custom version"
+        puts "with all neccessary flags set. Version as reported:"
+        puts Magick::Magick_version
+        puts
     end
 
     # Class Constructor
     def initialize
-        parseArguments
+        # required for multi core processing. Otherwise the data will
+        # not be written to the tempfiles before the sub-process exits.
+        STDOUT.sync = true
+        files = parseArguments
+        checkMagickVersion
+
+        # Let other ruby instances do the hard work for multi core...
+        if @cores > 1
+            delegateWork(files)
+        # or do it in this instance for single core processing
+        else
+            # Unless set manually, grab a sample image and use it to
+            # calculate the DPI
+            if @dpifix.nil?
+                list = Magick::ImageList.new(files[0])
+                @dpifix = list[0].dpifix
+            end
+
+            # All set? Ready, steady, parse!
+            parseOMRSheet
+
+            # Iterates over the given filenames and recognizes them
+            begin
+                parseFilenames(files)
+            rescue SystemExit, Interrupt
+                puts
+                puts "Exiting."
+                exit
+            end
+        end
     end
 end
 
 PESTOmr.new()
-
-
-#result = RubyProf.stop
-#printer = RubyProf::FlatPrinter.new(result)
-#printer.print(STDOUT, 0)

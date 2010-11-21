@@ -53,17 +53,18 @@ module FunkyDBBits
 
     result = nil
     sth = dbh.prepare(q)
-    #~ `echo "#{q} << #{h.values.join(", ")}"`
     begin
       sth.execute(*h.values)
       result = []
       sth.fetch_array { |r| result << r }
-    rescue
-      p q
-      p h
-      p t
-      p additional
-      raise "SQL-Error"
+    rescue DBI::DatabaseError => e
+      puts "Query is: #{q}"
+      print "Cond  is: "
+      pp h
+      puts "Table is: #{t}"
+      print "Addition: "
+      pp additional
+      raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}). Query was: #{q}"
     end
     # try to return values directly, if only one row and value
     # have been selected

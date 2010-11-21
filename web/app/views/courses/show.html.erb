@@ -61,13 +61,13 @@
       <th>Email</th>
     </tr>
     <% for prof in @course.profs.uniq %>
-    <tr>
+    <tr style="background: #<%= cycle('efefef', 'fff') %>">
       <td><%=h prof.fullname %></td>
       <td><%=h prof.email + ' (' + @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s + ')' %></td>
-      <td><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof},
-        :confirm => "Really remove #{prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
-      <td><%= link_to 'Form (cached)', { :action => 'get_pdf', :id => @course, :prof_id => prof} %></td>
-      <td><%= link_to 'Form (regenerate)', { :action => 'get_fresh_pdf', :id => @course, :prof_id => prof} %></td>
+      <% unless @course.semester.critical? %>
+        <td style="padding-left:4em"><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof},
+          :confirm => "Really remove #{prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
+      <% end %>
     </tr>
     <% end %>
     </table>
@@ -109,10 +109,12 @@
       <td><%= link_to tutor.abbr_name, edit_tutor_path(tutor) %></td>
       <td style="text-align:center"><%= tutor.pics.count %></td>
       <td style="text-align:center"><%= tutor.sheetcount %></td>
-      <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
-        :course_id => @course.id, :action => 'destroy'},
-        :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
-        :method => :delete %></td>
+      <% unless @course.semester.critical? %>
+        <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
+          :course_id => @course.id, :action => 'destroy'},
+          :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
+          :method => :delete %></td>
+      <% end %>
     </tr>
     <% end %>
     </table>

@@ -13,6 +13,10 @@
   <%=h @semester.title %>
 </p>
 
+<p>
+  <%= @semester.critical ? "Semester is critical" : "Semester is <b>not</b> critical" %>
+</p>
 
-<%= link_to 'Edit', edit_semester_path(@semester) %> |
-<%= link_to 'Back', semesters_path %>
+
+<%= link_to 'Edit this Semester', edit_semester_path(@semester) %> |
+<%= link_to 'Return to semester list', semesters_path %>

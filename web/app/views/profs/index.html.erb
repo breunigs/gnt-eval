@@ -1,5 +1,9 @@
 <h1>Listing profs</h1>
 
+<%= link_to 'Return to course list', :controller => "courses", :action => "index" %> |
+<%= link_to 'New Prof', new_prof_path %>
+<br />
+
 <table>
   <tr>
     <th>Firstname</th>
@@ -20,7 +24,5 @@
 <% end %>
 </table>
 
-<br />
-<%= link_to 'New course', new_course_path %> |
-<%= link_to 'New Prof', new_prof_path %> |
-<%= link_to 'New semester', new_semester_path %>
+
+

@@ -42,6 +42,10 @@ def find_barcode(filename)
   end
 end
 
+def bold(text)
+	"\e[1m#{text}\e[0m"
+end
+
 def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
@@ -60,6 +64,47 @@ def tex_none(form)
   ['keine', 'keine', 'none', ''][form]
 end
 
+# Generates the a pdf file with the barcode in the specified location
+def generate_barcode(barcode, path)
+  path = File.expand_path(path)
+  #puts "Creating barcode \"#{barcode}\" in #{path}"
+  require 'tmpdir'
+  tmp = Dir.mktmpdir("seee-barcode-")
+  Dir.chdir(tmp) do
+    `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
+    `ps2pdf barcode.ps barcode.pdf`
+    bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f barcode.pdf 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)[1].strip
+    File.open("barcode2.tex", "w") do |h|
+      h << "\\csname pdfmapfile\\endcsname{}\n"
+      h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
+      h << "  \\count0=#1\\relax\n"
+      h << "  \\setbox0=\\hbox{%\n"
+      h << "    \\pdfximage page #1{barcode.pdf}%\n"
+      h << "    \\pdfrefximage\\pdflastximage\n"
+      h << "  }%\n"
+      h << "  \\pdfhorigin=-#2bp\\relax\n"
+      h << "  \\pdfvorigin=#3bp\\relax\n"
+      h << "  \\pdfpagewidth=#4bp\\relax\n"
+      h << "  \\advance\\pdfpagewidth by -#2bp\\relax\n"
+      h << "  \\pdfpageheight=#5bp\\relax\n"
+      h << "  \\advance\\pdfpageheight by -#3bp\\relax\n"
+      h << "  \\ht0=\\pdfpageheight\n"
+      h << "  \\shipout\\box0\\relax\n"
+      h << "}\n"
+      h << "\\page 1 [#{bbox}]\n"
+      h << "\\csname @@end\\endcsname\n"
+      h << "\\end\n"
+    end
+    `#{Seee::Config.application_paths[:pdftex]} -halt-on-error barcode2.tex`
+    if $?.exitstatus != 0
+      puts "Could not create \"#{barcode}\" in \"#{path}\". Aborting."
+      puts `cat barcode2.log`
+      exit 1
+    end
+    `mv -f barcode2.pdf "#{path}"`
+  end
+end
+
 def make_sample_sheet(form, hasTutors)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -70,20 +115,23 @@ def make_sample_sheet(form, hasTutors)
     return
   end
 
-
-  # Barcode
-  bcfile = dir + "barcode"
-  `barcode -b "00000000" -g 80x30 -u mm -e EAN -n -o #{bcfile}.ps && ps2pdf #{bcfile}.ps #{bcfile}.pdf && pdfcrop #{bcfile}.pdf && rm #{bcfile}.ps && rm #{bcfile}.pdf && mv -f #{bcfile}-crop.pdf #{dir}barcode.pdf`
-  # TeX
-
+  generate_barcode("00000000", dir + "barcode.pdf")
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ ($curSem.title) +'}' + "\n"
 
-    h << '\tutoren{ \mmm[1][Mustafa Mustermann] Mustafa Mustermann & \mmm[2][Fred Nurk] Fred Nurk & \mmm[3][Ashok Kumar] Ashok Kumar & \mmm[4][Juan Pérez] Juan Pérez & \mmm[5][Jakob Mierscheid] Jakob Mierscheid\\\\ \mmm[6][Iwan Iwanowitsch] Iwan Iwanowitsch & \mmm[7][Pierre Dupont] Pierre Dupont & \mmm[8][John Smith] John Smith & \mmm[9][Eddi Exzellenz] Eddi Exzellenz & \mmm[10][Joe Bloggs] Joe Bloggs\\\\ \mmm[11][John Doe] John Doe & \mmm[12][\ ] \  & \mmm[13][\ ] \  & \mmm[14][\ ] \  & \mmm[15][\ ] \  \\\\ \mmm[16][\ ] \ & \mmm[17][\ ] \  & \mmm[18][\ ] \  & \mmm[19][\ ] \  & \mmm[20][\ ] \ \\\\ \mmm[21][\ ] \  & \mmm[22][\ ] \  & \mmm[23][\ ] \  & \mmm[24][\ ] \  & \mmm[25][\ ] \ \\\\ \mmm[26][\ ] \  & \mmm[27][\ ] \  & \mmm[28][\ ] \  & \mmm[29][\ ] \  & \mmm[30][\ keine] \ keine\\ }' if hasTutors
-
+    if hasTutors
+      h << '\tutoren{'
+      h << '\mmm[1][Mustafa Mustermann] & \mmm[2][Fred Nurk]     & \mmm[3][Ashok Kumar] & \mmm[4][Juan Pérez]     & \mmm[5][Jakob Mierscheid] \\\\'
+      h << '\mmm[6][Iwan Iwanowitsch]   & \mmm[7][Pierre Dupont] & \mmm[8][John Smith]  & \mmm[9][Eddi Exzellenz] & \mmm[10][Joe Bloggs]      \\\\'
+      h << '\mmm[11][John Doe]          & \mmm[12][\ ]           & \mmm[13][\ ]         & \mmm[14][\ ]            & \mmm[15][\ ]              \\\\'
+      h << '\mmm[16][\ ]                & \mmm[17][\ ]           & \mmm[18][\ ]         & \mmm[19][\ ]            & \mmm[20][\ ]              \\\\'
+      h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\'
+      h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }'
+    end
+    
     h << '\begin{document}' + "\n"
     h << tex_head_for(form) + "\n\n\n"
     h << tex_questions_for(form) + "\n"
@@ -102,34 +150,33 @@ end
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
     # first: the barcode
-    filename = dirname + cp.barcode
-    `barcode -b "#{cp.barcode}" -g 80x30 -u mm -e EAN -n -o #{filename}.ps && ps2pdf #{filename}.ps #{filename}.pdf && pdfcrop #{filename}.pdf && rm #{filename}.ps && rm #{filename}.pdf && mv -f #{filename}-crop.pdf #{dirname}barcode.pdf`
+    generate_barcode(cp.barcode, dirname + "barcode.pdf")
 
     # second: the form
     filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
     File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
-    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
-    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
-    # FIXME: insert check for tutors.empty? and also sort them into a different directory!
-    if cp.course.form != 3
-      none = tex_none(cp.course.form)
-      h << '\tutoren{' + "\n"
+      h << '\documentclass[ngerman]{eval}' + "\n"
+      h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
+      h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
+      h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
+      # FIXME: insert check for tutors.empty? and also sort them into a different directory!
+      if cp.course.form != 3
+        none = tex_none(cp.course.form)
+        h << '\tutoren{' + "\n"
 
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
+        tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
-      tutoren.each_with_index do |t, i|
-        t = escapeForTeX(t)
-        h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
+        tutoren.each_with_index do |t, i|
+          t = escapeForTeX(t)
+          h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
+        end
+
+        h << '}' + "\n"
       end
-
-      h << '}' + "\n"
-    end
-    h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form) + "\n\n\n"
-    h << tex_questions_for(cp.course.form) + "\n"
-    h << '\end{document}'
+      h << '\begin{document}' + "\n"
+      h << tex_head_for(cp.course.form) + "\n\n\n"
+      h << tex_questions_for(cp.course.form) + "\n"
+      h << '\end{document}'
     end
     puts "Wrote #{filename}.tex"
     Rake::Task[(filename + '.pdf').to_sym].invoke
@@ -150,10 +197,7 @@ end
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
-  # remove first line because no one cares about the current directory
-  d = `rake -T`.split("\n")
-  d.shift
-  puts d.join("\n")
+  system("rake -sT")
 end
 
 namespace :db do
@@ -237,7 +281,7 @@ namespace :images do
 
     puts
     puts "Please ensure that all comment pictures have been supplied to"
-    puts "\t/home/eval/public_html/.comments/#{$curSem.dirfriendly_title}"
+    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]} /#{$curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
     puts "This should have been done for you automatically, but you can"
     puts "run it again if it makes you feel better:"
@@ -276,10 +320,6 @@ namespace :images do
       end
     end
   end
-end
-
-namespace :print do
-  ## Nach Eval-Datum sortieren! (erleichtert dann das Eintüten)
 end
 
 namespace :mail do
@@ -502,28 +542,46 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-file for a certain semester (leave empty for current)"
-  task :semester, :semester_id, :needs => ['pdf:samplesheets'] do |t, a|
-    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
-    s = Semester.find(sem)
+  # This is a helper function that will create the result PDF file for a
+  # given semester and faculty_id in the specified directory.
+  def evaluate(semester_id, faculty_id, directory)
+      f = Faculty.find(faculty_id)
+      s = Semester.find(semester_id)
 
-    dirname = './tmp/'
-    FileUtils.mkdir_p(dirname)
-    threads = []
-    Faculty.find(:all).each_with_index do |f,i|
-      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "") +'_'+ s.dirFriendlyName + '.tex'
+      puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
+      puts "Could not find specified smeester (id = #{semester_id})" if s.nil?
+      return if f.nil? || s.nil?
 
-      # this operation is /not/ thread safe
-      File.open(dirname + filename, 'w') do |h|
+      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
+      filename << '_'+ s.dirFriendlyName + '.tex'
+
+      File.open(directory + filename, 'w') do |h|
         h.puts(s.evaluate(f))
       end
 
-      puts "Wrote #{dirname+filename}"
-      threads << Thread.new do
-        Rake::Task[(dirname+filename.gsub('tex', 'pdf')).to_sym].invoke
-      end
+      puts "Wrote #{directory+filename}"
+      Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
+  end
+
+  desc "create report pdf file for a given semester and faculty (leave empty for: sem = current, fac = all)"
+  task :semester, :semester_id, :faculty_id, :needs => ['pdf:samplesheets'] do |t, a|
+    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+
+    dirname = './tmp/'
+    FileUtils.mkdir_p(dirname)
+
+    # we have been given a specific faculty, so evaluate it and exit.
+    if not a.faculty_id.nil?
+      evaluate(sem, a.faculty_id, dirname)
+      exit
     end
-    threads.each { |t| t.join }
+
+    # no faculty specified, just find all and process them in parallel.
+    Faculty.find(:all).each do |f|
+      job = fork { exec "rake pdf:semester[#{sem},#{f.id}]" }
+      # we don't want to wait for the process to finish
+      Process.detach(job)
+    end
   end
 
   desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
@@ -576,42 +634,108 @@ namespace :pdf do
 end
 
 namespace :helper do
-    desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
-    task :lsfparse do
-        puts "Finding IDs…"
-        require 'net/http'
-        url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+  desc "Creates required amount of copies /within/ a PDF file. This saves you from having to specify the amount of copies when printing each form manually."
+  task :multiply_pdfs do
+    system("./helfer/multiply_pdfs.rb tmp")
+  end
 
-        req = Net::HTTP.get_response(URI.parse(url))
-        mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
-        physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
+  desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
+  task :lsfparse do
+    puts "Finding IDs…"
+    require 'net/http'
+    url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
 
-        dir = "tmp/lsfparse/"
-        File.makedirs(dir)
+    req = Net::HTTP.get_response(URI.parse(url))
+    mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
+    physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
 
-        puts "Mathe…"
-        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
-        puts "Physik…"
-        `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+    dir = "tmp/lsfparse/"
+    File.makedirs(dir)
 
-        puts
-        puts "All Done. Have a look in #{dir}"
-    end
+    puts "Mathe…"
+    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
+    puts "Physik…"
+    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+
+    puts
+    puts "All Done. Have a look in #{dir}"
+  end
+
+  desc "Grabs the current list of tutors from uebungen.physik.uni-hd.de and puts them into a human readable file"
+  task :tutors_physics do
+    `cd tmp && ./../helfer/physik_tutoren.rb`
+    require 'date'
+    Date.today.strftime("Schau mal in tmp/%Y-%m-%d Tutoren Physik.txt")
+  end
+
+  desc "Tries to find suitable files in ./tmp that might contain tutor/lecutre information for the maths fac."
+  task :tutors_maths do
+    Dir.chdir("tmp")
+    ymls = Dir.glob("*.yml") + Dir.glob("mues*.yaml") + Dir.glob("lect*.yaml")
+    csv = Dir.glob("Hiwi*.csv")
+    xls = Dir.glob("Hiwi*.xls")
+    files = '"'+(ymls + csv + xls).join('" "')+'"'
+    puts "Files found: #{files}"
+    #system("./../helfer/mathe_tutoren.rb #{files}")
+  end
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
-    puts "<ul>"
-    $curSem.courses.sort {|x,y| x.title <=> y.title }.each do |c|
+    puts $curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
+    # Sort by faculty first, then by course title
+    sorted = $curSem.courses.sort do |x,y|
+      if x.faculty_id == y.faculty_id
+        x.title <=> y.title
+      else
+        x.faculty_id <=> y.faculty_id
+      end
+    end
+    facs = Faculty.find(:all)
+    fac_id = -1
+
+    def printTD(stuff, join = ", ", extra = "")
+      s = "<td>" if extra.empty?
+      s = "<td style=\"#{extra}\">" unless extra.empty?
+      if stuff.is_a? Array
+        s << stuff.join(join) unless stuff.empty?
+      elsif stuff.is_a? String
+        s << stuff
+      end
+      s << "</td>"
+      s
+    end
+
+    odd = true
+    sorted.each do |c|
+      # faculty changed, so print header
+      if fac_id != c.faculty_id
+        fname = facs.find { |f| f.id == c.faculty_id }.longname
+        puts "</table>" unless fac_id == -1
+        puts "<h2>#{fname}</h2>"
+        puts "<table class=\"aligntop\" summary=\"Veranstaltungen der Fakultät für #{fname}\">"
+        puts "<tr class=\"odd\">"
+        puts "<th></th>"
+        puts "<th>Veranstaltung</th>"
+        puts "<th>DozentInnen</th>"
+        puts "<th>Wann?</th>"
+        puts "<th>Tutoren</th></tr>"
+      end
+      puts "<tr>" if odd
+      puts "<tr class=\"odd\">" if !odd
       tuts = c.tutors.collect{ |t| t.abbr_name }
       profs = c.profs.collect{ |t| t.fullname }
       hasEval = c.fs_contact_addresses.empty? ? "&nbsp;" : "&#x2713;"
-      print "<li><span class=\"evalcheckmark\">#{hasEval}</span> <strong>#{c.title}</strong>"
-      print "; <em>#{profs.join(', ')}</em>" unless profs.empty?
-      print "; #{c.description}" unless c.description.empty?
-      print "<br/><span class=\"evalcheckmark\">&nbsp;</span> Tutoren: #{tuts.join(', ')}" unless tuts.empty?
-      puts "<br/>&nbsp;</li>"
+
+      puts printTD(hasEval)
+      puts printTD(c.title.gsub("&", "&amp;"))
+      puts printTD(profs, "<br/>", "white-space: nowrap")
+      puts printTD(c.description)
+      puts printTD(tuts)
+      puts "</tr>"
+      fac_id = c.faculty_id
+      odd = !odd
     end
-    puts "</ul>"
+    puts "</table>"
   end
 
   desc "Generate crappy output sorted by day for simplified packing"
@@ -619,12 +743,15 @@ namespace :helper do
     crap = '<meta http-equiv="content-type" content=
   "text/html; charset=utf-8"><style> td { border-right: 1px solid #000; } .odd { background: #eee; }</style><table>'
     # used for sorting
-    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5]
+    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "??", 6]
     # used for counting
-    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0]
+    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0, "??", 0]
     d = $curSem.courses.sort do |x,y|
       a = x.description.strip.downcase
       b = y.description.strip.downcase
+
+      a = "??" if a.length < 2 || !h.include?(a[0..1])
+      b = "??" if b.length < 2 || !h.include?(b[0..1])
 
       if h[a[0..1]] > h[b[0..1]]
         1
@@ -638,7 +765,9 @@ namespace :helper do
     odd = false
     d.each do |c|
        odd = !odd
-       count[c.description.strip[0..1].downcase] += 1
+       day = c.description.strip[0..1].downcase
+       day = "??" if day.length < 2 || !count.include?(day[0..1])
+       count[day] += 1
        if odd
          crap << "<tr>"
        else
@@ -778,15 +907,216 @@ namespace :summary do
   end
 end
 
+namespace :magick do
+    srcImgMagick = Seee::Config.custom_builds[:src_img_magick]
+    srcRMagick = Seee::Config.custom_builds[:src_r_magick]
+    srcZBar = Seee::Config.custom_builds[:src_zbar]
+    bldImgMagick = Seee::Config.custom_builds[:bld_img_magick]
+    bldRMagick = Seee::Config.custom_builds[:bld_r_magick]
+    bldZBar = Seee::Config.custom_builds[:bld_zbar]
+
+    # useful functions
+    def exitOnError(text)
+        return if $?.exitstatus == 0
+        puts
+        puts bold("#"*15)
+        puts text
+        puts
+        exit 1
+    end
+
+    # all-in-one magic
+    desc "Does 'just what you want' in a single step"
+    task :all, :needs => ["magick:build", "magick:clean"] do
+        # run in extra shell so the config-variables get updated
+        system("rake magick:version")
+    end
+
+    # combined operation
+    desc "build custom ImageMagick, RMagick, ZBar"
+    task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick", "magick:buildZBar"] do
+        puts
+        puts bold "Built process finished successfully."
+    end
+
+    desc "run clean && distclean for custom ImageMagick, RMagick, ZBar"
+    task :clean, :needs => ["magick:cleanImageMagick", "magick:cleanRMagick", "magick:cleanZBar"]
+
+    desc "remove (uninstall) custom ImageMagick, RMagick, ZBar"
+    task :remove, :needs =>  ["magick:removeImageMagick", "magick:removeRMagick", "magick:removeZBar"]
+
+
+    # imagemagick stuff
+    desc "build custom ImageMagick (using quantum-depth=8)"
+    task :buildImageMagick, :needs => "magick:removeImageMagick" do
+        cdir = "cd #{srcImgMagick}"
+        puts bold "#### Building ImageMagick"
+
+        puts bold "#### Configure..."
+        system("#{cdir} && ./configure --prefix=#{bldImgMagick} --with-quantum-depth=8 --without-perl --without-magick-plus-plus --with-gnu-ld --without-dps --without-fpx --with-modules --disable-largefile --with-bzlib=yes --with-x=yes")
+        exitOnError("configuring ImageMagick failed")
+
+        puts bold "#### Make..."
+        system("#{cdir} && make")
+        exitOnError("making ImageMagick failed")
+
+        puts bold "#### Make install..."
+        system("#{cdir} && make install")
+        exitOnError("installing ImageMagick failed")
+
+        puts
+        puts bold "ImageMagick has been successfully built."
+    end
+
+    desc "clean ImageMagick compilation files"
+    task :cleanImageMagick do
+        system("cd #{srcImgMagick} && make clean && make distclean")
+    end
+
+    desc "remove (uninstall) custom ImageMagick"
+    task :removeImageMagick, :needs => ["magick:removeRMagick", "magick:removeZBar"] do
+        puts
+        puts bold "Removing custom ImageMagick"
+        system("rm -rf #{bldImgMagick}")
+    end
+
+
+    # rmagick stuff
+    desc "build custom RMagick (using the custom built ImageMagick)"
+    task :buildRMagick, :needs => "magick:removeRMagick" do
+        exec = "export PATH=#{bldImgMagick}/bin:/usr/bin"
+        # so compiling works
+        exec << " && export LD_LIBRARY_PATH=#{bldImgMagick}/lib"
+        # hard links the path in the binary (saves us from fiddling with
+        # LD_LIBRARY_PATH later, when running other ruby instances)
+        exec << " && export LD_RUN_PATH=#{bldImgMagick}/lib"
+        exec << " && cd #{srcRMagick}"
+        puts bold "#### Building RMagick"
+
+        puts bold "#### Configure..."
+        system("#{exec} && ruby setup.rb config --prefix=#{bldRMagick} --disable-htmldoc")
+        exitOnError("configuring RMagick failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
+
+        puts bold "#### Setup..."
+        system("#{exec} && ruby setup.rb setup")
+        exitOnError("Setting up RMagick failed")
+
+        puts bold "#### Install..."
+        system("#{exec} && ruby setup.rb install --prefix=#{bldRMagick}")
+        exitOnError("Installing RMagick failed")
+
+
+        # we cannot use :rmagick_rb here yet, because the file may not
+        # have existed before, thus the variable would be nil
+        rb = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick.rb"))[0]
+        so = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick2.so"))[0]
+        # hardcode paths into RMagick.rb to be able to simply require
+        # this file and use the custom ImageMagick version
+        system("sed -i \"s:require 'RMagick2.so':require '#{so}':\" #{rb}")
+
+        puts
+        puts bold "RMagick has been successfully built."
+    end
+
+    desc "clean RMagick compilation files"
+    task :cleanRMagick do
+        system("cd #{srcRMagick} && ruby setup.rb clean")
+        system("cd #{srcRMagick} && ruby setup.rb distclean")
+    end
+
+    desc "remove (uninstall) custom RMagick"
+    task :removeRMagick do
+        puts
+        puts bold "Removing custom RMagick"
+        system("rm -rf #{bldRMagick}")
+    end
+
+    # zbar stuff
+    desc "build custom ZBar (using custom imagemagick)"
+    task :buildZBar, :needs => "magick:removeZBar" do
+        exec = "cd #{srcZBar}"
+        exec << " && export PKG_CONFIG_PATH=#{bldImgMagick}/lib/pkgconfig"
+        exec << " && export LDFLAGS=\" -Wl,-z,defs\""
+        puts bold "#### Building ZBar"
+
+        puts bold "#### Configure..."
+        system("#{exec} && ./configure --prefix=#{bldZBar} --without-gtk --without-python --without-qt --without-jpeg --without-xv --with-gnu-ld --disable-video --enable-codes=ean --disable-pthread --without-xshm")
+        exitOnError("configuring ZBar failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
+
+        puts bold "#### Make..."
+        system("#{exec} && make")
+        exitOnError("making ZBar failed")
+
+        puts bold "#### Make install..."
+        system("#{exec} && make install")
+        exitOnError("installing ZBar failed")
+
+        puts
+        puts
+        puts "NOTE: Removing built zbar-libs in favor of global ones. For some reason the global ones are significantly faster and I can't find the issue. At least this is true for 0.8+dfsg-3 vs. 0.10+* as included in Debian/lenny (libzbar0) and Seee."
+        system("rm -rf #{bldZBar}/lib")
+
+        puts
+        puts bold "ZBar has been successfully built."
+    end
+
+    desc "clean ZBar compilation files"
+    task :cleanZBar do
+        system("cd #{srcZBar} && make clean && make distclean")
+    end
+
+    desc "remove (uninstall) custom ZBar"
+    task :removeZBar do
+        puts
+        puts bold "Removing custom ZBar"
+        system("rm -rf #{bldZBar}")
+    end
+
+    desc "Get version info if all built/installed ImageMagick/RMagick and what will be used"
+    task :version do
+        noi = ' || echo "not (properly?) installed"'
+        nob = ' || echo "not (properly?) built"'
+
+        puts
+        puts bold "GLOBAL versions:"
+        puts bold "ImageMagick:"
+        puts `convert -version #{noi}`.strip
+        puts
+        puts bold "RMagick:"
+        puts `ruby -r RMagick -e"puts Magick::Version" #{noi}`.strip
+        puts
+        puts bold "RMagick uses:"
+        puts `ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
+
+        # find path for installed rmagick/zbar
+        rmagickrb = Seee::Config.custom_builds[:rmagick_rb]
+        zbar = Seee::Config.application_paths[:zbar]
+        puts
+        puts
+        puts bold "CUSTOM versions:"
+        puts bold "ImageMagick:"
+        puts `#{bldImgMagick}/bin/convert -version #{nob}`.strip
+        puts
+        puts bold "RMagick:"
+        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
+        puts
+        puts bold "RMagick uses:"
+        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
+        puts
+        puts bold "ZBarImg reports:"
+        puts `#{zbar} --version #{nob}`.strip
+        puts "Note: ZBarImg is always custom built, therefore there is no global version. If no ImageMagick version is reported, this likely means it will use the shared libraries in /usr."
+    end
+end
+
 rule '.pdf' => '.tex' do |t|
     filename="\"#{File.basename(t.source)}\""
-    texpath="cd \"#{File.dirname(t.source)}\";" 
-
+    texpath="cd \"#{File.dirname(t.source)}\";"
 
     # run it once fast, to see if there are any syntax errors in the
     # text and create first-run-toc
     err = `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
-    if $?.to_i != 0
+    if $?.exitstatus != 0
         puts "="*60
         puts err
         puts "\n\n\nERROR WRITING: #{t.name}"
@@ -802,7 +1132,7 @@ rule '.pdf' => '.tex' do |t|
     # but this time also output a pdf
     `#{texpath} #{Seee::Config.commands[:pdflatex_real]} #{filename} 2>&1`
 
-    if $?.to_i == 0
+    if $?.exitstatus == 0
         puts "Wrote #{t.name}"
     else
         puts "Some other error occured. It shouldn't be TeX-related, as"

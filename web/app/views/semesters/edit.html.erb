@@ -19,9 +19,14 @@
   </p>
 
   <p>
+    <b>Currently in critical phase?</b><br />
+    <%= f.check_box :critical %>
+  </p>
+
+  <p>
     <%= f.submit "Update" %>
   </p>
 <% end %>
 
-<%= link_to 'Show', @semester %> |
-<%= link_to 'Back', semesters_path %>
+<%= link_to 'Show this semester', @semester %> |
+<%= link_to 'return to semester list', semesters_path %>

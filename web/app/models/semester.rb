@@ -44,6 +44,11 @@ class Semester < ActiveRecord::Base
     (firstday <= Time.now.to_date && Time.now.to_date <= lastday)
   end
 
+  # are we currently in the critical phase alias
+  def critical?
+    critical
+  end
+
   def dirFriendlyName
     title.gsub(' ', '_').gsub('/', '_')
   end

@@ -28,7 +28,12 @@
   </p>
   <p>
     <b>Form</b><br />
-    <%= f.select('form', @course.form_name_to_id) %>
+    <%= if @course.semester.critical?
+        @course.form_id_to_name[@course.form] + " (can't change this while the semester is critical)"
+      else
+        f.select('form', @course.form_name_to_id)
+      end
+    %>
   </p>
   <p>
     <b>Description (date etc)</b><br />
