@@ -122,8 +122,16 @@ def make_sample_sheet(form, hasTutors)
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ ($curSem.title) +'}' + "\n"
 
-    h << '\tutoren{ \mmm[1][Mustafa Mustermann] Mustafa Mustermann & \mmm[2][Fred Nurk] Fred Nurk & \mmm[3][Ashok Kumar] Ashok Kumar & \mmm[4][Juan Pérez] Juan Pérez & \mmm[5][Jakob Mierscheid] Jakob Mierscheid\\\\ \mmm[6][Iwan Iwanowitsch] Iwan Iwanowitsch & \mmm[7][Pierre Dupont] Pierre Dupont & \mmm[8][John Smith] John Smith & \mmm[9][Eddi Exzellenz] Eddi Exzellenz & \mmm[10][Joe Bloggs] Joe Bloggs\\\\ \mmm[11][John Doe] John Doe & \mmm[12][\ ] \  & \mmm[13][\ ] \  & \mmm[14][\ ] \  & \mmm[15][\ ] \  \\\\ \mmm[16][\ ] \ & \mmm[17][\ ] \  & \mmm[18][\ ] \  & \mmm[19][\ ] \  & \mmm[20][\ ] \ \\\\ \mmm[21][\ ] \  & \mmm[22][\ ] \  & \mmm[23][\ ] \  & \mmm[24][\ ] \  & \mmm[25][\ ] \ \\\\ \mmm[26][\ ] \  & \mmm[27][\ ] \  & \mmm[28][\ ] \  & \mmm[29][\ ] \  & \mmm[30][\ keine] \ keine\\ }' if hasTutors
-
+    if hasTutors
+      h << '\tutoren{'
+      h << '\mmm[1][Mustafa Mustermann] & \mmm[2][Fred Nurk]     & \mmm[3][Ashok Kumar] & \mmm[4][Juan Pérez]     & \mmm[5][Jakob Mierscheid] \\\\'
+      h << '\mmm[6][Iwan Iwanowitsch]   & \mmm[7][Pierre Dupont] & \mmm[8][John Smith]  & \mmm[9][Eddi Exzellenz] & \mmm[10][Joe Bloggs]      \\\\'
+      h << '\mmm[11][John Doe]          & \mmm[12][\ ]           & \mmm[13][\ ]         & \mmm[14][\ ]            & \mmm[15][\ ]              \\\\'
+      h << '\mmm[16][\ ]                & \mmm[17][\ ]           & \mmm[18][\ ]         & \mmm[19][\ ]            & \mmm[20][\ ]              \\\\'
+      h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\'
+      h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }'
+    end
+    
     h << '\begin{document}' + "\n"
     h << tex_head_for(form) + "\n\n\n"
     h << tex_questions_for(form) + "\n"
@@ -160,7 +168,7 @@ def make_pdf_for(s, cp, dirname)
 
         tutoren.each_with_index do |t, i|
           t = escapeForTeX(t)
-          h << '\mmm[' + (i+1).to_s + '][' + t + '] ' + t + ( (i+1)%5==0 ? '\\\\' + "\n" : ' & ' )
+          h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
         end
 
         h << '}' + "\n"
