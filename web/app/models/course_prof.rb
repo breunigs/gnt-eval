@@ -62,6 +62,6 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+    [course.form_name, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
   end
 end
