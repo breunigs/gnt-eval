@@ -118,16 +118,17 @@
 \def\bxss[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{-0.43cm}\huge{$\Box$}\normalsize\SaveMyYPos}
 %\def\bxs[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{0.5em}{$\bigcirc$}\normalsize\SaveMyYPos}
 
+\newcommand{\barcode}[1]{\def\barc{#1}}
 \newcommand{\Typ}[1]{\def\typ{#1}}
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
- \def\vorlesungsfragen{\input{fragenneu}}
- \def\vorlesungenglisch{\input{vorlesung_englisch_neu}}
- \def\seminarfragen{\input{fragen_seminar}}
- \def\struktur{\input{fragen_struktur3}}
+ \def\vorlesungsfragen{\input{bogen/fragen/fragenneu}}
+ \def\vorlesungenglisch{\input{./bogen/fragen/vorlesung_englisch_neu}}
+ \def\seminarfragen{\input{bogen/fragen/fragen_seminar}}
+ \def\struktur{\input{bogen/fragen/fragen_struktur3}}
 
 \def\blu[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
@@ -376,7 +377,7 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \bxss[1][Diplom] Diplom \hfill \bxs[2][Lehramt] Lehramt \hfill \bxs[3][Bachelor] Bachelor \hfill \bxs[4][Master] Master \hfill \bxs[5][Promotion] Promotion \hfill \bxs[6][Sonstiges] Sonstiges \vspace{1.45cm} \\
 \bluu[Hauptfach][hauptfach]
 \hspace{-0.8cm}\textbf{1. Hauptfach:} \\[0.01em]
-\bxss[1][Mathematik] Mathematik \hspace{0.04cm} \bxs[2][Physik] Physik \hspace{0.9375cm} \bxs[3][Informatik] Informatik \hfill \bxs[5][Sonstiges] Sonstiges \vspace{1cm} \\
+\bxss[1][Mathematik] Mathematik \hspace{0.445cm} \bxs[2][Physik] Physik \hspace{1.232cm} \bxs[3][Informatik] Informatik \hfill \bxs[5][Sonstiges] Sonstiges \vspace{1cm} \\
 \bluu[Fachsemester][semester]
 \hspace{-0.8cm}\textbf{Fachsemester:} \\[0.4em]
 \bxss[1][1]\hspace{-0.5em}1\hfill \bxss[2][2]\hspace{-0.5em}2\hfill \bxss[3][3]\hspace{-0.5em}3 \hfill \bxss[4][4]\hspace{-0.5em}4 \hfill \bxss[5][5]\hspace{-0.5em}5 \hfill \bxss[6][6]\hspace{-0.5em}6 \hfill \bxss[7][7]\hspace{-0.5em}7 \hfill \bxss[8][8]\hspace{-0.5em}8 \hfill \bxss[9][9]\hspace{-0.5em}9 \hfill \bxss[10][10]\hspace{-0.5em}10 \hfill \bxss[11][11]\hspace{-0.5em}11 \hfill \bxss[12][12]\hspace{-0.5em}12 \hfill \bxss[13][13]\hspace{-0.5em}13 \hfill \bxss[14][14]\hspace{-0.5em}14 \hfill \bxss[15][15]\hspace{-0.5em}15 \hfill \bxss[16][>15]\hspace{-0.5em}>15 \\
@@ -391,7 +392,7 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \write\posout{- !ruby/object:Page }
 \write\posout{u questions: }
 
-\ifthenelse{\equal{#1}{1}}{\Huge{Survey Regarding the Quality of Teaching}\normalsize}{\Huge{Lehrevaluation--Seminare}\normalsize}\hfill\includegraphics[width=3cm,height=1.5cm]{barcode.pdf}\\ %\vspace{0.1cm}
+\ifthenelse{\equal{#1}{1}}{\Huge{Survey Regarding the Quality of Teaching}\normalsize}{\Huge{Lehrevaluation--Seminare}\normalsize}\hfill\includegraphics[width=3cm,height=1.5cm]{\barc}\\ %\vspace{0.1cm}
 
 This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly.\vspace{0.1cm}
 
