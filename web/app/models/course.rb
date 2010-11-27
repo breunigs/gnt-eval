@@ -25,13 +25,30 @@ class Course < ActiveRecord::Base
     form_id_to_name.each_pair { |k,v| hash[v] = k }
     hash
   end
-  
+
   def form_name
     form_id_to_name[self.form] || "form #{self.form} doesn't exist"
   end
-  
+
   def form_id
     self.form
+  end
+
+  # Tries to parse the description field for eval times and returns them
+  # in a nice format for string comparison (i.e. <=>)
+  def eval_date
+    # FIXME: Make pref?
+    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "???", 6]
+    a = description.strip.downcase
+    a = "???" if a.length < 3 || !h.include?(a[0..1])
+    day = h[a[0..1]]
+    time = a[2..a.length-1].strip.rjust(3, "0")
+    "#{day} #{time}"
+  end
+
+  # returns a newline seperated list of profs of this course
+  def prof_list
+    profs.map { |p| p.fullname + "\n" }.sort
   end
 
   def fs_contact_addresses
