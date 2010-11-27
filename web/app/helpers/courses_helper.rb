@@ -40,7 +40,7 @@ module CoursesHelper
   end
 
   def sort_helper(courses)
-    return courses if params[:sort].nil? || params[:sort].empty?
+    params[:sort] = "faculty" if params[:sort].nil? || params[:sort].empty?
     sortby = []
     case params[:sort].gsub(/_rev$/, "")
       when "title" then
