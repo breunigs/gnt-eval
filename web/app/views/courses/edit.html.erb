@@ -29,9 +29,9 @@
   <p>
     <b>Form</b><br />
     <%= if @course.semester.critical?
-        @course.form_id_to_name[@course.form] + " (can't change this while the semester is critical)"
+        @course.form.name + " (can't change this while the semester is critical)"
       else
-        f.select('form', @course.form_name_to_id)
+	collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == @course.semester.id}, :id, :name, {:prompt => true})
       end
     %>
   </p>

@@ -116,7 +116,7 @@ class Question
 
   # collect all possible choices and return as array
   def get_choices
-    @boxes.collect { |x| x.text }
+    @boxes.collect { |x| x.text.nil? ? '' : x.text }
   end
 
   # question itself
@@ -167,7 +167,35 @@ class Question
       @db_column
     end
   end
-  
+
+  include FunkyDBBits
+  # h: hash correspoding to specific (!) where clause
+  # g: hash corresponding to general (!) where clause
+  def eval_to_tex(h, g, db_table)
+    @db_table = db_table
+
+    b = ''
+
+    if @db_column.is_a?(Array)
+
+      answers = multi_q(h, self)
+
+      t = TeXMultiQuestion.new(@qtext, answers)
+      b << t.to_tex
+
+      # single-q
+    else
+      antw, anz, m, m_a, s, s_a = single_q(h, g, self)
+      if anz > 0
+        t = TeXSingleQuestion.new(text, ltext, rtext, antw,
+                                  anz, m, m_a, s, s_a)
+
+      b << t.to_tex
+      end
+    end
+    return b
+  end
+
 end
 
 
@@ -188,7 +216,7 @@ class Page
     @questions = qs
   end
   def questions
-    @sections.collect {|s| s.questions}
+    @sections.collect {|s| s.questions}.flatten
   end
 end
 

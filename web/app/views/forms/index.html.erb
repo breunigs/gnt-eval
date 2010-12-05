@@ -7,7 +7,7 @@
     <th>Content</th>
   </tr>
 
-<% for form in @forms %>
+<% for form in @forms.sort {|y,x| x.semester_id <=> y.semester_id} %>
   <tr>
     <td><%=h form.semester.title %></td>
     <td><%=h form.name %></td>

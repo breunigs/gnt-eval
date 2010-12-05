@@ -5,6 +5,7 @@
 # typically a semester. A semester has many courses.
 class Semester < ActiveRecord::Base
   has_many :courses
+  has_many :forms
   validates_presence_of :title
 
   include FunkyTeXBits
@@ -20,7 +21,7 @@ class Semester < ActiveRecord::Base
     $facultybarcodes = cs.map{ |c| c.course_profs.map { |cp| cp.barcode.to_i }}.flatten
 
     # FunkyDBBits setup
-    @db_table = cs.map { |c| c.form.to_form.db_table }.uniq
+    @db_table = cs.map { |c| c.form.db_table }.uniq
 
     evalname = faculty.longname + ' ' + title
     anzahl_boegen = count_forms({})

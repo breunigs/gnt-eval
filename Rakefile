@@ -139,11 +139,12 @@ def generate_barcode(barcode, path)
   end
 end
 
-def make_sample_sheet(form, hasTutors)
+def make_sample_sheet(form)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  filename = dir + "sample_" + form.to_s
-
+  filename = dir + "sample_" + form.id.to_s
+  hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
+  
   if File.exists? filename+'.pdf'
     puts "#{filename}.pdf already exists. Skipping."
     return
@@ -564,8 +565,9 @@ namespace :pdf do
   task :samplesheets do
     # FIXME: automatically determine correct number
     # or TeX all files given
-    0.upto(3) do |i|
-      make_sample_sheet(i, (i == 0 || i == 2))
+    $curSem.forms.each do |f|
+      puts "sample for #{f.name}"
+      make_sample_sheet(f)
     end
 
     Rake::Task["clean".to_sym].invoke

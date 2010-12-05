@@ -222,7 +222,7 @@ class Course < ActiveRecord::Base
   end
 
   def evaluate
-    eval_against_form(form.to_form)
+    eval_against_form(form.abstract_form)
   end
 
 end

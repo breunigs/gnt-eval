@@ -227,11 +227,11 @@ module FunkyTeXBits
 
     path = File.join(File.dirname(__FILE__), "../../../tmp/sample_sheets/sample_")
     b << "{Die Fragebögen}\n"
-    # FIXME: mit der Formklasse Syncen iwie…
-    [["Vorlesungsbogen (Deutsch)", 0, 2], ["Vorlesungsbogen (Englisch)", 2, 2], ["Seminarbogen", 3, 1]].each do |v|
-      b << "\\subsection*{#{v[0]}}"
-      1.upto(v[2]) do |i|
-        b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{v[1]}.pdf}}\n"
+
+    $curSem.forms.each do |f|
+      b << "\\subsection*{#{f.name}}"
+      1.upto(f.pages.count) do |i|
+        b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{f.id}.pdf}}\n"
         b << "\\clearpage"
       end
     end
