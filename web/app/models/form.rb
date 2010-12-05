@@ -16,8 +16,8 @@ class Form < ActiveRecord::Base
     pp abstract_form
     $stdout = orig
 
-    # aber bitte ohne die ids
-    sio.string.gsub(/0x[^\s]*/,'')
+    # aber bitte ohne die ids und ohne @
+    sio.string.gsub(/0x[^\s]*/,'').gsub(/@/,'')
   end
 
   # fix: das sollte method_missing-magie werden
