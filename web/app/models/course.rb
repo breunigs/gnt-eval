@@ -5,6 +5,7 @@
 class Course < ActiveRecord::Base
   belongs_to :semester
   belongs_to :faculty
+  belongs_to :form
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
@@ -13,26 +14,29 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
-  def form_id_to_name
-    {3 => 'Seminarbogen',
-     2 => 'Englischer Bogen',
-     1 => 'Spezialbogen',
-     0 => 'Normaler Bogen'}
-  end
+  # def form_id_to_name
+  #   {3 => 'Seminarbogen',
+  #    2 => 'Englischer Bogen',
+  #    1 => 'Spezialbogen',
+  #    0 => 'Normaler Bogen'}
+  # end
 
-  def form_name_to_id
-    hash = {}
-    form_id_to_name.each_pair { |k,v| hash[v] = k }
-    hash
-  end
+  # def form_name_to_id
+  #   hash = {}
+  #   form_id_to_name.each_pair { |k,v| hash[v] = k }
+  #   hash
+  # end
+
+  # def form_name
+  #   form_id_to_name[self.form] || "form #{self.form} doesn't exist"
+  # end
 
   def form_name
-    form_id_to_name[self.form] || "form #{self.form} doesn't exist"
+    form.name
   end
-
-  def form_id
-    self.form
-  end
+  # def form_id
+  #   self.form
+  # end
 
   # Tries to parse the description field for eval times and returns them
   # in a nice format for string comparison (i.e. <=>)
@@ -70,7 +74,7 @@ class Course < ActiveRecord::Base
   end
 
   def getReturnedSheets
-    @db_table = form.to_form.db_table
+    @db_table = form.db_table
 
     if not profs.empty?
       count_forms({ :barcode => barcodes})

@@ -56,6 +56,7 @@ class Question
   # (tutoren, studienfach, semesterzahl)
 
   attr_accessor :special_care
+  attr_accessor :donotuse
 
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='', save_as = '')
@@ -173,14 +174,21 @@ end
 # this is actually just needed for OMR/TeX to distinguish between
 # pages
 #
+class Section
+  attr_accessor :title
+  attr_accessor :questions
+end
 
 class Page
 
-  # list of questions on that page
-  attr_accessor :questions
+  # list of sections on that page
+  attr_accessor :sections
 
   def initialize(qs = [])
     @questions = qs
+  end
+  def questions
+    @sections.collect {|s| s.questions}
   end
 end
 
@@ -198,6 +206,7 @@ class AbstractForm
 
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
+  attr_accessor :lang
   attr_reader :english
 
   def initialize(pages = [], db_table = '')

@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 require 'pp'
 require 'stringio'
 
 class Form < ActiveRecord::Base
   belongs_to :semester
+  has_many :course
 
   def abstract_form
     YAML::load(content)
@@ -16,5 +18,19 @@ class Form < ActiveRecord::Base
 
     # aber bitte ohne die ids
     sio.string.gsub(/0x[^\s]*/,'')
+  end
+
+  # fix: das sollte method_missing-magie werden
+  def db_table
+    abstract_form.db_table
+  end
+  def questions
+    abstract_form.questions
+  end
+  def lang
+    abstract_form.lang
+  end
+  def pages
+    abstract_form.pages
   end
 end

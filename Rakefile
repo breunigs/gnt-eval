@@ -50,18 +50,52 @@ def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
 
-# FIXME: we should really create a "form" class that collects all these information
-# [vorlesung, spezial, englisch, seminar]
+# fixme: das argument entscheidet, ob seminarbogen oder vorlesung. das
+# ist scheiße, wenn das abstrakt geschehen soll aus den
+# fragen. momentan gibt es damit nur vorlesungsköpfe.
 def tex_head_for(form)
-  '\\' + ['', '', 'eng', ''][form] + 'kopf{' + ['1', '0', '1', '0'][form] + '}'
+  if form.lang == 'eng'
+    '\\engkopf{1}'
+  else
+    '\\kopf{1}'
+  end
 end
 
 def tex_questions_for(form)
-  ['\vorlesungsfragen', '\vorlesungsfragen', '\vorlesungenglisch', '\seminarfragen'][form]
+  b = ""
+  form.pages.each do |p|
+    p.sections.each do |s|
+      # ist das ein abschnitt, der uns kümmert?
+      next if s.questions.find_all{|q| q.special_care != 1}.empty?
+      b << '\sect{' + s.title + "}\n\n"
+      s.questions.each do |q|
+        next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
+        if q.db_column =~ /comment/
+          b << '\kommentar{' + q.text + '}{' + q.db_column + '}{' +
+            q.db_column + '}{2972997}'
+        else
+          b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
+          b << 'm' if q.multi?
+          b << "{#{q.text}}"
+          b << q.boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| '{' +
+            x.text.to_s + '}' }.join('')
+          if q.multi?
+            b << '{' + q.db_column.first[0..-2] + '}'
+          else
+            b << "{#{q.db_column}}"
+          end
+        end
+        b << "\n\n"
+      end
+    end
+    b << "\\np\n\n"
+  end
+  b << "\n\n"
+  b
 end
 
 def tex_none(form)
-  ['keine', 'keine', 'none', ''][form]
+  ['keine', 'keine', 'none', ''][form.id]
 end
 
 # Generates the a pdf file with the barcode in the specified location
@@ -147,41 +181,49 @@ def escapeForTeX(string)
   string.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
 end
 
+# naming conventions einhalten bzw. zumindest aliase anlegen!
+def escape_for_tex string
+  escapeForTex string
+end
+
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
-    # first: the barcode
-    generate_barcode(cp.barcode, dirname + "barcode.pdf")
-
-    # second: the form
-    filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
-    File.open(filename + '.tex', 'w') do |h|
-      h << '\documentclass[ngerman]{eval}' + "\n"
-      h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
-      h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
-      h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
-      # FIXME: insert check for tutors.empty? and also sort them into a different directory!
-      if cp.course.form != 3
-        none = tex_none(cp.course.form)
-        h << '\tutoren{' + "\n"
-
-        tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
-
-        tutoren.each_with_index do |t, i|
-          t = escapeForTeX(t)
-          h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
-        end
-
-        h << '}' + "\n"
+  # first: the barcode
+  generate_barcode(cp.barcode, dirname + "barcode.pdf")
+  
+  # second: the form
+  filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
+  
+  File.open(filename + '.tex', 'w') do |h|
+    h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
+    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
+    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
+    
+    # FIXME: insert check for tutors.empty? and also sort them into a different directory!
+    if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
+      none = tex_none(cp.course.form)
+      h << '\tutoren{' + "\n"
+      
+      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
+      
+      tutoren.each_with_index do |t, i|
+        t = escapeForTeX(t)
+        h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
       end
-      h << '\begin{document}' + "\n"
-      h << tex_head_for(cp.course.form) + "\n\n\n"
-      h << tex_questions_for(cp.course.form) + "\n"
-      h << '\end{document}'
+      
+      h << '}' + "\n"
     end
-    puts "Wrote #{filename}.tex"
-    Rake::Task[(filename + '.pdf').to_sym].invoke
-
-    `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+    
+    h << '\begin{document}' + "\n"
+    h << tex_head_for(cp.course.form) + "\n\n\n"
+    h << tex_questions_for(cp.course.form) + "\n"
+    h << '\end{document}'
+  end
+  puts "Wrote #{filename}.tex"
+  Rake::Task[(filename + '.pdf').to_sym].invoke
+  
+  `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
 # Prints the current progress to the console without advancing one line
@@ -470,7 +512,7 @@ namespace :pest do
       # insert them later. Since `path` is UNIQUE insert queries will
       # simply fail if the path already exists.
       # Yes, this is cheap hack.
-      $dbh.do('DELETE FROM `' + table.to_s +'` WHERE `path` = ? ', f) if update
+      $dbh.do("DELETE FROM `#{table}` WHERE `path` = ? ", f) if update
 
       # "ignore" makes MySQL stop complaining about duplicate unique
       # keys (path in our case)
@@ -584,7 +626,7 @@ namespace :pdf do
     end
   end
 
-  desc "create pdf-form-files corresponding to each corse and prof (leave empty for current semester)"
+  desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
     `mkdir tmp` unless File.exists?('./tmp/')
     sem = a.semester_id.nil? ? $curSem.id : a.semester_id
