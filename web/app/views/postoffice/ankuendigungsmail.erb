@@ -1,6 +1,6 @@
 <%= word_wrap(@anrede, 72) %>,
 
-in der Woche vom 28. Juni bis 2. Juli am
+in der Woche vom 13. bis 17. Dezember am
 
      <%= @course.description %>
 
@@ -10,13 +10,13 @@ werden Vertreter_innen der Fachschaft MathPhys Ihre Veranstaltung
 	
 evaluieren. Nach der momentanen Planung werden wir mit
 
-     <%= @course.students %> Bögen
+     <%= @course.students %> Bögen auf <%= @sprache %>
 
-vorbeikommen. Sollte diese Zahl viel zu hoch sein oder Ihnen der
-Termin nicht passen, bitten wir Sie, uns darüber mit einer kurzen Mail
-zu informieren. Ferner gehen wir davon aus, dass es sich bei folgender
-Liste um eine vollständige Liste der Tutor_innen Ihrer Veranstaltung
-handelt:
+vorbeikommen. Sollte diese Zahl viel zu hoch sein, die Sprache
+unangemessen sein oder Ihnen der Termin nicht passen, bitten wir Sie,
+uns darüber mit einer kurzen Mail zu informieren. Ferner gehen wir
+davon aus, dass es sich bei folgender Liste um eine vollständige Liste
+der Tutor_innen Ihrer Veranstaltung handelt:
 
      <%= word_wrap((@course.tutors.empty? ? 'keine' : @course.tutors.collect { |t| t.abbr_name 
 }.join(', ')) , 67) %>

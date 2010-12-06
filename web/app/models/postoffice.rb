@@ -21,6 +21,7 @@ class Postoffice < ActionMailer::Base
     
     body[:course] = c
     body[:anrede] = profanrede(c)
+    body[:sprache] = c.form.abstract_form.lang == 'de' ? "Deutsch" : "Englisch"
   end
 
   def erinnerungsmail(course_id)
