@@ -55,9 +55,9 @@ end
 # fragen. momentan gibt es damit nur vorlesungsköpfe.
 def tex_head_for(form)
   if form.lang == 'eng'
-    '\\engkopf{1}'
+    "\\engkopf{#{form.texheadnumber}}"
   else
-    '\\kopf{1}'
+    "\\kopf{#{form.texheadnumber}}"
   end
 end
 

@@ -33,4 +33,7 @@ class Form < ActiveRecord::Base
   def pages
     abstract_form.pages
   end
+  def texheadnumber
+    abstract_form.texheadnumber
+  end
 end

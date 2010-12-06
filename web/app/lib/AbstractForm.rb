@@ -205,6 +205,10 @@ end
 class Section
   attr_accessor :title
   attr_accessor :questions
+  def initialize(t ='', q=[])
+    @title = t
+    @questions = q
+  end
 end
 
 class Page
@@ -212,8 +216,8 @@ class Page
   # list of sections on that page
   attr_accessor :sections
 
-  def initialize(qs = [])
-    @questions = qs
+  def initialize(secs=[])
+    @sections = secs
   end
   def questions
     @sections.collect {|s| s.questions}.flatten
@@ -235,6 +239,7 @@ class AbstractForm
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
   attr_accessor :lang
+  attr_accessor :texheadnumber
   attr_reader :english
 
   def initialize(pages = [], db_table = '')
