@@ -215,6 +215,8 @@ class Page
 
   # list of sections on that page
   attr_accessor :sections
+  attr_accessor :tex_at_top
+  attr_accessor :tex_at_bottom
 
   def initialize(secs=[])
     @sections = secs

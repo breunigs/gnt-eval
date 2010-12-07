@@ -64,6 +64,7 @@ end
 def tex_questions_for(form)
   b = ""
   form.pages.each_with_index do |p,i|
+    b << p.tex_at_top.to_s
     p.sections.each do |s|
       # ist das ein abschnitt, der uns kümmert?
       next if s.questions.find_all{|q| q.special_care != 1}.empty?
@@ -88,6 +89,7 @@ def tex_questions_for(form)
         end
       end
     end
+    b << p.tex_at_bottom.to_s
     b << "\\np\n\n" unless i == (form.pages.count - 1)
   end
   b
