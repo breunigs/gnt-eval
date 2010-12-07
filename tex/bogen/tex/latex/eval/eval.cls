@@ -386,7 +386,7 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 }
 
 \newcommand{\engkopf}[1]{
-\write\posout{--- !ruby/object:Form}
+\write\posout{--- !ruby/object:AbstractForm}
 \lang{1}
 \write\posout{db_table: \dbt}
 \write\posout{pages: }
