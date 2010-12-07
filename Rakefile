@@ -53,28 +53,37 @@ def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
 
-def tex_head_for(form)
-  form.abstract_form.texhead
+def tex_head_for(form, lang='')
+  h = form.abstract_form.texhead
+  if h.is_a?(String)
+    h
+  else
+    h[lang]
+  end
 end
 
-def tex_foot_for(form)
-  form.abstract_form.texfoot
+def tex_foot_for(form, lang='')
+  f = form.abstract_form.texfoot
+  if f.is_a?(String)
+    f
+  else
+    f[lang]
+  end
 end
 
-def tex_questions_for(form)
+def tex_questions_for(form, lang)
   b = ""
-  lang = :de
   form.pages.each_with_index do |p,i|
     b << p.tex_at_top.to_s
     p.sections.each do |s|
       # ist das ein abschnitt, der uns kümmert?
       next if s.questions.find_all{|q| q.special_care != 1}.empty?
-      b << "\n\n" + '\sect{' + s.title + "}"
+      b << "\n\n" + '\sect{' + s.title[lang] + "}"
       s.questions.each do |q|
         b << "\n\n"
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
         if q.db_column =~ /comment/
-          b << '\kommentar{' + q.text + '}{' + q.db_column + '}{' +
+          b << '\kommentar{' + q.text[lang] + '}{' + q.db_column + '}{' +
             q.db_column + '}{2972997}'
         else
           b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
@@ -219,10 +228,11 @@ def make_pdf_for(s, cp, dirname)
       h << '}' + "\n"
     end
 
+    lang = cp.course.language.intern
     h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form) + "\n\n\n"
-    h << tex_questions_for(cp.course.form) + "\n"
-    h << tex_foot_for(cp.course.form) + "\n"
+    h << tex_head_for(cp.course.form, lang) + "\n\n\n"
+    h << tex_questions_for(cp.course.form, lang) + "\n"
+    h << tex_foot_for(cp.course.form, lang) + "\n"
     h << '\end{document}'
   end
   puts "Wrote #{filename}.tex"
@@ -639,7 +649,7 @@ namespace :pdf do
     s = Semester.find(sem)
     dirname = './tmp/'
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
-        make_pdf_for(s, cp, dirname)
+      make_pdf_for(s, cp, dirname)
     end
 
     Rake::Task["clean".to_sym].invoke
