@@ -372,7 +372,9 @@ namespace :images do
           next
         end
 
-        form = CourseProf.find(barcode).course.form.id
+        form = CourseProf.find(barcode).course.form.id.to_s + '_' +
+          CourseProf.find(barcode).language.to_s
+        
         File.makedirs("tmp/images/#{form}")
         File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
