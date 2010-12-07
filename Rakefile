@@ -140,7 +140,7 @@ def make_sample_sheet(form)
   File.makedirs(dir)
   filename = dir + "sample_" + form.id.to_s
   hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
-  
+
   if File.exists? filename+'.pdf'
     puts "#{filename}.pdf already exists. Skipping."
     return
@@ -162,7 +162,7 @@ def make_sample_sheet(form)
       h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\'
       h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }'
     end
-    
+
     h << '\begin{document}' + "\n"
     h << tex_head_for(form) + "\n\n\n"
     h << tex_questions_for(form) + "\n"
@@ -187,31 +187,31 @@ end
 def make_pdf_for(s, cp, dirname)
   # first: the barcode
   generate_barcode(cp.barcode, dirname + "barcode.pdf")
-  
+
   # second: the form
   filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
-  
+
   File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
     h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
     h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
-    
+
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
       none = tex_none(cp.course.form)
       h << '\tutoren{' + "\n"
-      
+
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
-      
+
       tutoren.each_with_index do |t, i|
         t = escapeForTeX(t)
         h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
       end
-      
+
       h << '}' + "\n"
     end
-    
+
     h << '\begin{document}' + "\n"
     h << tex_head_for(cp.course.form) + "\n\n\n"
     h << tex_questions_for(cp.course.form) + "\n"
@@ -220,7 +220,7 @@ def make_pdf_for(s, cp, dirname)
   end
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
-  
+
   `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
@@ -712,12 +712,14 @@ namespace :helper do
   desc "Tries to find suitable files in ./tmp that might contain tutor/lecutre information for the maths fac."
   task :tutors_maths do
     Dir.chdir("tmp")
+    # selecting all "yml"s is okay because by default only "yamls" are
+    # written into /tmp by other parts
     ymls = Dir.glob("*.yml") + Dir.glob("mues*.yaml") + Dir.glob("lect*.yaml")
     csv = Dir.glob("Hiwi*.csv")
     xls = Dir.glob("Hiwi*.xls")
     files = '"'+(ymls + csv + xls).join('" "')+'"'
     puts "Files found: #{files}"
-    #system("./../helfer/mathe_tutoren.rb #{files}")
+    system("./../helfer/mathe_tutoren.rb #{files}")
   end
 
   desc "Generate lovely HTML output for our static website"

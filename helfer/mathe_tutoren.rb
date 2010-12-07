@@ -143,7 +143,7 @@ $falseFriends["Analysis 3"] = ["Analysis 1", "Liealgebren"]
 # Accepts a name and tries to find a similar one in existing $lectures.
 # May prompt the user. Returns either name or a similar one.
 def findLecture(name)
-  return $savedSimilar[name] unless  $savedSimilar[name].nil?
+  return $savedSimilar[name] unless $savedSimilar[name].nil?
 
   # find possible candidates
   candidates = Hash.new
@@ -168,23 +168,59 @@ def findLecture(name)
   return name if candidates.empty?
 
   t = "The following lectures appear to be similar to \"#{bold(name)}\":"
-  puts "\n"*5
-  puts t
-  puts "-"*(t.length - bold("").length)
+  askUser(t, name, candidates, true)
+end
+
+# Looks up if a similar tutor already exists (list = existing tutors,
+# new = new tutor)
+def findTutor(list, new)
+  return new if list.empty?
+
+  # find possible candidates
+  candidates = Hash.new
+  list.each do |name|
+    return new if new == name
+
+    dis = []
+    dis << $dl.distance(new, name)
+    dis << $dl.distance(name, new)
+    dis = dis.compact.sort[0]
+    next if dis.nil?
+
+    ratio = dis.to_f / name.length.to_f
+
+    next if ratio > 0.9
+
+    candidates[name] = dis
+  end
+
+  return new if candidates.empty?
+
+  t = "The following tutors appear to be similar to \"#{bold(new)}\":"
+  askUser(t, new, candidates, false)
+end
+
+# Asks the user if a given name is similar to a given list of candidates
+# text:       the question (should name the 'new' item in question)
+# default:    the 'new' item itself (used if the user says it's not similar)
+# candidates: the candidates similar to the 'default'
+# save_similar: if the similar information should be saved
+def askUser(text, default, candidates, save_similar)
+  puts text
+  puts "-"*(text.length - bold("").length)
   csort = candidates.to_a.sort { |x,y| x[1] <=> y[1] }
   csort.each_with_index do |item,i|
     puts "##{(i+1).to_s.rjust(2)}  ⎸ Δ: #{item[1].to_s.rjust(2)}  ⎸ #{item[0]}"
   end
   puts "Hit enter if there's no match"
-
   while true
     puts
     puts "Your choice:"
     a = STDIN.gets.strip
-    return name if a == ""
+    return default if a == ""
     a = a.to_i
     next if a <= 0 || a > csort.length
-    $savedSimilar[name] = csort[a-1][0]
+    $savedSimilar[default] = csort[a-1][0] if save_similar
     return csort[a-1][0]
   end
 end
@@ -212,7 +248,7 @@ def parseCSV(x)
     name = findLecture(row[0])
 
     $lectures[name] = Lecture.new if $lectures[name].nil?
-    $lectures[name].tutors << tut
+    $lectures[name].tutors << findTutor($lectures[name].tutors, tut)
     $lectures[name].lecturer = row[11].strip
   end
 end
@@ -227,7 +263,7 @@ def parseYAML(x)
       tuts = l["tutors"].collect { |t| t.gsub(/\s+/, " ").strip }
 
       $lectures[lecture] = Lecture.new if $lectures[lecture].nil?
-      $lectures[lecture].tutors += tuts
+      $lectures[lecture].tutors += findTutor($lectures[lecture].tutors, tuts)
       $lectures[lecture].student_count = l["student_count"]
       $lectures[lecture].lecturer = l["lecturer"]
     end
