@@ -63,6 +63,7 @@ end
 
 def tex_questions_for(form)
   b = ""
+  lang = :de
   form.pages.each_with_index do |p,i|
     b << p.tex_at_top.to_s
     p.sections.each do |s|
@@ -78,9 +79,9 @@ def tex_questions_for(form)
         else
           b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
           b << 'm' if q.multi?
-          b << "{#{q.text}}"
+          b << "{#{q.text[lang]}}"
           b << q.boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| '{' +
-            x.text.to_s + '}' }.join('')
+            x.text[lang].to_s + '}' }.join('')
           if q.multi?
             b << '{' + q.db_column.first[0..-2] + '}'
           else
