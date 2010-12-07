@@ -155,6 +155,7 @@ def make_sample_sheet(form)
   generate_barcode("00000000", dir + "barcode.pdf")
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\dbtable{' + escapeForTex(cp.course.form.db_table) + "}\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ (curSem.title) +'}' + "\n"
@@ -357,7 +358,7 @@ namespace :images do
           next
         end
 
-        form = CourseProf.find(barcode).course.form
+        form = CourseProf.find(barcode).course.form.id
         File.makedirs("tmp/images/#{form}")
         File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
