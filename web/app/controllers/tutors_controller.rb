@@ -63,7 +63,7 @@ class TutorsController < ApplicationController
     existingTutors = @course.tutors.map { |x| x.abbr_name }
     par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
     failure = nil
-    par.uniq.each do |p|
+    par.uniq.sort.each do |p|
       next if existingTutors.include? p
       t = @course.tutors.build({'abbr_name'=>p})
       if not t.save
