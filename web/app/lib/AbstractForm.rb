@@ -239,7 +239,8 @@ class AbstractForm
   attr_accessor :lang_quest_for_vorl_m
   attr_accessor :lang_quest_for_vorl_f
   attr_accessor :lang
-  attr_accessor :texheadnumber
+  attr_accessor :texhead
+  attr_accessor :texfoot
   attr_reader :english
 
   def initialize(pages = [], db_table = '')

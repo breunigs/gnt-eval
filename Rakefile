@@ -50,25 +50,23 @@ def find_barcode_from_basename(basename)
     basename.to_s.sub(/^.*_/, '').to_i
 end
 
-# fixme: das argument entscheidet, ob seminarbogen oder vorlesung. das
-# ist scheiße, wenn das abstrakt geschehen soll aus den
-# fragen. momentan gibt es damit nur vorlesungsköpfe.
 def tex_head_for(form)
-  if form.lang == 'eng'
-    "\\engkopf{#{form.texheadnumber}}"
-  else
-    "\\kopf{#{form.texheadnumber}}"
-  end
+  form.abstract_form.texhead
+end
+
+def tex_foot_for(form)
+  form.abstract_form.texfoot
 end
 
 def tex_questions_for(form)
   b = ""
-  form.pages.each do |p|
+  form.pages.each_with_index do |p,i|
     p.sections.each do |s|
       # ist das ein abschnitt, der uns kümmert?
       next if s.questions.find_all{|q| q.special_care != 1}.empty?
-      b << '\sect{' + s.title + "}\n\n"
+      b << "\n\n" + '\sect{' + s.title + "}"
       s.questions.each do |q|
+        b << "\n\n"
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
         if q.db_column =~ /comment/
           b << '\kommentar{' + q.text + '}{' + q.db_column + '}{' +
@@ -85,17 +83,15 @@ def tex_questions_for(form)
             b << "{#{q.db_column}}"
           end
         end
-        b << "\n\n"
       end
     end
-    b << "\\np\n\n"
+    b << "\\np\n\n" unless i == (form.pages.count - 1)
   end
-  b << "\n\n"
   b
 end
 
 def tex_none(form)
-  ['keine', 'keine', 'none', ''][form.id]
+  {'de' =>'keine', 'eng' => 'none'}[form.abstract_form.lang]
 end
 
 # Generates the a pdf file with the barcode in the specified location
@@ -219,6 +215,7 @@ def make_pdf_for(s, cp, dirname)
     h << '\begin{document}' + "\n"
     h << tex_head_for(cp.course.form) + "\n\n\n"
     h << tex_questions_for(cp.course.form) + "\n"
+    h << tex_foot_for(cp.course.form) + "\n"
     h << '\end{document}'
   end
   puts "Wrote #{filename}.tex"
