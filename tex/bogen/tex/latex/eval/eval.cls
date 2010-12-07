@@ -173,7 +173,7 @@
 \vspace{-1.2em}\rule{19cm}{1.5pt}\vspace{0.5em}
 }
 
-\newcommand{\kommentar}[4]{\write\posout{u - !ruby/object:Question}
+\newcommand{\kommentar}[3]{\write\posout{u - !ruby/object:Question}
 	\write\posout{uu active: true}
 	\write\posout{uu nochoice: }
 	\write\posout{uu choice: }
@@ -181,8 +181,8 @@
     	\write\posout{uu save_as: "#3"}
     	\write\posout{uu type: text}
     	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vfill%\vspace{1.5cm}
-	\write\posout{uuu height: #4}
+	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{2972997sp}
+	\write\posout{uuu height: 2972997}
  	\write\posout{uuu width: 39020584}
 }
 
