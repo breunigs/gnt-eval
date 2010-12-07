@@ -1,26 +1,26 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{eval}[2009/09/22 Evaluationsbögen]
 
-\LoadClass[twoside,8pt]{scrartcl} 
+\LoadClass[twoside,8pt]{scrartcl}
 
 \DeclareOption*{%
 \PassOptionsToClass{\CurrentOption}{scrartcl}%
 }
-\ProcessOptions\relax 
+\ProcessOptions\relax
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
-\RequirePackage{amssymb} 
-\RequirePackage{array} 
+\RequirePackage{amssymb}
+\RequirePackage{array}
 \RequirePackage{babel}
-\RequirePackage{booktabs} 
+\RequirePackage{booktabs}
 \RequirePackage{boxedminipage}
 \RequirePackage{color}
 \RequirePackage{fancyhdr}
-\RequirePackage{geometry} 
+\RequirePackage{geometry}
 \RequirePackage{ifthen}
-\RequirePackage{multirow} 
-\RequirePackage{graphicx} 
+\RequirePackage{multirow}
+\RequirePackage{graphicx}
 \RequirePackage{xspace}
 \RequirePackage{microtype}
 \RequirePackage{tokeniz0r}
@@ -41,7 +41,7 @@
 \renewcommand{\baselinestretch}{1}
 \setlength\tabcolsep{0pt}
 \geometry{left=9mm,right=9mm, top=0.8cm, bottom=0.8cm}
-\setlength\parindent{0pt} 
+\setlength\parindent{0pt}
 
 \newwrite\posout
 \openout\posout\jobname.posout
@@ -123,6 +123,7 @@
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
+\newcommand{\dbtable}[1]{\def\dbt{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
  \def\vorlesungsfragen{\input{fragenneu}}
@@ -263,7 +264,7 @@
 \end{minipage}
 \vspace{0.2em}
 }
- 
+
 \newcommand{\qiv}[6]{
 \bluu[#1][#6]
 \begin{minipage}{17cm}
@@ -351,9 +352,9 @@
 }
 
 \newcommand{\kopf}[1]{
-\write\posout{--- !ruby/object:Form}
+\write\posout{--- !ruby/object:AbstractForm}
 \lang{0}
-\write\posout{db_table: evaldaten_ss09}
+\write\posout{db_table: \dbt}
 \write\posout{pages: }
 \write\posout{- !ruby/object:Page }
 \write\posout{u questions: }
@@ -387,7 +388,7 @@ Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachsc
 \newcommand{\engkopf}[1]{
 \write\posout{--- !ruby/object:Form}
 \lang{1}
-\write\posout{db_table: evaldaten_ss09}
+\write\posout{db_table: \dbt}
 \write\posout{pages: }
 \write\posout{- !ruby/object:Page }
 \write\posout{u questions: }
