@@ -88,7 +88,7 @@ def tex_questions_for(form, lang)
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
         if q.db_column =~ /comment/
           b << '\kommentar{' + q.text[lang] + '}{' + q.db_column + '}{' +
-            q.db_column + '}{2972997}'
+            q.db_column + "}\n\n"
         else
           b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
           b << 'm' if q.multi?
