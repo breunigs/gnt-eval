@@ -38,16 +38,9 @@ require cdir + '/helper.constants.rb'
 require cdir + '/helper.misc.rb'
 
 require cdir + '/../lib/FunkyDBBits.rb'
-require cdir + '/../lib/Form.rb'
 
-
-
-# bp stands for "black percentage" and holds how much pixels in this
-# box are black. mx and my define the inner, top left corner of the
-# current box. These are only used for debugging purposes.
-class Box
-  attr_accessor :bp, :mx, :my
-end
+require cdir + '/../lib/AbstractForm.rb'
+require cdir + '/helper.AbstractFormExtended.rb'
 
 
 # Profiler. Uncomment code at the end of this file, too.
@@ -632,7 +625,7 @@ class PESTOmr
             begin
                 @draw.draw(@ilist[i]) if @debug
             rescue
-                puts "  Nothing to draw :(" if @debug
+                puts "  Nothing to draw :(" if @debug and @verbose
             end
         end
 
@@ -757,7 +750,7 @@ class PESTOmr
             rescue => e
               puts "FAILED: #{file}"
               File.open("PEST_OMR_ERROR.log", 'a+') do |errlog|
-                errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace}")
+                errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace.join("\n")}")
               end
               puts "="*20
               puts "OMR is EXITING! Fix this issue before attemping again! (See PEST_OMR_ERROR.log)"

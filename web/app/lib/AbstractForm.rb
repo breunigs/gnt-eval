@@ -222,7 +222,11 @@ class Page
     @sections = secs
   end
   def questions
-    @sections.collect {|s| s.questions}.flatten
+    if @sections.nil?
+      @questions
+    else
+      @sections.collect {|s| s.questions}.flatten
+    end
   end
 end
 

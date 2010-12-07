@@ -31,6 +31,10 @@ def curSem
   $curSem
 end
 
+def numberOfProcessors
+  `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
+end
+
 def word_wrap(txt, col = 80)
     txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
       "\\1\\3\n")
@@ -154,7 +158,6 @@ def make_sample_sheet(form)
   generate_barcode("00000000", dir + "barcode.pdf")
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dbtable{' + escapeForTex(cp.course.form.db_table) + "}\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\semester{'+ (curSem.title) +'}' + "\n"
@@ -199,6 +202,7 @@ def make_pdf_for(s, cp, dirname)
 
   File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\dbtable{' + escapeForTeX(cp.course.form.db_table) + "}\n"
     h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
     h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
     h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
@@ -451,13 +455,13 @@ namespace :pest do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
-      system('./pest/omr.rb -s "'+f+'" -p "./tmp/images/'+bn+'" -c 2')
+      system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{numberOfProcessors}")
     end
   end
 
   desc "(4) Correct invalid sheets"
   task :correct do
-      `./pest/fix.rb ./tmp/images/`
+    `./pest/fix.rb ./tmp/images/`
   end
 
   desc "(5) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."

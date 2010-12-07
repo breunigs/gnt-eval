@@ -35,6 +35,7 @@ require File.join(cdir, 'helper.constants.rb')
 require File.join(cdir, 'helper.misc.rb')
 
 require File.join(cdir, './../lib/rails_requirements.rb')
+require File.join(cdir, 'helper.AbstractFormExtended.rb')
 
 class PESTFix
     def initialize(win)
@@ -729,10 +730,26 @@ class PESTFix
         # ok, all files seem to have passed
         @find_fail.set_sensitive(false)
         undoStart
-        @statusbar.push 2, "No more failed questions found! (You may want to reload the directory for changes though)"
+        @statusbar.push 3, "No more failed questions found! (You may want to reload the directory for changes though)"
+        infoPopup("You're done!", "All failed questions have been processed. You can try to reload the directory to look for new processed forms or you can quit the application.")
+
         # Load at least some image if none has been displayed so far
         imagePrevNext(false) unless @doc
         return nil
+    end
+
+    # popups a gtk message dialog with the given title and text
+    def infoPopup(title, text)
+        dialog = Gtk::MessageDialog.new(
+            @window,
+            Gtk::Dialog::MODAL,
+            Gtk::MessageDialog::INFO,
+            Gtk::MessageDialog::BUTTONS_OK,
+            text
+        )
+        dialog.title = title
+        dialog.run
+        dialog.destroy
     end
 
     # Small helper function that avoids stalling the GUI when doing
@@ -923,31 +940,9 @@ class PESTFix
         # faster than an in-memory way. Partly because Gdk's import
         # functions suck and partly due to RMagick's to_blob being very
         # slow
-        temp = Tempfile.new("image")
-        begin
-            # Writing TIFs is fastest, so obviously use TIF. Takes
-            # ~0.08s which is about three times faster
-            img.write("tif:"+ temp.path)
-            @pixbuf = Gdk::Pixbuf.new(temp.path)
-        rescue
-            # However some of these are broken for no apparent reason
-            # Work around this and save it as a JPG (was 2nd fastest)
-            # Put altogether it takes ~0.18s when this occurs and is
-            # as fast as an optimized in-memory path, so our loss isn't
-            # too bad
-            puts "BORKEN! BORKEN! ImageMagick/RMagick wrote a corrupted TIF again"
-            img.write("jpg:"+ temp.path)
-            @pixbuf = Gdk::Pixbuf.new(temp.path)
-        end
-
-        # This was the old method. Without the thumbail stuff it took
-        # ~0.27s, reducing the size speeded it up to ~0.18s for each
-        # load. It's still too slow and it's a noticeable delay for the
-        # user
-        #img.thumbnail!(0.5)
-        #blob = img.to_blob{self.depth=8; self.format="RGB"}
-        #@pixbuf = Gdk::Pixbuf.new(blob, @gdkrgb, false, 8,
-        #                          img.columns, img.rows, img.columns*3)
+        temp = Tempfile.new("image.jpg")
+        img.write("jpg:"+ temp.path)
+        @pixbuf = Gdk::Pixbuf.new(temp.path)
 
         puts " (took: " + (Time.now-start_time).to_s + " s)"
 

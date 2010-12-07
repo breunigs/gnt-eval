@@ -22,7 +22,8 @@ cdir = File.dirname(__FILE__)
 
 require cdir + '/helper.array.rb'
 require cdir + '/../lib/FunkyDBBits.rb'
-require cdir + '/../lib/Form.rb'
+require cdir + '/../lib/AbstractForm.rb'
+require File.join(cdir, 'helper.AbstractFormExtended.rb')
 require 'yaml'
 
 workdir = ARGV.shift
