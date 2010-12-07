@@ -28,7 +28,10 @@
   </p>
   <p>
     <b>Form</b><br />
-    <%= f.select('form', {'Seminarbogen' => 3, 'Englischer Bogen' => 2, 'Spezialbogen'=> 1, 'Normaler Bogen' => 0}, :selected => 0) %>
+    <%=
+      semid = Semester.find(:all).find{|s| s.now?}.id
+	collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == semid }, :id, :name)
+    %>
   </p>
   <p>
     <b>Description (date etc)</b><br />
