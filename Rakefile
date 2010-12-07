@@ -25,8 +25,11 @@ include Magick
 require 'rake/clean'
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
 
-$curSem = Semester.find(:all).find{ |s| s.now? }
-
+# requires database
+def curSem
+  $curSem ||= Semester.find(:all).find{ |s| s.now? }
+  $curSem
+end
 
 def word_wrap(txt, col = 80)
     txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
@@ -151,7 +154,7 @@ def make_sample_sheet(form)
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
-    h << '\semester{'+ ($curSem.title) +'}' + "\n"
+    h << '\semester{'+ (curSem.title) +'}' + "\n"
 
     if hasTutors
       h << '\tutoren{'
@@ -321,7 +324,7 @@ namespace :images do
 
     puts
     puts "Please ensure that all comment pictures have been supplied to"
-    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]} /#{$curSem.dirfriendly_title}"
+    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]} /#{curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
     puts "This should have been done for you automatically, but you can"
     puts "run it again if it makes you feel better:"
@@ -413,7 +416,7 @@ namespace :pest do
     Dir.glob("./lib/forms/[0-9]*.yaml").each do |f|
         yaml = YAML::load(File.read(f))
         name = yaml.db_table
-        #name = "evaldaten_" + $curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
+        #name = "evaldaten_" + curSem.dirFriendlyName + '_' + File.basename(f, ".yaml")
 
         # Note that the barcode is only unique for each CourseProf, but
         # not for each sheet. That's why path is used as unique key.
@@ -475,7 +478,7 @@ namespace :pest do
     allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
-      table = tables[form] # "evaldaten_#{$curSem.dirFriendlyName}_#{form}"
+      table = tables[form] # "evaldaten_#{curSem.dirFriendlyName}_#{form}"
 
 
       keys = Array.new
@@ -545,9 +548,9 @@ namespace :pest do
   desc "Copies extracted comments into eval directory"
   task :copycomments do
     puts "Creating folders and copying comments, please wait..."
-    system("#{Seee::Config.commands[:mkdir_comment_image_directory]} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{$curSem.dirFriendlyName}\"")
+    system("#{Seee::Config.commands[:mkdir_comment_image_directory]} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
-    system("#{Seee::Config.commands[:find_comment_image_directory]} \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{$curSem.dirFriendlyName}/\" \\;")
+    system("#{Seee::Config.commands[:find_comment_image_directory]} \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\" \\;")
 
     puts
     puts "All comment pictures have been copied. If not already done so,"
@@ -562,7 +565,7 @@ namespace :pdf do
   task :samplesheets do
     # FIXME: automatically determine correct number
     # or TeX all files given
-    $curSem.forms.each do |f|
+    curSem.forms.each do |f|
       puts "sample for #{f.name}"
       make_sample_sheet(f)
     end
@@ -606,7 +609,7 @@ namespace :pdf do
 
   desc "create report pdf file for a given semester and faculty (leave empty for: sem = current, fac = all)"
   task :semester, :semester_id, :faculty_id, :needs => ['pdf:samplesheets'] do |t, a|
-    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    sem = a.semester_id.nil? ? curSem.id : a.semester_id
 
     dirname = './tmp/'
     FileUtils.mkdir_p(dirname)
@@ -628,7 +631,7 @@ namespace :pdf do
   desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
     `mkdir tmp` unless File.exists?('./tmp/')
-    sem = a.semester_id.nil? ? $curSem.id : a.semester_id
+    sem = a.semester_id.nil? ? curSem.id : a.semester_id
     s = Semester.find(sem)
     dirname = './tmp/'
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
@@ -667,7 +670,7 @@ namespace :pdf do
         return nil
       end
     end
-    tutors = $curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
+    tutors = curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
     tutors.each do |t|
       puts [t.abbr_name, t.course.title[0,20], t.profit.rtt, t.teacher.rtt, t.competence.rtt, t.preparation.rtt, t.boegenanzahl].join(' & ') + '\\\\'
     end
@@ -724,9 +727,9 @@ namespace :helper do
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
-    puts $curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
+    puts curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
     # Sort by faculty first, then by course title
-    sorted = $curSem.courses.sort do |x,y|
+    sorted = curSem.courses.sort do |x,y|
       if x.faculty_id == y.faculty_id
         x.title <=> y.title
       else
@@ -789,7 +792,7 @@ namespace :helper do
     h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "??", 6]
     # used for counting
     count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0, "??", 0]
-    d = $curSem.courses.sort do |x,y|
+    d = curSem.courses.sort do |x,y|
       a = x.description.strip.downcase
       b = y.description.strip.downcase
 
@@ -835,7 +838,7 @@ end
 namespace :crap do
     desc "does not print non-existing ranking that does not exist"
     task :rank, :needs => 'db:connect' do
-        s = $curSem.title.gsub(" ", "_")
+        s = curSem.title.gsub(" ", "_")
         # One query to RANK THEM ALL!
         query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_2` GROUP BY `barcode`) ORDER BY note ASC")
         query.execute()
@@ -882,7 +885,7 @@ namespace :summary do
 
   desc "fix some often encountered tex-errors in the summaries"
   task :fixtex do
-    $curSem.courses.each do |c|
+    curSem.courses.each do |c|
       unless c.summary.nil?
         c.summary = fixCommonTeXErrors(c.summary)
         c.save
@@ -929,7 +932,7 @@ namespace :summary do
 
   desc "find comment fields with broken LaTeX code"
   task :blame do
-    $curSem.courses.each_with_index do |c, i|
+    curSem.courses.each_with_index do |c, i|
       unless c.summary.nil? || c.summary.empty?
         if testTeXCode(c.summary) != 0
             puts "\rTeXing course comments failed: #{c.title}"
@@ -942,7 +945,7 @@ namespace :summary do
             puts "\rTeXing tutor  comments failed: #{c.title} / #{t.abbr_name} "
         end
       end
-      printProgress(i + 1, $curSem.courses.size)
+      printProgress(i + 1, curSem.courses.size)
     end
     puts "\nIf there were errors you might want to try"
     puts "\trake summary:fixtex"
