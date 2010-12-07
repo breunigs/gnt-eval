@@ -269,7 +269,7 @@ end
 
 namespace :images do
 
-  desc "(6) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
+  desc "(5) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
   task :insertcomments, :directory, :needs => 'pest:copycomments' do |t, d|
     dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
     puts "Working directory is #{dd}."
@@ -374,7 +374,7 @@ namespace :images do
 
         form = CourseProf.find(barcode).course.form.id.to_s + '_' +
           CourseProf.find(barcode).course.language.to_s
-        
+
         File.makedirs("tmp/images/#{form}")
         File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
@@ -415,19 +415,27 @@ namespace :mail do
 end
 
 namespace :pest do
-  desc '(2) Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
-  task :getyamls, :needs => 'db:connect' do |t|
+  def getYamls(overwrite = false)
     # FIXME: This can surely be done simpler by directly finding
     # a form for the current semester
     Dir.glob("./tmp/images/[0-9]*/").each do |f|
+      target = "#{f}../#{File.basename(f)}.yaml"
+      next if File.exists?(target) && !overwrite
       Dir.glob("#{f}*.tif") do |y|
-        barcode = find_barcode_from_basename(File.basename(y, ".tif")) #find_barcode(y)/10
+        # just take the first sheet, as all sheets in the same folder
+        # should be identical
+        barcode = find_barcode_from_basename(File.basename(y, ".tif"))
         cp = CourseProf.find(barcode)
         make_pdf_for(cp.course.semester, cp, f)
-        `mv -f "#{f + cp.get_filename}.yaml" "#{f}../#{File.basename(f)}.yaml"`
+        `mv -f "#{f + cp.get_filename}.yaml" "#{target}"`
         break
       end
     end
+  end
+
+  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
+  task :getyamls, :needs => 'db:connect' do |t|
+    getYamls(true)
   end
 
   # note: this is called automatically by yaml2db
@@ -463,21 +471,23 @@ namespace :pest do
     end
   end
 
-  desc "(3) Evaluates all sheets in ./tmp/images/"
+  desc "(2) Evaluates all sheets in ./tmp/images/"
   task :omr do
+    getYamls
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
+      puts "./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{numberOfProcessors}"
       system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{numberOfProcessors}")
     end
   end
 
-  desc "(4) Correct invalid sheets"
+  desc "(3) Correct invalid sheets"
   task :correct do
     `./pest/fix.rb ./tmp/images/`
   end
 
-  desc "(5) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."
+  desc "(4) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."
   task :yaml2db, :update, :needs => ['db:connect', 'pest:createtables'] do |t,a|
 
     update = !a.update.nil? && a.update == "update"
