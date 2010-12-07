@@ -7,9 +7,6 @@
 # - Question: see class.
 # - Box: see class
 #
-# We won't do no eval stuff in here, this is _just_ the abstract
-# notion of a form!
-
 
 # This is a box on a printed form. Nothing more.
 class Box
@@ -22,6 +19,9 @@ class Box
 
   # special value for easier LaTeX sheet generation, e.g. square or comment
   attr_accessor :type
+
+  # if this i a comment field, we need to know its height
+  attr_accessor :height
 
   def initialize(c, t)
     @choice = c
