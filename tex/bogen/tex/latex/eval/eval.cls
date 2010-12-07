@@ -181,8 +181,8 @@
     	\write\posout{uu save_as: "#3"}
     	\write\posout{uu type: text}
     	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{2972997sp}
-	\write\posout{uuu height: 2972997}
+	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{3300000sp}
+	\write\posout{uuu height: 3300000}
  	\write\posout{uuu width: 39020584}
 }
 
