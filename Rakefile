@@ -184,8 +184,8 @@ def make_sample_sheet(form, lang)
     end
 
     h << '\begin{document}' + "\n"
-    h << tex_head_for(form, :de) + "\n\n\n"
-    h << tex_questions_for(form, :de) + "\n"
+    h << tex_head_for(form, lang) + "\n\n\n"
+    h << tex_questions_for(form, lang) + "\n"
     h << '\end{document}'
   end
 
@@ -599,11 +599,14 @@ namespace :pdf do
     # or TeX all files given
     curSem.forms.each do |f|
       puts "sample for #{f.name}"
-      if f.abstract_form.texhead.is_a? String
-        # no multilang in tex head, assume it is only available in one language
-        make_sample_sheet(f, "")
-      else
-        f.abstract_form.texhead.each { |x| make_sample_sheet(f, x[0]) }
+      langs = []
+      f.abstract_form.questions.each do |x|
+        next if x.is_a? String
+        langs << x.qtext.keys
+      end
+      
+      langs.flatten.uniq.each do |x|
+         make_sample_sheet(f, x)
       end
     end
 
