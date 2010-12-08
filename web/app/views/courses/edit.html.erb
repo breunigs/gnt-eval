@@ -1,5 +1,9 @@
 <%= courseShowLink %> | <%= courseReturnLink %>
-<h1>Editing course</h1>
+<h1>Editing course <%=h @course.title %></h1>
+
+<% if @course.semester.critical? %>
+<h2 style="color:red;background:white">Careful now, the semester is critical. No unwary changes.</h2>
+<% end %>
 
 <%= error_messages_for :course %>
 

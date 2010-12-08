@@ -1,3 +1,9 @@
+<h1><%=h @course.title %> (<%=h @course.semester.title %>)</h1>
+
+<% if @course.semester.critical? %>
+<h2 style="color:red;background:white">Careful now, the semester is critical. No unwary changes.</h2>
+<% end %>
+
 <%= courseLinksForShowPage %>
 
 <p>

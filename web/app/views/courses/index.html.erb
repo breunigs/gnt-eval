@@ -1,4 +1,9 @@
-<h1>Listing courses of <%=h Semester.find(:all).find{|s| s.now?}.title %></h1>
+<% curSem = Semester.find(:all).find{|s| s.now? } %>
+
+<h1>Listing courses of <%=h curSem.title %></h1>
+<% if curSem.critical? %>
+<h2 style="color:red;background:white">Careful now, the semester is critical. No unwary changes.</h2>
+<% end %>
 <p>
   <%= link_to 'Prof List', :controller => "profs", :action => "index" %> |
   <%= link_to 'Semester List', :controller => "semesters", :action => "index" %> |
