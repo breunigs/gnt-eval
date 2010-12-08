@@ -154,10 +154,10 @@ def generate_barcode(barcode, path)
   end
 end
 
-def make_sample_sheet(form)
+def make_sample_sheet(form, lang)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  filename = dir + "sample_" + form.id.to_s
+  filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
   hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
   if File.exists? filename+'.pdf'
@@ -599,7 +599,12 @@ namespace :pdf do
     # or TeX all files given
     curSem.forms.each do |f|
       puts "sample for #{f.name}"
-      make_sample_sheet(f)
+      if f.abstract_form.texhead.is_a? String
+        # no multilang in tex head, assume it is only available in one language
+        make_sample_sheet(f, "")
+      else
+        f.abstract_form.texhead.each { |x| make_sample_sheet(f, x[0]) }
+      end
     end
 
     Rake::Task["clean".to_sym].invoke
