@@ -12,3 +12,4 @@ en:
     :null: No questionnaires have been submitted.
     :singular: Only one questionnaire has been submitted. In order to retain the participant's anonymity the results have been excluded.
     :plural: "Only #1 questionnaires have been submitted. In order to retain the participants' anonymity, the results have been excluded."
+  none: none

@@ -109,8 +109,10 @@ def tex_questions_for(form, lang)
   b
 end
 
-def tex_none(form)
-  {'de' =>'keine', 'eng' => 'none'}[form.abstract_form.lang]
+def tex_none(language)
+  I18n.locale = language
+  I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+  I18n.t(:none)
 end
 
 # Generates the a pdf file with the barcode in the specified location
@@ -220,7 +222,7 @@ def make_pdf_for(s, cp, dirname)
 
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
-      none = tex_none(cp.course.form)
+      none = tex_none(cp.course.language)
       h << '\tutoren{' + "\n"
 
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
@@ -233,7 +235,7 @@ def make_pdf_for(s, cp, dirname)
       h << '}' + "\n"
     end
 
-    lang = cp.course.language.intern
+    lang = cp.course.language.to_sym
     h << '\begin{document}' + "\n"
     h << tex_head_for(cp.course.form, lang) + "\n\n\n"
     h << tex_questions_for(cp.course.form, lang) + "\n"

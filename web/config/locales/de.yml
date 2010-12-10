@@ -12,3 +12,4 @@ de:
     :null: Es wurden keine Fragebögen abgegeben.
     :singular: Es wurde nur ein Fragebogen abgegeben. Um die Anonymität des Teilnehmers zu wahren, wurden die Ergebnisse ausgelassen.
     :plural: "Es wurden nur #1 Fragebögen abgegeben. Um die Anonymität der Teilnehmer zu bewahren, wurden die Ergebnisse ausgelassen."
+  none: keine

@@ -8,7 +8,11 @@
 # - Box: see class
 #
 
+require 'pp'
+
 # This is a box on a printed form. Nothing more.
+# Especially, attributes such es width or x,y-positions are added to
+# this class elsewhere.
 class Box
 
   # value to insert into database if cross is here
@@ -76,6 +80,7 @@ class Question
   end
 
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
+  # FIXME: now questions belong to sections. is there a way we could …
   def section
     if @db_column.nil? || @special_care == 1
       return 'this is no question in a traditional sense'
@@ -104,12 +109,12 @@ class Question
     @save_as
   end
 
-  # leftmost choice
+  # leftmost choice in appropriate language
   def ltext(language = :en)
     @boxes.first.text[language]
   end
 
-  #rightmost choice
+  # rightmost choice in appropriate language
   def rtext(language = :en)
     @boxes.last.text[language]
   end
@@ -123,7 +128,7 @@ class Question
     end
   end
 
-  # question itself
+  # question itself in appropriate language
   def text(language = :en)
     @qtext[language]
   end
@@ -143,7 +148,7 @@ class Question
     return @db_column.is_a?(Array)
   end
 
-  # ausgabe einer einzelnen frage ans tex
+  # export a single question to tex
   def to_tex
     #     \qvm{Gibt es Probleme mit dem mündlichen Vortrag? Wenn ja, welche?}{
     # keine}{zu leiss
@@ -173,6 +178,7 @@ class Question
   end
 
   include FunkyDBBits
+
   # h: hash correspoding to specific (!) where clause
   # g: hash corresponding to general (!) where clause
   def eval_to_tex(h, g, db_table, language)
@@ -203,8 +209,9 @@ class Question
 end
 
 
-# this is actually just needed for OMR/TeX to distinguish between
-# pages
+# this is atm actually just needed for OMR/TeX to distinguish between
+# pages. maybe (future ...) we could differentiate between different
+# types of questions.
 #
 class Section
   attr_accessor :title
@@ -215,6 +222,7 @@ class Section
   end
 end
 
+# this is really just needed for tex and OMR
 class Page
 
   # list of sections on that page
@@ -235,7 +243,7 @@ class Page
 end
 
 
-# main form, list of pages and (ATM) dbtable.
+# main form, list of pages and dbtable.
 #
 
 class AbstractForm
@@ -246,8 +254,11 @@ class AbstractForm
   # database table to use for this form
   attr_accessor :db_table
 
+  # we differentiate gender here
   attr_accessor :lecturer_header
 
+  # FIXME: is this correct? or should this be I18n-magic? this is a
+  # bit difficult, but better be safe than sorry and leave it here.
   attr_accessor :study_groups_header
   attr_accessor :study_groups_overview 
   attr_accessor :study_groups_overview_header
@@ -265,8 +276,22 @@ class AbstractForm
     @pages.collect { |p| p.questions }.flatten
   end
 
+  # find the question-object belonging to a db_column
   def get_question(db_column)
     questions.find { |q| q.db_column == db_column }
+  end
+
+  # pretty printing an AbstrctForm is a bit gnaahaha
+  # this does NOT stout but returns a string
+  def pretty_print
+    orig = $stdout
+    sio = StringIO.new
+    $stdout = sio
+    pp self
+    $stdout = orig
+
+    # aber bitte ohne die ids und ohne @
+    sio.string.gsub(/0x[^\s]*/,'').gsub(/@/,'')
   end
 end
 

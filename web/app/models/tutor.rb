@@ -5,7 +5,8 @@ class Tutor < ActiveRecord::Base
   include FunkyDBBits
   include FunkyTeXBits
 
-  def eval_against_form(form)
+  def evaluate
+    form = course.form
     @db_table = form.db_table
 
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"

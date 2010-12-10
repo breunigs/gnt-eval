@@ -7,14 +7,14 @@ class CourseProf < ActiveRecord::Base
   include FunkyDBBits
 
   # eval and output
-  def eval_against_form!(form)
-    puts eval_against_form(form)
+  def evaluate!
+    puts evaluate
   end
 
   # evals sth against some form \o/
   # returns a TeX-string
-  def eval_against_form(form)
-
+  def evaluate
+    form = course.form
     # setup for FunkyDBBits ...
     @db_table = form.db_table
 
@@ -62,6 +62,6 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form_name, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+    [course.form.name, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
   end
 end

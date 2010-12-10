@@ -6,6 +6,8 @@ class Form < ActiveRecord::Base
   belongs_to :semester
   has_many :course
 
+  # the AbstractForm object belonging to this form
+  # this is NOT relational, we just dump the AbstractForm into the database as a YAML-string
   def abstract_form
     # cache yaml files for speeeed
     $loaded_yaml_sheets ||= {}
@@ -13,15 +15,9 @@ class Form < ActiveRecord::Base
     $loaded_yaml_sheets[id]
   end
 
+  # pretty printing an AbstrctForm is a bit
   def pretty_abstract_form
-    orig = $stdout
-    sio = StringIO.new
-    $stdout = sio
-    pp abstract_form
-    $stdout = orig
-
-    # aber bitte ohne die ids und ohne @
-    sio.string.gsub(/0x[^\s]*/,'').gsub(/@/,'')
+    abstract_form.pretty_print
   end
 
   # what languages does this form support?
@@ -29,7 +25,7 @@ class Form < ActiveRecord::Base
     questions.collect { |q| q.qtext.keys }.uniq.flatten
   end
 
-  # fix: das sollte method_missing-magie werden
+  # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
   def db_table
     abstract_form.db_table
   end
@@ -46,6 +42,7 @@ class Form < ActiveRecord::Base
     abstract_form.texheadnumber
   end
 
+  # return a string like "Introduction to Astrophysics by John Doe"
   def lecturer_header(fullname, gender, language, sheets)
     abstract_form.lecturer_header[language][gender].gsub(/#1/, fullname).gsub(/#2/, sheets.to_s)
   end
@@ -54,6 +51,7 @@ class Form < ActiveRecord::Base
     abstract_form.get_question(search)
   end
 
+  # if too few questionnaires have been submitted, we return a lovely statement about anonymity etc.
   def too_few_questionnaires(language, sheets)
     I18n.locale = language
     I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')

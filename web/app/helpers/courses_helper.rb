@@ -52,7 +52,7 @@ module CoursesHelper
         sortby << "evaluator"
         sortby << "eval_date"
       when "profs" then
-        sortby << "prof_list"
+        sortby << "nl_separated_prof_fullname_list"
       when "description" then
         sortby << "eval_date"
         sortby << "description"

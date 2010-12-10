@@ -11,6 +11,7 @@ class Semester < ActiveRecord::Base
   include FunkyTeXBits
   include FunkyDBBits
 
+  # evaluate a faculty
   def evaluate(faculty)
     b = ''
 
@@ -56,9 +57,5 @@ class Semester < ActiveRecord::Base
 
   def dirfriendly_title
     dirFriendlyName
-  end
-
-  def eval_against_form!(faculty, form)
-    puts eval_against_form(faculty, form)
   end
 end

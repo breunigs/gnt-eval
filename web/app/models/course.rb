@@ -14,7 +14,8 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
-  def language
+  # storing symbols via activerecord is a bit icky
+  def language #:nodoc
     read_attribute(:language).to_sym
   end
 
@@ -22,6 +23,7 @@ class Course < ActiveRecord::Base
     write_attribute(:language, value.to_s)
   end
   
+  # magic translator function
   def t(string)
     I18n.t(string)
   end
@@ -39,10 +41,13 @@ class Course < ActiveRecord::Base
   end
 
   # returns a newline seperated list of profs of this course
-  def prof_list
+  def nl_separated_prof_fullname_list
     profs.map { |p| p.fullname + "\n" }.sort
   end
 
+  # lovely helper function: we want to guess the mail address of
+  # evaluators from their name, simply by adding a standand mail
+  # domain to it
   def fs_contact_addresses
     if fscontact.empty?
       pre_format = evaluator
@@ -61,7 +66,7 @@ class Course < ActiveRecord::Base
     course_profs.map{ |cp| cp.barcode.to_i }
   end
 
-  def getReturnedSheets
+  def returned_sheets
     @db_table = form.db_table
 
     if not profs.empty?
@@ -71,10 +76,12 @@ class Course < ActiveRecord::Base
     end
   end
 
+  # the head per course. this adds stuff like title, submitted
+  # questionnaires, what kind of people submitted questionnaires etc
   def eval_lecture_head(form)
     b = ''
 
-    sheets = getReturnedSheets
+    sheets = returned_sheets
 
     notspecified = t(:not_specified)
     b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
@@ -136,8 +143,9 @@ class Course < ActiveRecord::Base
 
     b
   end
-
-  def eval_against_form(form)
+  
+  # eval me (baby)
+  def evaluate
     # if this course doesn't have any lecturers it cannot have been
     # evaluated, since the sheets are coded with the course_prof id
     # Return early to avoid problems.
@@ -156,13 +164,13 @@ class Course < ActiveRecord::Base
 
     # vorlesungseval pro dozi
     course_profs.each do |cp|
-      b << cp.eval_against_form(form).to_s
+      b << cp.evaluate.to_s
     end
 
     # Do not print a "too few sheets" message here because if there are
     # to few sheets, it will have been printed for at least one lecturer
     # above already.
-    if getReturnedSheets >= Seee::Config.settings[:minimum_sheets_required]
+    if returned_sheets >= Seee::Config.settings[:minimum_sheets_required]
       unless summary.to_s.strip.empty?
         b << "\\commentsprof{#{t(:comments)}}\n\n"
         b << t(:notice_for_comments)
@@ -195,7 +203,7 @@ class Course < ActiveRecord::Base
     cc = ''
     found = false
     tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
-      text, anz = t.eval_against_form(form)
+      text, anz = t.evaluate
       next if anz.nil?
       c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
       cc << text.to_s
@@ -209,10 +217,6 @@ class Course < ActiveRecord::Base
     b << cc
 
     return b
-  end
-
-  def evaluate
-    eval_against_form(form)
   end
 
 end
