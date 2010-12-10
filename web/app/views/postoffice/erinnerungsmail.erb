@@ -2,7 +2,7 @@
 
 bitte lies diese Mail ganz genau.
 
-Du hast des großartige Glück, im Zeitraum vom 28. Juni bis 2. Juli am
+Du hast das großartige Glück, im Zeitraum vom 13. bis 17. Dezember am
 
 	<%= @course.description %>
 
@@ -14,11 +14,18 @@ bei
 
 	<%= @course.profs.map{ |p| p.fullname }.join(', ') %>
 	
-zu evaluieren. Sollten oben keine näheren Daten zur Veranstaltung
-stehen, so liegt das nicht etwa daran, dass das Eval-Team es verpennt
-hat, dir alle Informationen zusammen zu suchen, sondern einzig und
-allein daran, dass dich das Eval-Team dazu nötigen möchte, dich
-eigenständig im LSF nach den Infos zu erkundigen.
+zu evaluieren.
+
+Eingetragen in der Datenbank ist die Verwendung von
+
+	<%= @course.students %> Bögen des Typs <%= @course.form.name %>, <%= @course.language.to_s %>
+
+Sollten oben keine näheren Daten zur Veranstaltung stehen oder diese
+nicht stimmen, so liegt das nicht etwa daran, dass das Eval-Team es
+verpennt hat, dir alle Informationen zusammen zu suchen, sondern
+einzig und allein daran, dass dich das Eval-Team dazu nötigen möchte,
+dich eigenständig im LSF nach den Infos zu erkundigen. Wir können
+schließlich nicht alles machen.
 
 Wie eine Eval genau funktioniert, solltest du eigentlich wissen. Wenn
 nicht, ist das auch nicht weiter schlimm. Wenn du die Mappe abholst,
