@@ -22,11 +22,11 @@ class CourseProf < ActiveRecord::Base
 
     sheetCount = count_forms({:barcode => barcode.to_i})
 
-    vorlhead = form.getLecturerHeader(prof.fullname, prof.gender, sheetCount)
+    vorlhead = form.lecturer_header(prof.fullname, prof.gender, course.language, sheetCount)
     b << "\\profkopf{#{vorlhead}}\n\n"
 
     if sheetCount < Seee::Config.settings[:minimum_sheets_required]
-      return b + form.getTooFewQuestionnaires(sheetCount) + "\n\n"
+      return b + form.too_few_questionnaires(course.language, sheetCount) + "\n\n"
     end
 
     # b << "\\fragenzurvorlesung\n\n"
@@ -34,7 +34,7 @@ class CourseProf < ActiveRecord::Base
     specific = { :barcode => barcode.to_i }
     general = { :barcode => $facultybarcodes }
     form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table)
+      b << q.eval_to_tex(specific, general, form.db_table, course.language)
     end
 
     return b

@@ -9,4 +9,12 @@ class Prof < ActiveRecord::Base
   def surnamefirst
     return surname.strip + ', ' + firstname.strip
   end
+  def gender
+    g = read_attribute(:gender)
+    if g == 0
+      return :female
+    else
+      return :male
+    end
+  end
 end

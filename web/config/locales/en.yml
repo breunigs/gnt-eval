@@ -1,0 +1,14 @@
+en:
+  semester_distribution: semester distribution
+  academic_term: Academic term
+  degree_course: degree course
+  other: other
+  not_specified: not specified
+  submitted_questionnaires: submitted questionnaires
+  by: by
+  comments: Comments
+  notice_for_comments: "{ \\small\\emph{Note: } Each comment is an individual opinion and should be considered in relation to the total number of students.}"
+  too_few_questionnaires:
+    :null: No questionnaires have been submitted.
+    :singular: Only one questionnaire has been submitted. In order to retain the participant's anonymity the results have been excluded.
+    :plural: "Only #1 questionnaires have been submitted. In order to retain the participants' anonymity, the results have been excluded."

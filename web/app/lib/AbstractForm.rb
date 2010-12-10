@@ -105,23 +105,27 @@ class Question
   end
 
   # leftmost choice
-  def ltext
-    @boxes.first.text
+  def ltext(language = :en)
+    @boxes.first.text[language]
   end
 
   #rightmost choice
-  def rtext
-    @boxes.last.text
+  def rtext(language = :en)
+    @boxes.last.text[language]
   end
 
   # collect all possible choices and return as array
-  def get_choices
-    @boxes.collect { |x| x.text.nil? ? '' : x.text }
+  def get_choices(language = nil)
+    if language.nil?
+      @boxes.collect { |x| x.text.nil? ? '' : x.text }
+    else
+      @boxes.collect { |x| x.text.nil? ? '' : x.text[language] }
+    end
   end
 
   # question itself
-  def text
-    @qtext
+  def text(language = :en)
+    @qtext[language]
   end
 
   # did the user fail to answer the question?
@@ -171,23 +175,23 @@ class Question
   include FunkyDBBits
   # h: hash correspoding to specific (!) where clause
   # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table)
+  def eval_to_tex(h, g, db_table, language)
     @db_table = db_table
 
     b = ''
 
     if @db_column.is_a?(Array)
 
-      answers = multi_q(h, self)
+      answers = multi_q(h, self, language)
 
-      t = TeXMultiQuestion.new(@qtext, answers)
+      t = TeXMultiQuestion.new(text(language), answers)
       b << t.to_tex
 
       # single-q
     else
       antw, anz, m, m_a, s, s_a = single_q(h, g, self)
       if anz > 0
-        t = TeXSingleQuestion.new(text, ltext, rtext, antw,
+        t = TeXSingleQuestion.new(text(language), ltext(language), rtext(language), antw,
                                   anz, m, m_a, s, s_a)
 
       b << t.to_tex
@@ -242,12 +246,14 @@ class AbstractForm
   # database table to use for this form
   attr_accessor :db_table
 
-  attr_accessor :lang_quest_for_vorl_m
-  attr_accessor :lang_quest_for_vorl_f
-  attr_accessor :lang
+  attr_accessor :lecturer_header
+
+  attr_accessor :study_groups_header
+  attr_accessor :study_groups_overview 
+  attr_accessor :study_groups_overview_header
+
   attr_accessor :texhead
   attr_accessor :texfoot
-  attr_reader :english
 
   def initialize(pages = [], db_table = '')
     @pages = pages
@@ -261,58 +267,6 @@ class AbstractForm
 
   def get_question(db_column)
     questions.find { |q| q.db_column == db_column }
-  end
-
-  # FIXME kill this
-  def isEnglish?
-    return (not (@english.nil? || @english.to_s != "1"))
-  end
-
-  def getLecturerHeader(name, gender, sheetsCount)
-    if gender == 0 # Note: same as in database
-      @lang_quest_for_vorl_f.gsub(/#1/, name).gsub(/#2/, sheetsCount.to_s)
-    else
-      @lang_quest_for_vorl_m.gsub(/#1/, name).gsub(/#2/, sheetsCount.to_s)
-    end
-  end
-
-  def getStudyGroupsHeader
-    self.isEnglish? ? "Questions concerning the study groups" : "Fragen zum Übungsbetrieb"
-  end
-
-  def getStudyGroupsOverview
-    self.isEnglish? ? "Overview of study groups" : "Übersicht der Übungsgrupppen"
-  end
-
-  def getStudyGroupsOverviewHeader
-    self.isEnglish? ? "Tutors & Questionnaires & Page" : "Tutor & Bögen & Seite"
-  end
-
-  def getSheetCount
-    self.isEnglish? ? "submitted questionnaires" : "abgegebene Fragebögen"
-  end
-
-    # naming convention
-
-  alias :is_english? :isEnglish?
-  alias :lecturer_header :getLecturerHeader
-  alias :study_groups_header :getStudyGroupsHeader
-  alias :study_groups_overview :getStudyGroupsOverview
-  alias :study_groups_overview_heades :getStudyGroupsOverviewHeader
-  alias :sheet_count :getSheetCount
-
-  def getNoQuestionnaires
-    self.isEnglish? \
-      ? "No questionnaires have been submitted." \
-      : "Es wurden keine Fragebögen abgegeben."
-  end
-
-  def getTooFewQuestionnaires(c)
-    return self.getNoQuestionnaires if c == 0
-
-    self.isEnglish? \
-      ? "Only #{c} questionnaire#{c==1? 's':''} have been submitted. In order to retain the participant#{c==1? '’s':'s’'} anonymity the results have been excluded." \
-      : "Es wurde#{c==1? '':'n'} nur #{c} Frage#{c==1? 'bogen':'bögen'} abgegeben. Um die Anonymität de#{c==1? 's':'r'} Teilnehmer#{c==1? 's':''} zu wahren, wurden die Ergebnisse ausgelassen."
   end
 end
 

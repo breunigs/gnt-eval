@@ -1,0 +1,14 @@
+de:
+  semester_distribution: Semesterverteilung
+  academic_term: Fachsemester
+  degree_course: Studiengänge
+  other: sonstiges
+  not_specified: keine Angabe
+  submitted_questionnaires: Abgegebene Fragebögen
+  by: bei
+  comments: Kommentare
+  notice_for_comments: "{ \\small\\emph{Hinweis:} Bei den Kommentaren handelt es sich um Einzelmeinungen, die immer in Relation zur Gesamthörerzahl gesetzt werden sollten.}"
+  too_few_questionnaires:
+    :null: Es wurden keine Fragebögen abgegeben.
+    :singular: Es wurde nur ein Fragebogen abgegeben. Um die Anonymität des Teilnehmers zu wahren, wurden die Ergebnisse ausgelassen.
+    :plural: "Es wurden nur #1 Fragebögen abgegeben. Um die Anonymität der Teilnehmer zu bewahren, wurden die Ergebnisse ausgelassen."

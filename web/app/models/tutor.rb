@@ -11,7 +11,7 @@ class Tutor < ActiveRecord::Base
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
 
     if sheetcount < Seee::Config.settings[:minimum_sheets_required]
-      b << form.getTooFewQuestionnaires(sheetcount)
+      b << form.too_few_questionnaires(course.language, sheetcount)
       b << "\n\n"
       return b, sheetcount
     end
@@ -21,7 +21,7 @@ class Tutor < ActiveRecord::Base
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }
     form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table)
+      b << q.eval_to_tex(specific, general, form.db_table, course.language)
     end
     unless comment.to_s.strip.empty?
       if form.isEnglish?

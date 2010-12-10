@@ -8,8 +8,8 @@
 require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
-require 'lib/ext_requirements.rb'
-require 'lib/FunkyDBBits.rb'
+require 'web/lib/ext_requirements.rb'
+require 'web/lib/FunkyDBBits.rb'
 require 'pp'
 
 
@@ -87,12 +87,12 @@ def tex_questions_for(form, lang)
         b << "\n\n"
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
         if q.db_column =~ /comment/
-          b << '\kommentar{' + q.text[lang] + '}{' + q.db_column + '}{' +
+          b << '\kommentar{' + q.text(lang) + '}{' + q.db_column + '}{' +
             q.db_column + "}\n\n"
         else
           b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
           b << 'm' if q.multi?
-          b << "{#{q.text[lang]}}"
+          b << "{#{q.text(lang)}}"
           b << q.boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| '{' +
             x.text[lang].to_s + '}' }.join('')
           if q.multi?
@@ -599,14 +599,9 @@ namespace :pdf do
     # or TeX all files given
     curSem.forms.each do |f|
       puts "sample for #{f.name}"
-      langs = []
-      f.abstract_form.questions.each do |x|
-        next if x.is_a? String
-        langs << x.qtext.keys
-      end
       
-      langs.flatten.uniq.each do |x|
-         make_sample_sheet(f, x)
+      f.languages.each do |l|
+         make_sample_sheet(f, l)
       end
     end
 

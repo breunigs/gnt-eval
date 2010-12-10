@@ -14,29 +14,17 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
-  # def form_id_to_name
-  #   {3 => 'Seminarbogen',
-  #    2 => 'Englischer Bogen',
-  #    1 => 'Spezialbogen',
-  #    0 => 'Normaler Bogen'}
-  # end
-
-  # def form_name_to_id
-  #   hash = {}
-  #   form_id_to_name.each_pair { |k,v| hash[v] = k }
-  #   hash
-  # end
-
-  # def form_name
-  #   form_id_to_name[self.form] || "form #{self.form} doesn't exist"
-  # end
-
-  def form_name
-    form.name
+  def language
+    read_attribute(:language).to_sym
   end
-  # def form_id
-  #   self.form
-  # end
+
+  def language= (value)
+    write_attribute(:language, value.to_s)
+  end
+  
+  def t(string)
+    I18n.t(string)
+  end
 
   # Tries to parse the description field for eval times and returns them
   # in a nice format for string comparison (i.e. <=>)
@@ -88,15 +76,14 @@ class Course < ActiveRecord::Base
 
     sheets = getReturnedSheets
 
-    isEn = form.isEnglish? ? "E" : "D"
-    notspecified = (form.isEnglish? ? "not specified" : "keine Angabe")
-    b << "\\kurskopf#{isEn}{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}\n\n"
+    notspecified = t(:not_specified)
+    b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
 
     # Semesterverteilung
     b << "\\hfill\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{"+(form.isEnglish? ? "semester distribution" : "Semesterverteilung" )+":}} \\\\[.2em]\n"
+    b << "  \\multicolumn{2}{l}{\\textbf{"+ t('semester_distribution') +":}} \\\\[.2em]\n"
 
-    lang_sem = form.isEnglish? ? "Academic Term" : "Fachsemester"
+    lang_sem = t(:academic_term)
 
     # finds all different semesters for this course and counts them
     sems = get_distinct_values("semester", {:barcode => barcodes}).sort
@@ -112,11 +99,11 @@ class Course < ActiveRecord::Base
 
     # Hauptfach
     b << "\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{"+ (form.isEnglish? ? "degree course" : "Studiengänge") + ":}}\\\\[.2em]\n"
+    b << "  \\multicolumn{2}{l}{\\textbf{"+ t(:degree_course) + ":}}\\\\[.2em]\n"
 
     # grab the description text for each checkbox from the form
-    matchn = [notspecified] + form.get_question("hauptfach").get_choices
-    matchm = [""] + form.get_question("studienziel").get_choices
+    matchn = [notspecified] + form.get_question("hauptfach").get_choices(language)
+    matchm = [""] + form.get_question("studienziel").get_choices(language)
     # remove "sonstiges" or "other" from the end of the array because
     # otherwise we get pretty useless combinations
     matchn.pop
@@ -143,7 +130,7 @@ class Course < ActiveRecord::Base
         b << matchn[n] + " " + matchm[m] + ": & " + num.to_s + "\\\\ \n"
       end
     end
-    b << (form.isEnglish? ? "other" : "Sonstige") + ": & " + (sheets-all).to_s + "\\\\ \n"  if sheets != all
+    b << t(:other) + ": & " + (sheets-all).to_s + "\\\\ \n"  if sheets != all
     b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
     b << "\\end{tabular}\\hfill\\null\n\n"
 
@@ -155,6 +142,9 @@ class Course < ActiveRecord::Base
     # evaluated, since the sheets are coded with the course_prof id
     # Return early to avoid problems.
     return "" if profs.empty?
+
+    I18n.locale = language
+    I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
 
     b = ''
 
@@ -174,9 +164,9 @@ class Course < ActiveRecord::Base
     # above already.
     if getReturnedSheets >= Seee::Config.settings[:minimum_sheets_required]
       unless summary.to_s.strip.empty?
-        b << "\\commentsprof{#{form.isEnglish? ? "Comments" : "Kommentare"}}\n\n"
-        b << "{ \\small\\emph{Hinweis:} Bei den Kommentaren handelt es sich um Einzelmeinungen, die immer in Relation zur Gesamthörerzahl gesetzt werden sollten.}\n\n" if !form.isEnglish?
-        b << "{ \\small\\emph{Note: } Each comment is an individual opinion and should be considered in relation to the total number of students.}\n\n" if form.isEnglish?
+        b << "\\commentsprof{#{t(:comments)}}\n\n"
+        b << t(:notice_for_comments)
+        b << "\n\n"
         b << summary.to_s
         b << "\n\\medskip\n\n"
       end
@@ -185,21 +175,21 @@ class Course < ActiveRecord::Base
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?
 
-      b << "\\fragenzudenuebungen{"+ (form.getStudyGroupsHeader) +"}\n"
+      b << "\\fragenzudenuebungen{"+ form.study_groups_overview(language) +"}\n"
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
-        b << q.eval_to_tex(specific, general, form.db_table).to_s
+        b << q.eval_to_tex(specific, general, form.db_table, language).to_s
       end
     end
 
     return b if tutors.empty?
 
     c = ''
-    c << "\\uebersichtuebungsgruppen{"+form.getStudyGroupsOverview+"}\n"
+    c << "\\uebersichtuebungsgruppen{"+form.study_groups_overview(language)+"}\n"
     c << "\\begin{longtable}[l]{lrr}\n"
     c << "\\hline\n"
-    c << form.getStudyGroupsOverviewHeader + " \\\\ \n"
+    c << form.study_groups_overview_header(language) + " \\\\ \n"
     c << "\\hline\n"
     c << "\\endhead\n"
     cc = ''
@@ -222,17 +212,7 @@ class Course < ActiveRecord::Base
   end
 
   def evaluate
-    eval_against_form(form.abstract_form)
+    eval_against_form(form)
   end
 
-end
-
-class Integer
-  def to_form
-    p = File.join(File.dirname(__FILE__), "..", '/lib/forms/' + self.to_s + '.yaml')
-    # Cache YAML sheets in a global variable to avoid loading them again
-    $loaded_yaml_sheets ||= {}
-    $loaded_yaml_sheets[p] ||= YAML::load(File.read(p))
-    $loaded_yaml_sheets[p]
-  end
 end

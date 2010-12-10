@@ -126,8 +126,7 @@ module FunkyTeXBits
 
     if single.nil?
       b << "\\newcommand{\\profkopf}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\kurskopfD}[4]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 bei #2}\nAbgegebene Fragebögen: #3}\n"
-      b << "\\newcommand{\\kurskopfE}[4]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 by #2}\nsubmitted questionnaires: #3}\n"
+      b << "\\newcommand{\\kurskopf}[6]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 #5 #2}\n#6: #3}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section*{#1}}\n"
       b << "\\newcommand{\\commentsprof}[1]{\\textbf{#1}}\n"
@@ -136,8 +135,7 @@ module FunkyTeXBits
       b << "\\date{\\today}\n"
     else
       b << "\\newcommand{\\profkopf}[1]{\\section{#1}}\n"
-      b << "\\newcommand{\\kurskopfD}[4]{\\pdfdest name{#4} xyz%\n\\section{Erhebungsgrundlage}\nAbgegebene Fragebögen: #3}\n"
-      b << "\\newcommand{\\kurskopfE}[4]{\\pdfdest name{#4} xyz%\n\\section{frame of survey}\nsubmitted questionnaires: #3}\n"
+      b << "\\newcommand{\\kurskopf}[6]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 #5 #2}\n#6: #3}\n"
       b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section{#1}}\n"
       b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section{#1}}\n"
       b << "\\newcommand{\\zusammenfassung}[1]{\\section{#1}}\n"
@@ -211,7 +209,7 @@ module FunkyTeXBits
     semesterlong = semestershort.gsub("WS", "Wintersemester").gsub("SS", "Sommersemester")
     b << "\\newcommand{\\facultylong}{#{facultylong}}\n"
     b << "\\newcommand{\\semesterlong}{#{semesterlong}}\n"
-    b << "\\input{" + File.join(File.dirname(__FILE__), "../../../tex/vorwort.tex") + "}\n"
+    b << "\\input{" + File.join(Rails.root, "../tex/vorwort.tex") + "}\n"
     b
   end
 
@@ -225,14 +223,16 @@ module FunkyTeXBits
       b << "\\section"
     end
 
-    path = File.join(File.dirname(__FILE__), "../../../tmp/sample_sheets/sample_")
+    path = File.join(Rails.root, "../tmp/sample_sheets/sample_")
     b << "{Die Fragebögen}\n"
 
     $curSem.forms.each do |f|
-      b << "\\subsection*{#{f.name}}"
-      1.upto(f.pages.count) do |i|
-        b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{f.id}.pdf}}\n"
-        b << "\\clearpage"
+      f.languages.each do |l|
+        b << "\\subsection*{#{f.name}}"
+        1.upto(f.pages.count) do |i|
+          b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{f.id}_#{l.to_s}.pdf}}\n"
+          b << "\\clearpage"
+        end
       end
     end
     b << "\n\\end{document}\n"

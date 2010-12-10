@@ -63,6 +63,7 @@ module Seee
       :standard_mail_domain => 'mathphys.fsk.uni-heidelberg.de',
       :standard_mail_from => 'evaluation@mathphys.fsk.uni-heidelberg.de',
       :standard_mail_bcc => 'evaluation@mathphys.fsk.uni-heidelberg.de',
+
       # defines how many sheets need to be handed in before a course or
       # tutor gets an evaluation. Otherwise a sheet might be matched to
       # the person who filled it in, destroying anonymity.
