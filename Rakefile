@@ -595,8 +595,6 @@ end
 namespace :pdf do
   desc "create samples for all available sheets for printing or inclusion. "
   task :samplesheets do
-    # FIXME: automatically determine correct number
-    # or TeX all files given
     curSem.forms.each do |f|
       puts "sample for #{f.name}"
       
