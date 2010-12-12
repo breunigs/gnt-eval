@@ -42,7 +42,7 @@
   <p>
     <b>Language</b><br/>
     <%= if @course.semester.critical?
-        @course.language + " (can't change this while the semester is critical)"
+        "#{@course.language} (can't change this while the semester is critical)"
       else
 	collection_select(:course, :language, ['de', 'en'], :to_s, :to_s)
       end
