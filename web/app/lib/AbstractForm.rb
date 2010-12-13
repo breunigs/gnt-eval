@@ -260,7 +260,7 @@ class AbstractForm
   # FIXME: is this correct? or should this be I18n-magic? this is a
   # bit difficult, but better be safe than sorry and leave it here.
   attr_accessor :study_groups_header
-  attr_accessor :study_groups_overview 
+  attr_accessor :study_groups_overview
   attr_accessor :study_groups_overview_header
 
   attr_accessor :texhead
