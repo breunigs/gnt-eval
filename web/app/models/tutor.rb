@@ -17,7 +17,7 @@ class Tutor < ActiveRecord::Base
       return b, sheetcount
     end
 
-    b << "#{form.getSheetCount}: #{sheetcount}\n\n"
+    b << "#{form.submitted_questionnaires(course.language)}: #{sheetcount}\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }

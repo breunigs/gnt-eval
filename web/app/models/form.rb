@@ -76,4 +76,11 @@ class Form < ActiveRecord::Base
   def study_groups_header(lang)
     abstract_form.study_groups_header[lang]
   end
+
+  def submitted_questionnaires(lang)
+    I18n.locale = lang
+    I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
+
+    I18n.t(:submitted_questionnaires)
+  end
 end
