@@ -17,7 +17,7 @@ class Form < ActiveRecord::Base
 
   # pretty printing an AbstrctForm is a bit
   def pretty_abstract_form
-    abstract_form.pretty_print
+    abstract_form.pretty_print_me
   end
 
   # what languages does this form support?

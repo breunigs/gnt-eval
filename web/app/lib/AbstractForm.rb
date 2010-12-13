@@ -8,7 +8,7 @@
 # - Box: see class
 #
 
-require 'pp'
+require 'prettyprint'
 
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to
@@ -283,15 +283,12 @@ class AbstractForm
 
   # pretty printing an AbstrctForm is a bit gnaahaha
   # this does NOT stout but returns a string
-  def pretty_print
-    orig = $stdout
-    sio = StringIO.new
-    $stdout = sio
-    pp self
-    $stdout = orig
+  # GOTCHA: never name this pretty_print.
+  def pretty_print_me
+    sio = PP.pp(self, "")
 
     # aber bitte ohne die ids und ohne @
-    sio.string.gsub(/0x[^\s]*/,'').gsub(/@/,'')
+    sio.gsub(/0x[^\s]*/,'').gsub(/@/,'')
   end
 end
 
