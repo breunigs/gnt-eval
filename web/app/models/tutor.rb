@@ -17,7 +17,9 @@ class Tutor < ActiveRecord::Base
       return b, sheetcount
     end
 
-    b << "#{form.getSheetCount}: #{sheetcount}\n\n"
+    I18n.locale = course.language
+    I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
+    b << I18n.translate(:submitted_questionnaires) + ': ' + sheetcount.to_s + "\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }
@@ -25,11 +27,7 @@ class Tutor < ActiveRecord::Base
       b << q.eval_to_tex(specific, general, form.db_table, course.language)
     end
     unless comment.to_s.strip.empty?
-      if form.isEnglish?
-        b << "\\commentstutor{Comments}"
-      else
-        b << "\\commentstutor{Kommentare}"
-      end
+      b << "\\commentstutor{#{I18n.t(:comments)}}"
       b << comment.to_s
     end
     return b, sheetcount
