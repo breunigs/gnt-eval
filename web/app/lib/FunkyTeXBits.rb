@@ -38,6 +38,7 @@ module FunkyTeXBits
   def texpreview(code)
     return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
 
+    require 'lib/RandomUtils.rb'
     require 'digest'
     name = Digest::SHA256.hexdigest(code)
     path = "/tmp/seee_preview_#{name}"
@@ -63,9 +64,11 @@ module FunkyTeXBits
         if $? == 0
             # overwrite by design. Otherwise it's flooded with all
             # the TeX output even though TeXing worked fine
-            error = `cd /tmp/ && #{Seee::Config.application_paths[:pdfcrop]} #{path}.pdf #{path}-crop.pdf 2>&1`
-            exitcodes << $?.to_i
-            error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}-crop.pdf #{path}.png  2>&1`
+            error = ""
+            # we don't really care if cropping worked or not
+            exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
+
+            error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
             exitcodes << $?.to_i
             # convert creates one image per page, so join them
             # for easier processing

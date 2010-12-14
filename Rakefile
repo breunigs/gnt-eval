@@ -104,47 +104,6 @@ def tex_none(language)
   I18n.t(:none)
 end
 
-# Generates the a pdf file with the barcode in the specified location
-def generate_barcode(barcode, path)
-  path = File.expand_path(path)
-  #puts "Creating barcode \"#{barcode}\" in #{path}"
-  require 'tmpdir'
-  tmp = Dir.mktmpdir("seee-barcode-")
-  Dir.chdir(tmp) do
-    `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
-    `ps2pdf barcode.ps barcode.pdf`
-    bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f barcode.pdf 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)[1].strip
-    File.open("barcode2.tex", "w") do |h|
-      h << "\\csname pdfmapfile\\endcsname{}\n"
-      h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
-      h << "  \\count0=#1\\relax\n"
-      h << "  \\setbox0=\\hbox{%\n"
-      h << "    \\pdfximage page #1{barcode.pdf}%\n"
-      h << "    \\pdfrefximage\\pdflastximage\n"
-      h << "  }%\n"
-      h << "  \\pdfhorigin=-#2bp\\relax\n"
-      h << "  \\pdfvorigin=#3bp\\relax\n"
-      h << "  \\pdfpagewidth=#4bp\\relax\n"
-      h << "  \\advance\\pdfpagewidth by -#2bp\\relax\n"
-      h << "  \\pdfpageheight=#5bp\\relax\n"
-      h << "  \\advance\\pdfpageheight by -#3bp\\relax\n"
-      h << "  \\ht0=\\pdfpageheight\n"
-      h << "  \\shipout\\box0\\relax\n"
-      h << "}\n"
-      h << "\\page 1 [#{bbox}]\n"
-      h << "\\csname @@end\\endcsname\n"
-      h << "\\end\n"
-    end
-    `#{Seee::Config.application_paths[:pdftex]} -halt-on-error barcode2.tex`
-    if $?.exitstatus != 0
-      puts "Could not create \"#{barcode}\" in \"#{path}\". Aborting."
-      puts `cat barcode2.log`
-      exit 1
-    end
-    `mv -f barcode2.pdf "#{path}"`
-  end
-end
-
 def make_sample_sheet(form, lang)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
