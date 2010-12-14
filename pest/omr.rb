@@ -180,7 +180,7 @@ class PESTOmr
         # for detection should actually be in a perfectly scanned
         # document. They are hardcoded, since they never change.
         leftcut = [168*@dpifix, 168*@dpifix]
-        topcut = [145*@dpifix, 139*@dpifix]
+        topcut = [(145-3)*@dpifix, (139-3)*@dpifix]
 
         # This will contain the offset for each sheet
         @leftoff = [0,0]

@@ -340,6 +340,7 @@ namespace :images do
     else
       puts "Working directory is: #{d.directory}"
       files = Dir.glob(File.join(d.directory, '*.tif'))
+      files_size = files.size
       split = files.chunk(number_of_processors)
       curr = 0
       threads = []
@@ -369,7 +370,7 @@ namespace :images do
 
             #~ puts "Moved to #{form}/#{basename} (#{barcode})"
             curr += 1
-            print_progress(curr, files.size)
+            print_progress(curr, files_size)
           end
         end # thread
       end # split
