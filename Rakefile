@@ -617,15 +617,22 @@ namespace :pdf do
 
   desc "makes the result pdfs preliminary"
   task :make_preliminary do
-    Dir.glob("./tmp/[^orl]*[WS]S*.tex") do |d|
+    p = "./tmp/results"
+    threads = []
+    Dir.glob("#{p}/*.tex") do |d|
       d = File.basename(d)
-      dn = "orl_" + d.gsub('tex', 'pdf')
-      puts "Working on " + d
-      `sed 's/title{Lehrevaluation/title{vorl"aufige Lehrevaluation/' ./tmp/#{d} | sed 's/Ergebnisse der Vorlesungsumfrage/nicht zur Weitergabe/'  > ./tmp/orl_#{d}`
-      Rake::Task[("tmp/" + dn).to_sym].invoke
-      `pdftk ./tmp/#{dn} background ./helfer/wasserzeichen.pdf output ./tmp/preliminary_#{d.gsub('tex', 'pdf')}`
-      `rm -f ./tmp/orl_*`
+      next if d.match(/^orl_/)
+      threads << Thread.new do
+        dn = "orl_" + d.gsub('tex', 'pdf')
+        puts "Working on " + d
+        `sed 's/title{Lehrevaluation/title{vorl"aufige Lehrevaluation/' #{p}/#{d} | sed 's/Ergebnisse der Vorlesungsumfrage/nicht zur Weitergabe/'  > #{p}/orl_#{d}`
+        Rake::Task[("#{p}/" + dn).to_sym].invoke
+        `pdftk #{p}/#{dn} background ./helfer/wasserzeichen.pdf output #{p}/preliminary_#{d.gsub('tex', 'pdf')}`
+        `rm -f #{p}/#{"orl_" + d.gsub('tex', '*')}`
+      end
     end
+    threads.each { |t| t.join }
+    Rake::Task["clean".to_sym].invoke
   end
 
   # This is a helper function that will create the result PDF file for a
