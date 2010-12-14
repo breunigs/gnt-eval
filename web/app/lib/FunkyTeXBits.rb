@@ -24,6 +24,10 @@ module FunkyTeXBits
 
     unless $?.to_i == 0
         logger.warn "Hunspell failed for some reason. Skipping spellcheck."
+        logger.warn "Hunspell: #{Seee::Config.commands[:hunspell]}"
+        logger.warn "Path was: #{path}"
+        logger.warn "Whole command: #{Seee::Config.commands[:hunspell]} -l -t #{path}"
+        logger.warn words.join("\n")
         return code
     end
 
