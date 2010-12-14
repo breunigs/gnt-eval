@@ -653,7 +653,7 @@ namespace :pdf do
   task :semester, :semester_id, :faculty_id, :needs => ['pdf:samplesheets'] do |t, a|
     sem = a.semester_id.nil? ? curSem.id : a.semester_id
 
-    dirname = './tmp/'
+    dirname = './tmp/results/'
     FileUtils.mkdir_p(dirname)
 
     # we have been given a specific faculty, so evaluate it and exit.
@@ -672,10 +672,12 @@ namespace :pdf do
 
   desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
   task :forms, :semester_id, :needs => 'db:connect' do |t, a|
-    `mkdir tmp` unless File.exists?('./tmp/')
+    dirname = './tmp/forms/'
+    FileUtils.mkdir_p(dirname)
+
     sem = a.semester_id.nil? ? curSem.id : a.semester_id
     s = Semester.find(sem)
-    dirname = './tmp/'
+
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
       make_pdf_for(s, cp, dirname)
     end
@@ -686,8 +688,7 @@ namespace :pdf do
   desc "Create How Tos"
   task :howto, :needs => 'db:connect' do
     saveto = './tmp/howtos/'
-    require 'ftools'
-    File.makedirs(saveto)
+    FileUtils.mkdir_p(saveto)
 
     dirname = Seee::Config.file_paths[:forms_howto_dir]
     # Escape for TeX
