@@ -287,8 +287,14 @@ namespace :images do
       curdir = File.dirname(f)
 
       # find comments for the tutors
-      tname = basename + '-tutorcomment.jpg'
+      # FIXME hardcoded stuff, should be elsewhere, get this from form
+      tname = basename + 'ucomment.jpg'
+
       if File.exists?(File.join(curdir, tname)) && tpics.select { |x| x.basename == tname }.empty?
+        # FIXME: need to think of something nicer.
+        class Question
+          attr_accessor :value
+        end
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
         barcode = find_barcode_from_basename(basename)
@@ -303,7 +309,7 @@ namespace :images do
           else
             p = Pic.new
             p.tutor_id = tutors[tutnum-1].id
-            p.basename = basename + '-tutorcomment.jpg'
+            p.basename = basename + 'ucomment.jpg'
             p.save
             #~ puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
           end
@@ -313,6 +319,7 @@ namespace :images do
       end
 
       # finds comments for uhm… seminar sheet maybe?
+      # FIXME: is this ever used? if not: EXTERMINATE!
       xname = basename + '-comment.jpg'
       if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
         barcode = find_barcode_from_basename(basename)
@@ -327,7 +334,7 @@ namespace :images do
       end
 
       # insert comments for profs
-      cname = basename + '-vorlcomment.jpg'
+      cname = basename + 'vcomment.jpg'
       if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
         barcode = find_barcode_from_basename(basename)
 
@@ -335,7 +342,7 @@ namespace :images do
 
         p = CPic.new
         p.course_prof = course_prof
-        p.basename = basename + '-vorlcomment.jpg'
+        p.basename = basename + 'vcomment.jpg'
         p.save
         #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course.title} as #{p.id}"
       end
