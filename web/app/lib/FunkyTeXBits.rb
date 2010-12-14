@@ -23,11 +23,12 @@ module FunkyTeXBits
     File.delete(path)
 
     unless $?.to_i == 0
-        logger.warn "Hunspell failed for some reason. Skipping spellcheck."
+        logger.warn "Hunspell failed for some reason. Exit code: #{$?}"
         logger.warn "Hunspell: #{Seee::Config.commands[:hunspell]}"
         logger.warn "Path was: #{path}"
         logger.warn "Whole command: #{Seee::Config.commands[:hunspell]} -l -t #{path}"
-        logger.warn words.join("\n")
+        logger.warn "Code was: #{code}"
+        logger.warn "Hunspell output: #{words.join("\n")}"
         return code
     end
 
