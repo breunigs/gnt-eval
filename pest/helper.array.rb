@@ -25,22 +25,6 @@ class Array
         (self.length % 2 == 1) ? sorted[mid] : ((sorted[mid] + sorted[mid - 1]) / 2)
     end
 
-    # Splits up the array into arrays of equal size
-    # Taken from: http://snippets.dzone.com/posts/show/3486
-    def chunk(pieces = 2)
-        len = self.length;
-        mid = (len/pieces)
-        chunks = []
-        start = 0
-        1.upto(pieces) do |i|
-            last = start+mid
-            last = last-1 unless len%pieces >= i
-            chunks << self[start..last] || []
-            start = last+1
-        end
-        chunks
-    end
-
     # Splits up array into arrays of unequal size. The first array will
     # be the largest. Given you want 3 pieces, the first array will con-
     # tain 3/6, the second 2/6 and the third 1/6

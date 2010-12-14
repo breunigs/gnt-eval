@@ -41,7 +41,7 @@ require cdir + '/../lib/FunkyDBBits.rb'
 
 require cdir + '/../lib/AbstractForm.rb'
 require cdir + '/helper.AbstractFormExtended.rb'
-
+require cdir + '/../lib/RandomUtils.rb'
 
 # Profiler. Uncomment code at the end of this file, too.
 #require 'ruby-prof'

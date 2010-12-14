@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 # you probably want to hack the :copycomments task and specify where
@@ -10,6 +11,7 @@ require 'action_mailer'
 require 'web/config/boot'
 require 'web/lib/ext_requirements.rb'
 require 'web/lib/FunkyDBBits.rb'
+require 'web/lib/RandomUtils.rb'
 require 'pp'
 
 
@@ -31,15 +33,6 @@ def curSem
   $curSem
 end
 
-def numberOfProcessors
-  `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
-end
-
-def word_wrap(txt, col = 80)
-    txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
-      "\\1\\3\n")
-end
-
 def find_barcode(filename)
   r = `#{Seee::Config.commands[:zbar]} #{filename}`
   if not r.empty?
@@ -47,10 +40,6 @@ def find_barcode(filename)
   else
     return nil
   end
-end
-
-def bold(text)
-	"\e[1m#{text}\e[0m"
 end
 
 def find_barcode_from_basename(basename)
@@ -195,14 +184,9 @@ def make_sample_sheet(form, lang)
   Rake::Task[(filename + '.pdf').to_sym].invoke
 end
 
-def escapeForTeX(string)
+def escape_for_tex(string)
   # escapes & and % signs if not already done so
   string.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
-end
-
-# naming conventions einhalten bzw. zumindest aliase anlegen!
-def escape_for_tex string
-  escapeForTex string
 end
 
 # Creates form PDF file for given semester and CourseProf
@@ -215,10 +199,10 @@ def make_pdf_for(s, cp, dirname)
 
   File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
-    h << '\dbtable{' + escapeForTeX(cp.course.form.db_table) + "}\n"
-    h << '\dozent{' + escapeForTeX(cp.prof.fullname) + '}' + "\n"
-    h << '\vorlesung{' + escapeForTeX(cp.course.title) + '}' + "\n"
-    h << '\semester{' + escapeForTeX(s.title) + '}' + "\n"
+    h << '\dbtable{' + escape_for_tex(cp.course.form.db_table) + "}\n"
+    h << '\dozent{' + escape_for_tex(cp.prof.fullname) + '}' + "\n"
+    h << '\vorlesung{' + escape_for_tex(cp.course.title) + '}' + "\n"
+    h << '\semester{' + escape_for_tex(s.title) + '}' + "\n"
 
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
@@ -228,7 +212,7 @@ def make_pdf_for(s, cp, dirname)
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
       tutoren.each_with_index do |t, i|
-        t = escapeForTeX(t)
+        t = escape_for_tex(t)
         h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
       end
 
@@ -246,16 +230,6 @@ def make_pdf_for(s, cp, dirname)
   Rake::Task[(filename + '.pdf').to_sym].invoke
 
   `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
-end
-
-# Prints the current progress to the console without advancing one line
-# val: currently processed item
-# max: amount of items to process
-def printProgress(val, max)
-      percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
-      current = val.to_s.rjust(max.to_s.size)
-      print "\r#{percentage}% (#{current}/#{max})"
-      STDOUT.flush
 end
 
 # automatically calls rake -T when no task is given
@@ -347,7 +321,7 @@ namespace :images do
         #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course.title} as #{p.id}"
       end
 
-      printProgress(curr+1, allfiles.size)
+      print_progress(curr+1, allfiles.size)
     end # Dir glob
 
     puts
@@ -366,32 +340,41 @@ namespace :images do
     else
       puts "Working directory is: #{d.directory}"
       files = Dir.glob(File.join(d.directory, '*.tif'))
-      files.each_with_index do |f, curr|
-        unless File.writable?(f)
-          puts "No write access, cancelling."
-          break
-        end
+      split = files.chunk(number_of_processors)
+      curr = 0
+      threads = []
+      split.each do |files|
+        threads << Thread.new do
+          files.each do |f|
+            unless File.writable?(f)
+              puts "No write access, cancelling."
+              break
+            end
 
-        basename = File.basename(f, '.tif')
-        barcode = (find_barcode(f).to_f / 10).floor.to_i
+            basename = File.basename(f, '.tif')
+            barcode = (find_barcode(f).to_f / 10).floor.to_i
 
-        if barcode.nil? || (not CourseProf.exists?(barcode))
-          puts "bizarre #{basename}, exiting"
-          File.makedirs('tmp/images/bizarre')
-          File.move(f, 'tmp/images/bizarre')
-          next
-        end
+            if barcode.nil? || (not CourseProf.exists?(barcode))
+              puts "bizarre #{basename}, exiting"
+              File.makedirs('tmp/images/bizarre')
+              File.move(f, 'tmp/images/bizarre')
+              next
+            end
 
-        form = CourseProf.find(barcode).course.form.id.to_s + '_' +
-          CourseProf.find(barcode).course.language.to_s
+            form = CourseProf.find(barcode).course.form.id.to_s + '_' +
+              CourseProf.find(barcode).course.language.to_s
 
-        File.makedirs("tmp/images/#{form}")
-        File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
+            File.makedirs("tmp/images/#{form}")
+            File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
 
-        #~ puts "Moved to #{form}/#{basename} (#{barcode})"
-        printProgress(curr+1, files.size)
-      end
-    end
+            #~ puts "Moved to #{form}/#{basename} (#{barcode})"
+            curr += 1
+            print_progress(curr, files.size)
+          end
+        end # thread
+      end # split
+      threads.each { |t| t.join }
+    end # else
   end
 end
 
@@ -486,7 +469,7 @@ namespace :pest do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
-      system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{numberOfProcessors}")
+      system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
     end
   end
 
@@ -580,7 +563,7 @@ namespace :pest do
         exit
       end
 
-      printProgress(curr + 1, count)
+      print_progress(curr + 1, count)
     end
     puts
     puts "Done!"
@@ -1001,7 +984,7 @@ namespace :summary do
             puts "\rTeXing tutor  comments failed: #{c.title} / #{t.abbr_name} "
         end
       end
-      printProgress(i + 1, curSem.courses.size)
+      print_progress(i + 1, curSem.courses.size)
     end
     puts "\nIf there were errors you might want to try"
     puts "\trake summary:fixtex"
