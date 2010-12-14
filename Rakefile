@@ -27,7 +27,7 @@ CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log',
 
 # requires database
 def curSem
-  $curSem ||= Semester.find(:all).find{ |s| s.now? }
+  $curSem ||= Semester.find(:all).find { |s| s.now? }
   $curSem
 end
 
@@ -449,34 +449,34 @@ namespace :pest do
   end
 
   # note: this is called automatically by yaml2db
-  desc "Create db tables for each form for the available YAML files"
+  desc "Create db tables for each form for the current semester"
   task :createtables, :needs => 'db:connect' do
-    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
-        yaml = YAML::load(File.read(f))
-        name = yaml.db_table
+    curSem.forms.each do |f|
+      name = f.name
+      f = f.abstract_form
 
-        # Note that the barcode is only unique for each CourseProf, but
-        # not for each sheet. That's why path is used as unique key.
-        q = "CREATE TABLE IF NOT EXISTS `" + name + "` ("
-        q << "`path` VARCHAR(255) CHARACTER SET utf8 NOT NULL UNIQUE, "
-        q << "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
-        q << "`barcode` INT(11) default NULL, "
+      # Note that the barcode is only unique for each CourseProf, but
+      # not for each sheet. That's why path is used as unique key.
+      q = "CREATE TABLE IF NOT EXISTS `" + f.db_table + "` ("
+      q << "`path` VARCHAR(255) CHARACTER SET utf8 NOT NULL UNIQUE, "
+      q << "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
+      q << "`barcode` INT(11) default NULL, "
 
-        yaml.questions.each do |quest|
-            next if quest.db_column.nil?
-            if quest.db_column.is_a?(Array)
-                quest.db_column.each do |a|
-                    q << "`#{a}` SMALLINT(6) UNSIGNED, "
-                end
-            else
-                q << "`#{quest.db_column}` SMALLINT(6) UNSIGNED, "
-            end
+      f.questions.each do |quest|
+        next if quest.db_column.nil?
+        if quest.db_column.is_a?(Array)
+          quest.db_column.each do |a|
+            q << "`#{a}` SMALLINT(6) UNSIGNED, "
+          end
+        else
+          q << "`#{quest.db_column}` SMALLINT(6) UNSIGNED, "
         end
-        q << "PRIMARY KEY (id)"
-        q << ");"
+      end
 
-        puts "Creating #{name}"
-        $dbh.do(q)
+      q << "PRIMARY KEY (id)"
+      q << ");"
+      puts "Creating #{name} (#{f.db_table})"
+      $dbh.do(q)
     end
   end
 
