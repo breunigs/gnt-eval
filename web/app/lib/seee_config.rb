@@ -74,6 +74,11 @@ module Seee
       # werden. Hat dann pro Semester Unterordner.
       :comment_images_public_dir => '/home/eval/public_html/.comments/',
 
+      # the directory where the final form pdf files will be stored.
+      # this location will be printed below each howto, in case additional
+      # sheets need to be printed.
+      :forms_howto_dir => '/home/eval/forms/',
+
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
       :hunspell_personal_dic => File.join(RAILS_ROOT, 'persdic.dic'),

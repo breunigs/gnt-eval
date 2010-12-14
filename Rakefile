@@ -606,7 +606,7 @@ namespace :pdf do
   task :samplesheets do
     curSem.forms.each do |f|
       puts "sample for #{f.name}"
-      
+
       f.languages.each do |l|
          make_sample_sheet(f, l)
       end
@@ -685,18 +685,24 @@ namespace :pdf do
 
   desc "Create How Tos"
   task :howto, :needs => 'db:connect' do
-    saveto = './tmp/'
-    dirname = "/home/eval/forms/"
+    saveto = './tmp/howtos/'
+    require 'ftools'
+    File.makedirs(saveto)
+
+    dirname = Seee::Config.file_paths[:forms_howto_dir]
     # Escape for TeX
     dirname << Semester.find(:last).dirFriendlyName.gsub('_', '\_')
+    threads = []
     Dir.glob("./doc/howto_*.tex").each do |f|
-        texdata = File.read(f).gsub(/§§§/, dirname)
-        tex = File.open(saveto + File.basename(f), "w")
-        tex.write(texdata)
-        tex.close
-        Rake::Task[(saveto + File.basename(f).gsub(/\.tex$/, ".pdf")).to_sym].invoke
-        File.delete(saveto + File.basename(f))
+      threads << Thread.new do
+        data = File.read(f).gsub(/§§§/, dirname)
+        file = saveto + File.basename(f)
+        File.open(file, "w") { |x| x.write data }
+        Rake::Task[(file.gsub(/\.tex$/, ".pdf")).to_sym].invoke
+        File.delete(file)
+      end
     end
+    threads.each { |t| t.join }
     Rake::Task["clean".to_sym].invoke
   end
 
