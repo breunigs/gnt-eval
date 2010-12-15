@@ -81,7 +81,7 @@ module Seee
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(RAILS_ROOT, 'persdic.dic'),
+      :hunspell_personal_dic => File.join(Rails.root, 'app/lib/persdic.dic'),
 
       # Benutze die angepasste RMagick Version wenn möglich, ansonsten
       # falle auf die globale Version zurück (gedacht für "require")
