@@ -3,10 +3,8 @@
 
 module FunkyTeXBits
   def spellcheck(code)
-    aspell = Seee::Config.application_paths[:aspell]
-
     # check if hunspell is installed
-    `#{aspell} --version`
+    `#{Seee::Config.application_paths[:aspell]} --version`
     unless $?.to_i == 0
       logger.warn "aspell does not seem to be installed. Skipping spellcheck."
       return code
@@ -15,7 +13,7 @@ module FunkyTeXBits
     # write code to tempfile
     require 'digest'
     name = Digest::SHA256.hexdigest(code)
-    path = "/tmp/seee_spellcheck_#{name}"
+    path = File.join(temp_dir, "spellcheck_#{name}")
     File.open("#{path}", 'w') {|f| f.write(code) }
 
     # spell check!
@@ -38,9 +36,9 @@ module FunkyTeXBits
     w = words.join("|")
     r1 = Regexp.new(/.*\b(#{w})\b.*/)
     r2 = Regexp.new(/\b(#{w})\b/)
-    blockers = Regexp.new(/\\pgf|\\spellingerror|\\begin\{pgfpicture/)
+    blockers = Regexp.new(/\\pgf|\\spellingerror|\bpgf[a-z]+|\\color/)
     code.gsub!(r1) do |s|
-      s.match(blockers).nil? ? s.gsub(r2, '\\spellingerror{\1}') : s
+      s.match(blockers).nil? ? s.gsub(r2, '\spellingerror{\1}') : s
     end
 
     code
@@ -51,8 +49,9 @@ module FunkyTeXBits
 
     require 'lib/RandomUtils.rb'
     require 'digest'
+
     name = Digest::SHA256.hexdigest(code)
-    path = "/tmp/seee_preview_#{name}"
+    path = File.join(temp_dir, "preview_#{name}")
 
     # will be overwritten on (re-)generation
     failed = false
@@ -69,9 +68,13 @@ module FunkyTeXBits
         f.write(head + spellcheck(code) + foot)
       end
 
-      error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
+      error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
       ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
+      error << "<hr><pre>"
+      error << head
       error << spellcheck(code)
+      error << foot
+      error << "</pre>"
       exitcodes = []
       exitcodes << ex
       if ex == 0

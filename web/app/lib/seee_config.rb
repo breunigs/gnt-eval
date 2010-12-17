@@ -70,6 +70,9 @@ module Seee
       :minimum_sheets_required => 3
     }
     @@file_paths = {
+      # Specify a directory where to cache things
+      :cache_tmp_dir => '/tmp/seee/',
+
       # Verzeichnis, in dem die Kommentarbilder gespeichert
       # werden. Hat dann pro Semester Unterordner.
       :comment_images_public_dir => '/home/eval/public_html/.comments/',
@@ -106,7 +109,7 @@ module Seee
       :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
 
       :hunspell => @@application_paths[:hunspell] + " -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
-      :aspell => @@application_paths[:aspell] + " -d de_DE-neu list | " + @@application_paths[:aspell] + " -d en list",
+      :aspell => @@application_paths[:aspell] + " -t -d de_DE-neu list | " + @@application_paths[:aspell] + " -t -d en list",
 
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured

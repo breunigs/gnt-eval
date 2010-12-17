@@ -90,3 +90,10 @@ def pdf_crop_tex(pdffile)
   end
   true
 end
+
+def temp_dir
+  tmp = Seee::Config.file_paths[:cache_tmp_dir]
+  require 'ftools'
+  File.makedirs(tmp)
+  tmp
+end
