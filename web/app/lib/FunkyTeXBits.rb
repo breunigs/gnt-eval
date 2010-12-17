@@ -38,7 +38,7 @@ module FunkyTeXBits
     w = words.join("|")
     r1 = Regexp.new(/.*\b(#{w})\b.*/)
     r2 = Regexp.new(/\b(#{w})\b/)
-    blockers = Regexp.new(/\\pgf|\\spellingerror|\\begin{pgfpicture/)
+    blockers = Regexp.new(/\\pgf|\\spellingerror|\\begin\{pgfpicture/)
     code.gsub!(r1) do |s|
       s.match(blockers).nil? ? s.gsub(r2, '\\spellingerror{\1}') : s
     end

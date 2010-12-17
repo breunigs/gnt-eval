@@ -78,7 +78,7 @@ class Course < ActiveRecord::Base
 
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
-  def eval_lecture_head(form)
+  def eval_lecture_head
     b = ''
 
     sheets = returned_sheets
@@ -160,7 +160,7 @@ class Course < ActiveRecord::Base
     @db_table = form.db_table
 
     puts "   #{title}"
-    b << eval_lecture_head(form)
+    b << eval_lecture_head
 
     # vorlesungseval pro dozi
     course_profs.each do |cp|
@@ -183,7 +183,7 @@ class Course < ActiveRecord::Base
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?
 
-      b << "\\fragenzudenuebungen{"+ form.study_groups_overview(language) +"}\n"
+      b << "\\fragenzudenuebungen{"+ form.study_groups_header(language) +"}\n"
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
