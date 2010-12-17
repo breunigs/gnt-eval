@@ -88,6 +88,16 @@ module Seee
       :rmagick => @@custom_builds[:rmagick_rb] || "RMagick"
     }
 
+
+    # Sind Pfade nicht gesetzt, defaulte auf /usr/bin/env
+    def @@application_paths.default(key=nil)
+      if not key.nil?
+        "/usr/bin/env #{key.to_s}"
+      else
+        nil
+      end
+    end
+
     # Spezielle Kommandos, die ggf. rechtespezifisch sind, also nicht
     # nur application_paths.
 
@@ -96,6 +106,7 @@ module Seee
       :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
 
       :hunspell => @@application_paths[:hunspell] + " -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
+      :aspell => @@application_paths[:aspell] + " -d de_DE-neu list | " + @@application_paths[:aspell] + " -d en list",
 
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
@@ -115,15 +126,6 @@ module Seee
     # einfach mit dem Applikationspfad
     def @@commands.default(key=nil)
       @@application_paths[key]
-    end
-
-    # Sind Pfade nicht gesetzt, defaulte auf /usr/bin/env
-    def @@application_paths.default(key=nil)
-      if not key.nil?
-        "/usr/bin/env #{key.to_s}"
-      else
-        nil
-      end
     end
   end
 end
