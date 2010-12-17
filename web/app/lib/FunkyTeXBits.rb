@@ -8,8 +8,8 @@ module FunkyTeXBits
     # check if hunspell is installed
     `#{hunspell} --version`
     unless $?.to_i == 0
-        logger.warn "Hunspell does not seem to be installed. Skipping spellcheck."
-        return code
+      logger.warn "Hunspell does not seem to be installed. Skipping spellcheck."
+      return code
     end
 
     # write code to tempfile
@@ -23,18 +23,24 @@ module FunkyTeXBits
     File.delete(path)
 
     unless $?.to_i == 0
-        logger.warn "Hunspell failed for some reason. Exit code: #{$?}"
-        logger.warn "Hunspell: #{Seee::Config.commands[:hunspell]}"
-        logger.warn "Path was: #{path}"
-        logger.warn "Whole command: #{Seee::Config.commands[:hunspell]} -l -t #{path}"
-        logger.warn "Code was: #{code}"
-        logger.warn "Hunspell output: #{words.join("\n")}"
-        return code
+      logger.warn "Hunspell failed for some reason. Exit code: #{$?}"
+      logger.warn "Hunspell: #{Seee::Config.commands[:hunspell]}"
+      logger.warn "Path was: #{path}"
+      logger.warn "Whole command: #{Seee::Config.commands[:hunspell]} -l -t #{path}"
+      logger.warn "Code was: #{code}"
+      logger.warn "Hunspell output: #{words.join("\n")}"
+      return code
     end
 
+    return code if words.empty?
+
     # highlight misspelled words
-    words.each do |w|
-        code.gsub!(/\b#{w}\b/, "\\spellingerror{#{w}}")
+    w = words.join("|")
+    r1 = Regexp.new(/.*\b(#{w})\b.*/)
+    r2 = Regexp.new(/\b(#{w})\b/)
+    blockers = Regexp.new(/\\pgf|\\spellingerror|\\begin{pgfpicture/)
+    code.gsub!(r1) do |s|
+      s.match(blockers).nil? ? s.gsub(r2, '\\spellingerror{\1}') : s
     end
 
     code
@@ -55,42 +61,45 @@ module FunkyTeXBits
 
     # see if it's cached, otherwise regenerate
     unless File.exists?("#{path}.base64")
-        head = praeambel("Blaming Someone For Bad LaTeX")
-        head << "\\pagestyle{empty}"
-        foot = "\\end{document}"
+      head = praeambel("Blaming Someone For Bad LaTeX")
+      head << "\\pagestyle{empty}"
+      foot = "\\end{document}"
 
-        File.open(path + ".tex", 'w') do |f|
-          f.write(head + spellcheck(code) + foot)
-        end
+      File.open(path + ".tex", 'w') do |f|
+        f.write(head + spellcheck(code) + foot)
+      end
 
-        error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
-        exitcodes = []
+      error = `cd /tmp/ && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
+      ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
+      error << spellcheck(code)
+      exitcodes = []
+      exitcodes << ex
+      if ex == 0
+        # overwrite by design. Otherwise it's flooded with all
+        # the TeX output even though TeXing worked fine
+        error = ""
+
+        # we don't really care if cropping worked or not
+        exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
+
+        error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
         exitcodes << $?.to_i
-        if $? == 0
-            # overwrite by design. Otherwise it's flooded with all
-            # the TeX output even though TeXing worked fine
-            error = ""
-            # we don't really care if cropping worked or not
-            exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
-
-            error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
-            exitcodes << $?.to_i
-            # convert creates one image per page, so join them
-            # for easier processing
-            unless File.exists?("#{path}.png")
-                error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
-                exitcodes << $?.to_i
-            end
+        # convert creates one image per page, so join them
+        # for easier processing
+        unless File.exists?("#{path}.png")
+          error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
+          exitcodes << $?.to_i
         end
-        failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
+      end
+      failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
 
-        # convert to base64 and store to disk
-        if File.exists?("#{path}.png")
-            require 'base64'
-            data = File.open("#{path}.png", 'rb') { |f| f.read }
-            base64 = Base64.encode64(data)
-            File.open("#{path}.base64", 'w') {|f| f.write(base64) }
-        end
+      # convert to base64 and store to disk
+      if File.exists?("#{path}.png")
+        require 'base64'
+        data = File.open("#{path}.png", 'rb') { |f| f.read }
+        base64 = Base64.encode64(data)
+        File.open("#{path}.base64", 'w') {|f| f.write(base64) }
+      end
     end
 
     # only read from disk if the image has not been created above
@@ -118,6 +127,7 @@ module FunkyTeXBits
     b << "\\usepackage[utf8]{inputenc}\n"
     b << "\\usepackage[T1]{fontenc}\n"
     b << "\\usepackage{ngerman}\n"
+    b << "\\usepackage{pgf} % drawings with jpgjdraw\n"
     b << "\\usepackage{lmodern}\n"
     b << "\\usepackage{longtable}\n"
     b << "\\usepackage{marvosym}\n"

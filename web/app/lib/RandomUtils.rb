@@ -58,7 +58,9 @@ end
 # of the pdffile in the current working directory. Usually you want to
 # call this like pdf_crop or generate_barcode
 def pdf_crop_tex(pdffile)
-  bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)[1].strip
+  bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
+  return false if bbox.nil? || bbox.size < 2
+  bbox = bbox[1].strip
   File.open("cropped.tex", "w") do |h|
     h << "\\csname pdfmapfile\\endcsname{}\n"
     h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
