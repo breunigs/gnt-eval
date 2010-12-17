@@ -36,7 +36,7 @@ module Seee
 
     # Die sollten recht selbsterklärend sein
     @@application_paths = {
-      :hunspell => '/usr/bin/env hunspell',
+      :hunspell => '/usr/bin/hunspell',
       :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
       # das ist das alte zbar, das die Standard ImageMagick Pfade nutzt
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', 'zbarimg'),

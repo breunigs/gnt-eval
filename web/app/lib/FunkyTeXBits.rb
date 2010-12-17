@@ -20,17 +20,17 @@ module FunkyTeXBits
 
     # spell check!
     words = `#{Seee::Config.commands[:hunspell]} -l -t #{path}`.split("\n")
-    File.delete(path)
 
     unless $?.to_i == 0
       logger.warn "Hunspell failed for some reason. Exit code: #{$?}"
       logger.warn "Hunspell: #{Seee::Config.commands[:hunspell]}"
       logger.warn "Path was: #{path}"
       logger.warn "Whole command: #{Seee::Config.commands[:hunspell]} -l -t #{path}"
-      logger.warn "Code was: #{code}"
+      logger.warn "Code was: #{File.read(path)}"
       logger.warn "Hunspell output: #{words.join("\n")}"
       return code
     end
+    File.delete(path)
 
     return code if words.empty?
 
