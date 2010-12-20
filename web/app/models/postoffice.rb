@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 class Postoffice < ActionMailer::Base
   def profanrede(course)
-    return course.profs.map{ |p| 'sehr ' + ['geehrte Frau',
-                                         'geehrter Herr'][p.gender] + 
+    return course.profs.map{ |p| 'sehr ' + {:female => 'geehrte Frau',
+        :male => 'geehrter Herr'}[p.gender] + 
                               ' ' + p.surname.strip }.join(', ').
              gsub(/^(\w)/) { $1.chars.first.capitalize }
   end
@@ -49,7 +49,7 @@ class Postoffice < ActionMailer::Base
     recipients c.profs.collect{ |p| p.email }.join(', ')
     from Seee::Config.settings[:standard_mail_from]
     bcc Seee::Config.settings[:standard_mail_bcc]
-    subject 'Ergebnisse der diessemestrigen Vorlesungsumfrage'
+    subject 'Ergebnisse der diessemestrigen Veranstaltungsumfrage'
     headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
     sent_on Time.now
