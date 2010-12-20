@@ -136,6 +136,7 @@ module FunkyTeXBits
     b << "\\usepackage{pgf} % drawings with jpgjdraw\n"
     b << "\\usepackage{lmodern}\n"
     b << "\\usepackage{longtable}\n"
+    b << "\\usepackage{dsfont}\n"
     b << "\\usepackage{marvosym}\n"
     b << "\\usepackage[protrusion=true,expansion]{microtype}\n"
     b << "\\usepackage{graphicx}\n"
