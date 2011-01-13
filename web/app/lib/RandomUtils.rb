@@ -95,5 +95,6 @@ def temp_dir
   tmp = Seee::Config.file_paths[:cache_tmp_dir]
   require 'ftools'
   File.makedirs(tmp)
+  `chmod 0777 -R #{tmp}`
   tmp
 end
