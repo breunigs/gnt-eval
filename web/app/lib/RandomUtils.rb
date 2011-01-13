@@ -34,33 +34,38 @@ end
 # crops the given pdf file in place. If cropping fails for some reason,
 # the original file is not overwritten
 def pdf_crop(pdffile)
-  tmp = Dir.mktmpdir("seee-pdfcrop-")
+  tmp = Dir.mktmpdir("seee/pdfcrop-")
+  worked = false
   Dir.chdir(tmp) do
-    return false unless pdf_crop_tex(pdffile)
+    break unless pdf_crop_tex(pdffile)
+    worked = true
     `mv -f cropped.pdf "#{pdffile}"`
   end
-  true
+  `rm -rf #{tmp}`
+  worked
 end
 
 # Generates the a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
   path = File.expand_path(path)
-  tmp = Dir.mktmpdir("seee-barcode-")
+  tmp = Dir.mktmpdir("seee/barcode-")
+  worked = false
   Dir.chdir(tmp) do
     `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
     `ps2pdf barcode.ps barcode.pdf`
-    return false unless pdf_crop_tex("barcode.pdf")
+    break unless pdf_crop_tex("barcode.pdf")
     `mv -f cropped.pdf "#{path}"`
   end
+  `rm -rf #{tmp}`
+  worked
 end
 
 # helper function, that generates a cropped version named "cropped.pdf"
 # of the pdffile in the current working directory. Usually you want to
 # call this like pdf_crop or generate_barcode
 def pdf_crop_tex(pdffile)
-  bbox = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`.match(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
-  return false if bbox.nil? || bbox.size < 2
-  bbox = bbox[1].strip
+  bboxes= `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
+  return false if bboxes.nil? || bboxes.size <= 1
   File.open("cropped.tex", "w") do |h|
     h << "\\csname pdfmapfile\\endcsname{}\n"
     h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
@@ -78,7 +83,13 @@ def pdf_crop_tex(pdffile)
     h << "  \\ht0=\\pdfpageheight\n"
     h << "  \\shipout\\box0\\relax\n"
     h << "}\n"
-    h << "\\page 1 [#{bbox}]\n"
+    bboxes.each_with_index do |bbox,i|
+      # each page appears twice, so skip every 2nd entry
+      next if i%2 != 0
+      bbox = bbox[0].strip.split(/\s+/)
+      bbox[1] = bbox[1].to_i - 9
+      h << "\\page #{i/2 + 1} [#{bbox.join(" ")}]\n"
+    end
     h << "\\csname @@end\\endcsname\n"
     h << "\\end\n"
   end
