@@ -20,13 +20,13 @@ class CourseProf < ActiveRecord::Base
 
     b = ''
 
-    sheetCount = count_forms({:barcode => barcode.to_i})
+    sheet_count = count_forms({:barcode => barcode.to_i})
 
-    vorlhead = form.lecturer_header(prof.fullname, prof.gender, course.language, sheetCount)
+    vorlhead = form.lecturer_header(prof.fullname, prof.gender, course.language, sheet_count)
     b << "\\profkopf{#{vorlhead}}\n\n"
 
-    if sheetCount < Seee::Config.settings[:minimum_sheets_required]
-      return b + form.too_few_questionnaires(course.language, sheetCount) + "\n\n"
+    if sheet_count < Seee::Config.settings[:minimum_sheets_required]
+      return b + form.too_few_questionnaires(course.language, sheet_count) + "\n\n"
     end
 
     # b << "\\fragenzurvorlesung\n\n"

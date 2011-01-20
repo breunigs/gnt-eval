@@ -1,18 +1,25 @@
-<p>
-  <b>Semester:</b>
-  <%=h @form.semester.title %>
-</p>
+<fieldset>
+<h1>Form <%=h @form.name %> (<%=h @form.semester.title %>) Preview</h1>
 
-<p>
-  <b>Name:</b>
-  <%=h @form.name %>
-</p>
+ <table>
+    <% for item in
+      [
+        ["Semester",      @form.semester.title],
+        ["Name",          @form.name]
+      ]
+    %>
+      <tr style="background: #<%= cycle('efefef', 'fff') %>">
+        <th><%=h item.shift %></th>
+        <% for data in item do %> <td><%=h data %></td> <% end %>
+      </tr>
+    <% end %>
+  </table>
 
-<p>
-  <b>Content:</b><pre>
-  <%=h @form.pretty_abstract_form %></pre>
-</p>
+  <p>
+    <b>Content:</b>
+    <pre><%=h (@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
+  </p>
 
-
-<%= link_to 'Edit', edit_form_path(@form) %> |
-<%= link_to 'Back', forms_path %>
+  <%= link_to("Edit #{@form.name}", edit_form_path(@form))+' |' unless @form.critical? %>
+  <%= link_to 'List all available forms', forms_path %>
+</fieldset>

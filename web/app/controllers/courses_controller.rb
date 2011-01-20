@@ -77,6 +77,7 @@ class CoursesController < ApplicationController
     @course = Course.find(params[:id])
 
     respond_to do |format|
+      # FIXME don't change form and language if @course.critical?
       if @course.update_attributes(params[:course])
         flash[:notice] = 'Course was successfully updated.'
         format.html { redirect_to(@course) }
@@ -92,13 +93,16 @@ class CoursesController < ApplicationController
   # DELETE /courses/1.xml
   def destroy
     @course = Course.find(params[:id])
-    begin
-      @course.course_profs.each { |cp| cp.destroy }
-      @course.tutors.each { |t| t.destroy }
+    unless @course.critical?
+      begin
+        @course.course_profs.each { |cp| cp.destroy }
+        @course.tutors.each { |t| t.destroy }
+      end
+      @course.destroy
     end
-    @course.destroy
 
     respond_to do |format|
+      flash[:error] = 'Course was critical and has therefore not been destroyed.' if @course.critical?
       format.html { redirect_to(courses_url) }
       format.xml  { head :ok }
     end
@@ -107,10 +111,13 @@ class CoursesController < ApplicationController
   # DELETE /courses/drop_prof?course=1&prof=1
   def drop_prof
     @course = Course.find(params[:id])
-    @prof = Prof.find(params[:prof_id])
-    @course.profs.delete(@prof)
+    unless @course.critical?
+      @prof = Prof.find(params[:prof_id])
+      @course.profs.delete(@prof)
+    end
 
     respond_to do |format|
+      flash[:error] = "Course was critical and therefore prof #{@prof.fullname} has been kept." if @course.critical?
       format.html { redirect_to(@course) }
       format.xml { head :ok }
     end

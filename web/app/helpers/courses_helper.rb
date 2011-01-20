@@ -3,27 +3,19 @@ module CoursesHelper
     link_to("Edit '#{@course.title}'", edit_course_path(@course))
   end
 
-  def courseReturnLink
-    link_to('Return to courses list', courses_path)
-  end
-
   def courseDestroyLink
-    link_to('Delete course', @course, :confirm => "Really delete course '#{@course.title}'?", :method => :delete)
-  end
-
-  def courseShowLink
-    link_to("Show '#{@course.title}'", @course)
+    link_to('Destroy course', @course, :confirm => "Really destroy course '#{@course.title}'?", :method => :delete)
   end
 
   def courseLinksForShowPage
     d = []
-    # doesn't make too much sense when viewing a course?
-    #d << link_to('New', new_course_path)
     d << courseEditLink
-    # FIXME this link should be hidden automatically around eval week
-    d << courseDestroyLink
-    d << courseReturnLink
+    d << courseDestroyLink unless @course.semester.critical?
     d.join(" | ")
+  end
+
+  def comment_image_link
+    Seee::Config.file_paths[:comment_images_public_link]
   end
 
   def sort_class(param)

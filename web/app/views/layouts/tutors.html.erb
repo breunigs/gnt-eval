@@ -6,10 +6,16 @@
   <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
   <title>Tutors: <%= controller.action_name %></title>
   <%= stylesheet_link_tag 'scaffold' %>
+  <%= yield(:script) %>
 </head>
 <body>
 
-<p style="color: green"><%= flash[:notice] %></p>
+<% if flash[:notice] || flash[:error] %>
+<fieldset>
+  <p style="color: green"><%= flash[:notice] %></p>
+  <p style="color: red;font-weight:bold"><%= flash[:error] %></p>
+</fieldset>
+<% end %>
 
 <%= yield  %>
 

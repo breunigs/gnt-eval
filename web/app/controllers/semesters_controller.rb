@@ -45,7 +45,7 @@ class SemestersController < ApplicationController
     respond_to do |format|
       if @semester.save
         flash[:notice] = 'Semester was successfully created.'
-        format.html { redirect_to(@semester) }
+        format.html { redirect_to(semesters_url) }
         format.xml  { render :xml => @semester, :status => :created, :location => @semester }
       else
         format.html { render :action => "new" }
@@ -62,7 +62,7 @@ class SemestersController < ApplicationController
     respond_to do |format|
       if @semester.update_attributes(params[:semester])
         flash[:notice] = 'Semester was successfully updated.'
-        format.html { redirect_to(@semester) }
+        format.html { redirect_to(semesters_url) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -75,9 +75,10 @@ class SemestersController < ApplicationController
   # DELETE /semesters/1.xml
   def destroy
     @semester = Semester.find(params[:id])
-    @semester.destroy
+    @semester.destroy unless @semester.critical?
 
     respond_to do |format|
+      flash[:error] = 'Semester was critical and has therefore not been destroyed.' if @semester.critical?
       format.html { redirect_to(semesters_url) }
       format.xml  { head :ok }
     end

@@ -1,23 +1,36 @@
+<%= render "shared/main_menu" %>
+
+
+
+<fieldset>
+  <legend>Main details</legend>
+  <h1>Showing Tutor</h1>
+  <%= tutorEditLink %> | <%= tutorReturnLink %>
+
+
+  <table style="margin-top:2em">
+    <% for item in
+      [
+        ["Course",              @tutor.course.title],
+        ["Abbr name",           @tutor.abbr_name],
+        ["returned sheets",     @tutor.sheet_count],
+        ["# of comments",       @tutor.pics.count]
+      ]
+    %>
+      <tr style="background: #<%= cycle('efefef', 'fff') %>">
+        <th><%=h item.shift %></th>
+        <% for data in item do %> <td><%=h data %></td> <% end %>
+      </tr>
+    <% end %>
+  </table>
+</fieldset>
+
+<fieldset>
+  <legend>Comments preview</legend>
+    <iframe style="height:20em;"  scrolling="auto" class="preview" src="<%= url_for({ :action => 'preview', :id => @tutor, :quiet => "yes"}) %>"></iframe>
+  <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @tutor} %></p>
+</fieldset>
+
+<fieldset>
 <%= tutorEditLink %> | <%= tutorReturnLink %>
-
-<h1>Showing Tutor</h1>
-
-<p>
-  <b>Course:</b>
-  <%=h @tutor.course.title %>
-</p>
-
-<p>
-  <b>Abbr name:</b>
-  <%=h @tutor.abbr_name %>
-</p>
-
-<p>
-  <b>Comment</b><pre>
-<%=h @tutor.comment %>
-  </pre>
-</p>
-
-<iframe style="width:100%;height:30em;" src="<%= url_for({ :action => 'preview', :id => @tutor}) %>"></iframe>
-
-<%= tutorEditLink %> | <%= tutorReturnLink %>
+</fieldset>

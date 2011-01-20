@@ -45,7 +45,7 @@ class FacultiesController < ApplicationController
     respond_to do |format|
       if @faculty.save
         flash[:notice] = 'Faculty was successfully created.'
-        format.html { redirect_to(@faculty) }
+        format.html { redirect_to(faculties_url) }
         format.xml  { render :xml => @faculty, :status => :created, :location => @faculty }
       else
         format.html { render :action => "new" }
@@ -62,7 +62,7 @@ class FacultiesController < ApplicationController
     respond_to do |format|
       if @faculty.update_attributes(params[:faculty])
         flash[:notice] = 'Faculty was successfully updated.'
-        format.html { redirect_to(@faculty) }
+        format.html { redirect_to(faculties_url) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -75,9 +75,10 @@ class FacultiesController < ApplicationController
   # DELETE /faculties/1.xml
   def destroy
     @faculty = Faculty.find(params[:id])
-    @faculty.destroy
+    @faculty.destroy unless @faculty.critical?
 
     respond_to do |format|
+      flash[:error] = 'Faculty was critical and has therefore not been destroyed.' if @faculty.critical?
       format.html { redirect_to(faculties_url) }
       format.xml  { head :ok }
     end

@@ -1,28 +1,43 @@
-<h1>Editing tutor</h1>
-<%= tutorShowLink %> | <%= tutorReturnLink %>
-
-<%= error_messages_for :tutor %>
+<%= render "shared/main_menu" %>
 
 <% form_for([@course, @tutor]) do |f| %>
-  <p>
-    <b>Abbr name</b><br />
-    <%= f.text_field :abbr_name %>
-  </p>
 
-  <p>
-    <b>Comment</b> (This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')<br/>
-    <%= f.text_area(:comment, :style => 'width:99%')%>
-  </p>
-  <p>
-    <%= f.submit "Update and Preview" %>
-  </p>
+<fieldset>
+  <h1>Editing tutor</h1>
+  <%= f.submit "Update and Preview" %> | <%= link_to "Cancel", @tutor.course %>
+  <%= error_messages_for :tutor %>
 
-  <div class="commentview">
-<% for p in @tutor.pics %>
-    <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" /><br/>
+  <table style="margin-top:2em">
+    <tr style="background:#efefef">
+      <th>Abbr name</th>
+      <td><%= f.text_field :abbr_name %></td>
+    </tr>
+  </table>
+
+</fieldset>
+
+<fieldset>
+  <legend>Comments</legend>
+    <p>(This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')</p>
+      <%= f.text_area(:comment, :style => 'width:99%')%>
+    </p>
+</fieldset>
+
+<fieldset>
+  <legend>Scanned comments</legend>
+    <div class="commentview">
+  <% for p in @tutor.pics %>
+      <img
+        style="border-left:2em solid #<%= cycle('efefef', 'bfbfbf') %>"
+        src="<%=h comment_image_link %>/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" /><br/>
+  <% end %>
+      <span style="background:#f00;color:#fff">end of comments</span>
+    </div>
+
+</fieldset>
+
+<fieldset>
+  <%= f.submit "Update and Preview" %> | <%= link_to "Cancel", @tutor.course %>
+</fieldset>
+
 <% end %>
-    <hr color="#f00">
-  </div>
-<% end %>
-
-<%= tutorShowLink %> | <%= tutorReturnLink %>

@@ -9,23 +9,31 @@ class Course < ActiveRecord::Base
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
-  validates_presence_of :semester_id
+  validates_presence_of :semester_id, :title, :faculty, :language
   validates_numericality_of :students
 
   include FunkyDBBits
 
   # storing symbols via activerecord is a bit icky
   def language #:nodoc
+    return '' if read_attribute(:language).nil?
     read_attribute(:language).to_sym
   end
 
   def language= (value)
     write_attribute(:language, value.to_s)
   end
-  
+
   # magic translator function
   def t(string)
     I18n.t(string)
+  end
+
+  # returns if the course is critical. If it is, some features should
+  # be disabled (e.g. deletion). A course is critical, when the semester
+  # it belongs to is.
+  def critical?
+    semester.critical?
   end
 
   # Tries to parse the description field for eval times and returns them
@@ -143,7 +151,7 @@ class Course < ActiveRecord::Base
 
     b
   end
-  
+
   # eval me (baby)
   def evaluate
     # if this course doesn't have any lecturers it cannot have been

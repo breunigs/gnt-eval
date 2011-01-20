@@ -1,18 +1,15 @@
-<% curSem = Semester.find(:all).find{|s| s.now? } %>
+<%= render "shared/main_menu" %>
 
-<h1>Listing courses of <%=h curSem.title %></h1>
-<% if curSem.critical? %>
-<h2 style="color:red;background:white">Careful now, the semester is critical. No unwary changes.</h2>
-<% end %>
-<p>
-  <%= link_to 'Prof List', :controller => "profs", :action => "index" %> |
-  <%= link_to 'Semester List', :controller => "semesters", :action => "index" %> |
-  <%= link_to 'New course', new_course_path %>
-</p>
+<fieldset>
+  <h1>Listing courses of <%=h @curSem.title %></h1>
+  <p>
+    <%= link_to 'New course', new_course_path %>
+  </p>
+</fieldset>
 
-<table>
+<!-- didn't put the table in a fieldset because the horizontal space is too valuable -->
+<table style="margin-top:1em;">
   <tr>
-    <!--<th>Semester</th>-->
     <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
     <th <%= sort_class(x) %>>
         <%= sort_link(x) %>
@@ -35,8 +32,10 @@ for course in courses %>
 <% end %>
 </table>
 
-<br />
-<%= link_to 'New course', new_course_path %> |
-<%= link_to 'New Prof', new_prof_path %> |
-<%= link_to 'New semester', new_semester_path %>
-
+<fieldset>
+  <p>
+    <%= link_to 'New course', new_course_path %> |
+    <%= link_to 'New Prof', new_prof_path %> |
+    <%= link_to 'New semester', new_semester_path %>
+  </p>
+</fieldset>

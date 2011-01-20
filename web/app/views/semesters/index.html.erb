@@ -1,8 +1,6 @@
-<h1>Listing semesters</h1>
-
-
-<%= link_to 'Return to course list', :controller => "courses", :action => "index" %> |
-<%= link_to 'New semester', new_semester_path %>
+<fieldset>
+  <h1>Listing semesters</h1>
+  <%= link_to 'New semester', new_semester_path %>
 <br />
 <br />
 <table>
@@ -17,11 +15,12 @@
     <td><%=h semester.firstday %></td>
     <td><%=h semester.lastday %></td>
     <td><%=h semester.title %></td>
-    <td><%= link_to 'Show', semester %></td>
-    <td><%= link_to 'Edit', edit_semester_path(semester) %></td>
-    <td><%= link_to 'Destroy', semester, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to "Edit #{semester.title}", edit_semester_path(semester) %></td>
+    <td><%= semester.critical ? "Critical" : (link_to 'Destroy', semester, :confirm => 'Are you sure?', :method => :delete) %></td>
+
   </tr>
 <% end %>
 </table>
+</fieldset>
 
 

@@ -1,11 +1,17 @@
-<h1>Previewing <%=@tutor.abbr_name %></h1>
-EXIT CODES: <%= @exitcodes.join(", ") %>
-<br/><br/>
+<% unless params[:quiet] %>
+  <%= render "shared/main_menu" %>
 
-<% if @failed %>
-	<%= @error %>
-	<br/><br/>
+	<h1>Previewing <%=@tutor.abbr_name %></h1>
 <% end %>
+
+<% if @failed || !params[:quiet] %>
+  EXIT CODES:
+  <%= @exitcodes.join(", ") %>
+  <br/>
+  <%= @error if @failed %>
+  <br/>
+<% end %>
+
 
 <%= "<img src=\"data:image/png;base64,#{@base64}\"/>" unless @failed || @base64.nil? || @base64.empty? %>
 

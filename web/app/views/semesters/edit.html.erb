@@ -1,32 +1,33 @@
-<h1>Editing semester</h1>
-
-<%= error_messages_for :semester %>
-
 <% form_for(@semester) do |f| %>
-  <p>
-    <b>Firstday</b><br />
-    <%= f.date_select :firstday %>
-  </p>
+
+<fieldset>
+  <h1>Editing semester <%=h @semester.title %></h1>
+  <%= error_messages_for :semester %>
+
+    <table>
+      <% for item in
+        [
+          ["Firstday",                      f.date_select(:firstday), "required"],
+          ["Lastday",                       f.date_select(:lastday),  "required"],
+          [f.label(:title),                 f.text_field(:title),     "required"],
+          [f.label(:critical, "Critical?"), f.check_box(:critical) + f.label(:critical, "the semester is critical")]
+
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
 
   <p>
-    <b>Lastday</b><br />
-    <%= f.date_select :lastday %>
-  </p>
-
-  <p>
-    <b>Title</b><br />
-    <%= f.text_field :title %>
-  </p>
-
-  <p>
-    <b>Currently in critical phase?</b><br />
-    <%= f.check_box :critical %>
-  </p>
-
-  <p>
-    <%= f.submit "Update" %>
+    <%= f.submit "Update semester" %>
+    <%= link_to 'Cancel', semesters_path %>
   </p>
 <% end %>
 
-<%= link_to 'Show this semester', @semester %> |
-<%= link_to 'return to semester list', semesters_path %>
+</fieldset>
+
+

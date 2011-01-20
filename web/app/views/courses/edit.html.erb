@@ -1,82 +1,83 @@
-<%= courseShowLink %> | <%= courseReturnLink %>
-<h1>Editing course <%=h @course.title %></h1>
+<%= render "shared/main_menu" %>
 
-<% if @course.semester.critical? %>
-<h2 style="color:red;background:white">Careful now, the semester is critical. No unwary changes.</h2>
-<% end %>
-
-<%= error_messages_for :course %>
 
 <% form_for(@course) do |f| %>
-  <p>
-    <b>Semester</b><br />
-    <%= collection_select(:course, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}) %>
-  </p>
+  <fieldset>
+    <h1>Editing course <%=h @course.title %></h1>
+    <%= error_messages_for :course %>
 
-  <p>
-    <b>Title</b><br />
-    <%= f.text_field :title %>
-  </p>
+    <p>
+      <%= f.submit "Update and Preview" %>
+      <%= link_to "Cancel", @course %>
+    </p>
+  </fieldset>
 
-  <p>
-    <b>Students</b><br />
-    <%= f.text_field :students %>
-  </p>
-  <p>
-    <b>Evaluated by</b><br />
-    <%= f.text_field :evaluator %>
-  </p>
-  <p>
-    <b>FS contact (email):</b><br />
-    <%= f.text_field :fscontact %>
-  </p>
-  <p>
-    <b>Form</b><br />
-    <%= if @course.semester.critical?
-        @course.form.name + " (can't change this while the semester is critical)"
-      else
-	collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == @course.semester.id}, :id, :name, {:prompt => true})
-      end
-    %>
-  </p>
-  <p>
-    <b>Language</b><br/>
-    <%= if @course.semester.critical?
-        "#{@course.language} (can't change this while the semester is critical)"
-      else
-	collection_select(:course, :language, ['de', 'en'], :to_s, :to_s)
-      end
-    %>
-  </p>
-  <p>
-    <b>Description (date etc)</b><br />
-    <%= f.text_field :description %>
-  </p>
-  <p>
-    <b>Faculty</b><br />
-    <%= collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}) %>
-  </p>
-  <p>
-    <b>Summary</b> (This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')<br />
+  <fieldset>
+    <legend>main details</legend>
+    <table>
+      <% for item in
+        [
+          [f.label(:semester_id),                       collection_select(:course, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}), "required"],
+          [f.label(:title),                             f.text_field(:title), "required"],
+          [f.label(:students),                          f.text_field(:students), "required, numeric. If you absolutely must, use 999 for “don't know”"],
+          [f.label(:form_id),
+              if @course.semester.critical?
+                "#{@course.form.name} (can't change this while critical)"
+              else
+                collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == @course.semester.id}, :id, :name, {:prompt => true})
+              end],
+          [f.label(:language),
+              if @course.semester.critical?
+                "#{@course.language} (can't change this while critical)"
+              else
+                collection_select(:course, :language, ['de', 'en'], :to_sym, :to_s)
+              end],
+          [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
+          [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
+          [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],
+          [f.label(:faculty_id),                        collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"]
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </fieldset>
+
+
+  <fieldset>
+    <legend>Comments</legend>
+    <p>(This is LaTeX-enabled! Be careful when using % or $ signs. Use LaTeX quotes, i.e. &#8222;quote&#8220; or "`quote"')</p>
     <%= f.text_area(:summary, :style => 'width:99%')%>
-  </p>
+  </fieldset>
 
-  <p>
-    <%= f.submit "Update and Preview" %>
-  </p>
+  <fieldset>
+    <legend>Scanned comments</legend>
+    <div class="commentview">
+      <% for cp in @course.course_profs %>
+        <% if cp.c_pics.empty? %>
+          <span>NO COMMENTS for <%=h cp.prof.fullname %></span>
+          <% next %>
+        <% end %>
 
-  <div class="commentview">
-    <% for cp in @course.course_profs %>
-      <span>Für <%= cp.prof.fullname %>:</span><br/>
-      <% for p in cp.c_pics %>
-        <img src="http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" " />
+        <span>for <%=h cp.prof.fullname %>:</span>
+        <% for p in cp.c_pics %>
+          <img style="border-left:2em solid #<%= cycle('efefef', 'bfbfbf') %>"
+            src="<%=h comment_image_link %>/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" />
+          <br/>
+        <% end %>
         <br/>
       <% end %>
-      <br/>
-    <% end %>
-    <hr color="#f00">
-  </div>
+      <span style="background:#f00;color:#fff">end of comments</span>
+    </div>
+  </fieldset>
 
+  <fieldset>
+    <%= f.submit "Update and Preview" %>
+    <%= link_to "Cancel", @course %>
+  </fieldset>
 <% end %>
 
-<%= courseShowLink %> | <%= courseReturnLink %>

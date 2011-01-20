@@ -60,7 +60,11 @@ class FormsController < ApplicationController
     @form = Form.find(params[:id])
 
     respond_to do |format|
-      if @form.update_attributes(params[:form])
+      if @form.critical?
+        flash[:error] = 'Form was critical and has therefore not been updated.' if @form.critical?
+        format.html { redirect_to(@form) }
+        format.xml  { head :ok }
+      elsif @form.update_attributes(params[:form])
         flash[:notice] = 'Form was successfully updated.'
         format.html { redirect_to(@form) }
         format.xml  { head :ok }
@@ -75,9 +79,10 @@ class FormsController < ApplicationController
   # DELETE /forms/1.xml
   def destroy
     @form = Form.find(params[:id])
-    @form.destroy
+    @form.destroy unless @form.critical?
 
     respond_to do |format|
+      flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
       format.html { redirect_to(forms_url) }
       format.xml  { head :ok }
     end

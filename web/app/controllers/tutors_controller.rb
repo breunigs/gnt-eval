@@ -11,7 +11,8 @@ class TutorsController < ApplicationController
   # GET /tutors
   # GET /tutors.xml
   def index
-    @tutors = @course.tutors.find(:all)
+    @tutors = Tutor.all.reject { |x| x.course.nil? }
+    @tutors.sort! { |x,y| x.abbr_name <=> y.abbr_name }
 
     respond_to do |format|
       format.html # index.html.erb
@@ -103,9 +104,10 @@ class TutorsController < ApplicationController
   # DELETE /tutors/1.xml
   def destroy
     @tutor = @course.tutors.find(params[:id])
-    @tutor.destroy
+    @tutor.destroy unless @tutor.critical?
 
     respond_to do |format|
+      flash[:error] = 'Tutor was critical and has therefore not been destroyed.' if @tutor.critical?
       format.html { redirect_to(@course) }
       format.xml  { head :ok }
     end

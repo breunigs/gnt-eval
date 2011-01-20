@@ -1,49 +1,37 @@
-<h1>New course</h1>
-
-<%= error_messages_for :course %>
+<%= render "shared/main_menu" %>
 
 <% form_for(@course) do |f| %>
-  <p>
-    <b>Semester</b><br />
-    <%= select_tag 'course[semester_id]', options_from_collection_for_select(Semester.find(:all), :id, :title, Semester.find(:all).last.id) %>
-  </p>
+  <fieldset>
+    <legend>main details</legend>
+    <h1>New course</h1>
+    <%= error_messages_for :course %>
 
-  <p>
-    <b>Title</b><br />
-    <%= f.text_field :title %>
-  </p>
+    <table>
+      <% for item in
+        [
+          [f.label(:semester_id),                       f.collection_select(:semester_id, Semester.find(:all, :order => "id").reverse, :id, :title), "required"],
+          [f.label(:title),                             f.text_field(:title), "required"],
+          [f.label(:students),                          f.text_field(:students), "required, numeric. If you absolutely must, use 999 for “don't know”"],
+          [f.label(:form_id),                           f.collection_select(:form_id, Form.all.find_all{|x| x.semester_id == @curSem.id }, :id, :name)],
+          [f.label(:language),                          f.collection_select(:language, ['de', 'en'], :to_sym, :to_s), "required"],
+          [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
+          [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
+          [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],
+          [f.label(:faculty_id),                        f.collection_select(:faculty_id, Faculty.all, :id, :shortname), "required"]
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
+  </fieldset>
 
-  <p>
-    <b>Students</b><br />
-    <%= f.text_field :students %>
-  </p>
 
-  <p>
-    <b>Evaluated by</b><br />
-    <%= f.text_field :evaluator %>
-  </p>
-  <p>
-    <b>FS contact (@mathphys added automagically)</b><br />
-    <%= f.text_field :fscontact %>
-  </p>
-  <p>
-    <b>Form</b><br />
-    <%=
-      semid = Semester.find(:all).find{|s| s.now?}.id
-	collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == semid }, :id, :name)
-    %>
-  </p>
-  <p>
-    <b>Description (date etc)</b><br />
-    <%= f.text_field :description %>
-  </p>
-  <p>
-    <b>Faculty</b><br />
-    <%= select_tag 'course[faculty_id]', options_from_collection_for_select(Faculty.find(:all), :id, :shortname) %>
-  </p>
   <p>
     <%= f.submit "Create new course" %>
+    <%= link_to "Cancel", @course %>
   </p>
 <% end %>
-
-<%= link_to 'Return to course list', courses_path %>

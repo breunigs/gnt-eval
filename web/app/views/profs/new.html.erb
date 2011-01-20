@@ -1,31 +1,29 @@
-<h1>New prof</h1>
+<fieldset>
+  <h1>New prof</h1>
+  <%= error_messages_for :prof %>
 
-<%= error_messages_for :prof %>
+  <% form_for(@prof) do |f| %>
+    <table>
+      <% for item in
+        [
+          [f.label(:firstname), f.text_field(:firstname), "required"],
+          [f.label(:surname),   f.text_field(:surname),   "required"],
+          [f.label(:email),     f.text_field(:email)],
+          [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"]
 
-<% form_for(@prof) do |f| %>
-  <p>
-    <b>Firstname</b><br />
-    <%= f.text_field :firstname %>
-  </p>
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
 
-  <p>
-    <b>Surname</b><br />
-    <%= f.text_field :surname %>
-  </p>
-
-  <p>
-    <b>Email</b><br />
-    <%= f.text_field :email %>
-  </p>
-
-  <p>
-    <b>Gender</b><br />
-    <%= f.select('gender', {'w' => 0, 'm'=> 1}) %>
-  </p>
-
-  <p>
-    <%= f.submit "Create" %>
-  </p>
-<% end %>
-
-<%= link_to 'Return to prof list', profs_path %>
+    <p>
+      <%= f.submit "Create" %>
+      <%= link_to 'Cancel', profs_path %>
+    </p>
+  <% end %>
+</fieldset>

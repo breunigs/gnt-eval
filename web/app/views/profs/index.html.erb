@@ -1,28 +1,29 @@
-<h1>Listing profs</h1>
+<fieldset>
+  <h1>Listing profs</h1>
 
-<%= link_to 'Return to course list', :controller => "courses", :action => "index" %> |
-<%= link_to 'New Prof', new_prof_path %>
-<br />
+  <%= link_to 'New Prof', new_prof_path %>
+</fieldset>
 
-<table>
-  <tr>
-    <th>Firstname</th>
-    <th>Surname</th>
-    <th>Email</th>
-    <th>Gender</th>
-  </tr>
+<fieldset>
+  <table>
+    <tr>
+      <th>Firstname</th>
+      <th>Surname</th>
+      <th>Email</th>
+      <th>Gender</th>
+    </tr>
 
-<% for prof in @profs %>
-  <tr>
-    <td><%=h prof.firstname %></td>
-    <td><%=h prof.surname %></td>
-    <td><%=h prof.email %></td>
-    <td><%=h prof.gender %></td>
-    <td><%= link_to 'Show', prof %></td>
-    <td><%= link_to 'Edit', edit_prof_path(prof) %></td>
-  </tr>
-<% end %>
-</table>
-
-
-
+  <% for prof in @profs %>
+    <tr style="background: #<%= cycle('efefef', 'fff') %>">
+      <td><%=h prof.firstname %></td>
+      <td><%=h prof.surname %></td>
+      <td><%= mail_to prof.email %></a></td>
+      <td><%=h prof.gender %></td>
+      <td><%= link_to "Edit #{prof.fullname}", edit_prof_path(prof) %></td>
+      <td><%= link_to('Destroy', {:controller => 'profs', :id => prof, :action => 'destroy'},
+          :confirm => "Really delete prof #{prof.fullname}?",
+          :method => :delete) unless prof.critical? %></td>
+    </tr>
+  <% end %>
+  </table>
+</fieldset>

@@ -3,18 +3,27 @@ class Prof < ActiveRecord::Base
   has_many :course_profs
   has_many :courses, :through => :course_profs
   validates_presence_of :firstname, :surname, :gender
+
   def fullname
     return firstname.strip + ' ' + surname.strip
   end
+
   def surnamefirst
     return surname.strip + ', ' + firstname.strip
   end
+
   def gender
     g = read_attribute(:gender)
-    if g == 0
-      return :female
-    else
+    if g == 1
       return :male
+    else
+      return :female
     end
+  end
+
+  # Returns if the prof is critical. This is the case if there are any
+  # associated courses
+  def critical?
+    course_profs.size > 0
   end
 end

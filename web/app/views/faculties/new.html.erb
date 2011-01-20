@@ -1,15 +1,28 @@
-<h1>New faculty</h1>
-
 <% form_for(@faculty) do |f| %>
-  <%= f.error_messages %>
 
-  <p>
-    <%= f.label :name %><br />
-    <%= f.text_field :name %>
-  </p>
-  <p>
-    <%= f.submit "Create" %>
-  </p>
+  <fieldset>
+    <h1>New faculty</h1>
+    <%= f.error_messages %>
+
+   <table>
+      <% for item in
+        [
+          [f.label(:shortname),   f.text_field(:shortname), 'required, short identifier to save space, only used internally'],
+          [f.label(:longname),    f.text_field(:longname),  'required, should be the full official name']
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <th><%= item.shift %></th>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
+
+
+    <p>
+      <%= f.submit "Create new faculty" %>
+      <%= link_to 'Cancel', faculties_path %>
+    </p>
+  </fieldset>
 <% end %>
-
-<%= link_to 'Back', faculties_path %>

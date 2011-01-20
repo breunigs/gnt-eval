@@ -7,7 +7,7 @@ module TutorsHelper
 		link_to "Return to '#{@tutor.course.title}'", @tutor.course
 	end
 
-	def tutorShowLink
-		link_to "Show/Preview '#{@tutor.abbr_name}'", @tutor
-	end
+	def comment_image_link
+    Seee::Config.file_paths[:comment_images_public_link]
+  end
 end

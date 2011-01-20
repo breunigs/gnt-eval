@@ -1,26 +1,32 @@
-<h1>New semester</h1>
+<fieldset>
+  <h1>New semester</h1>
+  <%= error_messages_for :semester %>
 
-<%= error_messages_for :semester %>
+  <% form_for(@semester) do |f| %>
+    <table>
+      <tr style="background:#efefef">
+        <th>Firstday</th>
+        <td><%= f.date_select :firstday %></td>
+        <td>required</td>
+      </tr>
 
-<% form_for(@semester) do |f| %>
-  <p>
-    <b>Firstday</b><br />
-    <%= f.date_select :firstday %>
-  </p>
+      <tr>
+        <th>Lastday</th>
+        <td><%= f.date_select :lastday %></td>
+        <td>required</td>
+      </tr>
 
-  <p>
-    <b>Lastday</b><br />
-    <%= f.date_select :lastday %>
-  </p>
+      <tr style="background:#efefef">
+        <th><%= f.label :title %></th>
+        <td><%= f.text_field :title %></td>
+        <td>required</td>
+      </tr>
+    </table>
+    <p>
+      <%= f.submit "Create new semester" %>
+      <%= link_to 'Cancel', semesters_path %>
+    </p>
+  <% end %>
 
-  <p>
-    <b>Title</b><br />
-    <%= f.text_field :title %>
-  </p>
 
-  <p>
-    <%= f.submit "Create" %>
-  </p>
-<% end %>
-
-<%= link_to 'Return to semester list', semesters_path %>
+</fieldset>

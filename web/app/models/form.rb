@@ -5,6 +5,14 @@ require 'stringio'
 class Form < ActiveRecord::Base
   belongs_to :semester
   has_many :course
+  validates_presence_of :semester, :name, :content
+
+  # returns if the form is critical. This is the case if the semester is
+  # critical. It may be edited/removed even if there are associated
+  # courses. Latter would not be too wise, though.
+  def critical?
+    semester.critical?
+  end
 
   # the AbstractForm object belonging to this form
   # this is NOT relational, we just dump the AbstractForm into the database as a YAML-string
@@ -17,7 +25,11 @@ class Form < ActiveRecord::Base
 
   # pretty printing an AbstrctForm is a bit
   def pretty_abstract_form
-    abstract_form.pretty_print_me
+    if abstract_form.is_a? String
+      "This is not a valid form. Here's the source: \n\n\n" + abstract_form.to_s
+    else
+      abstract_form.pretty_print_me
+    end
   end
 
   # what languages does this form support?

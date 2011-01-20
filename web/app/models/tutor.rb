@@ -5,21 +5,27 @@ class Tutor < ActiveRecord::Base
   include FunkyDBBits
   include FunkyTeXBits
 
+  # returns if the tutor is critical. This is the case when either the
+  # parent course is critical or if the course has returned sheets
+  def critical?
+    course.critical? || course.returned_sheets > 0
+  end
+
   def evaluate
     form = course.form
     @db_table = form.db_table
 
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
 
-    if sheetcount < Seee::Config.settings[:minimum_sheets_required]
-      b << form.too_few_questionnaires(course.language, sheetcount)
+    if sheet_count < Seee::Config.settings[:minimum_sheets_required]
+      b << form.too_few_questionnaires(course.language, sheet_count)
       b << "\n\n"
-      return b, sheetcount
+      return b, sheet_count
     end
 
     I18n.locale = course.language
     I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
-    b << I18n.translate(:submitted_questionnaires) + ': ' + sheetcount.to_s + "\n\n"
+    b << I18n.translate(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }
@@ -30,7 +36,7 @@ class Tutor < ActiveRecord::Base
       b << "\\commentstutor{#{I18n.t(:comments)}}"
       b << comment.to_s
     end
-    return b, sheetcount
+    return b, sheet_count
   end
 
   def tutnum
@@ -62,7 +68,7 @@ class Tutor < ActiveRecord::Base
     query(prep_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t3 > 0").to_f
 
   end
-  def sheetcount
+  def sheet_count
     # Otherwise the SQL query will not work
     return 0 if course.profs.empty?
     @db_table = course.form.db_table

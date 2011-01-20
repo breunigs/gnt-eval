@@ -1,32 +1,56 @@
-<h1>Editing prof</h1>
+<fieldset>
+  <h1>Editing <%=h @prof.fullname %></h1>
+  <%= error_messages_for :prof %>
 
-<%= error_messages_for :prof %>
+  <%=  %>
 
-<% form_for(@prof) do |f| %>
-  <p>
-    <b>Firstname</b><br />
-    <%= f.text_field :firstname %>
-  </p>
+  <% form_for(@prof) do |f| %>
+    <table>
+      <% for item in
+        [
+          [f.label(:firstname), f.text_field(:firstname), "required"],
+          [f.label(:surname),   f.text_field(:surname),   "required"],
+          [f.label(:email),     f.text_field(:email)],
+          [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"]
 
-  <p>
-    <b>Surname</b><br />
-    <%= f.text_field :surname %>
-  </p>
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
 
-  <p>
-    <b>Email</b><br />
-    <%= f.text_field :email %>
-  </p>
+    <p>
+      <%= f.submit "Update Prof" %>
+      <%= link_to 'Cancel', profs_path %>
+    </p>
+  <% end %>
+</fieldset>
 
-  <p>
-    <b>Gender</b><br />
-    <%= f.select('gender', {'w' => 0, 'm'=> 1}) %>
-  </p>
+<fieldset>
+  <legend>courses associated with <%=h @prof.fullname %></legend>
+  <% if @prof.course_profs.empty? %>
+    There are no associated courses.
+  <% else %>
+    <table>
+      <tr>
+        <th>semester</th>
+        <th>form</th>
+        <th>lang</th>
+        <th>title</th>
+      </tr>
+    <% for cp in @prof.course_profs.sort { |x,y| s = y.course.semester.id <=> x.course.semester.id; (s == 0 ? x.course.title <=> y.course.title : s) } %>
+      <tr style="background: #<%= cycle('efefef', 'fff') %>">
+        <td><%=h cp.course.semester.title %></td>
+        <td><%= link_to cp.course.form.name, cp.course.form %></td>
+        <td><%=h cp.course.language %></td>
+        <td><%= link_to cp.course.title, cp.course %></td>
+      </tr>
+    <% end %>
+    </table>
+  <% end %>
+</fieldset>
 
-  <p>
-    <%= f.submit "Update" %>
-  </p>
-<% end %>
-
-<%= link_to 'Show', @prof %> |
-<%= link_to 'Back', profs_path %>

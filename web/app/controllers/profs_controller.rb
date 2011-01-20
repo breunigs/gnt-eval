@@ -45,7 +45,7 @@ class ProfsController < ApplicationController
     respond_to do |format|
       if @prof.save
         flash[:notice] = 'Prof was successfully created.'
-        format.html { redirect_to(@prof) }
+        format.html { redirect_to(profs_url) }
         format.xml  { render :xml => @prof, :status => :created, :location => @prof }
       else
         format.html { render :action => "new" }
@@ -61,8 +61,8 @@ class ProfsController < ApplicationController
 
     respond_to do |format|
       if @prof.update_attributes(params[:prof])
-        flash[:notice] = 'Prof was successfully updated.'
-        format.html { redirect_to(@prof) }
+        flash[:notice] = "Prof '#{@prof.firstname} #{@prof.surname}' was successfully updated."
+        format.html { redirect_to(profs_url) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -75,9 +75,10 @@ class ProfsController < ApplicationController
   # DELETE /profs/1.xml
   def destroy
     @prof = Prof.find(params[:id])
-    @prof.destroy
+    @prof.destroy unless @prof.critical?
 
     respond_to do |format|
+      flash[:error] = 'Prof was critical and has therefore not been destroyed.' if @prof.critical?
       format.html { redirect_to(profs_url) }
       format.xml  { head :ok }
     end

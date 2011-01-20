@@ -1,22 +1,27 @@
+<%= render "shared/main_menu" %>
+
+<% content_for :script, javascript_include_tag("table_filter") %>
+
+<fieldset>
 <h1>Listing tutors</h1>
 
-<table>
-  <tr>
-    <th>Course</th>
-    <th>Abbr name</th>
-  </tr>
+  <b>Filter:</b>
+  <input name="filter" onkeyup="table_filter(this.value, 'tutors_table')" type="text" id="filter">
+  <button type="button" onclick="table_filter_clear('filter', 'tutors_table');">Clear</button><br/><br/>
 
-<% for tutor in @tutors %>
-  <tr>
-    <td><%=h tutor.course %></td>
-    <td><%=h tutor.abbr_name %></td>
-    <td><%= link_to 'Show', tutor %></td>
-    <td><%= link_to 'Edit', edit_tutor_path(tutor) %></td>
-    <td><%= link_to 'Destroy', tutor, :confirm => 'Are you sure?', :method => :delete %></td>
-  </tr>
-<% end %>
-</table>
+  <table id="tutors_table">
+    <tr>
+      <th>Abbr name</th>
+      <th>Course</th>
+      <th>Semester</th>
+    </tr>
 
-<br />
-
-<%= link_to 'New tutor', new_tutor_path %>
+  <% for tutor in @tutors %>
+    <tr class="<%= cycle('odd', 'even') %>">
+      <td><%= link_to tutor.abbr_name, tutor  %></td>
+      <td><%= link_to tutor.course.title, tutor.course %></td>
+      <td><%=h tutor.course.semester.title %></td>
+    </tr>
+  <% end %>
+  </table>
+</fieldset>
