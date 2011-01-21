@@ -264,4 +264,27 @@ module FunkyTeXBits
 
     return b
   end
+
+  def blacklist_head(semester_title)
+    b = ""
+    b << "\\documentclass[11pt,a4paper]{article}\n"
+    b << "\\usepackage[utf8]{inputenc}\n"
+    b << "\\usepackage[T1]{fontenc}\n"
+    b << "\\usepackage{graphicx}\n"
+    b << "\\usepackage{longtable}\n"
+    b << "\\usepackage{hyperref}\n"
+    b << "\\usepackage[landscape]{geometry}\n"
+    b << "\\title{Tutoren #{semester_title}}\n"
+    b << "\\date{}\n"
+    b << "\\begin{document}\n"
+    b << "\\maketitle\n"
+    b << "\\begin{longtable}{llrrrrr}\n"
+    b << "\\hline\n"
+    b << "Tutor & Vorlesung & Nutzen & Lehrer & Kompetenz & Vorbereitung & Bögen \\\\ \n"
+    b << "\\hline\n"
+    return b
+  end
+  def blacklist_foot
+    "\\end{longtable}\\end{document}"
+  end
 end
