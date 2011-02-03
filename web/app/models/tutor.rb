@@ -44,26 +44,26 @@ class Tutor < ActiveRecord::Base
   end
 
   def competence
-    @db_table = course.form.to_form.db_table
+    @db_table = course.form.db_table
     competence_field = 'AVG(t2)'
     query(competence_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t2 > 0").to_f
   end
 
   def profit
-    @db_table = course.form.to_form.db_table
+    @db_table = course.form.db_table
     profit_field = 'AVG(t10)'
     query(profit_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t10 > 0").to_f
 
   end
 
   def teacher
-    @db_table = course.form.to_form.db_table
+    @db_table = course.form.db_table
     teacher_field = 'AVG(t1)'
     query(teacher_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t1 > 0").to_f
 
   end
   def preparation
-    @db_table = course.form.to_form.db_table
+    @db_table = course.form.db_table
     prep_field = 'AVG(t3)'
     query(prep_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t3 > 0").to_f
 
