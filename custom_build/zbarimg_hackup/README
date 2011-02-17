@@ -10,7 +10,7 @@ make -- also builds the hackup
 Note that you can easily build ZBarimg using 'rake magick:buildZBar' in
 the seee-root directory.
 
-Intended usage is a follows:
+Intended usage is as follows:
 	zbarimg <imagefile>
 It will print the found barcode to STDOUT, the image will be rotated
 and flipped as required IN PLACE. If no barcode can be found, an
