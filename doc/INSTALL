@@ -1,0 +1,167 @@
+This manual was written using Ubuntu 10.10 installed into a virtual
+machine. It assumes you're familiar working with the command line and
+hacking source code. You can also download this VirtualBox image if you
+don't want to follow this guide.
+
+Ubuntu settings:
+  Username:             eval
+  Password:             hurrdurr
+  computer's name:      eval-testpc
+
+=================
+REQUIRED SOFTWARE
+=================
+
+packages w/o special treatment
+------------------------------
+
+  curl
+  autoconf
+  bison
+  build-essential
+  git
+  libc6-dev
+  libmagick9-dev
+  libreadline6
+  libreadline6-dev
+  libsqlite3-0
+  libsqlite3-dev
+  libssl-dev
+  libxml2-dev
+  libxslt-dev
+  libyaml-dev
+  ncurses-dev
+  openssl
+  ruby-gnome2
+  sqlite3
+  texlive
+  zlib1g
+  zlib1g-dev
+
+
+Image Processing
+----------------
+
+For image processing you can either use your system-provided packages or
+build them on your own. Latter might speed up things a bit, but for
+starters it's recommended to stick to the system-ones.
+
+A)  if you want to use the system-provided packages:
+      imagemagick
+      librmagick-ruby
+
+B)  if you want to build your own you'll need to install:
+      FIXME
+    and run "rake magick:all" once the repository has been checked out.
+
+
+Ruby & Rails version hell
+-------------------------
+
+While it is possible to use system packages for ruby related software as
+well, we ran into compatibility problems. The solution to not have to
+deal with this is called “RVM” (Ruby Version Manager) and essentially
+maintains independent versions of ruby as required.
+
+Usually these steps are sufficient to get RVM running:
+  bash <<(curl http://rvm.beginrescueend.com/releases/rvm-install-head)
+And add the following line at the end of your .bashrc, .zshrc, …
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
+To see if this worked open a new shell and type execute "rvm". If the
+command is not found, please refer to the manual at
+  http://rvm.beginrescueend.com/rvm/install/
+
+Then we need to install ruby:
+  FIXME required? rvm package install openssl
+  rvm install 1.8.7 --with-openssl-dir=$HOME/.rvm/usr
+
+and create a gemset, which will be seperate from your other system gems:
+  rvm gemset create "seeeFIXME"
+
+To continue you first need to download a version of =FIXME.
+
+
+==================
+DOWNLOADING =FIXME
+==================
+
+For now, you can only clone the repository. To do so run:
+  git clone FIXME-URL-TO-GIT
+
+
+==========================
+FINISHING THE INSTALLATION
+==========================
+
+Change into the newly created directory. And run
+  rvm use 1.8.7@seeeFIXME --rvmrc
+which will tell RVM to use the previously installed ruby version and the
+matching gemset. --rvmrc saves these settings so they will be used
+automatically once you cd in any subdirectory.
+
+Run
+  gem install bundler
+to install the version management tool that will be used to grab all
+other required gems and then
+  bundle install
+to actually get them. Finally, there's an incompatibility left to solve
+by installing an older version of RubyGems.
+  FIXME required? gem uninstall rubygems-update
+  gem install rubygems-update -v 1.4.2
+  update_rubygems
+
+To confirm the basic setup worked, type in
+  rake
+to get a (large) list of available commands. If not, you probably miss
+some packages. Please report any that weren't listed in this manual.
+
+===================
+BASIC CONFIGURATION
+===================
+
+Have look at
+  lib/seee_config.rb
+for most settings. The application paths are usually fine and work out
+of the box, however you need to specify an URL and matching local path
+if you want the extracted comments to be displayed in the web interface.
+The relevant variables are:
+  :comment_images_public_dir
+  :comment_images_public_link
+
+If above directory requires access rights which are different from the
+ones your current terminal ownes, you probably want to change the
+following variables so the respective commands can read AND write to
+those directories once executed. For example, in our setup I am not
+allowed to write to /home/eval directly, but I am a member of the eval-
+group, so I may login as user "eval". We have a wrapper script for this,
+so the relevant command became "login_gruppe_home eval find" instead of
+just "find". The relevant variables are:
+  :find_comment_image_directory
+  :mkdir_comment_image_directory
+
+It has been proven useful to have a directory with all the
+questionnaires, in case too few have been printed. This path will be
+printed included in the how-tos for the people who carry out an
+evaluation so it's important it is up to date. The relevant variable is:
+  :forms_howto_dir
+
+If you want to use mass-mailing (you can use it to remind your minions
+to carry out their evals and to notify profs that the eval is done) you
+have to adjust the following variables:
+  :standard_mail_domain
+  :standard_mail_from
+  :standard_mail_bcc
+The bcc part is useful, so you can get a confirmation to your own
+address. Your local mail setup will be used, so ensure it works before
+trying anything (check using the mail command, for example).
+
+
+You can store the database settings here, but first we need to create a
+new database. To do so, run sqlite3 in a terminal and
+FIXME
+
+
+=============
+MY FIRST EVAL
+=============
+
