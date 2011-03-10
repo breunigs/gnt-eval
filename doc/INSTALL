@@ -106,8 +106,6 @@ other required gems and then
   bundle install
 to actually get them. Finally, there's an incompatibility left to solve
 by installing an older version of RubyGems.
-  FIXME required? gem uninstall rubygems-update
-  gem install rubygems-update -v 1.4.2
   update_rubygems
 
 To confirm the basic setup worked, type in
