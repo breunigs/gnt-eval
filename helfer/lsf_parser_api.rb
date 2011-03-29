@@ -173,10 +173,10 @@ def getTree(id)
     else
         puts "Subtree " + id.to_s + " is not a tree." if @debug
 
-        events = events + getEventList(id)
+        events += getEventList(id)
     end
     # Remove bogus events
-    events.delete_if { |m| m == nil }
+    events.compact!
     events
 end
 
@@ -216,13 +216,14 @@ def getEvent(eventdata)
     return nil if type.isStopType?
 
     name = eventdata[getPrefix + ':name'].text.strip
-    return nil if name.isStopName?
+    return nil if name.nil? || name.isStopName?
 
     facul = Integer(eventdata[getPrefix + ':eid'].text)
 
     times, rooms, profs = getTimetable(id)
-    # also skip all events that do not provide necessary information
-    return nil if times.empty? || rooms.empty? || profs.empty?
+    # also skip all events that do not provide necessary information unless
+    # there's SWS data available.
+    return nil if (sws.nil? || sws == 0)  && (times.empty? || rooms.empty? || profs.empty?)
 
     Event.new(id, name, times, rooms, profs, type, facul, sws)
 end
@@ -249,7 +250,7 @@ def getProfs(id)
         profs << getProfDetails(profid, name)
     end
 
-    profs.delete_if { |m| m == nil }
+    profs.compact!
     profs
 end
 
@@ -384,6 +385,7 @@ def printYamlKummerKasten(data, faculty)
     s = "---\n"
     s << "events:\n"
     data.each do |d|
+        next if d.profs.empty?
         case d.type
             when /vorlesung/i then type = "Vorlesung"
             when /seminar/i   then type = "Seminar"
@@ -430,6 +432,7 @@ def printFinalList(data)
     s << "</tr>\n"
 
     data.each do |d|
+        next if (d.times.empty? || d.rooms.empty? || d.profs.empty?)
         s << '<tr>'
         s << '<td style="max-width:10cm;overflow:hidden">' + d.name + '</td>'
         s << '<td>' + listProfs(d.profs) + '</td>'
@@ -462,6 +465,8 @@ def printPreList(data)
     s << "</tr>\n\n"
 
     data.each do |d|
+        next if (d.times.empty? || d.rooms.empty? || d.profs.empty?)
+
         allprofs = Array.new
         allprofs << d.profs.flatten.uniq
         s << '<tr>'
