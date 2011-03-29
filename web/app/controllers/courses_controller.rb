@@ -12,6 +12,7 @@ class CoursesController < ApplicationController
     @courses = Course.find(:all)
     @curr_sem ||= Semester.all.find { |s| s.now? }
     if @curr_sem.nil?
+      flash[:error] = "Cannot list courses for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
     else
       respond_to do |format|
@@ -38,6 +39,7 @@ class CoursesController < ApplicationController
     @course = Course.new
     @curr_sem ||= Semester.all.find { |s| s.now? }
     if @curr_sem.nil?
+      flash[:error] = "Cannot create a new course for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
     else
       respond_to do |format|
