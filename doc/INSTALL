@@ -163,3 +163,123 @@ FIXME
 MY FIRST EVAL
 =============
 
+For now we’ll use Webrick to handle the webpage related work, in the long
+run you might want to use Apache instead, though. To start Webrick:
+  cd seee/web/script && ./server
+If it starts properly, there should be a webpage available at
+  http://localhost:3000
+where you can enter all your profs, courses, forms, etc. To get an idea of
+how the data is organized, here’s a short wrap up: Create a new semester
+to get started, the “current one” is determined by the date automatically
+will always be the active one. For now, it’s not possible to change that
+without hacking. Next, add some courses and once done, you can add
+professors and tutors to the course. Profs are “real” classes, so you can
+re-use them, but tutors are just a bunch of names that are not connected
+throughout the application. If it ever comes up, “CourseProf” is the
+model which holds the barcode id and that is later used to distinguish
+the forms. It is therefore possible to have more than one prof per
+lecture and give each of them their own evaluation, but you also need to
+be more careful when handing out the sheets.
+
+Once all data is entered, we’ll leave the web interface for now and
+work on the console. Change to the root of the repository and run
+  rake
+You’ll see a lot of options, here are the ones you’re probably most
+interested in. They are listed in the order we use them for our eval.
+
+
+rake pdf:howto
+--------------
+Run this to generate PDF-Howtos in each available language to hand to
+the people who carry out an evaluation. You can customize the HowTos
+in doc/howto_[lang code].tex.
+
+rake pdf:forms
+--------------
+Creates the forms for each course and prof that should be printed. The
+amount of copies required is included in the filename. When printing the
+sheets, ensure that they are printed exactly the same size (i.e. no “fit
+to paper”). The default output is A4, but you might be able to change
+this in lib/FunkyTeXBits.rb. Unless a semester-id is specified, it will
+create forms for the current one.
+
+If you want to customize the available forms, you best have a look at the
+existing ones and change them to your needs (you can do this on the web
+interface at “Forms”). There’s a GUI generator planned, but not yet
+started.
+
+rake images:sortandalign[directory]
+-----------------------------------
+Before you can use this function, you need to scan the images into two-
+sided tif images. Only black-and-white tifs are supported. 300 DPI is
+usually enough (and what we use), but you can experiment with different
+settings if you like.
+
+“directory” is where to *move* the images from, so make sure “directory”
+is writable before running this. The function will try to recognize the
+bar code and sort them depending on the form type into different folders
+in our tmp directory.
+
+rake pest:omr
+-------------
+This will work on the images previously sorted into the tmp directory
+and recognize if a certain field is filled out or if a comment field is
+empty or not. It may be required to hack some magic numbers in the
+pest/omr.rb file, but we’re working on improving that.
+
+If you do this for the first time, you probably want to run it with
+debug output on, so you’ll get a graphical representation of what’s
+going on. Run pest/omr.rb without any arguments to get a list of
+possible command line options. The following line should get you
+started for your debugging purposes:
+
+  ./pest/omr.rb -s "./tmp/images/0.yaml" -p "./tmp/images/0" -d -v
+
+
+rake pest:correct
+-----------------
+For many questions there will be more than one cross detected, either
+because it wasn’t clear enough the question at hand is single-choice
+or if a correction was made. Testing showed that without educating
+how to mark an incorrect field, there are numerous ways of correcting
+and no auto-detection was possible.
+
+You can use the arrow-keys to select the correct answer or choose the
+box in the upper left corner to mark an answer invalid.
+
+rake pest:yaml2db
+-----------------
+This will copy the results of the previous command (these were stored
+in YAML files) into a database which will be used from now on. It is
+planned to remove this step altogether and use a database from the
+beginning, with optional YAML output.
+
+rake images:insertcomments
+--------------------------
+This grabs the recognized comments and makes them available in the
+web interface (under each course and/or tutor). Note that you need
+to configure the used directories in seee_config first (see above).
+
+
+When you’re done, switch to the webinterface and type the comments,
+write a summary for each course and/or tutor.
+
+rake pdf:semester
+-----------------
+Without parameters, this will generate results in one PDF per
+faculty for the current semester. You can run rake pdf:make_
+preliminary to mark these results as not final and that they shouldn’t
+be handed to anyone.
+
+
+“Rolling Eval”
+--------------
+You can execute all of the above commands as often as you wish without
+creating duplicates anywhere (except maybe for images:insertcomments…
+I haven’t checked, but if you notice it creates dups, please create a
+ticket). Anyway, this makes it possible to create a rolling eval, i.e.
+add new sheets each evening and hand the results so far to whomever you
+like. I don’t recommend advertising this on your first go, but remember
+it will be possible later.
+
+If you’ve made it so far, congratulations! This is your first eval.
