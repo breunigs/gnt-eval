@@ -22,6 +22,7 @@ packages w/o special treatment
   git
   libc6-dev
   libmagick9-dev
+  libmysqlclient-dev
   libreadline6
   libreadline6-dev
   libsqlite3-0
