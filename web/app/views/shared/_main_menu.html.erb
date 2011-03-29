@@ -1,4 +1,4 @@
-<% @curSem = Semester.all.find{ |s| s.now? } %>
+<% @curr_sem ||= Semester.all.find{ |s| s.now? } %>
 
 <fieldset class="main_menu">
   <legend><b>main menu</b></legend>
@@ -9,13 +9,13 @@
   <%= link_to 'Faculties', 		:controller => "faculties", 	:action => "index" %> |
   <%= link_to 'Tutors', 		  :controller => "tutors", 	    :action => "index" %>
 
-  <span style="float:right">&nbsp;<%=h @curSem.title %></span>
+  <span style="float:right">&nbsp;<%=h @curr_sem ? "no semester currently active" : @curr_sem.title %></span>
 
   <% if @course && @course.semester && @course.semester.critical? %>
     <span class="warning">Careful, sheets for this course have been printed.</span>
- <% end %>
+  <% end %>
 
-   <% if (@course.nil? || @course.semester.nil?) && @curSem.critical? %>
+  <% if (@course.nil? || @course.semester.nil?) && @curr_sem && @curr_sem.critical? %>
     <span class="warning">Careful, current semester is critical.</span>
- <% end %>
+  <% end %>
 </fieldset>

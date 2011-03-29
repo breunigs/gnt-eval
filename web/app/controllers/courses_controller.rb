@@ -10,10 +10,14 @@ class CoursesController < ApplicationController
   # GET /courses.xml
   def index
     @courses = Course.find(:all)
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.xml  { render :xml => @courses }
+    @curr_sem ||= Semester.all.find { |s| s.now? }
+    if @curr_sem.nil?
+      redirect_to :controller => "semester", :action => "index"
+    else
+      respond_to do |format|
+        format.html # index.html.erb
+        format.xml  { render :xml => @courses }
+      end
     end
   end
 
@@ -32,10 +36,14 @@ class CoursesController < ApplicationController
   # GET /courses/new.xml
   def new
     @course = Course.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @course }
+    @curr_sem ||= Semester.all.find { |s| s.now? }
+    if @curr_sem.nil?
+      redirect_to :controller => "semester", :action => "index"
+    else
+      respond_to do |format|
+        format.html # new.html.erb
+        format.xml  { render :xml => @course }
+      end
     end
   end
 
