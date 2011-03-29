@@ -843,7 +843,7 @@ class PESTOmr
             opts.separator("REQUIRED ARGUMENTS:")
             opts.on("-s", "--omrsheet OMRSHEET", "Path to the OMR Sheet that should be used to parse the sheets") { |sheet| @omrsheet = sheet }
 
-            opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the output will be saved.", "All paths are relative to this.") { |path| @path = path.chomp("/") }
+            opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the output will be saved.", "All image paths are relative to this.") { |path| @path = path.chomp("/") }
 
             opts.separator("")
             opts.separator("OPTIONAL ARGUMENTS:")
