@@ -9,7 +9,7 @@ class Course < ActiveRecord::Base
   has_many :course_profs
   has_many :profs, :through => :course_profs
   has_many :tutors
-  validates_presence_of :semester_id, :title, :faculty, :language
+  validates_presence_of :semester_id, :title, :faculty, :language, :form
   validates_numericality_of :students
 
   include FunkyDBBits
@@ -74,7 +74,10 @@ class Course < ActiveRecord::Base
     course_profs.map{ |cp| cp.barcode.to_i }
   end
 
+  # will count the returned sheets, if all necessary data is
+  # available. In case of an error, -1 will be returned.
   def returned_sheets
+    return -1 if form.nil? || form.db_table.nil?
     @db_table = form.db_table
 
     if not profs.empty?
