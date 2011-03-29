@@ -9,7 +9,7 @@
   <%= link_to 'Faculties', 		:controller => "faculties", 	:action => "index" %> |
   <%= link_to 'Tutors', 		  :controller => "tutors", 	    :action => "index" %>
 
-  <span style="float:right">&nbsp;<%=h @curr_sem ? "no semester currently active" : @curr_sem.title %></span>
+  <span style="float:right">&nbsp;<%=h @curr_sem.nil? ? "no semester currently active" : @curr_sem.title %></span>
 
   <% if @course && @course.semester && @course.semester.critical? %>
     <span class="warning">Careful, sheets for this course have been printed.</span>

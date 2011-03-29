@@ -12,7 +12,7 @@ class CoursesController < ApplicationController
     @courses = Course.find(:all)
     @curr_sem ||= Semester.all.find { |s| s.now? }
     if @curr_sem.nil?
-      redirect_to :controller => "semester", :action => "index"
+      redirect_to :controller => "semesters", :action => "index"
     else
       respond_to do |format|
         format.html # index.html.erb
@@ -38,7 +38,7 @@ class CoursesController < ApplicationController
     @course = Course.new
     @curr_sem ||= Semester.all.find { |s| s.now? }
     if @curr_sem.nil?
-      redirect_to :controller => "semester", :action => "index"
+      redirect_to :controller => "semesters", :action => "index"
     else
       respond_to do |format|
         format.html # new.html.erb
