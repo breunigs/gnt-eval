@@ -154,11 +154,45 @@ The bcc part is useful, so you can get a confirmation to your own
 address. Your local mail setup will be used, so ensure it works before
 trying anything (check using the mail command, for example).
 
+Databases
+---------
+Now onto the databases. Yes, there are currently two: One for Rails
+(i.e. all the profs, courses, tutors and so on) and one for storing the
+recognized sheet data. We want to fix that, but until that happens
+you’ll have to setup two databases.
 
-You can store the database settings here, but first we need to create a
-new database. To do so, run sqlite3 in a terminal and
-FIXME
+* lib/seee_config.rb
+  This is the DB where all the results will be stored. Locate
+  @@external_database and set them up as you like. The following will
+  use an SQLite3 database which will be stored in web/db/results.sqlite3
+    @@external_database = {
+      :dbi_handler => 'Sqlite3',
+      :username => '',
+      :password => '',
+      :database => 'db/results.sqlite3'
+    }
 
+* web/config/database.yml
+  This is the database Rails uses. You can define different setups for
+  a debug or production environment, but for now set them both to the
+  same values. (We do this as well and that makes us, by definition, bad
+  people). The following will use an SQLite3 database which will be
+  stored in web/db/rails.sqlite3
+    development:
+      adapter: sqlite3
+      database: db/rails.sqlite3
+      pool: 5
+      timeout: 5000
+
+    production:
+      adapter: sqlite3
+      database: db/rails.sqlite3
+      pool: 5
+      timeout: 5000
+
+Once the database config is final, run the following to create all
+necessary tables:
+  cd web && rake db:migrate
 
 =============
 MY FIRST EVAL
