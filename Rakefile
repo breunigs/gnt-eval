@@ -29,7 +29,13 @@ def curSem
 end
 
 def find_barcode(filename)
-  r = `#{Seee::Config.commands[:zbar]} #{filename}`
+  zbar = Seee::Config.commands[:zbar]
+  unless File.exist?(zbar)
+    puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{uname -m}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
+    exit 1
+  end
+
+  r = `#{zbar} "#{filename}"`
   if not r.empty?
     return r.strip.match(/^([0-9]+)/)[1].to_i
   else
