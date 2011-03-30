@@ -45,11 +45,11 @@ def pdf_crop(pdffile)
   worked
 end
 
-# Generates the a pdf file with the barcode in the specified location
+# Generates a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
   path = File.expand_path(path)
+  FileUtils.mkdir_p(File.join(Dir.tmpdir, "seee"))
   tmp = Dir.mktmpdir("seee/barcode-")
-  worked = false
   Dir.chdir(tmp) do
     `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
     `ps2pdf barcode.ps barcode.pdf`
@@ -57,7 +57,6 @@ def generate_barcode(barcode, path)
     `mv -f cropped.pdf "#{path}"`
   end
   `rm -rf #{tmp}`
-  worked
 end
 
 # helper function, that generates a cropped version named "cropped.pdf"
