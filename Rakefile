@@ -401,23 +401,21 @@ namespace :pest do
 
       # Note that the barcode is only unique for each CourseProf, but
       # not for each sheet. That's why path is used as unique key.
-      q = "CREATE TABLE IF NOT EXISTS `" + f.db_table + "` ("
-      q << "`path` VARCHAR(255) CHARACTER SET utf8 NOT NULL UNIQUE, "
-      q << "`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, "
-      q << "`barcode` INT(11) default NULL, "
+      q = "CREATE TABLE IF NOT EXISTS `#{$dbh.quote(f.db_table)}` ("
 
       f.questions.each do |quest|
         next if quest.db_column.nil?
         if quest.db_column.is_a?(Array)
           quest.db_column.each do |a|
-            q << "`#{a}` SMALLINT(6) UNSIGNED, "
+            q << "`#{$dbh.quote(a)}` SMALLINT(6), "
           end
         else
-          q << "`#{quest.db_column}` SMALLINT(6) UNSIGNED, "
+          q << "`#{$dbh.quote(quest.db_column)}` SMALLINT(6), "
         end
       end
 
-      q << "PRIMARY KEY (id)"
+      q << "`path` VARCHAR(255) NOT NULL UNIQUE, "
+      q << "`barcode` INT(11) default NULL "
       q << ");"
       puts "Creating #{name} (#{f.db_table})"
       $dbh.do(q)
@@ -439,14 +437,11 @@ namespace :pest do
     `./pest/fix.rb ./tmp/images/`
   end
 
-  desc "(4) Copies YAML data into database. Append update only, if you really want to re-insert existing YAMLs into the database."
-  task :yaml2db, :update, :needs => ['db:connect', 'pest:createtables'] do |t,a|
+  desc "(4) Copies YAML data into database. Won’t delete any entries, but update existing ones."
+  task :yaml2db, :needs => ['db:connect', 'pest:createtables'] do |t,a|
     class Question
       attr_accessor :value
     end
-
-    update = !a.update.nil? && a.update == "update"
-    puts "Will be updating already existing entries." if update
 
     tables = {}
     Dir.glob("./tmp/images/[0-9]*.yaml") do |f|
@@ -455,7 +450,6 @@ namespace :pest do
       tables[form] = yaml.db_table
     end
 
-
     allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
     count = allfiles.size
 
@@ -463,8 +457,7 @@ namespace :pest do
     allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
-      table = tables[form] # "evaldaten_#{curSem.dirFriendlyName}_#{form}"
-
+      table = tables[form]
 
       keys = Array.new
       vals = Array.new
@@ -494,15 +487,9 @@ namespace :pest do
         end
       end
 
-      # If 'update' is specified we delete all existing entries and re-
-      # insert them later. Since `path` is UNIQUE insert queries will
-      # simply fail if the path already exists.
-      # Yes, this is cheap hack.
-      $dbh.do("DELETE FROM `#{table}` WHERE `path` = ? ", f) if update
-
-      # "ignore" makes MySQL stop complaining about duplicate unique
-      # keys (path in our case)
-      q = "INSERT IGNORE INTO `#{table}` ("
+      # REPLACE is a non standard extension supported by at least
+      # SQLite and MySQL and works as “insert or replace”
+      q = "REPLACE INTO `#{table}` ("
       q << keys.join(", ")
       q << ") VALUES ("
       # inserts right amount of question marks for easy
