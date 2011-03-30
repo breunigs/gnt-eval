@@ -50,21 +50,30 @@ def generate_barcode(barcode, path)
   path = File.expand_path(path)
   FileUtils.mkdir_p(File.join(Dir.tmpdir, "seee"))
   tmp = Dir.mktmpdir("seee/barcode-")
+  worked = false
   Dir.chdir(tmp) do
     `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
     `ps2pdf barcode.ps barcode.pdf`
     break unless pdf_crop_tex("barcode.pdf")
     `mv -f cropped.pdf "#{path}"`
+    worked = true
   end
   `rm -rf #{tmp}`
+  worked
 end
 
 # helper function, that generates a cropped version named "cropped.pdf"
 # of the pdffile in the current working directory. Usually you want to
 # call this like pdf_crop or generate_barcode
 def pdf_crop_tex(pdffile)
-  bboxes= `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
-  return false if bboxes.nil? || bboxes.size <= 1
+  gs_out = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`
+  bboxes = gs_out.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
+  if bboxes.nil? || bboxes.empty?
+    puts "Could not run ghostscript or couldn't find suitable bounding boxes in given file"
+    return false
+  end
+  twice_print_bug = gs_out.split("\n")[1].start_with?("%%Bounding")
+
   File.open("cropped.tex", "w") do |h|
     h << "\\csname pdfmapfile\\endcsname{}\n"
     h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
@@ -83,8 +92,9 @@ def pdf_crop_tex(pdffile)
     h << "  \\shipout\\box0\\relax\n"
     h << "}\n"
     bboxes.each_with_index do |bbox,i|
-      # each page appears twice, so skip every 2nd entry
-      next if i%2 != 0
+      # for some gs versions each page appears twice, so skip every
+      # 2nd entry if that is the case
+      next if twice_print_bug && i%2 != 0
       bbox = bbox[0].strip.split(/\s+/)
       bbox[1] = bbox[1].to_i - 9
       h << "\\page #{i/2 + 1} [#{bbox.join(" ")}]\n"
