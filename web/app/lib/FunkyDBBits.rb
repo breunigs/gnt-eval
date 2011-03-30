@@ -103,7 +103,13 @@ module FunkyDBBits
 
   # returns count of stuff where i IN h[i] for each i + additional
   def count_forms(h, additional = '')
-    res = query('COUNT(*)', h, additional)
+    begin
+      res = query('COUNT(*)', h, additional)
+    rescue DBI::ProgrammingError
+      # table that should be counted likely doesn't exist. Ignore
+      # this and return 0 instead.
+      return 0
+    end
     if res.nil?
       p h
       p additional

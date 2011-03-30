@@ -166,7 +166,7 @@ you’ll have to setup two databases.
   @@external_database and set them up as you like. The following will
   use an SQLite3 database which will be stored in web/db/results.sqlite3
     @@external_database = {
-      :dbi_handler => 'Sqlite3',
+      :dbi_handler => 'SQLite3',
       :username => '',
       :password => '',
       :database => 'db/results.sqlite3'
@@ -204,23 +204,35 @@ run you might want to use Apache instead, though. To start Webrick:
 If it starts properly, there should be a webpage available at
   http://localhost:3000
 where you can enter all your profs, courses, forms, etc. To get an idea of
-how the data is organized, here’s a short wrap up: Create a new semester
-to get started, the “current one” is determined by the date automatically
-will always be the active one. For now, it’s not possible to change that
-without hacking. Next, add some courses and once done, you can add
-professors and tutors to the course. Profs are “real” classes, so you can
-re-use them, but tutors are just a bunch of names that are not connected
-throughout the application. If it ever comes up, “CourseProf” is the
-model which holds the barcode id and that is later used to distinguish
-the forms. It is therefore possible to have more than one prof per
-lecture and give each of them their own evaluation, but you also need to
-be more careful when handing out the sheets.
+how the data is organized, here’s a short wrap up:
+
+* Create a new semester to get started, the “current one” is determined
+  by the date automatically will always be the active one. For now, it’s
+  not possible to change that without hacking.
+* Once done you should add forms for the current semester – the
+  questionnaires. As of writing, there’s no GUI to help you develop
+  these forms and you have to enter them in YAML format. The best method
+  is to take one of the included examples in
+    doc/example_forms
+  and adjust them to your needs. Save often, it will display the form
+  as serialized Ruby object if the YAML file is valid. Some parts are
+  hard coded into TeX, grep is your friend. Patches welcome.
+* Next, add some courses and once done,
+* you can add professors and tutors to the course. Profs are “real”
+  classes, so you can re-use them, but tutors are just a bunch of names
+  that are not connected throughout the application. If it ever comes
+  up, “CourseProf” is the model which holds the barcode id and that is
+  later used to distinguish the forms. It is therefore possible to have
+  more than one prof per lecture and give each of them their own
+  evaluation, but you also need to be more careful when handing out the
+  sheets.
 
 Once all data is entered, we’ll leave the web interface for now and
 work on the console. Change to the root of the repository and run
   rake
 You’ll see a lot of options, here are the ones you’re probably most
-interested in. They are listed in the order we use them for our eval.
+interested in. They are listed in the order we use them for our eval,
+so you can use them one after another to get to your first eval.
 
 
 rake pdf:howto
