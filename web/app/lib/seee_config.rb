@@ -39,7 +39,7 @@ module Seee
       :hunspell => '/usr/bin/hunspell',
       :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
       # this is the old zbar, which uses the default ImageMagick
-      :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', 'zbarimg'),
+      :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`}"),
       # this is the custom zbar, which uses the custom ImageMagick
       :zbar_cust => File.join(@@custom_builds[:bld_zbar], "bin", "zbarimg")
     }
