@@ -526,10 +526,13 @@ namespace :pest do
 
   desc "Copies extracted comments into eval directory"
   task :copycomments do
+    find = Seee::Config.commands[:find_comment_image_directory] || "find"
+    mkdir = Seee::Config.commands[:mkdir_comment_image_directory] || "mkdir"
+
     puts "Creating folders and copying comments, please wait..."
-    system("#{Seee::Config.commands[:mkdir_comment_image_directory]} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
+    system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
-    system("#{Seee::Config.commands[:find_comment_image_directory]} \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\" \\;")
+    system("#{find} \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\" \\;")
 
     puts
     puts "All comment pictures have been copied. If not already done so,"
