@@ -134,13 +134,22 @@ class CoursesController < ApplicationController
   end
 
   def add_prof
-    @course = Course.find(params[:id])
-    @prof = Prof.find(params[:courses][:profs])
-    @course.profs << @prof
+    begin
+      @course = Course.find(params[:id])
+      @prof = Prof.find(params[:courses][:profs])
+      @course.profs << @prof
 
-    respond_to do |format|
-      format.html { redirect_to(@course) }
-      format.xml { head :ok }
+      respond_to do |format|
+        format.html { redirect_to(@course) }
+        format.xml { head :ok }
+      end
+    rescue
+      flash[:error] = "Couldn’t add prof. Are you sure the course and selected prof exist?"
+      respond_to do |format|
+        format.html { redirect_to(@course) }
+        format.xml  { render :xml => (@course.nil? ? "" : @course.errors),
+          :status => :unprocessable_entity }
+      end
     end
   end
 end
