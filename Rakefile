@@ -31,7 +31,7 @@ end
 def find_barcode(filename)
   zbar = Seee::Config.commands[:zbar]
   unless File.exist?(zbar)
-    puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{uname -m}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
+    puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{`uname -m`}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
     exit 1
   end
 
