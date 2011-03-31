@@ -9,5 +9,5 @@ gem "rmagick"
 gem "mysql"
 gem "dbd-mysql"
 
-gem "sqlite3"
-gem "dbd-sqlite3"
+gem "postgres"
+gem "dbd-pg"

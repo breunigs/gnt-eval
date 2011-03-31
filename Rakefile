@@ -286,7 +286,7 @@ namespace :images do
 
     puts
     puts "Please ensure that all comment pictures have been supplied to"
-    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]} /#{curSem.dirfriendly_title}"
+    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirfriendly_title}"
     puts "as that's where the web-seee will look for it."
     puts "This should have been done for you automatically, but you can"
     puts "run it again if it makes you feel better:"
@@ -401,24 +401,34 @@ namespace :pest do
 
       # Note that the barcode is only unique for each CourseProf, but
       # not for each sheet. That's why path is used as unique key.
-      q = "CREATE TABLE IF NOT EXISTS `#{$dbh.quote(f.db_table)}` ("
+      q = "CREATE TABLE #{f.db_table} ("
 
       f.questions.each do |quest|
         next if quest.db_column.nil?
         if quest.db_column.is_a?(Array)
           quest.db_column.each do |a|
-            q << "`#{$dbh.quote(a)}` SMALLINT(6), "
+            q << "#{a} INTEGER, "
           end
         else
-          q << "`#{$dbh.quote(quest.db_column)}` SMALLINT(6), "
+          q << "#{quest.db_column} INTEGER, "
         end
       end
 
-      q << "`path` VARCHAR(255) NOT NULL UNIQUE, "
-      q << "`barcode` INT(11) default NULL "
+      q << "path VARCHAR(255) NOT NULL UNIQUE, "
+      q << "barcode INTEGER default NULL "
       q << ");"
-      puts "Creating #{name} (#{f.db_table})"
-      $dbh.do(q)
+
+      begin
+        $dbh.do(q)
+        puts "Created #{name} (#{f.db_table})"
+      rescue
+        puts "Note: Creating #{name} (table: #{f.db_table}) failed. Possible causes:"
+        puts "* table already exists"
+        puts "* SQL backend is down/misconfigured"
+        puts "* used SQL query is not supported by your SQL backend"
+        puts "If no further errors pop up, you’re probably fine."
+        puts
+      end
     end
   end
 
@@ -487,9 +497,7 @@ namespace :pest do
         end
       end
 
-      # REPLACE is a non standard extension supported by at least
-      # SQLite and MySQL and works as “insert or replace”
-      q = "REPLACE INTO `#{table}` ("
+      q = "INSERT INTO #{table} ("
       q << keys.join(", ")
       q << ") VALUES ("
       # inserts right amount of question marks for easy
@@ -498,6 +506,7 @@ namespace :pest do
       q << ")"
 
       begin
+        $dbh.do("DELETE FROM #{table} WHERE path = ?", f)
         $dbh.do(q, *vals)
       rescue DBI::DatabaseError => e
         puts
@@ -519,8 +528,8 @@ namespace :pest do
 
   desc "Copies extracted comments into eval directory"
   task :copycomments do
-    find = Seee::Config.commands[:find_comment_image_directory] || "find"
-    mkdir = Seee::Config.commands[:mkdir_comment_image_directory] || "mkdir"
+    find = Seee::Config.commands[:find_comment_image_directory]
+    mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
     puts "Creating folders and copying comments, please wait..."
     system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")

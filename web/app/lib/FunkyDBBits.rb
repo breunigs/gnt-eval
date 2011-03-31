@@ -105,7 +105,7 @@ module FunkyDBBits
   def count_forms(h, additional = '')
     begin
       res = query('COUNT(*)', h, additional)
-    rescue DBI::ProgrammingError
+    rescue
       # table that should be counted likely doesn't exist. Ignore
       # this and return 0 instead.
       return 0
