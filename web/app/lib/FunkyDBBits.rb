@@ -62,7 +62,7 @@ module FunkyDBBits
     begin
       result = []
       sth.execute(*h.values.flatten)
-      sth.fetch_array { |r| result << r }
+      sth.each { |r| result << r }
     rescue DBI::DatabaseError => e
       puts "Query is: #{q}"
       print "Cond  is: "
@@ -75,17 +75,14 @@ module FunkyDBBits
 
     # try to return values directly, if only one row and value
     # have been selected
-    if result.count == 1 # only one row has been found
-      if result[0].count == 1
-        result[0][0] # the result contains only one column
-      else
-        result[0] # the result contains at least two columns
-      end
-    else
-      # if it contains more than one row simply return the
-      # whole result
-      return result
+    return result if result.count != 1
+    return result[0]  if result[0].count != 1 # not exactly one column
+    r = result[0][0]
+    if r.is_a?(String)
+      r.to_i if r.to_i.to_s == r
+      r.to_f if r.to_f.to_s == r
     end
+    r
   end
 
   def query(f, h, additional = '')
@@ -130,7 +127,7 @@ module FunkyDBBits
     ts = @db_table.to_a
     arr = []
     ts.each do |t|
-        arr << query_single_table('DISTINCT `'+ column+'`', h, t, additional)
+        arr << query_single_table('DISTINCT '+ column, h, t, additional)
     end
     arr.flatten.uniq
   end
