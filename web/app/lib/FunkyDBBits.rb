@@ -38,24 +38,30 @@ module FunkyDBBits
   # query fields, where-hash and additional clauses, all uncached
   def uncached_query_single_table(f, h, t, additional = '')
     q = 'SELECT '
-    q += f.to_a.join(', ')
-    q += " FROM #{t}"
+    q << f.to_a.join(', ')
+    q << " FROM #{t}"
 
-    if h.empty?
-      if not additional.empty?
-        additional = additional.sub(/^\s*AND/,'')
-        q += ' WHERE ' + additional
+    c = []
+    c << additional.sub(/^\s*AND/,'') unless additional.empty?
+
+    unless h.empty?
+      h.each do |k,v|
+        # flatten the arrays because otherwise DBI will break for
+        # Postgres for some reason
+        amount_of_values = v.is_a?(Array) ? v.size : 1
+        c << "#{k} IN (#{(["?"]*amount_of_values).join(",")})"
       end
-    else
-      q += ' WHERE ' + h.keys.join(' IN (?) AND ') + ' IN (?) ' +
-        additional
     end
 
-    result = nil
+    unless c.empty?
+      q << " WHERE "
+      q << c.join(" AND ")
+    end
+
     sth = dbh.prepare(q)
     begin
-      sth.execute(*h.values)
       result = []
+      sth.execute(*h.values.flatten)
       sth.fetch_array { |r| result << r }
     rescue DBI::DatabaseError => e
       puts "Query is: #{q}"
@@ -66,6 +72,7 @@ module FunkyDBBits
       pp additional
       raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}). Query was: #{q}"
     end
+
     # try to return values directly, if only one row and value
     # have been selected
     if result.count == 1 # only one row has been found
@@ -115,7 +122,7 @@ module FunkyDBBits
       p additional
       raise "something went nil"
     end
-    return res
+    return res.to_i
   end
 
   # gets the distinct values for the given field and where clause
@@ -148,10 +155,10 @@ module FunkyDBBits
   # h_general: where-clause-hash für die vergleichsveranstaltungen
   def single_q(h_particular, h_general, q)
     col = q.db_column
-    sigma, mittel, anzahl = query(["STD(#{col})", "AVG(#{col})",
+    sigma, mittel, anzahl = query(["STDDEV(#{col})", "AVG(#{col})",
                                    "COUNT(#{col})"], h_particular,
                                   "AND #{col} != 0")
-    sigma_alle, mittel_alle = query(["STD(#{col})", "AVG(#{col})"],
+    sigma_alle, mittel_alle = query(["STDDEV(#{col})", "AVG(#{col})"],
                                    h_general, "AND #{col} != 0")
 
     # single values

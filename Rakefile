@@ -463,7 +463,6 @@ namespace :pest do
     allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
     count = allfiles.size
 
-
     allfiles.each_with_index do |f, curr|
       form = File.basename(File.dirname(f))
       yaml = YAML::load(File.read(f))
