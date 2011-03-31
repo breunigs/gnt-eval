@@ -15,30 +15,49 @@ REQUIRED SOFTWARE
 packages w/o special treatment
 ------------------------------
 
-  curl
   autoconf
+  barcode
   bison
   build-essential
+  curl
   git
+  gs
   libc6-dev
   libmagick9-dev
   libmysqlclient-dev
+  libpq-dev
   libreadline6
   libreadline6-dev
-  libsqlite3-0
-  libsqlite3-dev
   libssl-dev
   libxml2-dev
   libxslt-dev
   libyaml-dev
   ncurses-dev
   openssl
+  postgresql
   ruby-gnome2
-  sqlite3
   texlive
+  texlive-lang-german
+  texlive-latex-extra
+  tex-gyre
   zlib1g
   zlib1g-dev
 
+Database Backend
+----------------
+
+This guide uses PostgreSQL as a database backend. All necessary packages
+for MySQL support are installed as well, so if you prefer MySQL simply
+change the configuration later on.
+
+Any other backend, that is as powerful as MySQL or PostgreSQL will be
+fine, too, but you need to install all necessary packages and Ruby Gems
+yourself.
+
+I advise against using SQLite because it supports standard deviation
+only through an extension which must be manually installed. Furthermore,
+it needs to be loaded each time from within this project, so you’ll have
+to hack the source and end up with a still limited database system.
 
 Image Processing
 ----------------
@@ -126,6 +145,9 @@ if you want the extracted comments to be displayed in the web interface.
 The relevant variables are:
   :comment_images_public_dir
   :comment_images_public_link
+Good defaults that will work for a basic setup:
+  :comment_images_public_dir  => File.join(RAILS_ROOT, "public", "comments")
+  :comment_images_public_link => "http://localhost:3000/comments"
 
 If above directory requires access rights which are different from the
 ones your current terminal ownes, you probably want to change the
@@ -137,12 +159,18 @@ so the relevant command became "login_gruppe_home eval find" instead of
 just "find". The relevant variables are:
   :find_comment_image_directory
   :mkdir_comment_image_directory
+If you use the values from above, simply leave these on their default
+values.
 
 It has been proven useful to have a directory with all the
 questionnaires, in case too few have been printed. This path will be
 printed included in the how-tos for the people who carry out an
 evaluation so it's important it is up to date. The relevant variable is:
   :forms_howto_dir
+A good default would be the folder where they are stored when being
+created. However, there’s a lot of other stuff in that folder, so people
+might get confused:
+  :forms_howto_dir => File.join(RAILS_ROOT, "..", "tmp", "forms")
 
 If you want to use mass-mailing (you can use it to remind your minions
 to carry out their evals and to notify profs that the eval is done) you
@@ -161,34 +189,48 @@ Now onto the databases. Yes, there are currently two: One for Rails
 recognized sheet data. We want to fix that, but until that happens
 you’ll have to setup two databases.
 
+To get access to PostgreSQL features, you’ll have to login as postgres
+user. To do so, run:
+  sudo -u postgres -s
+Now you’ll be able to execute PostgreSQL specific commands. First, run
+  createuser -P eval
+to create a new user called “eval”. The -P switch will prompt you for a
+password, leave it out to create a user with no password (our password will again be “hurrdurr”). You will be asked some questions, answer
+them as you see fit.
+
 * lib/seee_config.rb
   This is the DB where all the results will be stored. Locate
   @@external_database and set them up as you like. The following will
-  use an SQLite3 database which will be stored in web/db/results.sqlite3
+  use Postgres with the user created above:
     @@external_database = {
-      :dbi_handler => 'SQLite3',
-      :username => '',
-      :password => '',
-      :database => 'db/results.sqlite3'
+      :dbi_handler => 'Pg',
+      :username => 'eval',
+      :password => 'hurrdurr',
+      :database => 'results'
     }
+  Still logged in as postgres, run the following to create the database:
+    createdb results
 
 * web/config/database.yml
   This is the database Rails uses. You can define different setups for
   a debug or production environment, but for now set them both to the
   same values. (We do this as well and that makes us, by definition, bad
-  people). The following will use an SQLite3 database which will be
-  stored in web/db/rails.sqlite3
+  people). Again, run
+    createdb rails
+  while still logged in as postgres user and update the database.yml:
+    login: &login
+      adapter:  postgresql
+      username: eval
+      password: hurrdurr
+      host:     localhost
+
     development:
-      adapter: sqlite3
-      database: db/rails.sqlite3
-      pool: 5
-      timeout: 5000
+      <<: *login
+      database: rails
 
     production:
-      adapter: sqlite3
-      database: db/rails.sqlite3
-      pool: 5
-      timeout: 5000
+      <<: *login
+      database: rails
 
 Once the database config is final, run the following to create all
 necessary tables:
@@ -230,9 +272,12 @@ how the data is organized, here’s a short wrap up:
 Once all data is entered, we’ll leave the web interface for now and
 work on the console. Change to the root of the repository and run
   rake
-You’ll see a lot of options, here are the ones you’re probably most
-interested in. They are listed in the order we use them for our eval,
-so you can use them one after another to get to your first eval.
+You’ll see a lot of options, most of which you can ignore.
+
+
+Below follows a list of commands you’ll likely need. They are ordered so
+that you can check off each step/command and end up with a complete eval
+that can be handed out to everyone.
 
 
 rake pdf:howto
@@ -244,16 +289,14 @@ in doc/howto_[lang code].tex.
 rake pdf:forms
 --------------
 Creates the forms for each course and prof that should be printed. The
-amount of copies required is included in the filename. When printing the
-sheets, ensure that they are printed exactly the same size (i.e. no “fit
-to paper”). The default output is A4, but you might be able to change
-this in lib/FunkyTeXBits.rb. Unless a semester-id is specified, it will
-create forms for the current one.
+amount of copies required is included in the filename.
 
-If you want to customize the available forms, you best have a look at the
-existing ones and change them to your needs (you can do this on the web
-interface at “Forms”). There’s a GUI generator planned, but not yet
-started.
+Printing
+--------
+When printing the sheets, ensure that they are printed exactly the same
+size (i.e. no “fit to paper”). The default output is A4, but you might
+be able to change this in lib/FunkyTeXBits.rb. Unless a semester-id is
+specified, it will create forms for the current one.
 
 rake images:sortandalign[directory]
 -----------------------------------
@@ -266,6 +309,11 @@ settings if you like.
 is writable before running this. The function will try to recognize the
 bar code and sort them depending on the form type into different folders
 in our tmp directory.
+
+If you get a lot of errors that are zbarimg related, the included exe-
+cutable is probably out of date compared to the libraries on your
+system. In that case, run “rake magick:buildZBar” to build a custom
+version.
 
 rake pest:omr
 -------------
@@ -281,7 +329,6 @@ possible command line options. The following line should get you
 started for your debugging purposes:
 
   ./pest/omr.rb -s "./tmp/images/0.yaml" -p "./tmp/images/0" -d -v
-
 
 rake pest:correct
 -----------------
@@ -307,9 +354,16 @@ This grabs the recognized comments and makes them available in the
 web interface (under each course and/or tutor). Note that you need
 to configure the used directories in seee_config first (see above).
 
-
+Typing the comments/summaries
+-----------------------------
 When you’re done, switch to the webinterface and type the comments,
-write a summary for each course and/or tutor.
+write a summary for each course and/or tutor. Each field is directly
+passed to LaTeX so you’re not limited to some design options. If you
+need further packages add them in lib/FunkyTeXBits.rb#praeambel. If you
+want to draw images you can use “Dia” which can export as LaTeX PGF. The
+code can be pasted directly into the comment field and should render out
+of the box. If you want to include raster images, specify an absolute
+path somewhere on your disk.
 
 rake pdf:semester
 -----------------
@@ -317,7 +371,6 @@ Without parameters, this will generate results in one PDF per
 faculty for the current semester. You can run rake pdf:make_
 preliminary to mark these results as not final and that they shouldn’t
 be handed to anyone.
-
 
 “Rolling Eval”
 --------------
@@ -330,3 +383,35 @@ like. I don’t recommend advertising this on your first go, but remember
 it will be possible later.
 
 If you’ve made it so far, congratulations! This is your first eval.
+
+
+==================
+THINGS TO CONSIDER
+==================
+
+* Don’t rank. Many people believe creating a rank will actually solve
+  problems and over time improve the quality of the evaluated object.
+  There are many good reasons, but the main reasons are:
+    - oversimplification of the issue
+    - easy to dismiss by /anyone/
+    - doesn’t help interested people to improve themselves at all
+    - doesn’t make uninterested people magically better or interested
+  The results are just a bunch of worthless numbers unless you go to the
+  people involved, talk to them and offer them help where appropriate.
+
+  If you do it RIGHT, the actual evaluation will be the least amount of
+  work to be done. Seriously, don’t rank.
+
+* If you want to make the web interface available from the internet,
+  be sure to add HTTP-Authentication or similar to protect your data.
+  There’s no user/admin scheme in SeeeFIXME, so everyone may to every-
+  thing. If someone is not trustworthy, don’t give them access.
+
+* Submit patches. Please do. We are only a small team and are happy for
+  any help. Even though the project does not yet follow the following
+  guidelines everywhere, they should be used nonetheless:
+    - use_underscores_for_everything_but_classes
+    - ClassesShouldUseCamelCase
+    - Language is English
+    - indent with 2 spaces, no tabs.
+    - file encoding must be UTF-8.
