@@ -66,7 +66,7 @@ class Form < ActiveRecord::Base
   # if too few questionnaires have been submitted, we return a lovely statement about anonymity etc.
   def too_few_questionnaires(language, sheets)
     I18n.locale = language
-    I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
+    I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
     if sheets == 0
       I18n.t(:too_few_questionnaires)[:null]

@@ -37,6 +37,7 @@ packages w/o special treatment
   postgresql
   ruby-gnome2
   texlive
+  texlive-fonts-extra
   texlive-lang-german
   texlive-latex-extra
   tex-gyre

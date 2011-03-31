@@ -163,7 +163,7 @@ class Course < ActiveRecord::Base
     return "" if profs.empty?
 
     I18n.locale = language
-    I18n.load_path += Dir.glob(Rails.root + '/config/locales/*.yml')
+    I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
     b = ''
 
