@@ -1,6 +1,13 @@
 require 'enumerator'
 require 'tmpdir'
 
+# once the barcode has been recognized the images are stored in the
+# format oldname_barcode.tif. This way barcode detection and OMR can
+# be split up. This function reads the barcode from the filename.
+def find_barcode_from_path(path)
+    path.to_s.sub(/^.*_([0-9]+).*$/, '\1').to_i
+end
+
 # http://snippets.dzone.com/posts/show/3486
 class Array
   def chunk(pieces)

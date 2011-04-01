@@ -43,10 +43,6 @@ def find_barcode(filename)
   end
 end
 
-def find_barcode_from_basename(basename)
-    basename.to_s.sub(/^.*_/, '').to_i
-end
-
 def tex_head_for(form, lang='')
   h = form.abstract_form.texhead
   if h.is_a?(String)
@@ -206,7 +202,7 @@ end
 
 namespace :images do
 
-  desc "(5) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
+  desc "(4) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
   task :insertcomments, :directory, :needs => 'pest:copycomments' do |t, d|
     dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
     puts "Working directory is #{dd}."
@@ -231,7 +227,7 @@ namespace :images do
         end
         scan = YAML::load(File.read(f))
         tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
-        barcode = find_barcode_from_basename(basename)
+        barcode = find_barcode_from_path(basename)
 
         course = CourseProf.find(barcode).course
 
@@ -256,7 +252,7 @@ namespace :images do
       # FIXME: is this ever used? if not: EXTERMINATE!
       xname = basename + '-comment.jpg'
       if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
-        barcode = find_barcode_from_basename(basename)
+        barcode = find_barcode_from_path(basename)
 
         course_prof = CourseProf.find(barcode)
 
@@ -270,7 +266,7 @@ namespace :images do
       # insert comments for profs
       cname = basename + 'vcomment.jpg'
       if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
-        barcode = find_barcode_from_basename(basename)
+        barcode = find_barcode_from_path(basename)
 
         course_prof = CourseProf.find(barcode)
 
@@ -378,7 +374,7 @@ namespace :pest do
       Dir.glob("#{f}*.tif") do |y|
         # just take the first sheet, as all sheets in the same folder
         # should be identical
-        barcode = find_barcode_from_basename(File.basename(y, ".tif"))
+        barcode = find_barcode_from_path(y)
         cp = CourseProf.find(barcode)
         make_pdf_for(cp.course.semester, cp, f)
         `mv -f "#{f + cp.get_filename}.yaml" "#{target}"`
@@ -390,46 +386,6 @@ namespace :pest do
   desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
   task :getyamls, :needs => 'db:connect' do |t|
     getYamls(true)
-  end
-
-  # note: this is called automatically by yaml2db
-  desc "Create db tables for each form for the current semester"
-  task :createtables, :needs => 'db:connect' do
-    curSem.forms.each do |f|
-      name = f.name
-      f = f.abstract_form
-
-      # Note that the barcode is only unique for each CourseProf, but
-      # not for each sheet. That's why path is used as unique key.
-      q = "CREATE TABLE #{f.db_table} ("
-
-      f.questions.each do |quest|
-        next if quest.db_column.nil?
-        if quest.db_column.is_a?(Array)
-          quest.db_column.each do |a|
-            q << "#{a} INTEGER, "
-          end
-        else
-          q << "#{quest.db_column} INTEGER, "
-        end
-      end
-
-      q << "path VARCHAR(255) NOT NULL UNIQUE, "
-      q << "barcode INTEGER default NULL "
-      q << ");"
-
-      begin
-        $dbh.do(q)
-        puts "Created #{name} (#{f.db_table})"
-      rescue
-        puts "Note: Creating #{name} (table: #{f.db_table}) failed. Possible causes:"
-        puts "* table already exists"
-        puts "* SQL backend is down/misconfigured"
-        puts "* used SQL query is not supported by your SQL backend"
-        puts "If no further errors pop up, you’re probably fine."
-        puts
-      end
-    end
   end
 
   desc "(2) Evaluates all sheets in ./tmp/images/"
@@ -445,84 +401,6 @@ namespace :pest do
   desc "(3) Correct invalid sheets"
   task :correct do
     `./pest/fix.rb ./tmp/images/`
-  end
-
-  desc "(4) Copies YAML data into database. Won’t delete any entries, but update existing ones."
-  task :yaml2db, :needs => ['db:connect', 'pest:createtables'] do |t,a|
-    class Question
-      attr_accessor :value
-    end
-
-    tables = {}
-    Dir.glob("./tmp/images/[0-9]*.yaml") do |f|
-      form = File.basename(f, ".yaml")
-      yaml = YAML::load(File.read(f))
-      tables[form] = yaml.db_table
-    end
-
-    allfiles = Dir.glob("./tmp/images/[0-9]*/*.yaml")
-    count = allfiles.size
-
-    allfiles.each_with_index do |f, curr|
-      form = File.basename(File.dirname(f))
-      yaml = YAML::load(File.read(f))
-      table = tables[form]
-
-      keys = Array.new
-      vals = Array.new
-
-      # Get barcode
-      keys << "barcode"
-      vals << find_barcode_from_basename(File.basename(f, ".yaml")).to_s
-
-      keys << "path"
-      vals << f
-
-      yaml.questions.each do |q|
-        next if q.type == "text" || q.type == "text_wholepage"
-        next if q.db_column.nil?
-
-        if q.db_column.is_a?(Array)
-          q.db_column.each_with_index do |a, i|
-            # The first answer starts with 1, but i is zero-based.
-            # Therefore add 1 everytime to put the results in the
-            # right columns.
-            vals << (q.value == (i+1).to_s ? 1 : 0).to_s
-            keys << a
-          end
-        else
-          vals << (q.value.nil? ? 0 : Integer(q.value)).to_s
-          keys << q.db_column
-        end
-      end
-
-      q = "INSERT INTO #{table} ("
-      q << keys.join(", ")
-      q << ") VALUES ("
-      # inserts right amount of question marks for easy
-      # escaping
-      q << (["?"]*(vals.size)).join(", ")
-      q << ")"
-
-      begin
-        $dbh.do("DELETE FROM #{table} WHERE path = ?", f)
-        $dbh.do(q, *vals)
-      rescue DBI::DatabaseError => e
-        puts
-        puts "Failed to insert #{form}/#{File.basename(f)}"
-        puts q
-        puts "Error code: #{e.err}"
-        puts "Error message: #{e.errstr}"
-        puts "Error SQLSTATE: #{e.state}"
-        puts
-        puts "Aborting."
-        exit
-      end
-
-      print_progress(curr + 1, count)
-    end
-    puts
-    puts "Done!"
   end
 
   desc "Copies extracted comments into eval directory"

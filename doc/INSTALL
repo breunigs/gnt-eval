@@ -100,7 +100,7 @@ Then we need to install ruby:
   rvm install 1.8.7 --with-openssl-dir=$HOME/.rvm/usr
 
 and create a gemset, which will be seperate from your other system gems:
-  rvm gemset create "seeeFIXME"
+  rvm gemset create 'seeeFIXME'
 
 To continue you first need to download a version of =FIXME.
 
@@ -334,6 +334,10 @@ started for your debugging purposes:
 
   ./pest/omr.rb -s "./tmp/images/0.yaml" -p "./tmp/images/0" -d -v
 
+Activating debugging mode will store the data in an SQLite file in the
+working directory, so don’t worry about overwriting something in your
+production database
+
 rake pest:correct
 -----------------
 For many questions there will be more than one cross detected, either
@@ -344,13 +348,6 @@ and no auto-detection was possible.
 
 You can use the arrow-keys to select the correct answer or choose the
 box in the upper left corner to mark an answer invalid.
-
-rake pest:yaml2db
------------------
-This will copy the results of the previous command (these were stored
-in YAML files) into a database which will be used from now on. It is
-planned to remove this step altogether and use a database from the
-beginning, with optional YAML output.
 
 rake images:insertcomments
 --------------------------
