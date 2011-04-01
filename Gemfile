@@ -11,3 +11,7 @@ gem "dbd-mysql"
 
 gem "postgres"
 gem "dbd-pg"
+
+# used for debugging
+gem "sqlite3"
+gem "dbd-sqlite3"

@@ -28,6 +28,8 @@ packages w/o special treatment
   libpq-dev
   libreadline6
   libreadline6-dev
+  libsqlite3-0
+  libsqlite3-dev
   libssl-dev
   libxml2-dev
   libxslt-dev
@@ -36,6 +38,7 @@ packages w/o special treatment
   openssl
   postgresql
   ruby-gnome2
+  sqlite3
   texlive
   texlive-fonts-extra
   texlive-lang-german
