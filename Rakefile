@@ -405,7 +405,7 @@ namespace :pest do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       tables << YAML::load(File.open(f)).db_table
     end
-    `./pest/fix.rb #{tables.join(" ")`
+    `./pest/fix.rb #{tables.join(" ")}`
   end
 
   desc "Copies extracted comments into eval directory"
