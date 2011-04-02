@@ -400,7 +400,12 @@ namespace :pest do
 
   desc "(3) Correct invalid sheets"
   task :correct do
-    `./pest/fix.rb ./tmp/images/`
+    require File.join(Rails.root, "lib", "AbstractForm.rb")
+    tables = []
+    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+      tables << YAML::load(File.open(f)).db_table
+    end
+    `./pest/fix.rb #{tables.join(" ")`
   end
 
   desc "Copies extracted comments into eval directory"
