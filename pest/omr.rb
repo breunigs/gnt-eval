@@ -1,7 +1,7 @@
 #!/usr/bin/ruby1.8
 
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: OMR (Optical Mark Recognition)
@@ -9,7 +9,7 @@
 # Parses a set of files or a given directory and saves the results for
 # each image/sheet into the given directory. Results are the corrected
 # x/y values for all elements given in the input-sheet (rotation, off-
-# set) and the answers (choice, nochoice, failchoice attributes for each
+# set) and the answers (choice attributes for each
 # group/question). Outputs images for each fill out free text field if
 # specified.
 #
@@ -55,7 +55,7 @@ require cdir + '/../lib/RandomUtils.rb'
 #RubyProf.start
 
 
-class PESTOmr
+class PESTOmr < PESTDatabaseTools
   # Finds the percentage of black/white pixels for the given rectangle
   # and image.
   def blackPercentage(x, y, width, height, img)
@@ -198,13 +198,13 @@ class PESTOmr
     leftThres = [9, 9]
     topThres = [20, 20]
 
-    lTop  = ( 180*@dpifix).to_i
-    lBot  = (2650*@dpifix).to_i
+    lTop    = ( 180*@dpifix).to_i
+    lBot    = (2650*@dpifix).to_i
     lLeft   = (  40*@dpifix).to_i
     lWidth  = ( 500*@dpifix).to_i
     lHeight = ( 300*@dpifix).to_i
     tLeft   = (2000*@dpifix).to_i
-    tTop  = (  40*@dpifix).to_i
+    tTop    = (  40*@dpifix).to_i
     tWidth  = ( 400*@dpifix).to_i
     tHeight = ( 500*@dpifix).to_i
     0.upto(page_count-1) do |i|
@@ -353,7 +353,7 @@ class PESTOmr
       box.x = x
       box.y = y
 
-      # Usage?
+      # Used for debugging below
       box.mx = mx
       box.my = my
 
@@ -395,7 +395,8 @@ class PESTOmr
     # imperfect scanning. If no checkmark is found, lower the thres-
     # hold each time. This makes it more prone to false-positives,
     # but at least keeps them to a minimum on questions that do not
-    # need such a low limit.
+    # need such a low limit. The last entry will be marked as "low
+    # threshold".
     thresholds = [3.5, 1.5, 0.5]
     # This ensures that single boxes won't get checked because of
     # dirt. This might result in undetected checkmarks but no answer
@@ -409,10 +410,9 @@ class PESTOmr
     # upper limit if this occurs.
     thres_max = 90
 
-    threshold  = -1
+    low_threshold = false
     thresholds.each do |t|
-      # Save for debugging uses
-      threshold = t
+      low_threshold = t == thresholds.last
       group.boxes.each do |box|
         checks << box if box.bp > t
       end
@@ -424,24 +424,31 @@ class PESTOmr
     # it's a single choice question and the upper limit has been
     # reached. Mark it as failed.
     if group.boxes.size == 1 && checks.size == 1 && checks[0].bp > thres_max
-      result = group.failchoice
+      result = -1
     end
 
     # it's a multiple choice question. Remove all checkmarks that
     # are above the threshold but only if there are at least two
     # checkmarks (catches the case where someone used a fat marker)
     if group.boxes.size >= 2 && checks.size >= 2
-      checks.delete_if { |x| x.bp > thres_max }
+      del = checks.find_all { |x| x.bp > thres_max }
+      del.each { |d| d.fill_critical = true }
+      checks -= del
       # We lost all checkmarks… let's ask the user
-      result = group.failchoice if checks.empty?
+      result = -1 if checks.empty?
     end
 
     # Cover all normal cases
     result = case checks.length
-      when 0 then group.nochoice
+      when 0 then 0
       when 1 then checks[0].choice
-      else    group.failchoice
+      else -1
     end unless result
+
+    # store for each box if it was checked
+    checks.each { |c| c.is_checked = true }
+    # store for each box if it was selected with a low threshld
+    checks.each { |c| c.fill_critical = true } if low_threshold
 
     # Draws the red/green/yellow boxes for each answer
     if @debug
@@ -580,11 +587,8 @@ class PESTOmr
       @ilist[imgid].crop(x, y, w, h).minify.write filename
     end
 
-    # We're text-parsing, thus we can only have yes or no, but no
-    # "fail" answer. "Yes" answer is hardcoded because it's not used
-    # anywhere. An existing image is usually "yes" enough, but keep this for
-    # debugging.
-    return bp > limit ? 1 : group.nochoice
+    # use "1" for yes and "0" for no text (= no choice)
+    return bp > limit ? 1 : 0
   end
 
   # Looks at each group listed in the yaml file and calls the appro-
@@ -702,6 +706,9 @@ class PESTOmr
     keys << "path"
     vals << filename
 
+    keys << "abstract_form"
+    vals << Marshal.dump(yaml)
+
     yaml.questions.each do |q|
       next if q.type == "text" || q.type == "text_wholepage"
       next if q.db_column.nil?
@@ -744,10 +751,9 @@ class PESTOmr
 
     # only create YAMLs in debug mode
     return unless @debug
-    # FIXME
-    #~ fout = File.open(getNewFileName(filename), "w")
-    #~ fout.puts YAML::dump(@doc)
-    #~ fout.close
+    fout = File.open(getNewFileName(filename), "w")
+    fout.puts YAML::dump(@doc)
+    fout.close
   end
 
   # Finds if a given page for the currently loaded @doc requires
@@ -896,7 +902,8 @@ class PESTOmr
     end
 
     q << "path VARCHAR(255) NOT NULL UNIQUE, "
-    q << "barcode INTEGER default NULL "
+    q << "barcode INTEGER default NULL, "
+    q << "abstract_form TEXT default NULL "
     q << ");"
 
     begin
@@ -988,7 +995,7 @@ class PESTOmr
     end
 
     # if debug is activated, use SQLite database instead
-    set_debug_database if @debug
+    set_debug_database# if @debug  FIXME
 
     # Verbose and multicore processing don't really work together,
     # the output is just too ugly.

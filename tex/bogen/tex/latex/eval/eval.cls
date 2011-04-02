@@ -133,8 +133,6 @@
 
 \def\blu[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
-    \write\posout{uu failchoice: -1}
-    \write\posout{uu nochoice: }
     \write\posout{uu qtext: "#1"}
     %\write\posout{uu save_as: ""}
     \write\posout{uu type: square}
@@ -149,8 +147,6 @@
 }
 \def\bluu[#1][#2]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
-    \write\posout{uu failchoice: -1}
-    \write\posout{uu nochoice: }
     \write\posout{uu qtext: "#1"}
     \write\posout{uu save_as: ""}
     \write\posout{uu type: square}
@@ -175,7 +171,6 @@
 
 \newcommand{\kommentar}[3]{\write\posout{u - !ruby/object:Question}
 	\write\posout{uu active: true}
-	\write\posout{uu nochoice: }
 	\write\posout{uu choice: }
 	\write\posout{uu qtext: "#1"}
     	\write\posout{uu save_as: "#3"}
@@ -188,7 +183,6 @@
 
 \newcommand{\comment}[4]{\write\posout{u - !ruby/object:Question}
 	\write\posout{uu active: true}
-	\write\posout{uu nochoice: }
 	\write\posout{uu choice: }
 	\write\posout{uu qtext: "#1"}
     	\write\posout{uu save_as: "#3"}

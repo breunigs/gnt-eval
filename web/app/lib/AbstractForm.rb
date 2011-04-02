@@ -41,12 +41,6 @@ class Question
   # text of the question
   attr_accessor :qtext
 
-  # value to insert into database if OMR fails
-  attr_accessor :failchoice
-
-  # value to insert into db if there is no mark
-  attr_accessor :nochoice
-
   # what does the box look like (defaults to square)
   attr_accessor :type
 
@@ -62,12 +56,12 @@ class Question
   attr_accessor :special_care
   attr_accessor :donotuse
 
+  # FIXME: remove failchoice
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='', save_as = '')
 
     @boxes = boxes
     @qtext = qtext
-    @failchoice = failchoice
     @nochoice = nochoice
     @type = type
     @db_column = db_column
@@ -135,12 +129,12 @@ class Question
 
   # did the user fail to answer the question?
   def failed?
-    return @value == @failchoice
+    return @value == 0 || @value.to_i < 0
   end
 
   # didn't the user make any choice?
   def nochoice?
-    return @value == @nochoice || (@value == 0 && @nochoice.nil?)
+    return @value == 0
   end
 
   # is this a multi-answer question?
