@@ -21,7 +21,6 @@ require 'rubygems'
 require 'optparse'
 require 'yaml'
 require 'pp'
-require 'narray'
 require 'ftools'
 require 'tempfile'
 
@@ -51,8 +50,8 @@ require cdir + '/helper.AbstractFormExtended.rb'
 require cdir + '/../lib/RandomUtils.rb'
 
 # Profiler. Uncomment code at the end of this file, too.
-#require 'ruby-prof'
-#RubyProf.start
+#~ require 'ruby-prof'
+#~ RubyProf.start
 
 
 class PESTOmr < PESTDatabaseTools
@@ -72,8 +71,8 @@ class PESTOmr < PESTDatabaseTools
       return 0 if x >= img.columns || y >= img.rows
       x = x.makePos
       y = y.makePos
-      width = x + width > img.columns ? img.columns - x : width
-      height = y + height > img.rows ? img.rows - y : height
+      width = Math.min(img.columns - x, width)
+      height = Math.min(img.rows - y, height)
       return 0 if width <= 0 || height <= 0
     end
     begin
@@ -93,8 +92,9 @@ class PESTOmr < PESTDatabaseTools
       end
       return 0
     end
-    nrect = NArray.to_na(rect)
-    nrect.size - (nrect.sum / Magick::QuantumRange)
+    # this is faster than using NArray (needs conversion first) or
+    # actually counting the objects using rect.count(QuantumRange)
+    (rect - [Magick::QuantumRange]).size
   end
 
   # This function finds the first line of pixels whose black-% is
@@ -858,7 +858,7 @@ class PESTOmr < PESTDatabaseTools
       puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
       exit
     end
-    doc = YAML::load(File.read(@omrsheet))
+    doc = loadYAMLsheet
 
     @page_count = doc.pages.count
     @db_table = doc.db_table
@@ -930,8 +930,10 @@ class PESTOmr < PESTDatabaseTools
 
   # Loads the YAML file and converts LaTeX's scalepoints into pixels
   def loadYAMLsheet
-    @omrsheet_loaded ||= File.read(@omrsheet)
-    doc = YAML::load(@omrsheet_loaded)
+    # it is faster create new YAMLs by marshaling them instead of having
+    # to parse them again.
+    return Marshal.load(@omrsheet_parsed) if @omrsheet_parsed
+    doc = YAML::load(File.read(@omrsheet))
     doc.pages.each do |p|
       next if p.questions.nil?
       p.questions.each do |q|
@@ -944,6 +946,7 @@ class PESTOmr < PESTDatabaseTools
         end
       end
     end
+    @omrsheet_parsed = Marshal.dump(doc)
     doc
   end
 
@@ -1146,3 +1149,7 @@ class PESTOmr < PESTDatabaseTools
 end
 
 PESTOmr.new()
+
+#~ result = RubyProf.stop
+#~ printer = RubyProf::FlatPrinter.new(result)
+#~ printer.print(STDOUT, 0)

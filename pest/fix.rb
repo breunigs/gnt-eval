@@ -74,7 +74,7 @@ class PESTFix < PESTDatabaseTools
 
     debug Magick::Magick_version
 
-    if File.exist?(ARGV.last) && ARGV.last.start_with? ("/")
+    if File.exist?(ARGV.last) && ARGV.last.start_with?("/")
       @path = ARGV.pop
       debug "Using debug path = #{@path}"
       set_debug_database
