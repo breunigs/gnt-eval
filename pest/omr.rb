@@ -1,4 +1,4 @@
-#!/usr/bin/ruby1.8
+#!/usr/bin/env ruby
 
 # PEST
 # Praktisches Evaluations ScripT
@@ -858,7 +858,9 @@ class PESTOmr < PESTDatabaseTools
       puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
       exit
     end
-    doc = loadYAMLsheet
+    # can’t use loadYAMLsheet here because it needs more dependencies
+    # that are not yet available
+    doc = YAML::load(File.read(@omrsheet))
 
     @page_count = doc.pages.count
     @db_table = doc.db_table
@@ -998,7 +1000,7 @@ class PESTOmr < PESTDatabaseTools
     end
 
     # if debug is activated, use SQLite database instead
-    set_debug_database# if @debug  FIXME
+    set_debug_database if @debug
 
     # Verbose and multicore processing don't really work together,
     # the output is just too ugly.

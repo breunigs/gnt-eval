@@ -4,9 +4,9 @@ hacking source code. You can also download this VirtualBox image if you
 don't want to follow this guide.
 
 Ubuntu settings:
-  Username:             eval
-  Password:             hurrdurr
-  computer's name:      eval-testpc
+  Username:             gnt-eval
+  Password:             gnt-eval
+  computer's name:      gnt-eval
 
 =================
 REQUIRED SOFTWARE
@@ -34,10 +34,10 @@ packages w/o special treatment
   libxml2-dev
   libxslt-dev
   libyaml-dev
+  libzbar0
   ncurses-dev
   openssl
   postgresql
-  ruby-gnome2
   sqlite3
   texlive
   texlive-fonts-extra
@@ -63,6 +63,30 @@ only through an extension which must be manually installed. Furthermore,
 it needs to be loaded each time from within this project, so you’ll have
 to hack the source and end up with a still limited database system.
 
+
+Ruby & Rails version hell
+-------------------------
+
+While it is possible to use system packages for ruby related software as
+well, we ran into compatibility problems. The solution to not have to
+deal with this is called “RVM” (Ruby Version Manager) and essentially
+maintains independent versions of ruby as required.
+
+Usually these steps are sufficient to get RVM running:
+  bash < <(curl http://rvm.beginrescueend.com/releases/rvm-install-head)
+And add the following line at the end of your .bashrc, .zshrc, …
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
+To see if this worked open a new shell and type execute "rvm". If the
+command is not found, please refer to the manual at
+  http://rvm.beginrescueend.com/rvm/install/
+
+Then we need to install ruby:
+  rvm install 1.8.7-p334
+and create a gemset, which will be seperate from your other system gems:
+  rvm 1.8.7-p334
+  rvm gemset create 'gnt-eval'
+
+
 Image Processing
 ----------------
 
@@ -74,54 +98,40 @@ A)  if you want to use the system-provided packages:
       imagemagick
       librmagick-ruby
 
-B)  if you want to build your own you'll need to install:
-      FIXME
+B)  if you want to build your own you'll need to additionally install:
+      ruby1.8-dev
     and run "rake magick:all" once the repository has been checked out.
+    You can install the system libraries alongside the custom repository
+    without any problems. This way you can uninstall the custom versions
+    at any time you like. If you run into problems, like segmentation
+    faults, it’s probably better to stick with the system libraries
+    because debugging the ImageMagick-RMagick-ZBar combo can be a lot of
+    effort.
 
 
-Ruby & Rails version hell
--------------------------
-
-While it is possible to use system packages for ruby related software as
-well, we ran into compatibility problems. The solution to not have to
-deal with this is called “RVM” (Ruby Version Manager) and essentially
-maintains independent versions of ruby as required.
-
-Usually these steps are sufficient to get RVM running:
-  bash <<(curl http://rvm.beginrescueend.com/releases/rvm-install-head)
-And add the following line at the end of your .bashrc, .zshrc, …
-  [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
-To see if this worked open a new shell and type execute "rvm". If the
-command is not found, please refer to the manual at
-  http://rvm.beginrescueend.com/rvm/install/
-
-Then we need to install ruby:
-  FIXME required? rvm package install openssl
-  rvm install 1.8.7 --with-openssl-dir=$HOME/.rvm/usr
-
-and create a gemset, which will be seperate from your other system gems:
-  rvm gemset create 'seeeFIXME'
-
-To continue you first need to download a version of =FIXME.
+To continue you first need to download a version of G'n'T.
 
 
-==================
-DOWNLOADING =FIXME
-==================
+=================
+DOWNLOADING G'n'T
+=================
 
 For now, you can only clone the repository. To do so run:
   git clone FIXME-URL-TO-GIT
 
+If you run this in a virtual machine, you can use the “Shared Folders”
+feature of VirtualBox to mount a directory from the host machine. First,
+add the folder then run
+  sudo mount -t vboxsf gnt-repository-on-host /home/gnt-eval/gnt-eval
+to mount the directory for this session or add it to the fstab file.
 
 ==========================
 FINISHING THE INSTALLATION
 ==========================
 
-Change into the newly created directory. And run
-  rvm use 1.8.7@seeeFIXME --rvmrc
-which will tell RVM to use the previously installed ruby version and the
-matching gemset. --rvmrc saves these settings so they will be used
-automatically once you cd in any subdirectory.
+Change into the newly created directory. RVM will likely ask you to
+confirm that the included .rvmrc is fine. Press enter, then type 'yes'
+to trust G'n'T’s .rvmrc.
 
 Run
   gem install bundler
@@ -152,6 +162,9 @@ The relevant variables are:
 Good defaults that will work for a basic setup:
   :comment_images_public_dir  => File.join(RAILS_ROOT, "public", "comments")
   :comment_images_public_link => "http://localhost:3000/comments"
+(Attention: Don’t delete trailing commas in seee_config.rb, if they are
+present in the default file. Otherwise you’ll get syntax errors and it
+won’t work.)
 
 If above directory requires access rights which are different from the
 ones your current terminal ownes, you probably want to change the
@@ -197,10 +210,11 @@ To get access to PostgreSQL features, you’ll have to login as postgres
 user. To do so, run:
   sudo -u postgres -s
 Now you’ll be able to execute PostgreSQL specific commands. First, run
-  createuser -P eval
+  createuser -P gnt-eval
 to create a new user called “eval”. The -P switch will prompt you for a
-password, leave it out to create a user with no password (our password will again be “hurrdurr”). You will be asked some questions, answer
-them as you see fit.
+password, leave it out to create a user with no password (our password
+will again be “gnt-eval”). You will be asked some questions, answer them
+as you see fit.
 
 * lib/seee_config.rb
   This is the DB where all the results will be stored. Locate
@@ -208,8 +222,8 @@ them as you see fit.
   use Postgres with the user created above:
     @@external_database = {
       :dbi_handler => 'Pg',
-      :username => 'eval',
-      :password => 'hurrdurr',
+      :username => 'gnt-eval',
+      :password => 'gnt-eval',
       :database => 'results'
     }
   Still logged in as postgres, run the following to create the database:
@@ -224,8 +238,8 @@ them as you see fit.
   while still logged in as postgres user and update the database.yml:
     login: &login
       adapter:  postgresql
-      username: eval
-      password: hurrdurr
+      username: gnt-eval
+      password: gnt-eval
       host:     localhost
 
     development:
@@ -246,7 +260,7 @@ MY FIRST EVAL
 
 For now we’ll use Webrick to handle the webpage related work, in the long
 run you might want to use Apache instead, though. To start Webrick:
-  cd seee/web/script && ./server
+  cd web/script && ./server
 If it starts properly, there should be a webpage available at
   http://localhost:3000
 where you can enter all your profs, courses, forms, etc. To get an idea of
@@ -405,7 +419,7 @@ THINGS TO CONSIDER
 
 * If you want to make the web interface available from the internet,
   be sure to add HTTP-Authentication or similar to protect your data.
-  There’s no user/admin scheme in SeeeFIXME, so everyone may to every-
+  There’s no user/admin scheme in G'n'T, so everyone may to every-
   thing. If someone is not trustworthy, don’t give them access.
 
 * Submit patches. Please do. We are only a small team and are happy for
@@ -416,3 +430,9 @@ THINGS TO CONSIDER
     - Language is English
     - indent with 2 spaces, no tabs.
     - file encoding must be UTF-8.
+
+
+=======
+SUMMARY
+=======
+

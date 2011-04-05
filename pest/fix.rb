@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # PEST
 # Praktisches Evaluations ScripT
@@ -263,7 +263,8 @@ class PESTFix < PESTDatabaseTools
     @statusbar.pop 99
     @statusbar.push 3, "No more failed questions! If there’s no background processing, you’re done."
     update_window_title_and_progressbar
-    popup_info("You're done!", "All failed questions have been processed. Unless images are still processed in the background, you can exit this application.")
+    popup_info("You're done!", "All failed questions have been processed. Unless images are still processed in the background, you can exit this application.") unless @all_done_popup_shown
+    @all_done_popup_shown = true
     return nil
   end
 

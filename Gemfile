@@ -4,6 +4,7 @@ gem "rails",      "2.3.5"
 gem "dbi"
 gem "rubygems-update", "1.4.2"
 gem "rmagick"
+gem "gtk2"
 
 gem "mysql"
 gem "dbd-mysql"
