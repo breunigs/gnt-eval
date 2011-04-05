@@ -436,3 +436,62 @@ THINGS TO CONSIDER
 SUMMARY
 =======
 
+sudo apt-get install curl git autoconf barcode bison build-essential gs libc6-dev libmagick9-dev libmysqlclient-dev libpq-dev libreadline6 libreadline6-dev libsqlite3-0 libsqlite3-dev libssl-dev libxml2-dev libxslt-dev libyaml-dev libzbar0 ncurses-dev openssl postgresql sqlite3 texlive texlive-fonts-extra texlive-lang-german texlive-latex-extra tex-gyre zlib1g zlib1g-dev imagemagick librmagick-ruby
+
+Above command will take forever, wait until curl and git are installed,
+then continue without waiting for it to finish.
+
+bash < <(curl http://rvm.beginrescueend.com/releases/rvm-install-head)
+
+Add this line at the end of .bashrc/.zshrc/etc.:
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
+
+Open new shell
+
+rvm install 1.8.7-p334
+rvm 1.8.7-p334
+rvm gemset create 'gnt-eval'
+
+git clone http://FIXME seee
+cd seee
+[Enter]yes[Enter]
+
+bundle install
+update_rubygems
+
+Leaving the configuration options on their defaults, they should work
+out of the box.
+
+sudo -u postgres -s
+createuser -P gnt-eval
+gnt-eval[Enter]
+gnt-eval[Enter]
+y[Enter]
+createdb rails
+createdb results
+exit
+
+cd web && rake db:migrate
+./script/server
+
+Open new terminal
+cd seee
+
+x-www-browser http://localhost:3000&
+Add data in WWW-Browser, use forms from doc/example_forms
+
+rake pdf:howto
+rake pdf:forms
+
+Print forms, evaluate, scan to TIFs, copy to /home/gnt-eval/testimgs
+
+rake images:sortandalign[/home/gnt-eval/testimgs]
+rake pest:omr
+rake pest:correct
+rake images:insertcomments
+
+x-www-browser http://localhost:3000&
+Type comments for each course/tutor in web interface
+
+rake pdf:semester
+pdf:make_preliminary

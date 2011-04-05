@@ -1,5 +1,5 @@
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: HELPER.ARRAY
@@ -45,14 +45,14 @@ class Array
     def previous(el)
         i = self.index(el)
         return nil if !i
-        self[i - 1] 
+        self[i - 1]
     end
 
     # Selects next element to the given one in self
     def next(el)
         i = self.index(el)
         return nil if !i
-        self[i + 1] 
+        self[i + 1]
     end
 
     # Joins all children of the current array into one and returns that

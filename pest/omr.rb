@@ -17,6 +17,7 @@
 
 cdir = File.dirname(__FILE__)
 
+require 'base64'
 require 'rubygems'
 require 'optparse'
 require 'yaml'
@@ -707,7 +708,7 @@ class PESTOmr < PESTDatabaseTools
     vals << filename
 
     keys << "abstract_form"
-    vals << Marshal.dump(yaml)
+    vals << Base64.encode64(Marshal.dump(yaml))
 
     yaml.questions.each do |q|
       next if q.type == "text" || q.type == "text_wholepage"
@@ -1035,7 +1036,7 @@ class PESTOmr < PESTDatabaseTools
 
   # Splits the given file and reports the status of each sub-process.
   def delegateWork(files)
-    puts "Owning FormPro, " + @cores.to_s + " sheets at a time"
+    puts "Owning certain software, " + @cores.to_s + " sheets at a time"
     splitFiles = files.chunk(@cores)
 
     path = " -p " + @path.gsub(/(?=\s)/, "\\")

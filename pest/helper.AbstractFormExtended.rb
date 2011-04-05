@@ -1,5 +1,5 @@
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: HELPER.AbstractFormExtended

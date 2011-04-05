@@ -1,7 +1,7 @@
-#!/usr/bin/ruby1.8
+#!/usr/bin/env ruby
 
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: LaTeX Indentionfixer

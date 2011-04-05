@@ -26,6 +26,7 @@
 SUPPORTED_TYPES = ["square"]
 
 # includes #############################################################
+require 'base64'
 require 'rubygems'
 require 'gtk2'
 require 'tempfile'
@@ -74,7 +75,7 @@ class PESTFix < PESTDatabaseTools
 
     debug Magick::Magick_version
 
-    if File.exist?(ARGV.last) && ARGV.last.start_with?("/")
+    if !ARGV.nil? && File.exist?(ARGV.last) && ARGV.last.start_with?("/")
       @path = ARGV.pop
       debug "Using debug path = #{@path}"
       set_debug_database
@@ -82,7 +83,6 @@ class PESTFix < PESTDatabaseTools
 
     ensure_database_access
     find_tables_to_process
-    setup_failed_background_search
 
     # global Variables
     @window = win
@@ -162,13 +162,14 @@ class PESTFix < PESTDatabaseTools
 
   # loads the value stored in the DB for the given question
   def db_value_for_question(q)
-    dbh.execute("SELECT #{q["question"].db_column} FROM #{q["table"]} WHERE path = ?", q["path"]).fetch_array[0]
+    dbh.execute("SELECT #{q["question"].db_column} FROM #{q["table"]} WHERE path = ?", q["path"]).fetch_array[0].to_i
   end
 
   # sets up a thread that will look for new failed questions once every
   # five second to give the user a reasonable status info if there’s
-  # background processing
+  # background processing.
   def setup_failed_background_search
+    return if @setup_failed_background_search
     @setup_failed_background_search = Gtk.timeout_add(1*5000) do
       find_all_failed_questions
       find_failed_question if current_question.nil?
@@ -210,7 +211,7 @@ class PESTFix < PESTDatabaseTools
       q = "SELECT path, abstract_form, #{f.join(", ")} FROM #{t} WHERE #{f.join("=-1 OR ")}=-1"
       res = dbh.execute(q)
       res.each do |q|
-        form = Marshal.load(q[1])
+        form = Marshal.load(Base64.decode64(q[1]))
         # use the database result to check if a question is failed.
         # AbstractForm is never changed, so already fixes questions need
         # to be excluded.
@@ -235,6 +236,8 @@ class PESTFix < PESTDatabaseTools
     end
     debug "Found #{new_questions} new question(s)"
     @find_all_failed_questions = false
+    # enable background search once the first round is done
+    setup_failed_background_search
   end
 
   # Searches through @all_failed_questions and finds all questions that
@@ -263,8 +266,10 @@ class PESTFix < PESTDatabaseTools
     @statusbar.pop 99
     @statusbar.push 3, "No more failed questions! If there’s no background processing, you’re done."
     update_window_title_and_progressbar
-    popup_info("You're done!", "All failed questions have been processed. Unless images are still processed in the background, you can exit this application.") unless @all_done_popup_shown
-    @all_done_popup_shown = true
+    unless @all_done_popup_shown
+      @all_done_popup_shown = true
+      popup_info("You're done!", "All failed questions have been processed. Unless images are still processed in the background, you can exit this application.")
+    end
     return nil
   end
 
@@ -284,13 +289,16 @@ class PESTFix < PESTDatabaseTools
       # only add tables if they exist AND have an abstract_form column
       begin
         form = dbh.execute("SELECT abstract_form FROM #{t} LIMIT 1")
-        form = Marshal.load(form.fetch_array[0])
+        form = Marshal.load(Base64.decode64(form.fetch_array[0]))
         valid_fields = form.questions.collect do |q|
           SUPPORTED_TYPES.include?(q.type) ? q.db_column : nil
         end
         valid_fields.compact!
         @tables[t] = valid_fields.flatten unless valid_fields.empty?
-      rescue; end
+      rescue => e
+        debug "Table #{t} doesn't appear to be valid. Error message:"
+        pp e
+      end
     end
     @tables
   end
@@ -395,10 +403,10 @@ class PESTFix < PESTDatabaseTools
     @find_fail.set_tooltip_text "Finds an Improperly Answered Question (ENTER)"
     @find_fail.signal_connect "clicked" do find_failed_question end
 
-    mark_as_bizarre = Gtk::ToolButton.new(Gtk::Stock::NO)
-    mark_as_bizarre.set_label "Mark file bizarr"
-    mark_as_bizarre.set_tooltip_text "Mark the current file as bizarre, i.e. if it's scanned incorrectly."
-    mark_as_bizarre.signal_connect "clicked" do mark_as_bizarre end
+    @mark_as_bizarre = Gtk::ToolButton.new(Gtk::Stock::NO)
+    @mark_as_bizarre.set_label "Mark file bizarr"
+    @mark_as_bizarre.set_tooltip_text "Mark the current file as bizarre, i.e. if it's scanned incorrectly."
+    @mark_as_bizarre.signal_connect "clicked" do mark_as_bizarre end
 
     quit = Gtk::ToolButton.new(Gtk::Stock::QUIT)
     quit.set_tooltip_text "Exits the Application (CTRL + Q)"
@@ -420,7 +428,7 @@ class PESTFix < PESTDatabaseTools
     toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), @find_fail)
     toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
-    toolbar.insert((c+=1), mark_as_bizarre)
+    toolbar.insert((c+=1), @mark_as_bizarre)
     toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), quit)
 
@@ -589,6 +597,7 @@ class PESTFix < PESTDatabaseTools
     @quest_next.set_sensitive(n)
 
     @undo_btn.set_sensitive(!@undo.empty?)
+    @mark_as_bizarre.set_sensitive(!current_question.nil?)
   end
 
   # popups a gtk message dialog with the given title and text

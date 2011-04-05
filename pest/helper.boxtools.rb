@@ -1,5 +1,5 @@
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: HELPER.BOXTOOLS
@@ -34,7 +34,7 @@ end
 # given maxWidth and maxHeight. Returns an array of boxes.
 def splitBoxes(box, maxWidth, maxHeight)
     boxes = []
-    
+
     # Due problems in TeX in regard of getting the width of certain
     # boxes, it's also possible to define a start box with top left
     # coordinates and height. A later box will contain the top right
@@ -66,7 +66,7 @@ def splitBoxes(box, maxWidth, maxHeight)
     boxes.each do |box|
         while box.height > maxHeight
             box.height -= maxHeight
-            
+
             allBoxes << Box.new(nil, box.x, box.y + box.height, box.width, maxHeight, nil)
         end
         allBoxes << box
@@ -78,7 +78,7 @@ end
 # Calculates the bounds for given set of boxes
 def calculateBounds(boxes, group, borderLeft = 0)
     width, height = getGenericBoxDimension(group)
-    
+
     xmin = 999999
     xmax = 0
 

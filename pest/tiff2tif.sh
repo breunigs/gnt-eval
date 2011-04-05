@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PEST
-# Praktisches Evaluations ScripT ( >> FormPro)
+# Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
 #
 # Component: TIFF2TIF
