@@ -8,9 +8,6 @@ require 'web/lib/FunkyDBBits.rb'
 require 'web/lib/RandomUtils.rb'
 require 'custom_build/build.rb'
 require 'pp'
-
-
-# need for parsing yaml into database
 require 'yaml'
 
 # needed for image manipulations
@@ -101,6 +98,9 @@ def tex_none(language)
   I18n.t(:none)
 end
 
+# Creates a sample sheet in tmp/sample_sheets for the given form (object)
+# and language name. Returns the full filepath, but without the file
+# extension. Does not re-create existing files.
 def make_sample_sheet(form, lang)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
@@ -109,7 +109,7 @@ def make_sample_sheet(form, lang)
 
   if File.exists? filename+'.pdf'
     puts "#{filename}.pdf already exists. Skipping."
-    return
+    return filename
   end
 
   generate_barcode("00000000", dir + "barcode.pdf")
@@ -138,6 +138,7 @@ def make_sample_sheet(form, lang)
 
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
+  filename
 end
 
 def escape_for_tex(string)
@@ -365,32 +366,27 @@ namespace :mail do
 end
 
 namespace :pest do
-  def getYamls(overwrite = false)
-    # FIXME: This can surely be done simpler by directly finding
-    # a form for the current semester
-    Dir.glob("./tmp/images/[0-9]*/").each do |f|
-      target = "#{f}../#{File.basename(f)}.yaml"
-      next if File.exists?(target) && !overwrite
-      Dir.glob("#{f}*.tif") do |y|
-        # just take the first sheet, as all sheets in the same folder
-        # should be identical
-        barcode = find_barcode_from_path(y)
-        cp = CourseProf.find(barcode)
-        make_pdf_for(cp.course.semester, cp, f)
-        `mv -f "#{f + cp.get_filename}.yaml" "#{target}"`
-        break
+  # find forms for current semester and extract variables from the
+  # first key that comes along. The language should exist for every
+  # key, even though this is currently not enforced. Will be though,
+  # once a graphical form creation interface exists.
+  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml. Specify true if you want existing files to be overwritten.'
+  task :getyamls, :overwrite do |t,o|
+    overwrite = (!o.overwrite.nil? && o.overwrite == "true")
+    curSem.forms.each do |form|
+      form.abstract_form.lecturer_header.keys.collect do |lang|
+        target = "./tmp/images/#{form.id}_#{lang}.yaml"
+        next if File.exists?(target) && !overwrite
+        file = make_sample_sheet(form, lang)
+        `./pest/latexfix.rb "#{file}.posout"`
+        `mv -f "#{file}.yaml" "#{target}"`
       end
     end
   end
 
-  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml'
-  task :getyamls, :needs => 'db:connect' do |t|
-    getYamls(true)
-  end
-
   desc "(2) Evaluates all sheets in ./tmp/images/"
-  task :omr do
-    getYamls
+  task :omr, :needs => 'pest:getyamls' do
+    # OMR needs the YAML files as TeX also outputs position information
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")

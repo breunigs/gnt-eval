@@ -5,7 +5,9 @@ require 'tmpdir'
 # format oldname_barcode.tif. This way barcode detection and OMR can
 # be split up. This function reads the barcode from the filename.
 def find_barcode_from_path(path)
-    path.to_s.sub(/^.*_([0-9]+).*$/, '\1').to_i
+  bc = path.to_s.match(/^.*\/([0-9]+)_[^\/]*$/)
+  return nil if bc.nil?
+  bc[1]
 end
 
 # http://snippets.dzone.com/posts/show/3486
