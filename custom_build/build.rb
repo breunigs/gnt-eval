@@ -43,7 +43,7 @@ namespace :magick do
     # imagemagick stuff
     desc "build custom ImageMagick (using quantum-depth=8)"
     task :buildImageMagick, :needs => ["magick:removeImageMagick", "magick:sourceImageMagick"] do
-        cdir = "cd #{Dir.glob(srcImgMagick).sort.last}"
+        cdir = "cd #{Dir.glob(srcImgMagick, File::FNM_DOTMATCH).sort.last}"
         puts bold "#### Building ImageMagick"
 
         puts bold "#### Configure..."
@@ -64,7 +64,7 @@ namespace :magick do
 
     desc "download ImageMagick source if not yet downloaded"
     task :sourceImageMagick do
-      if Dir.glob(srcImgMagick).empty?
+      if Dir.glob(srcImgMagick, File::FNM_DOTMATCH).empty?
         puts bold "Downloading ImageMagick. Please note that you accept ImageMagick's license by continuing (Apache 2.0 license)"
         system("cd \"#{dir}\" && wget \"ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick.tar.gz\" && tar -xf ImageMagick.tar.gz && rm ImageMagick.tar.gz")
       end
@@ -86,7 +86,7 @@ namespace :magick do
     # rmagick stuff
     desc "build custom RMagick (using the custom built ImageMagick)"
     task :buildRMagick, :needs => ["magick:removeRMagick", "magick:sourceRMagick"] do
-        exec = "export PATH=#{bldImgMagick}/bin:/usr/bin"
+        exec = "export PATH=#{bldImgMagick}/bin:$PATH"
         # so compiling works
         exec << " && export LD_LIBRARY_PATH=#{bldImgMagick}/lib"
         # hard links the path in the binary (saves us from fiddling with
@@ -96,25 +96,28 @@ namespace :magick do
         puts bold "#### Building RMagick"
 
         puts bold "#### Configure..."
-        system("#{exec} && ruby setup.rb config --prefix=#{bldRMagick} --disable-htmldoc")
+        system("#{exec} && /usr/bin/env ruby setup.rb config --prefix=#{bldRMagick} --disable-htmldoc")
         exitOnError("configuring RMagick failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
 
         puts bold "#### Setup..."
-        system("#{exec} && ruby setup.rb setup")
+        system("#{exec} && /usr/bin/env ruby setup.rb setup")
         exitOnError("Setting up RMagick failed")
 
         puts bold "#### Install..."
-        system("#{exec} && ruby setup.rb install --prefix=#{bldRMagick}")
+        system("#{exec} && /usr/bin/env ruby setup.rb install --prefix=#{bldRMagick}")
         exitOnError("Installing RMagick failed")
 
 
         # we cannot use :rmagick_rb here yet, because the file may not
         # have existed before, thus the variable would be nil
-        rb = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick.rb"))[0]
-        so = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick2.so"))[0]
+        rb = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick.rb"), File::FNM_DOTMATCH)[0]
+        so = Dir.glob(File.join(Seee::Config.custom_builds[:bld_r_magick], "**", "RMagick2.so"), File::FNM_DOTMATCH)[0]
         # hardcode paths into RMagick.rb to be able to simply require
         # this file and use the custom ImageMagick version
         system("sed -i \"s:require 'RMagick2.so':require '#{so}':\" #{rb}")
+        # make the newly build library known to the system (otherwise
+        # we’ll get a file not found error)
+        system("#{exec} && sudo ldconfig #{bldImgMagick}/lib")
 
         puts
         puts bold "RMagick has been successfully built."
@@ -123,7 +126,7 @@ namespace :magick do
 
     desc "download RMagick source if not yet downloaded"
     task :sourceRMagick do
-      if Dir.glob(srcRMagick).empty?
+      if Dir.glob(srcRMagick, File::FNM_DOTMATCH).empty?
         puts bold "Downloading RMagick. Please note that you accept RMagick's license by continuing."
         system("cd \"#{dir}\" && git clone  \"https://github.com/rmagick/rmagick.git\" RMagick-git")
       end
@@ -131,8 +134,8 @@ namespace :magick do
 
     desc "clean RMagick compilation files"
     task :cleanRMagick do
-        system("cd #{srcRMagick} && ruby setup.rb clean")
-        system("cd #{srcRMagick} && ruby setup.rb distclean")
+        system("cd #{srcRMagick} &&  /usr/bin/env ruby setup.rb clean")
+        system("cd #{srcRMagick} &&  /usr/bin/env ruby setup.rb distclean")
     end
 
     desc "remove (uninstall) custom RMagick"
@@ -194,10 +197,10 @@ namespace :magick do
         puts `convert -version #{noi}`.strip
         puts
         puts bold "RMagick:"
-        puts `ruby -r RMagick -e"puts Magick::Version" #{noi}`.strip
+        puts ` /usr/bin/env ruby -r RMagick -e"puts Magick::Version" #{noi}`.strip
         puts
         puts bold "RMagick uses:"
-        puts `ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
+        puts ` /usr/bin/env ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
 
         # find path for installed rmagick/zbar
         rmagickrb = Seee::Config.custom_builds[:rmagick_rb]
@@ -209,10 +212,10 @@ namespace :magick do
         puts `#{bldImgMagick}/bin/convert -version #{nob}`.strip
         puts
         puts bold "RMagick:"
-        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
+        puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
         puts
         puts bold "RMagick uses:"
-        puts `ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
+        puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
         puts
         puts bold "ZBarImg reports:"
         puts `#{zbar} --version #{nob}`.strip

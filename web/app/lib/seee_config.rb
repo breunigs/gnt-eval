@@ -30,7 +30,7 @@ module Seee
       # contains the path to the custom RMagick.rb if it has been built. It's
       # nil otherwise. While this is not actually a pref, it seems to be in a
       # good place.
-      :rmagick_rb => Dir.glob(File.join(@@custom_builds[:bld_r_magick], "**", "RMagick.rb"))[0],
+      :rmagick_rb => Dir.glob(File.join(@@custom_builds[:bld_r_magick], "**", "RMagick.rb"), File::FNM_DOTMATCH)[0],
       # see also: @@file_paths[:rmagick]
     })
 
