@@ -394,12 +394,10 @@ be handed to anyone.
 “Rolling Eval”
 --------------
 You can execute all of the above commands as often as you wish without
-creating duplicates anywhere (except maybe for images:insertcomments…
-I haven’t checked, but if you notice it creates dups, please create a
-ticket). Anyway, this makes it possible to create a rolling eval, i.e.
-add new sheets each evening and hand the results so far to whomever you
-like. I don’t recommend advertising this on your first go, but remember
-it will be possible later.
+creating duplicates anywhere. This makes it possible to create a rolling
+eval, i.e. add new sheets each evening and hand the results so far to
+whomever you like. I don’t recommend advertising this on your first go,
+but remember it will be possible later.
 
 If you’ve made it so far, congratulations! This is your first eval.
 
@@ -498,4 +496,4 @@ x-www-browser http://localhost:3000&
 Type comments for each course/tutor in web interface
 
 rake pdf:semester
-pdf:make_preliminary
+rake pdf:make_preliminary

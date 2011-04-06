@@ -117,7 +117,7 @@ def make_sample_sheet(form, lang)
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
-    h << '\dbtable{oliver_ist_doof}' + "\n"
+    h << '\dbtable{'+ from.db_table +'}' + "\n"
     h << '\semester{'+ (curSem.title) +'}' + "\n"
 
     if hasTutors
@@ -205,7 +205,7 @@ namespace :images do
 
   desc "(4) Find all .jpg files in tmp/images, copy them to the correct location and let Rails know about them"
   task :insertcomments, :needs => ['db:connect'] do |t, d|
-    cp = Seee::Config.commands[:copy_comment_image_directory]
+    cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
     system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
@@ -269,12 +269,12 @@ namespace :images do
           next
         end
 
-        puts "tutor  image: #{f}"
+        #~ puts "tutor  image: #{f}"
         p = Pic.new
         p.tutor_id = tutors[tut_num-1].id
       else # files for the course/prof. Should be split up. FIXME.
         next if cpics.any? { |x| x.basename == bname }
-        puts "course image: #{f}"
+        #~ puts "course image: #{f}"
         p = CPic.new
         p.course_prof = course_prof
       end
@@ -373,6 +373,7 @@ namespace :pest do
   desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml. Specify true if you want existing files to be overwritten.'
   task :getyamls, :overwrite do |t,o|
     overwrite = (!o.overwrite.nil? && o.overwrite == "true")
+    `mkdir -p ./tmp/images`
     curSem.forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
         target = "./tmp/images/#{form.id}_#{lang}.yaml"
