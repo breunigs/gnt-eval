@@ -109,7 +109,7 @@ module Seee
     # that is more than an “application_path”
 
     @@commands = {
-      :find_comment_image_directory => 'login_gruppe_home eval find',
+      :cp_comment_image_directory => 'login_gruppe_home eval cp',
       :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
 
       :hunspell => @@application_paths[:hunspell] + " -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",

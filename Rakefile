@@ -202,91 +202,91 @@ end
 
 namespace :images do
 
-  desc "(4) Insert comment pictures from YAML/jpg in directory. Leave directory empty for useful defaults."
-  task :insertcomments, :directory, :needs => 'pest:copycomments' do |t, d|
-    dd = d.directory.nil? ? "./tmp/images/**/" : d.directory
-    puts "Working directory is #{dd}."
+  desc "(4) Find all .jpg files in tmp/images, copy them to the correct location and let Rails know about them"
+  task :insertcomments, :needs => ['db:connect'] do |t, d|
+    cp = Seee::Config.commands[:copy_comment_image_directory]
+    mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
+
+    system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
+    path=File.join(File.dirname(__FILE__), "tmp/images")
 
     # find all existing images for courses/profs and tutors
     cpics = CPic.find(:all)
     tpics = Pic.find(:all)
 
-    allfiles = Dir.glob(File.join(dd, '*.yaml'))
+    # find all tables, that have a tutnum column
+    forms = curSem.forms.reject { |form| form.get_question("tutnum").nil? }
+    tables = forms.collect { |form| form.db_table }
+
+    allfiles = Dir.glob('./tmp/images/**/*.jpg')
     allfiles.each_with_index do |f, curr|
-      basename = File.basename(f, '.yaml')
-      curdir = File.dirname(f)
+      bname = File.basename(f)
+      barcode = find_barcode_from_path(f)
 
-      # find comments for the tutors
-      # FIXME hardcoded stuff, should be elsewhere, get this from form
-      tname = basename + 'ucomment.jpg'
-
-      if File.exists?(File.join(curdir, tname)) && tpics.select { |x| x.basename == tname }.empty?
-        # FIXME: need to think of something nicer.
-        class Question
-          attr_accessor :value
-        end
-        scan = YAML::load(File.read(f))
-        tutnum = scan.questions.find{ |q| q.db_column == "tutnum" }.value.to_i
-        barcode = find_barcode_from_path(basename)
-
-        course = CourseProf.find(barcode).course
-
-        # first checkbox is 1! (0 means 'no choice')
-        if tutnum > 0
-          tutors = course.tutors.sort{ |a,b| a.id <=> b.id }
-          if tutnum > tutors.count
-            $stderr.print "\rDid nothing with #{basename}, #{tutnum} > #{tutors.count}\n"
-          else
-            p = Pic.new
-            p.tutor_id = tutors[tutnum-1].id
-            p.basename = basename + 'ucomment.jpg'
-            p.save
-            #~ puts "Inserted #{p.basename} for #{tutors[tutnum-1].abbr_name} as #{p.id}"
-          end
-        else
-          $stderr.print "\rDid nothing with #{basename}, tutnum is 0 (no choice made)\n"
-        end
+      if barcode == 0
+        $stderr.print "Couldn’t detect barcode for #{bname}, skipping.\n"
+        next
       end
 
-      # finds comments for uhm… seminar sheet maybe?
-      # FIXME: is this ever used? if not: EXTERMINATE!
-      xname = basename + '-comment.jpg'
-      if File.exists?(File.join(curdir, xname)) && cpics.select { |x| x.basename == xname }.empty?
-        barcode = find_barcode_from_path(basename)
+      course_prof = CourseProf.find(barcode)
+      if course_prof.nil?
+        $stderr.print "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
+        next
+      end
 
-        course_prof = CourseProf.find(barcode)
+      p = nil
+      # tutor comments, place them under each tutor
+      if f.downcase.end_with?("ucomment.jpg")
+        next if tpics.any? { |x| x.basename == bname }
+        # find tutor id
+        tut_num = nil
+        tables.each do |t|
+          # remove everything after the last underscore and add .tif to
+          # find the original image
+          path = f.sub(/_[^_]+$/, "") + ".tif"
+          data = $dbh.execute("SELECT tutnum FROM #{t} WHERE path = ?", path)
+          data = data.fetch_array
+          tut_num = data[0].to_i if data
+          break if tut_num
+        end
 
+        if tut_num.nil?
+          $stderr.print "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+          next
+        end
+
+        if tut_num == 0
+          $stderr.print "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+          next
+        end
+
+        # load tutors
+        tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
+
+        if tut_num > tutors.count
+          $stderr.print "Couldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
+          next
+        end
+
+        puts "tutor  image: #{f}"
+        p = Pic.new
+        p.tutor_id = tutors[tut_num-1].id
+      else # files for the course/prof. Should be split up. FIXME.
+        next if cpics.any? { |x| x.basename == bname }
+        puts "course image: #{f}"
         p = CPic.new
         p.course_prof = course_prof
-        p.basename = basename + '-comment.jpg'
-        p.save
-        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course_prof.course.title} as #{p.id}"
       end
-
-      # insert comments for profs
-      cname = basename + 'vcomment.jpg'
-      if File.exists?(File.join(curdir, cname)) && cpics.select { |x| x.basename == cname }.empty?
-        barcode = find_barcode_from_path(basename)
-
-        course_prof = CourseProf.find(barcode)
-
-        p = CPic.new
-        p.course_prof = course_prof
-        p.basename = basename + 'vcomment.jpg'
-        p.save
-        #~ puts "Inserted #{p.basename} for #{course_prof.prof.fullname}: #{course.title} as #{p.id}"
-      end
-
+      p.basename = bname
+      # let rails know about this comment
+      p.save
+      # move comment to correct location
+      system("#{cp} \"#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
       print_progress(curr+1, allfiles.size)
     end # Dir glob
 
     puts
-    puts "Please ensure that all comment pictures have been supplied to"
-    puts "\t#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirfriendly_title}"
-    puts "as that's where the web-seee will look for it."
-    puts "This should have been done for you automatically, but you can"
-    puts "run it again if it makes you feel better:"
-    puts "\trake pest:copycomments"
+    puts "Done."
   end
 
   desc "(1) Work on the .tif's in directory and sort'em to tmp/images/..."
@@ -322,7 +322,7 @@ namespace :images do
               CourseProf.find(barcode).course.language.to_s
 
             File.makedirs("tmp/images/#{form}")
-            File.move(f, File.join("tmp/images/#{form}", basename + '_' + barcode.to_s + '.tif'))
+            File.move(f, File.join("tmp/images/#{form}", "#{barcode}_#{basename}.tif"))
 
             #~ puts "Moved to #{form}/#{basename} (#{barcode})"
             curr += 1
@@ -401,28 +401,8 @@ namespace :pest do
   desc "(3) Correct invalid sheets"
   task :correct do
     require File.join(Rails.root, "lib", "AbstractForm.rb")
-    tables = []
-    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
-      tables << YAML::load(File.open(f)).db_table
-    end
+    tables = curSem.forms.collect { |form| form.db_table }
     `./pest/fix.rb #{tables.join(" ")}`
-  end
-
-  desc "Copies extracted comments into eval directory"
-  task :copycomments do
-    find = Seee::Config.commands[:find_comment_image_directory]
-    mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
-
-    puts "Creating folders and copying comments, please wait..."
-    system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
-    path=File.join(File.dirname(__FILE__), "tmp/images")
-    system("#{find} \"#{path}\" -name \"*comment.jpg\" -exec cp {} \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\" \\;")
-
-    puts
-    puts "All comment pictures have been copied. If not already done so,"
-    puts "you need to make the web-seee know about them. Simply run"
-    puts "\trake images:insertcomments"
-    puts "for this."
   end
 end
 
@@ -720,29 +700,6 @@ namespace :helper do
     `x-www-browser #{p}`
     puts "Wrote and opened #{p}"
   end
-end
-
-
-namespace :crap do
-    desc "does not print non-existing ranking that does not exist"
-    task :rank, :needs => 'db:connect' do
-        s = curSem.title.gsub(" ", "_")
-        # One query to RANK THEM ALL!
-        query = $dbh.prepare("(SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_0` GROUP BY `barcode`) UNION ALL (SELECT AVG(v22) as note, COUNT(v22) as num, barcode  FROM `evaldaten_#{s}_2` GROUP BY `barcode`) ORDER BY note ASC")
-        query.execute()
-        puts "Note\tStimmen\tVorlesung (Dozent)"
-        while row = query.fetch() do
-            cp = CourseProf.find(row[2])
-            print row[0]
-            print "\t"
-            print row[1].to_s.rjust(5)
-            print "\t"
-            print cp.course.title.ljust(60)
-            print "\t("
-            print cp.prof.fullname
-            puts ")"
-        end
-    end
 end
 
 namespace :summary do

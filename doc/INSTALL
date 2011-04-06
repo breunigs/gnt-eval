@@ -172,9 +172,9 @@ following variables so the respective commands can read AND write to
 those directories once executed. For example, in our setup I am not
 allowed to write to /home/eval directly, but I am a member of the eval-
 group, so I may login as user "eval". We have a wrapper script for this,
-so the relevant command became "login_gruppe_home eval find" instead of
-just "find". The relevant variables are:
-  :find_comment_image_directory
+so the relevant command became "login_gruppe_home eval cp" instead of
+just "cp". The relevant variables are:
+  :cp_comment_image_directory
   :mkdir_comment_image_directory
 If you use the values from above, simply leave these on their default
 values.
@@ -276,7 +276,11 @@ how the data is organized, here’s a short wrap up:
     doc/example_forms
   and adjust them to your needs. Save often, it will display the form
   as serialized Ruby object if the YAML file is valid. Some parts are
-  hard coded into TeX, grep is your friend. Patches welcome.
+  hard coded into TeX, grep is your friend. Patches welcome. Comments
+  with a saveas attribute ending in “ucomment” will be placed at the
+  tutor’s page if one was selected. All other comments will be put in
+  the course section. The saveas attribute may only contain hyphens,
+  and latin1 alphanumerals (0-9, a-z, A-Z).
 * Next, add some courses and once done,
 * you can add professors and tutors to the course. Profs are “real”
   classes, so you can re-use them, but tutors are just a bunch of names

@@ -523,7 +523,7 @@ class PESTOmr < PESTDatabaseTools
     return 0 if c.rows*c.columns < 500*@dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
-    filename << group.saveas + ".jpg"
+    filename << "_" + group.saveas + ".jpg"
     puts "  Saving Comment Image: " + filename if @verbose
     c.write filename
 
@@ -583,7 +583,7 @@ class PESTOmr < PESTDatabaseTools
         puts group.saveas
       end
       filename = @path + "/" + File.basename(@currentFile, ".tif")
-      filename << group.saveas + ".jpg"
+      filename << "_" + group.saveas + ".jpg"
       x, y, w, h = calculateBounds(boxes, group)
       @ilist[imgid].crop(x, y, w, h).minify.write filename
     end
@@ -940,6 +940,11 @@ class PESTOmr < PESTDatabaseTools
     doc.pages.each do |p|
       next if p.questions.nil?
       p.questions.each do |q|
+        if q.saveas
+          q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
+          puts "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
+          exit
+        end
         next if q.boxes.nil?
         q.boxes.each do |b|
           b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
