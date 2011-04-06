@@ -940,8 +940,7 @@ class PESTOmr < PESTDatabaseTools
     doc.pages.each do |p|
       next if p.questions.nil?
       p.questions.each do |q|
-        if q.saveas
-          q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
+        if q.saveas && q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
           puts "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
           exit
         end
@@ -1001,7 +1000,7 @@ class PESTOmr < PESTDatabaseTools
     end
 
     if !File.directory?(@path)
-      puts "Specified PATH is not a directory"
+      puts "Given directory #{@path} does not exist, skipping."
       exit
     end
 
