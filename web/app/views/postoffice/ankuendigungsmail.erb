@@ -1,4 +1,4 @@
-<%= word_wrap(@anrede, 72) %>,
+<%= @anrede.word_wrap %>,
 
 in der Woche vom 13. bis 17. Dezember am
 
@@ -7,7 +7,7 @@ in der Woche vom 13. bis 17. Dezember am
 werden Vertreter_innen der Fachschaft MathPhys Ihre Veranstaltung
 
      <%= @course.title %>
-	
+
 evaluieren. Nach der momentanen Planung werden wir mit
 
      <%= @course.students %> Bögen auf <%= @sprache %>
@@ -18,8 +18,8 @@ uns darüber mit einer kurzen Mail zu informieren. Ferner gehen wir
 davon aus, dass es sich bei folgender Liste um eine vollständige Liste
 der Tutor_innen Ihrer Veranstaltung handelt:
 
-     <%= word_wrap((@course.tutors.empty? ? 'keine' : @course.tutors.collect { |t| t.abbr_name 
-}.join(', ')) , 67) %>
+     <%= (@course.tutors.empty? ? 'keine' : @course.tutors.collect { |t| t.abbr_name
+}.join(', ')).word_wrap(67) %>
 
 Sollte sich bei dieser Liste ein Fehler eingeschlichen haben, wären
 wir über einen kurzen Hinweis ebenfalls sehr dankbar.

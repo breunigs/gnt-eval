@@ -117,8 +117,8 @@ def make_sample_sheet(form, lang)
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
-    h << '\dbtable{'+ from.db_table +'}' + "\n"
-    h << '\semester{'+ (curSem.title) +'}' + "\n"
+    h << '\dbtable{'+ from.db_table + "}\n"
+    h << '\semester{'+ (curSem.title) + "}\n"
 
     if hasTutors
       h << '\tutoren{'
@@ -341,10 +341,10 @@ namespace :mail do
   task :reminder do
     s = Semester.find(:all).find{ |s| s.now? }
 
-    puts word_wrap("This will send reminder mails to _all_ fscontacts for courses " +
-                   "in semester #{s.title}. I will now show you a list of the mails, " +
-                   "that I will send. After you have seen the list, you will still be " +
-                   "able to abort.\nPlease press Enter.", 72)
+    puts ("This will send reminder mails to _all_ fscontacts for courses " +
+      "in semester #{s.title}. I will now show you a list of the mails, " +
+      "that I will send. After you have seen the list, you will still be " +
+      "able to abort.\nPlease press Enter.").word_wrap
     $stdin.gets
 
     s.courses.each do |c|

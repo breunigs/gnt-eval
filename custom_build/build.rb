@@ -13,7 +13,7 @@ namespace :magick do
     def exitOnError(text)
         return if $?.exitstatus == 0
         puts
-        puts bold("#"*15)
+        puts ("#"*15).bold
         puts text
         puts
         exit 1
@@ -30,7 +30,7 @@ namespace :magick do
     desc "build custom ImageMagick, RMagick, ZBar"
     task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick", "magick:buildZBar"] do
         puts
-        puts bold "Built process finished successfully."
+        puts "Built process finished successfully.".bold
     end
 
     desc "run clean && distclean for custom ImageMagick, RMagick, ZBar"
@@ -44,28 +44,28 @@ namespace :magick do
     desc "build custom ImageMagick (using quantum-depth=8)"
     task :buildImageMagick, :needs => ["magick:removeImageMagick", "magick:sourceImageMagick"] do
         cdir = "cd #{Dir.glob(srcImgMagick, File::FNM_DOTMATCH).sort.last}"
-        puts bold "#### Building ImageMagick"
+        puts "#### Building ImageMagick".bold
 
-        puts bold "#### Configure..."
+        puts "#### Configure...".bold
         system("#{cdir} && ./configure --prefix=#{bldImgMagick} --with-quantum-depth=8 --without-perl --without-magick-plus-plus --with-gnu-ld --without-dps --without-fpx --with-modules --disable-largefile --with-bzlib=yes --with-x=yes")
         exitOnError("configuring ImageMagick failed")
 
-        puts bold "#### Make..."
+        puts "#### Make...".bold
         system("#{cdir} && make")
         exitOnError("making ImageMagick failed")
 
-        puts bold "#### Make install..."
+        puts "#### Make install...".bold
         system("#{cdir} && make install")
         exitOnError("installing ImageMagick failed")
 
         puts
-        puts bold "ImageMagick has been successfully built."
+        puts "ImageMagick has been successfully built.".bold
     end
 
     desc "download ImageMagick source if not yet downloaded"
     task :sourceImageMagick do
       if Dir.glob(srcImgMagick, File::FNM_DOTMATCH).empty?
-        puts bold "Downloading ImageMagick. Please note that you accept ImageMagick's license by continuing (Apache 2.0 license)"
+        puts "Downloading ImageMagick. Please note that you accept ImageMagick's license by continuing (Apache 2.0 license)".bold
         system("cd \"#{dir}\" && wget \"ftp://ftp.imagemagick.org/pub/ImageMagick/ImageMagick.tar.gz\" && tar -xf ImageMagick.tar.gz && rm ImageMagick.tar.gz")
       end
     end
@@ -78,7 +78,7 @@ namespace :magick do
     desc "remove (uninstall) custom ImageMagick"
     task :removeImageMagick, :needs => ["magick:removeRMagick", "magick:removeZBar"] do
         puts
-        puts bold "Removing custom ImageMagick"
+        puts "Removing custom ImageMagick".bold
         system("rm -rf #{bldImgMagick}")
     end
 
@@ -93,17 +93,17 @@ namespace :magick do
         # LD_LIBRARY_PATH later, when running other ruby instances)
         exec << " && export LD_RUN_PATH=#{bldImgMagick}/lib"
         exec << " && cd #{srcRMagick}"
-        puts bold "#### Building RMagick"
+        puts "#### Building RMagick".bold
 
-        puts bold "#### Configure..."
+        puts "#### Configure...".bold
         system("#{exec} && /usr/bin/env ruby setup.rb config --prefix=#{bldRMagick} --disable-htmldoc")
         exitOnError("configuring RMagick failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
 
-        puts bold "#### Setup..."
+        puts "#### Setup...".bold
         system("#{exec} && /usr/bin/env ruby setup.rb setup")
         exitOnError("Setting up RMagick failed")
 
-        puts bold "#### Install..."
+        puts "#### Install...".bold
         system("#{exec} && /usr/bin/env ruby setup.rb install --prefix=#{bldRMagick}")
         exitOnError("Installing RMagick failed")
 
@@ -120,14 +120,14 @@ namespace :magick do
         system("#{exec} && sudo ldconfig #{bldImgMagick}/lib")
 
         puts
-        puts bold "RMagick has been successfully built."
+        puts "RMagick has been successfully built.".bold
     end
 
 
     desc "download RMagick source if not yet downloaded"
     task :sourceRMagick do
       if Dir.glob(srcRMagick, File::FNM_DOTMATCH).empty?
-        puts bold "Downloading RMagick. Please note that you accept RMagick's license by continuing."
+        puts "Downloading RMagick. Please note that you accept RMagick's license by continuing.".bold
         system("cd \"#{dir}\" && git clone  \"https://github.com/rmagick/rmagick.git\" RMagick-git")
       end
     end
@@ -141,7 +141,7 @@ namespace :magick do
     desc "remove (uninstall) custom RMagick"
     task :removeRMagick do
         puts
-        puts bold "Removing custom RMagick"
+        puts "Removing custom RMagick".bold
         system("rm -rf #{bldRMagick}")
     end
 
@@ -151,17 +151,17 @@ namespace :magick do
         exec = "cd #{srcZBar}"
         exec << " && export PKG_CONFIG_PATH=#{bldImgMagick}/lib/pkgconfig"
         exec << " && export LDFLAGS=\" -Wl,-z,defs\""
-        puts bold "#### Building ZBar"
+        puts "#### Building ZBar".bold
 
-        puts bold "#### Configure..."
+        puts "#### Configure...".bold
         system("#{exec} && ./configure --prefix=#{bldZBar} --without-gtk --without-python --without-qt --without-jpeg --without-xv --with-gnu-ld --disable-video --enable-codes=ean --disable-pthread --without-xshm")
         exitOnError("configuring ZBar failed.\nAre you sure the custom ImageMagick version is built?\nTry 'rake magick:buildImageMagick'.")
 
-        puts bold "#### Make..."
+        puts "#### Make...".bold
         system("#{exec} && make")
         exitOnError("making ZBar failed")
 
-        puts bold "#### Make install..."
+        puts "#### Make install...".bold
         system("#{exec} && make install")
         exitOnError("installing ZBar failed")
 
@@ -171,7 +171,7 @@ namespace :magick do
         system("rm -rf #{bldZBar}/lib")
 
         puts
-        puts bold "ZBar has been successfully built."
+        puts "ZBar has been successfully built.".bold
     end
 
     desc "clean ZBar compilation files"
@@ -182,7 +182,7 @@ namespace :magick do
     desc "remove (uninstall) custom ZBar"
     task :removeZBar do
         puts
-        puts bold "Removing custom ZBar"
+        puts "Removing custom ZBar".bold
         system("rm -rf #{bldZBar}")
     end
 
@@ -192,14 +192,14 @@ namespace :magick do
         nob = ' || echo "not (properly?) built"'
 
         puts
-        puts bold "GLOBAL versions:"
-        puts bold "ImageMagick:"
+        puts "GLOBAL versions:".bold
+        puts "ImageMagick:".bold
         puts `convert -version #{noi}`.strip
         puts
-        puts bold "RMagick:"
+        puts "RMagick:".bold
         puts ` /usr/bin/env ruby -r RMagick -e"puts Magick::Version" #{noi}`.strip
         puts
-        puts bold "RMagick uses:"
+        puts "RMagick uses:".bold
         puts ` /usr/bin/env ruby -r RMagick -e"puts Magick::Magick_version" #{noi}`.strip
 
         # find path for installed rmagick/zbar
@@ -207,17 +207,17 @@ namespace :magick do
         zbar = Seee::Config.application_paths[:zbar]
         puts
         puts
-        puts bold "CUSTOM versions:"
-        puts bold "ImageMagick:"
+        puts "CUSTOM versions:".bold
+        puts "ImageMagick:".bold
         puts `#{bldImgMagick}/bin/convert -version #{nob}`.strip
         puts
-        puts bold "RMagick:"
+        puts "RMagick:".bold
         puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
         puts
-        puts bold "RMagick uses:"
+        puts "RMagick uses:".bold
         puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
         puts
-        puts bold "ZBarImg reports:"
+        puts "ZBarImg reports:".bold
         puts `#{zbar} --version #{nob}`.strip
         puts "Note: ZBarImg is always custom built, therefore there is no global version. If no ImageMagick version is reported, this likely means it will use the shared libraries in /usr."
     end

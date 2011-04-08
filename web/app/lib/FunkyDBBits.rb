@@ -38,8 +38,8 @@ module FunkyDBBits
   # query fields, where-hash and additional clauses, all uncached
   def uncached_query_single_table(f, h, t, additional = '')
     q = 'SELECT '
-    q << f.to_a.join(', ')
-    q << " FROM #{t}"
+    q << f.to_a.collect{|a| a.keep_valid_db_chars }.join(', ')
+    q << " FROM #{t.keep_valid_db_chars}"
 
     c = []
     c << additional.sub(/^\s*AND/,'') unless additional.empty?
@@ -49,7 +49,8 @@ module FunkyDBBits
         # flatten the arrays because otherwise DBI will break for
         # Postgres for some reason
         amount_of_values = v.is_a?(Array) ? v.size : 1
-        c << "#{k} IN (#{(["?"]*amount_of_values).join(",")})"
+        c << "#{k.keep_valid_db_chars} IN "
+        c << "(#{(["?"]*amount_of_values).join(",")})"
       end
     end
 

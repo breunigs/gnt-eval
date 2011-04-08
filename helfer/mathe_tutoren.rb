@@ -7,17 +7,13 @@ require 'rubygems'
 require 'inline' # gem is "RubyInline" and NOT "inline"
 require 'time'
 require 'yaml'
+require "#{File.dirname(__FILE__)}/../lib/RandomUtils.rb"
 
 # CONFIG ###############################################################
 $separator = ","
 $filename  = Date.today.strftime + " Tutoren Mathe.txt"
 $skipMes   = ["mintmachen", "robotik labor", "www-auftrag", "dekanat", "bibliothek", "kurs"]
 ########################################################################
-
-# Adds terminal control characters to make the given text appear bold
-def bold(text)
-	"\e[1m#{text}\e[0m"
-end
 
 
 # string distance ######################################################
@@ -167,7 +163,7 @@ def findLecture(name)
 
   return name if candidates.empty?
 
-  t = "The following lectures appear to be similar to \"#{bold(name)}\":"
+  t = "The following lectures appear to be similar to \"#{name.bold}\":"
   askUser(t, name, candidates, true)
 end
 
@@ -196,7 +192,7 @@ def findTutor(list, new)
 
   return new if candidates.empty?
 
-  t = "The following tutors appear to be similar to \"#{bold(new)}\":"
+  t = "The following tutors appear to be similar to \"#{new.bold}\":"
   askUser(t, new, candidates, false)
 end
 
@@ -207,7 +203,7 @@ end
 # save_similar: if the similar information should be saved
 def askUser(text, default, candidates, save_similar)
   puts text
-  puts "-"*(text.length - bold("").length)
+  puts "-"*(text.length - "".bold.length)
   csort = candidates.to_a.sort { |x,y| x[1] <=> y[1] }
   csort.each_with_index do |item,i|
     puts "##{(i+1).to_s.rjust(2)}  ⎸ Δ: #{item[1].to_s.rjust(2)}  ⎸ #{item[0]}"

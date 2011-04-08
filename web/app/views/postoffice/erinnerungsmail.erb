@@ -1,4 +1,4 @@
-<%= word_wrap(@anrede, 72) %>,
+<%= @anrede.word_wrap %>,
 
 bitte lies diese Mail ganz genau.
 
@@ -13,7 +13,7 @@ die Veranstaltung
 bei
 
 	<%= @course.profs.map{ |p| p.fullname }.join(', ') %>
-	
+
 zu evaluieren.
 
 Eingetragen in der Datenbank ist die Verwendung von

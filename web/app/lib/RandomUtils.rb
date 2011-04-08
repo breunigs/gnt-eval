@@ -1,6 +1,30 @@
 require 'enumerator'
 require 'tmpdir'
 
+class String
+  # keeps only characters that may be used in a table name or column for
+  # SQL querys.
+  def keep_valid_db_chars
+    new = self.scan(/[.0-9a-z_-]/i).join
+    if new != self
+      puts "WARNING: String contained illegal characters for SQL queries."
+      puts "         Original string: #{self}"
+      puts "         Cleaned  string: #{new}"
+    end
+    new
+  end
+
+  # wraps text after a maximum of X cols. 72 is the default for mails,
+  # so don’t change it here.
+  def word_wrap(col = 72)
+    self.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "\\1\\3\n")
+  end
+
+  def bold
+    "\e[1m#{self}\e[0m"
+  end
+end
+
 # once the barcode has been recognized the images are stored in the
 # format oldname_barcode.tif. This way barcode detection and OMR can
 # be split up. This function reads the barcode from the filename.
@@ -20,14 +44,6 @@ end
 
 def number_of_processors
   `cat /proc/cpuinfo | grep processor | wc -l`.strip.to_i
-end
-
-def bold(text)
-	"\e[1m#{text}\e[0m"
-end
-
-def word_wrap(txt, col = 80)
-    txt.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "\\1\\3\n")
 end
 
 # Prints the current progress to the console without advancing one line
