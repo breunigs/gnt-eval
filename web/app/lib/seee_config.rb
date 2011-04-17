@@ -1,6 +1,39 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+########################################################################
+# HOW 2 CONFIG
+########################################################################
+# This is the default configuration file, which is checked into the
+# repository. It will load the system and user configuration files, if
+# they exist, from the following locations:
+system_config = "/etc/gnt-eval-seee.rb"
+user_config =  "~/.gnt-eval-seee.rb"
+# The user’s one takes precedence over the system wide one which takes
+# precedence over this default file. Here’s a skeleton to start your own
+# configuration file:
+#
+# module Seee
+#   module Config
+#     @@custom_builds.merge!({
+#       :some_setting => "jasper ist doof",  # note the comma!
+#       :some_other_setting => "stefan ist doof"
+#     })
+#     @@application_paths.merge!({
+#       :some_setting => "oliver/ist/doof"
+#     })
+#     @@external_database.merge!({
+#     })
+#     @@settings.merge!({
+#     })
+#     @@file_paths.merge!({
+#     })
+#     @@commands.merge!({
+#     })
+#   end
+# end
+########################################################################
+
 require 'active_support'
 require 'pathname'
 
@@ -34,10 +67,9 @@ module Seee
       # see also: @@file_paths[:rmagick]
     })
 
-    # these pretty much speak for themselves
     @@application_paths = {
-      :hunspell => '/usr/bin/hunspell',
-      :pdflatex => '/home/jasper/texlive/2009/bin/x86_64-linux/pdflatex',
+      :hunspell => 'hunspell',
+      :pdflatex => 'pdflatex',
       # this is the old zbar, which uses the default ImageMagick
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
@@ -52,42 +84,43 @@ module Seee
 
     # external database (i.e. not the Rails one) which stores the real eval data
     @@external_database = {
-      :dbi_handler => 'Mysql',
-      :username => 'eval',
-      :password => 'E-Wahl',
-      :database => 'eval'
+      :dbi_handler => 'Pg',
+      :username => 'gnt-eval',
+      :password => 'gnt-eval',
+      :database => 'results'
     }
 
     @@settings = {
       # default recipient's FQDN
-      :standard_mail_domain => 'mathphys.fsk.uni-heidelberg.de',
-      :standard_mail_from => 'evaluation@mathphys.fsk.uni-heidelberg.de',
-      :standard_mail_bcc => 'evaluation@mathphys.fsk.uni-heidelberg.de',
+      :standard_mail_domain => 'some.domain.name.asdf',
+      :standard_mail_from => 'evaluation@some.domain.name.asdf',
+      :standard_mail_bcc => 'evaluation@some.domain.name.asdf',
 
       # defines how many sheets need to be handed in before a course or
       # tutor gets an evaluation. Otherwise a sheet might be matched to
       # the person who filled it in, destroying anonymity.
       :minimum_sheets_required => 3
     }
+
     @@file_paths = {
       # Specify a directory where to cache things
       :cache_tmp_dir => '/tmp/seee/',
 
-      # directory to store the extracted comment images to. Each semester
-      # has its own subfolder.
-      :comment_images_public_dir => '/home/eval/public_html/.comments/',
+      # directory to store the extracted comment images in. Each semester
+      # has its own subfolder, which will be created automatically.
+      :comment_images_public_dir  => File.join(RAILS_ROOT, "public", "comments"),
 
       # Same directory as above, but available via http
-      :comment_images_public_link => 'http://mathphys.fsk.uni-heidelberg.de/~eval/.comments/',
+      :comment_images_public_link => "http://localhost:3000/comments",
 
       # the directory where the final form pdf files will be stored.
       # this location will be printed below each howto, in case additional
       # sheets need to be printed.
-      :forms_howto_dir => '/home/eval/forms/',
+      :forms_howto_dir => File.join(RAILS_ROOT, "..", "tmp", "forms")
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(Rails.root, 'app/lib/persdic.dic'),
+      :hunspell_personal_dic => File.join(Rails.root, "app", "lib", "persdic.dic"),
 
       # prefer the custom RMagick version over the default one. Its meant
       # to be used for "require" and should automatically fall back to
@@ -105,28 +138,30 @@ module Seee
       end
     end
 
-    # special commands which might be access right depended. I.e. anything
-    # that is more than an “application_path”
+    # special commands which might be access right depended, i.e.
+    # anything that is more than an “application_path”
 
     @@commands = {
-      :cp_comment_image_directory => 'login_gruppe_home eval cp',
-      :mkdir_comment_image_directory => 'login_gruppe_home eval mkdir',
+      :cp_comment_image_directory => 'cp',
+      :mkdir_comment_image_directory => 'mkdir',
 
-      :hunspell => @@application_paths[:hunspell] + " -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
-      :aspell => @@application_paths[:aspell] + " -t -d de_DE-neu list | " + @@application_paths[:aspell] + " -t -d en list",
+      :hunspell => "#{@@application_paths[:hunspell]} -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
+      :aspell => "#{@@application_paths[:aspell]} -t -d de_DE-neu list | #{@@application_paths[:aspell]} -t -d en list",
 
+      :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}"
+    }
+
+    @@commands.merge!({
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
       # -draftmode: doesn't create PDF, which speeds up TeX. Still does
       #             syntax-checking and toc-creation
       # -interaction=nonstopmode prevents from asking for stuff on the
       #             console which regularily occurs for missing packages
-      :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}"}
-    @@commands.merge!({
-      :pdflatex_fast => @@commands[:pdflatex].to_s + ' -halt-on-error -file-line-error -draftmode -interaction=nonstopmode',
-      :pdflatex_real => @@commands[:pdflatex].to_s + ' -halt-on-error -file-line-error',
+      :pdflatex_fast => "#{@@commands[:pdflatex]} -halt-on-error -file-line-error -draftmode -interaction=nonstopmode",
+      :pdflatex_real => "#{@@commands[:pdflatex]} -halt-on-error -file-line-error",
 
-      :zbar => @@application_paths[:zbar].to_s + ' --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 '
+      :zbar => "#{@@application_paths[:zbar]} --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 "
     })
 
     # fall back to application_paths if a command
@@ -136,3 +171,10 @@ module Seee
     end
   end
 end
+
+# Load configuration files from other directories.
+system_config = File.expand_path(system_config)
+require system_config if File.exist? system_config
+
+user_config = File.expand_path(user_config)
+require user_config if File.exist? user_config

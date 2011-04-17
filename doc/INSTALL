@@ -1,7 +1,9 @@
 This manual was written using Ubuntu 10.10 installed into a virtual
 machine. It assumes you're familiar working with the command line and
 hacking source code. You can also download this VirtualBox image if you
-don't want to follow this guide.
+don't want to follow this guide. If you believe you’re pro enough,
+there’s a summary at the end of this guide which only list the commands
+without all that explanation blahblah.
 
 Ubuntu settings:
   Username:             gnt-eval
@@ -152,10 +154,14 @@ BASIC CONFIGURATION
 ===================
 
 Have look at
-  lib/seee_config.rb
-for most settings. The application paths are usually fine and work out
-of the box, however you need to specify an URL and matching local path
-if you want the extracted comments to be displayed in the web interface.
+  web/config/seee_config.rb
+for most settings. It’s not recommended to edit this file directly, but
+rather use the system wide and user configuration file. For details, see
+the boilerplate comment in the file.
+
+The application paths are usually fine and work out of the box, however
+you need to specify an URL and matching local path if you want the
+extracted comments to be displayed in the web interface.
 The relevant variables are:
   :comment_images_public_dir
   :comment_images_public_link
@@ -201,10 +207,9 @@ trying anything (check using the mail command, for example).
 
 Databases
 ---------
-Now onto the databases. Yes, there are currently two: One for Rails
-(i.e. all the profs, courses, tutors and so on) and one for storing the
-recognized sheet data. We want to fix that, but until that happens
-you’ll have to setup two databases.
+Now onto the databases. Yes, there are two: One for Rails (i.e. all the
+profs, courses, tutors and so on) and one for storing the recognized
+sheet data. So you’ll have to setup two databases.
 
 To get access to PostgreSQL features, you’ll have to login as postgres
 user. To do so, run:
@@ -216,14 +221,17 @@ password, leave it out to create a user with no password (our password
 will again be “gnt-eval”). You will be asked some questions, answer them
 as you see fit.
 
-* lib/seee_config.rb
+* web/config/seee_config.rb
   This is the DB where all the results will be stored. Locate
-  @@external_database and set them up as you like. The following will
-  use Postgres with the user created above:
+  @@external_database and set them up as you like. Don’t modify this
+  file directly and rather use the system wide or user configuration
+  file. Read the boilerplate comment on how this can be accomplished.
+  The following will use Postgres with the user created above:
     @@external_database = {
       :dbi_handler => 'Pg',
       :username => 'gnt-eval',
       :password => 'gnt-eval',
+      :host => 'localhost',
       :database => 'results'
     }
   Still logged in as postgres, run the following to create the database:
@@ -233,14 +241,16 @@ as you see fit.
   This is the database Rails uses. You can define different setups for
   a debug or production environment, but for now set them both to the
   same values. (We do this as well and that makes us, by definition, bad
-  people). Again, run
+  people). Like with seee_config, database.yml has system wide and user
+  configuration files, see the boilerplate comment for details.
+  Again, run
     createdb rails
   while still logged in as postgres user and update the database.yml:
     login: &login
       adapter:  postgresql
-      username: gnt-eval
-      password: gnt-eval
-      host:     localhost
+      username: <%= Seee::Config.external_database[:username] %>
+      password: <%= Seee::Config.external_database[:password] %>
+      host:     <%= Seee::Config.external_database[:host] %>
 
     development:
       <<: *login
@@ -249,6 +259,16 @@ as you see fit.
     production:
       <<: *login
       database: rails
+
+Note that Rails and DBI use different handlers/adapters and that you
+need to install a different gem for each. For a list of available DBI
+handlers you can have a look at its documentation:
+  http://ruby-dbi.rubyforge.org/rdoc/index.html
+I haven’t found a list of available Rails adapters, but you can view the
+ones installed on your system by listing the following directory:
+  activerecord-(version number)/lib/active_record/connection_adapters
+Alternatively, just enter this command:
+  locate *active_record/connection_adapters/*_adapter.rb
 
 Once the database config is final, run the following to create all
 necessary tables:

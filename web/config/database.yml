@@ -1,10 +1,29 @@
+########################################################################
+# HOW 2 CONFIG
+########################################################################
+# This is the default configuration file, which is checked into the
+# repository. It will load the system and user configuration files, if
+# they exist, from the following locations:
+<% system_config = "/etc/gnt-eval-database.yml" %>
+<% user_config =  "~/.gnt-eval-database.yml" %>
+# The user’s one takes precedence over the system wide one which takes
+# precedence over this default file. To start your own configuration
+# file, simply copy the contents below.
+########################################################################
+
+login: &login
+  adapter:  postgresql
+  username: <%= Seee::Config.external_database[:username] %>
+  password: <%= Seee::Config.external_database[:password] %>
+  host:     <%= Seee::Config.external_database[:host] %>
+
 development:
-  adapter: mysql
-  encoding: utf8
-  database: seee
-  username: seee
-  socket: /var/run/mysqld/mysqld.sock
-  password: uh8ieL8MSic1aiS0
+  <<: *login
+  database: rails
+
+production:
+  <<: *login
+  database: rails
 
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
@@ -14,11 +33,9 @@ test:
   encoding: utf8
   dbfile: db/test.db
 
+# Load configuration files from other directories.
+<% system_config = File.expand_path(system_config) %>
+<%= IO.read(system_config) if File.exist?(system_config) %>
 
-production:
-  adapter: mysql
-  encoding: utf8
-  database: seee
-  username: seee
-  socket: /var/run/mysqld/mysqld.sock
-  password: uh8ieL8MSic1aiS0
+<% user_config = File.expand_path(user_config) %>
+<%= IO.read(user_config) if File.exist?(user_config) %>

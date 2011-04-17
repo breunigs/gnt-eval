@@ -9,9 +9,11 @@ module FunkyDBBits
   require 'dbi'
   def self.dbh
     return @dbh if !@dbh.nil? && @dbh.connected?
-    @dbh = DBI.connect("DBI:#{Seee::Config.external_database[:dbi_handler]}:#{Seee::Config.external_database[:database]}",
-             Seee::Config.external_database[:username],
-             Seee::Config.external_database[:password])
+    sced = Seee::Config.external_database
+    @dbh = DBI.connect(
+      "DBI:#{sced[:dbi_handler]}:#{sced[:database]}:#{sced[:host]}",
+      sced[:username],
+      sced[:password])
   end
 
   # convenience function so dbh can be accessed directly

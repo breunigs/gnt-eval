@@ -444,7 +444,7 @@ namespace :pdf do
       s = Semester.find(semester_id)
 
       puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
-      puts "Could not find specified smeester (id = #{semester_id})" if s.nil?
+      puts "Could not find specified semester (id = #{semester_id})" if s.nil?
       return if f.nil? || s.nil?
 
       filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
