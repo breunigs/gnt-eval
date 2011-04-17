@@ -52,7 +52,7 @@ module FunkyDBBits
         # Postgres for some reason
         amount_of_values = v.is_a?(Array) ? v.size : 1
         c << "#{k.keep_valid_db_chars} IN "
-        c << "(#{(["?"]*amount_of_values).join(",")})"
+        c.last << "(#{(["?"]*amount_of_values).join(",")})"
       end
     end
 

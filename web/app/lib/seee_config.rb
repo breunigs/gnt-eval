@@ -116,7 +116,7 @@ module Seee
       # the directory where the final form pdf files will be stored.
       # this location will be printed below each howto, in case additional
       # sheets need to be printed.
-      :forms_howto_dir => File.join(RAILS_ROOT, "..", "tmp", "forms")
+      :forms_howto_dir => File.join(RAILS_ROOT, "..", "tmp", "forms"),
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 

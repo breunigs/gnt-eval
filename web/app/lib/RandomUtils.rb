@@ -3,9 +3,9 @@ require 'tmpdir'
 
 class String
   # keeps only characters that may be used in a table name or column for
-  # SQL querys.
+  # SQL querys. Adds some hacks to allow for COUNT(*) and DISTINCT blub.
   def keep_valid_db_chars
-    new = self.scan(/[.0-9a-z_-]/i).join
+    new = self.scan(/[()*.0-9a-z_-]/i).join.gsub("DISTINCT", "DISTINCT ")
     if new != self
       puts "WARNING: String contained illegal characters for SQL queries."
       puts "         Original string: #{self}"
@@ -13,7 +13,16 @@ class String
     end
     new
   end
+end
 
+class Symbol
+  # The same function as for strings.
+  def keep_valid_db_chars
+    self.to_s.keep_valid_db_chars.to_sym
+  end
+end
+
+class String
   # wraps text after a maximum of X cols. 72 is the default for mails,
   # so don’t change it here.
   def word_wrap(col = 72)
