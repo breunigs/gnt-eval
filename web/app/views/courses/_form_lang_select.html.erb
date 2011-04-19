@@ -1,0 +1,22 @@
+<script type="text/javascript">
+  var languages = new Array();
+  <% forms.each do |f| %>
+    <%= "languages.push(new Array(\"#{f.languages.join("\", \"")}\"));" %>
+  <% end %>
+
+  function updateLanguages(form) {
+    var langs = languages[form.selectedIndex];
+    var select = document.getElementById("course_language");
+    var old = select.options[select.selectedIndex].value;
+
+    select.options.length=0;
+    for(var i=0; i<langs.length; i++) {
+      select.options[i]=new Option(langs[i], langs[i], old == langs[i], old == langs[i]);
+    }
+  }
+
+  function init() {
+    updateLanguages(document.getElementById('course_form_id'));
+  }
+  window.onload=init;
+</script>

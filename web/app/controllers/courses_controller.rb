@@ -70,7 +70,7 @@ class CoursesController < ApplicationController
     @course = Course.new(params[:course])
 
     respond_to do |format|
-      if @course.save
+      if form_lang_combo_valid? && @course.save
         flash[:notice] = 'Course was successfully created.'
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @course, :status => :created, :location => @course }
@@ -87,8 +87,8 @@ class CoursesController < ApplicationController
     @course = Course.find(params[:id])
 
     respond_to do |format|
-      # FIXME don't change form and language if @course.critical?
-      if @course.update_attributes(params[:course])
+      checks = form_lang_combo_valid? && !critical_changes?(@course)
+      if checks && @course.update_attributes(params[:course])
         flash[:notice] = 'Course was successfully updated.'
         format.html { redirect_to(@course) }
         format.xml  { head :ok }
@@ -151,6 +151,31 @@ class CoursesController < ApplicationController
           :status => :unprocessable_entity }
       end
     end
+  end
+
+  private
+  # looks if critical changes to a course were made and reports them iff
+  # the course is critical.
+  def critical_changes? course
+    lang_changed = course.language.to_s != params[:course][:language].to_s
+    form_changed = course.form.to_s != params[:course][:form].to_s
+    if course.critical? && (lang_changed || form_changed)
+      flash[:error] = "Can’t change the language because the semester is critical." if lang_changed
+      flash[:error] = "Can’t change the form because the semester is critical." if form_changed
+      return true
+    end
+    false
+  end
+
+  # checks if the chosen form and language actually exist and report
+  # if iff the combo is invalid
+  def form_lang_combo_valid?
+    f = Form.find(params[:course][:form_id])
+    l = params[:course][:language]
+    x = f.has_language?(l)
+    return true if x
+    flash[:error] = "There’s no language “#{l}” for form “#{f.name}”"
+    false
   end
 end
 

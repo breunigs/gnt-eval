@@ -37,6 +37,10 @@ class Form < ActiveRecord::Base
     questions.collect { |q| q.qtext.keys }.uniq.flatten
   end
 
+  def has_language? lang
+    languages.include? lang.to_sym
+  end
+
   # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
   def db_table
     abstract_form.db_table
