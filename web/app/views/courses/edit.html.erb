@@ -1,5 +1,23 @@
 <%= render "shared/main_menu" %>
 
+<% forms = Form.find(:all).find_all{|x| x.semester_id == @course.semester.id} %>
+<script type="text/javascript">
+  var languages = new Array();
+  <% forms.each do |f| %>
+    <%= "languages.push(new Array(\"#{f.languages.join("\", \"")}\"));" %>
+  <% end %>
+
+  function updateLanguages(form) {
+    var langs = languages[form.selectedIndex];
+    var select = document.getElementById("course_language");
+    var old = select.options[select.selectedIndex].value;
+
+    select.options.length=0;
+    for(var i=0; i<langs.length; i++) {
+      select.options[i]=new Option(langs[i], langs[i], old == langs[i], old == langs[i]);
+    }
+  }
+</script>
 
 <% form_for(@course) do |f| %>
   <fieldset>
@@ -24,13 +42,13 @@
               if @course.semester.critical?
                 "#{@course.form.name} (can't change this while critical)"
               else
-                collection_select(:course, :form_id, Form.find(:all).find_all{|x| x.semester_id == @course.semester.id}, :id, :name, {:prompt => true})
+                collection_select(:course, :form_id, forms, :id, :name, {:prompt => true}, {:onchange => "updateLanguages(this);" })
               end],
           [f.label(:language),
               if @course.semester.critical?
                 "#{@course.language} (can't change this while critical)"
               else
-                collection_select(:course, :language, ['de', 'en'], :to_sym, :to_s)
+                collection_select(:course, :language, @course.form.languages, :to_sym, :to_s)
               end],
           [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
           [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
