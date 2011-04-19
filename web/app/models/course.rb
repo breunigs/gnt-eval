@@ -41,6 +41,7 @@ class Course < ActiveRecord::Base
   def eval_date
     # FIXME: Make pref?
     h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "???", 6]
+    h.merge(Hash["mo", 1, "tu", 2, "we", 3, "th", 4, "fr", 5, "???", 6])
     a = description.strip.downcase
     a = "???" if a.length < 3 || !h.include?(a[0..1])
     day = h[a[0..1]]
@@ -109,10 +110,10 @@ class Course < ActiveRecord::Base
       num = count_forms({:barcode => barcodes, :semester => i})
       next if num == 0
 
-      b << i.to_s + ". #{lang_sem}: & " + num.to_s + "\\\\ \n"
+      b << "#{i == 16 ? "> 15" : i}. #{lang_sem}: & #{num} \\\\ \n"
     end
     num = count_forms({:barcode => barcodes, :semester => 0})
-    b << notspecified + ": & " + num.to_s + "\\\\ \n" if num > 0
+    b << "#{notspecified}: & #{num} \\\\ \n" if num > 0
     b << "\\end{tabular}\\hfill\n"
 
     # Hauptfach
@@ -134,12 +135,12 @@ class Course < ActiveRecord::Base
         num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
         next if num == 0
         all += num
-        # check for 'sonstige' and skip
+        # check for 'other' and skip
         if n == matchn.length || m == matchm.length
           next
         end
 
-        # check for 'keine Angabe' and group them together
+        # check for 'not specified' and group them together
         if n == 0 || m == 0
           keinang += num
           next
