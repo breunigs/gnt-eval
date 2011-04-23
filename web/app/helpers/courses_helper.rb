@@ -1,4 +1,14 @@
 module CoursesHelper
+  include FunkyTeXBits
+
+  def render_preview
+    texpreview(@course.summary)
+  end
+
+  def courseShowLink
+    link_to("Show '#{@course.title}'", course_path(@course))
+  end
+
   def courseEditLink
     link_to("Edit '#{@course.title}'", edit_course_path(@course))
   end

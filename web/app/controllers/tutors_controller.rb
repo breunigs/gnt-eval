@@ -1,8 +1,6 @@
 class TutorsController < ApplicationController
   before_filter :load_course
 
-  include FunkyTeXBits
-
   def load_course
     if not params[:course_id].nil?
           @course = Course.find(params[:course_id])
@@ -51,7 +49,6 @@ class TutorsController < ApplicationController
   # GET /tutors/1/preview
   def preview
     @tutor = Tutor.find(params[:id])
-    @failed, @exitcodes, @error, @base64 = texpreview(@tutor.comment)
 
     respond_to do |format|
       format.html # preview.html.erb
@@ -71,6 +68,9 @@ class TutorsController < ApplicationController
         failure = true
       end
     end
+
+    kill_caches
+
     respond_to do |format|
       if failure.nil?
         flash[:notice] = 'Tutor was successfully created.'
@@ -87,6 +87,8 @@ class TutorsController < ApplicationController
   # PUT /tutors/1.xml
   def update
     @tutor = @course.tutors.find(params[:id])
+    kill_caches @tutor
+    expire_fragment("tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
 
     respond_to do |format|
       if @tutor.update_attributes(params[:tutor])
@@ -104,6 +106,9 @@ class TutorsController < ApplicationController
   # DELETE /tutors/1.xml
   def destroy
     @tutor = @course.tutors.find(params[:id])
+    kill_caches @tutor
+    # expire preview cache as well
+    expire_fragment("tutors_#{params[:id]}")
     @tutor.destroy unless @tutor.critical?
 
     respond_to do |format|
@@ -111,5 +116,17 @@ class TutorsController < ApplicationController
       format.html { redirect_to(@course) }
       format.xml  { head :ok }
     end
+  end
+
+  caches_page :index, :show, :edit, :preview
+
+  private
+  def kill_caches(tutor = nil)
+    puts "="*50
+    puts "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
+    expire_page :action => "index"
+    expire_page :action => "show", :id => tutor
+    expire_page :action => "preview", :id => tutor
+    expire_page :action => "edit", :id => tutor
   end
 end

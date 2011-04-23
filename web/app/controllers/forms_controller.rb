@@ -42,6 +42,8 @@ class FormsController < ApplicationController
   def create
     @form = Form.new(params[:form])
 
+    kill_caches
+
     respond_to do |format|
       if @form.save
         flash[:notice] = 'Form was successfully created.'
@@ -58,6 +60,7 @@ class FormsController < ApplicationController
   # PUT /forms/1.xml
   def update
     @form = Form.find(params[:id])
+    kill_caches @form
 
     respond_to do |format|
       if @form.critical?
@@ -81,10 +84,40 @@ class FormsController < ApplicationController
     @form = Form.find(params[:id])
     @form.destroy unless @form.critical?
 
+    kill_caches @form
+
     respond_to do |format|
       flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
       format.html { redirect_to(forms_url) }
       format.xml  { head :ok }
+    end
+  end
+
+  caches_page :index, :show, :new, :edit
+  private
+  def kill_caches(form = nil)
+    puts "="*50
+    puts "Expiring form caches" + (form ? " for #{form.name}" : "")
+    expire_page :action => "index"
+    expire_page :action => "new"
+    expire_page :action => "show", :id => form
+    expire_page :action => "edit", :id => form
+
+    # need to expire all edit+new pages, in case a form was added
+    Courses.find(:all) do |c|
+      puts "Expiring courses#edit+new caches for #{c.title}"
+      expire_page :controller => "courses", :action => "edit", :id => c
+      expire_page :controller => "courses", :action => "new", :id => c
+    end
+
+    return unless form
+    form.courses.each do |c|
+      puts "Expiring courses#show caches for #{c.title}"
+      expire_page :controller => "courses", :action => "show", :id => c
+      c.profs.each do |p|
+        puts "Expiring profs#edit for #{p.surname}"
+        expire_page :controller => "profs", :action => "edit", :id => p
+      end
     end
   end
 end

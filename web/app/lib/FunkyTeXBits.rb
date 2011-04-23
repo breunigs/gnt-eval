@@ -58,64 +58,50 @@ module FunkyTeXBits
 
     # will be overwritten on (re-)generation
     failed = false
-    exitcodes = ['(cached image)']
+    exitcodes = []
     error = ""
 
-    # see if it's cached, otherwise regenerate
-    unless File.exists?("#{path}.base64")
-      head = praeambel("Blaming Someone For Bad LaTeX")
-      head << "\\pagestyle{empty}"
-      foot = "\\end{document}"
+    head = praeambel("Blaming Someone For Bad LaTeX")
+    head << "\\pagestyle{empty}"
+    foot = "\\end{document}"
 
-      File.open(path + ".tex", 'w') do |f|
-        f.write(head + spellcheck(code) + foot)
-      end
-
-      error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
-      ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
-      error << "<hr><pre>"
-      error << head
-      error << spellcheck(code)
-      error << foot
-      error << "</pre>"
-      exitcodes = []
-      exitcodes << ex
-      if ex == 0
-        # overwrite by design. Otherwise it's flooded with all
-        # the TeX output even though TeXing worked fine
-        error = ""
-
-        # we don't really care if cropping worked or not
-        exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
-
-        error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
-        exitcodes << $?.to_i
-        # convert creates one image per page, so join them
-        # for easier processing
-        unless File.exists?("#{path}.png")
-          error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
-          exitcodes << $?.to_i
-        end
-      end
-      failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
-
-      # convert to base64 and store to disk
-      if File.exists?("#{path}.png")
-        require 'base64'
-        data = File.open("#{path}.png", 'rb') { |f| f.read }
-        base64 = Base64.encode64(data)
-        File.open("#{path}.base64", 'w') {|f| f.write(base64) }
-      end
+    File.open(path + ".tex", 'w') do |f|
+      f.write(head + spellcheck(code) + foot)
     end
 
-    # only read from disk if the image has not been created above
-    if base64.nil? && File.exists?("#{path}.base64")
-        base64 = File.open("#{path}.base64", 'rb') { |f| f.read }
+    error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
+    ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
+    error << "<hr><pre>" << head << spellcheck(code) << foot << "</pre>"
+    exitcodes << ex
+
+    if ex == 0
+      # overwrite by design. Otherwise it's flooded with all
+      # the TeX output even though TeXing worked fine
+      error = ""
+
+      # we don't really care if cropping worked or not
+      exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
+
+      error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
+      exitcodes << $?.to_i
+      # convert creates one image per page, so join them
+      # for easier processing
+      unless File.exists?("#{path}.png")
+        error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
+        exitcodes << $?.to_i
+      end
+    end
+    failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
+
+    # convert to base64
+    if File.exists?("#{path}.png")
+      require 'base64'
+      data = File.open("#{path}.png", 'rb') { |f| f.read }
+      base64 = Base64.encode64(data)
     end
 
     # cleanup temp files
-    [".tex", ".pdf", ".out", ".log", "-crop.pdf", ".aux", ".png", \
-        "-0.png", "-1.png", "-2.png", "-3.png"].each { |c| `rm -f "#{path}#{c}"` }
+    `rm -f "#{path}*"`
 
     return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end

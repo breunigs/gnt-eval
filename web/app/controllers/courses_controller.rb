@@ -4,8 +4,6 @@ require 'digest/md5'
 require 'ftools'
 
 class CoursesController < ApplicationController
-  include FunkyTeXBits
-
   # GET /courses
   # GET /courses.xml
   def index
@@ -57,7 +55,6 @@ class CoursesController < ApplicationController
   # GET /courses/1/preview
   def preview
     @course = Course.find(params[:id])
-    @failed, @exitcodes, @error, @base64 = texpreview(@course.summary)
 
     respond_to do |format|
       format.html # preview.html.erb
@@ -68,6 +65,7 @@ class CoursesController < ApplicationController
   # POST /courses.xml
   def create
     @course = Course.new(params[:course])
+    kill_caches
 
     respond_to do |format|
       if form_lang_combo_valid? && @course.save
@@ -85,6 +83,8 @@ class CoursesController < ApplicationController
   # PUT /courses/1.xml
   def update
     @course = Course.find(params[:id])
+    kill_caches @course
+    expire_fragment("courses_#{params[:id]}") if @course.summary != params[:course][:summary]
 
     respond_to do |format|
       checks = form_lang_combo_valid? && !critical_changes?(@course)
@@ -103,6 +103,10 @@ class CoursesController < ApplicationController
   # DELETE /courses/1.xml
   def destroy
     @course = Course.find(params[:id])
+    kill_caches @course
+    # expire preview cache as well
+    expire_fragment("courses_#{params[:id]}")
+
     unless @course.critical?
       begin
         @course.course_profs.each { |cp| cp.destroy }
@@ -126,6 +130,11 @@ class CoursesController < ApplicationController
       @course.profs.delete(@prof)
     end
 
+    # kill caches and update the deleted prof’s page as well (not
+    # catched by kill_caches)
+    kill_caches @course
+    expire_page :controller => "profs", :action => "show", :id => @prof
+
     respond_to do |format|
       flash[:error] = "Course was critical and therefore prof #{@prof.fullname} has been kept." if @course.critical?
       format.html { redirect_to(@course) }
@@ -138,6 +147,10 @@ class CoursesController < ApplicationController
       @course = Course.find(params[:id])
       @prof = Prof.find(params[:courses][:profs])
       @course.profs << @prof
+
+      # kill caches after the prof is being added, so that the new prof
+      # will get an updated page
+      kill_caches @course
 
       respond_to do |format|
         format.html { redirect_to(@course) }
@@ -157,8 +170,12 @@ class CoursesController < ApplicationController
   # looks if critical changes to a course were made and reports them iff
   # the course is critical.
   def critical_changes? course
+    # if the semester is critical, these fields will not be submitted.
+    # supply them from the database instead.
+    params[:course][:form_id] ||= course.form.id
+    params[:course][:language] ||= course.language
     lang_changed = course.language.to_s != params[:course][:language].to_s
-    form_changed = course.form.to_s != params[:course][:form].to_s
+    form_changed = course.form.id.to_s != params[:course][:form_id].to_s
     if course.critical? && (lang_changed || form_changed)
       flash[:error] = "Can’t change the language because the semester is critical." if lang_changed
       flash[:error] = "Can’t change the form because the semester is critical." if form_changed
@@ -170,12 +187,41 @@ class CoursesController < ApplicationController
   # checks if the chosen form and language actually exist and report
   # if iff the combo is invalid
   def form_lang_combo_valid?
+    # if the semester is critical, these fields will not be submitted.
+    # supply them from the database instead.
+    params[:course][:form_id] ||= @course.form.id
+    params[:course][:language] ||= @course.language
     f = Form.find(params[:course][:form_id])
     l = params[:course][:language]
     x = f.has_language?(l)
     return true if x
     flash[:error] = "There’s no language “#{l}” for form “#{f.name}”"
     false
+  end
+
+  caches_page :index, :new, :show, :edit, :preview
+  def kill_caches course
+    puts "="*50
+
+    expire_page :action => "index"
+
+    return unless course
+    expire_page :action => "edit", :id => course
+    expire_page :action => "preview", :id => course
+    expire_page :action => "show", :id => course
+
+    # course title and form are listed on the prof’s page.
+    course.profs.each do |p|
+      puts "Expiring profs#show for #{p.surname}"
+      expire_page :controller => "profs", :action => "show", :id => p.id
+    end
+
+    course.tutors.each do |t|
+      puts "Expiring tutors#show for #{t.abbr_name}"
+      expire_page :controller => "tutors", :action => "show", :id => t.id
+    end
+    puts "Expiring tutors#index"
+    expire_page :controller => "tutors", :action => "index"
   end
 end
 

@@ -1,16 +1,8 @@
-<% unless params[:quiet] %>
-  <%= render "shared/main_menu" %>
-
+<%= render "shared/main_menu" %>
+<fieldset>
   <h1>Previewing <%=@course.title %></h1>
-<% end %>
+  <%= courseShowLink %>
+  <%= courseEditLink %>
+</fieldset>
 
-<% if @failed || !params[:quiet] %>
-  EXIT CODES:
-  <%= @exitcodes.join(", ") %>
-  <br/>
-  <%= @error if @failed %>
-<% end %>
-
-
-<%= "<img src=\"data:image/png;base64,#{@base64}\"/>" unless @failed || @base64.nil? || @base64.empty? %>
-
+<%= render :partial => "shared/preview_big" %>

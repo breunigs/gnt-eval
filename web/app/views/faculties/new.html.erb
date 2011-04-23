@@ -21,7 +21,7 @@
 
 
     <p>
-      <%= f.submit "Create new faculty" %>
+      <%= f.submit "Create new faculty", :disable_with => "Saving&hellip;" %>
       <%= link_to 'Cancel', faculties_path %>
     </p>
   </fieldset>

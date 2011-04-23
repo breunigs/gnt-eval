@@ -4,7 +4,7 @@ require 'stringio'
 
 class Form < ActiveRecord::Base
   belongs_to :semester
-  has_many :course
+  has_many :courses
   validates_presence_of :semester, :name, :content
 
   # returns if the form is critical. This is the case if the semester is

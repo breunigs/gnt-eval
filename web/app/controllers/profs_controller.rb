@@ -41,6 +41,7 @@ class ProfsController < ApplicationController
   # POST /profs.xml
   def create
     @prof = Prof.new(params[:prof])
+    kill_caches @prof
 
     respond_to do |format|
       if @prof.save
@@ -58,7 +59,7 @@ class ProfsController < ApplicationController
   # PUT /profs/1.xml
   def update
     @prof = Prof.find(params[:id])
-
+    kill_caches @prof
     respond_to do |format|
       if @prof.update_attributes(params[:prof])
         flash[:notice] = "Prof '#{@prof.firstname} #{@prof.surname}' was successfully updated."
@@ -77,10 +78,28 @@ class ProfsController < ApplicationController
     @prof = Prof.find(params[:id])
     @prof.destroy unless @prof.critical?
 
+    kill_caches @prof
+
     respond_to do |format|
       flash[:error] = 'Prof was critical and has therefore not been destroyed.' if @prof.critical?
       format.html { redirect_to(profs_url) }
       format.xml  { head :ok }
+    end
+  end
+
+  caches_page :index, :new, :edit
+  private
+  def kill_caches(prof = nil)
+    puts "="*50
+    puts "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
+    expire_page :action => "index"
+    expire_page :action => "new"
+    expire_page :action => "edit", :id => prof
+
+    return unless prof
+    prof.courses.each do |c|
+      puts "Expiring courses#show for #{c.title}"
+      expire_page :controller => "courses", :action => "show", :id => c
     end
   end
 end

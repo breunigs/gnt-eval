@@ -1,11 +1,9 @@
 <%= render "shared/main_menu" %>
 
-
-
 <fieldset>
   <legend>Main details</legend>
   <h1>Showing Tutor</h1>
-  <%= tutorEditLink %> | <%= tutorReturnLink %>
+  <%= tutor_edit_link %> | <%= tutor_return_link %>
 
 
   <table style="margin-top:2em">
@@ -27,10 +25,12 @@
 
 <fieldset>
   <legend>Comments preview</legend>
-    <iframe style="height:20em;"  scrolling="auto" class="preview" src="<%= url_for({ :action => 'preview', :id => @tutor, :quiet => "yes"}) %>"></iframe>
+  <div class="preview">
+    <%= render :partial => "shared/preview" %>
+  </div>
   <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @tutor} %></p>
 </fieldset>
 
 <fieldset>
-<%= tutorEditLink %> | <%= tutorReturnLink %>
+<%= tutor_edit_link %> | <%= tutor_return_link %>
 </fieldset>

@@ -23,7 +23,7 @@
       </tr>
     </table>
     <p>
-      <%= f.submit "Create new semester" %>
+      <%= f.submit "Create new semester", :disable_with => "Saving&hellip;" %>
       <%= link_to 'Cancel', semesters_path %>
     </p>
   <% end %>

@@ -32,7 +32,9 @@
 
 <fieldset>
   <legend>Comments Preview</legend>
-  <iframe scrolling="auto" class="preview" src="<%= url_for({ :action => 'preview', :id => @course, :quiet => "yes"}) %>"></iframe>
+  <div class="preview">
+    <%= render :partial => "shared/preview" %>
+  </div>
   <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @course} %></p>
 </fieldset>
 
@@ -44,9 +46,9 @@
       <th>Email</th>
       <th>Barcode</th>
     </tr>
-    <% for prof in @course.profs.uniq %>
+    <% @course.profs.uniq.each do |prof| %>
     <tr style="background: #<%= cycle('efefef', 'fff') %>">
-      <td><%=h prof.fullname %></td>
+      <td><%= link_to prof.fullname, {:controller => "profs", :action => "edit", :id => prof } %></td>
       <td><%=h prof.email %></td>
       <td><%=h @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s %></td>
       <% unless @course.semester.critical? %>

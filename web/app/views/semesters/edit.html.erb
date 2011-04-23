@@ -23,7 +23,7 @@
     </table>
 
   <p>
-    <%= f.submit "Update semester" %>
+    <%= f.submit "Update semester", :disable_with => "Saving&hellip;" %>
     <%= link_to 'Cancel', semesters_path %>
   </p>
 <% end %>

@@ -8,7 +8,7 @@
     <%= error_messages_for :course %>
 
     <p>
-      <%= f.submit "Update and Preview" %>
+      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %>
       <%= link_to "Cancel", @course %>
     </p>
   </fieldset>
@@ -77,7 +77,7 @@
   </fieldset>
 
   <fieldset>
-    <%= f.submit "Update and Preview" %>
+    <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %>
     <%= link_to "Cancel", @course %>
   </fieldset>
 <% end %>

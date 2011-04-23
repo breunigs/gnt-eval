@@ -24,7 +24,7 @@
     </table>
 
     <p>
-      <%= f.submit "Update Prof" %>
+      <%= f.submit "Update Prof", :disable_with => "Saving&hellip;" %>
       <%= link_to 'Cancel', profs_path %>
     </p>
   <% end %>

@@ -208,6 +208,9 @@ namespace :images do
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
+    expire_course_cache = []
+    expire_tutor_cache = []
+
     system("#{mkdir} -p \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
     path=File.join(File.dirname(__FILE__), "tmp/images")
 
@@ -238,6 +241,7 @@ namespace :images do
       p = nil
       # tutor comments, place them under each tutor
       if f.downcase.end_with?("ucomment.jpg")
+        # skip existing images
         next if tpics.any? { |x| x.basename == bname }
         # find tutor id
         tut_num = nil
@@ -272,11 +276,13 @@ namespace :images do
         #~ puts "tutor  image: #{f}"
         p = Pic.new
         p.tutor_id = tutors[tut_num-1].id
+        expire_tutor_cache << tutors[tut_num-1]
       else # files for the course/prof. Should be split up. FIXME.
         next if cpics.any? { |x| x.basename == bname }
         #~ puts "course image: #{f}"
         p = CPic.new
         p.course_prof = course_prof
+        expire_course_cache << course_prof.course
       end
       p.basename = bname
       # let rails know about this comment
@@ -285,6 +291,10 @@ namespace :images do
       system("#{cp} \"#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
       print_progress(curr+1, allfiles.size)
     end # Dir glob
+
+    puts "Expiring caches for courses#edit and tutors#edit"
+    expire_course_cache.each { |c| expire_page :controller => "courses", :action => "edit", :id => c }
+    expire_tutor_cache.each { |t| expire_page :controller => "tutors", :action => "edit", :id => t }
 
     puts
     puts "Done."

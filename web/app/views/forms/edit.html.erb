@@ -22,7 +22,7 @@
 
 
     <p>
-      <%= f.submit "Update and Preview #{@form.name}" %>
+      <%= f.submit "Update and Preview #{@form.name}", :disable_with => "Saving&hellip;" %>
       <%= link_to 'Cancel', forms_path %>
     </p>
   </fieldset>
