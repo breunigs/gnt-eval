@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+require 'erb'
+
 module FunkyTeXBits
   def spellcheck(code)
     # do nothing until we can fix this properly
@@ -61,7 +63,7 @@ module FunkyTeXBits
     exitcodes = []
     error = ""
 
-    head = praeambel("Blaming Someone For Bad LaTeX")
+    head = preamble("Blaming Someone For Bad LaTeX")
     head << "\\pagestyle{empty}"
     foot = "\\end{document}"
 
@@ -106,149 +108,49 @@ module FunkyTeXBits
     return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end
 
-  def praeambel(evalname, single = nil)
-    b = ''
-    if single.nil?
-      b << "\\documentclass[pagesize,halfparskip-,headsepline," +
-        "cleardoubleempty]{scrbook}\n"
-    else
-       b << "\\documentclass[pagesize,halfparskip-]{scrartcl}\n"
-    end
+  def t(item)
+    # FIXME
+    # all items that are translated here should be displayed in the
+    # default language iff I18n is not tainted (i.e. mixed-language)
+    #~ I18n.locale = I18n.default_locale if I18n.tainted?
+    I18n.translate(item.to_sym)
+  end
 
-    b << "\\areaset[1cm]{17cm}{26cm}\n"
-    b << "\\usepackage[utf8]{inputenc}\n"
-    b << "\\usepackage[T1]{fontenc}\n"
-    b << "\\usepackage{ngerman}\n"
-    b << "\\usepackage{pgf} % drawings with jpgjdraw\n"
-    b << "\\usepackage{lmodern}\n"
-    b << "\\usepackage{longtable}\n"
-    b << "\\usepackage{dsfont}\n"
-    b << "\\usepackage{marvosym}\n"
-    b << "\\usepackage[protrusion=true,expansion]{microtype}\n"
-    b << "\\usepackage{graphicx}\n"
-    b << "\\usepackage{color}\n"
-    b << "\\usepackage[pdftex,%\n"
-    b << "  pdftitle={Lehrevaluation #{evalname}},%\n"
-    b << "  pdfauthor={Fachschaft MathPhys, Universität Heidelberg},%\n"
-    b << "  pdfborder=0 0 1, \n bookmarks=true,\n pdftoolbar=true,\n pdfmenubar=true,\n colorlinks=true,\n  linkcolor=black,\n citecolor=black,\n filecolor=black,\n urlcolor=black]{hyperref}\n\n"
-    b << "\\author{Universität Heidelberg\\\\Fachschaft MathPhys}\n"
-    b << "\\renewcommand{\\labelitemi}{-}\n"
-    b << "\\newcommand{\\spellingerror}[1]{\\textcolor{red}{#1}}\n"
-
-    if single.nil?
-      b << "\\newcommand{\\profkopf}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\kurskopf}[6]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 #5 #2}\n#6: #3}\n"
-      b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section*{#1}}\n"
-      b << "\\newcommand{\\commentsprof}[1]{\\textbf{#1}}\n"
-      b << "\\newcommand{\\commentstutor}[1]{\\textbf{#1}}\n"
-      b << "\\title{Lehrevaluation\\\\#{evalname}}\n"
-      b << "\\date{\\today}\n"
-    else
-      b << "\\newcommand{\\profkopf}[1]{\\section{#1}}\n"
-      b << "\\newcommand{\\kurskopf}[6]{\\clearpage\n\\pdfdest name{#4} xyz%\n\\chapter{#1 #5 #2}\n#6: #3}\n"
-      b << "\\newcommand{\\fragenzudenuebungen}[1]{\\section{#1}}\n"
-      b << "\\newcommand{\\uebersichtuebungsgruppen}[1]{\\section{#1}}\n"
-      b << "\\newcommand{\\zusammenfassung}[1]{\\section{#1}}\n"
-      b << "\\title{\\Large{Ergebnis der Evaluation}\\\\\\huge{#{evalname}}\\\\\\vspace{0.1cm}\\large{($dozent)}\\vspace{1.2cm}}\n"
-      b << "\\date{\\today}"
-    end
-
-    b << "\\begin{document}\n\n"
+  def preamble(evalname, single = nil)
+    data = IO.read(RAILS_ROOT + "/../tex/results_preamble.tex.erb")
+    ERB.new(data).result(binding)
   end
 
   def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
-    b = ''
-
+    b = preamble(evalname, single)
     # FIXME: Need to encapsulate form stuff. I.e. if it's a seminar,
     # a lecture and if it's German or English. The class should
     # automatically provide appropriate strings for all language
     # specifics
-    b << praeambel(evalname, single)
+    data = IO.read(RAILS_ROOT + "/../tex/results_header.tex.erb")
+    b << ERB.new(data).result(binding)
 
-    if single.nil?
-      b << "\\begin{titlepage}\n"
-      b << "\\null\\vskip 2.5cm\n"
-      b << "\\begin{center}\n"
-      b << "{\\parskip0pt\n"
-      b << "{\\sectfont\\Huge \\makeatletter\\\@title\\makeatother \\par}\n"
-      b << "\\vspace{2em}\n"
-      b << "{\\usekomafont{sectioning}\\mdseries\\LARGE\n"
-      b << "Ergebnisse der Vorlesungsumfrage\\par}\n"
-      b << "\\vfill\n"
-      b << "{\\Large \\makeatletter\\\@author\\makeatother \\par}\n"
-      b << "\\vspace{4em}\n"
-      b << "{\\Large \\makeatletter\\\@date\\makeatother \\par}\n"
-      b << "\\vfill\n"
-      b << "}\n"
-      b << "\\end{center}\n"
-      b << "\\clearpage\\thispagestyle{empty}\\null\\vfill\n"
-      b << "\\noindent\\begin{minipage}[b]{\\textwidth}\n"
-      b << "\\textbf{Umfang dieser Evaluation:}\\par\\medskip\n"
-      b << "\\begin{tabular}[b]{rl}\\hline\n"
-      b << "  #{c_courses} & Veranstaltungen \\\\\n" +
-        "  #{c_profs} & Dozenten \\\\\n" +
-        "  #{c_tutors} & Übungsgruppen\\\\\n" +
-        "  #{c_forms} & ausgewertete Fragebögen\\\\\\hline"
-      b << "\\end{tabular}\\hfill\n"
-#    b << "{\\footnotesize\\texttt{%\n"
-#    b << "  Auswertung: SVN-Revision $SvnRevision ($SvnDate $SvnTime)}}\n"
-      b << "\\end{minipage}\n"
-      b << "\\end{titlepage}\n\n"
-      b << "\\makeatletter\n"
-      b << "\\renewcommand{\\l\@section}{\\\@dottedtocline{1}{1.5em}{2.8em}}\n"
-      b << "\\makeatother\n"
-      b << "\\tableofcontents\n\n"
-    else
-      b << "\\maketitle\n\\tableofcontents\n"
-    end
-
-    return b
-  end
-
-  def TeXVorwort(facultylong, semestershort, single = nil)
-    b = ''
-
-    if single.nil?
-      b << '\chapter'
-    else
-      b << "\\pagebreak\n"
-      b << "\\section"
-    end
-    b << "{Vorwort}"
-
-    semesterlong = semestershort.gsub("WS", "Wintersemester").gsub("SS", "Sommersemester")
-    b << "\\newcommand{\\facultylong}{#{facultylong}}\n"
-    b << "\\newcommand{\\semesterlong}{#{semesterlong}}\n"
-    b << "\\input{" + File.join(Rails.root, "../tex/vorwort.tex") + "}\n"
     b
   end
 
+  def TeXVorwort(facultylong, semestershort, single = nil)
+    semesterlong = semestershort.gsub("WS", "Wintersemester").gsub("SS", "Sommersemester")
+    data = IO.read(RAILS_ROOT + "/../tex/results_preface.tex.erb")
+    ERB.new(data).result(binding)
+  end
+
   def TeXFuss(single = nil)
-    b = ''
-
-    if single.nil?
-      b << '\chapter'
-    else
-      b << "\\pagebreak\n"
-      b << "\\section"
-    end
-
     path = File.join(Rails.root, "../tmp/sample_sheets/sample_")
-    b << "{Die Fragebögen}\n"
+    files = {}
 
     $curSem.forms.each do |f|
       f.languages.each do |l|
-        b << "\\subsection*{#{f.name}}"
-        1.upto(f.pages.count) do |i|
-          b << "\\fbox{\\includegraphics[height=.85\\textheight,page=#{i}]{#{path}#{f.id}_#{l.to_s}.pdf}}\n"
-          b << "\\clearpage"
-        end
+        files["#{path}#{f.id}_#{l}.pdf"] = { :name => f.name, :pages => f.pages.count }
       end
     end
-    b << "\n\\end{document}\n"
 
-    return b
+    data = IO.read(RAILS_ROOT + "/../tex/results_footer.tex.erb")
+    ERB.new(data).result(binding)
   end
 
   def blacklist_head(semester_title)

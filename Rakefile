@@ -107,7 +107,9 @@ def make_sample_sheet(form, lang)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
   hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
-  if File.exists? filename+'.pdf'
+  # PDFs are required for result generation and the posouts for OMR
+  # parsing. Only skip if both files are present.
+  if File.exists?(filename+'.pdf') && File.exists?(filename+'.posout')
     puts "#{filename}.pdf already exists. Skipping."
     return filename
   end
@@ -117,7 +119,7 @@ def make_sample_sheet(form, lang)
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
-    h << '\dbtable{'+ from.db_table + "}\n"
+    h << '\dbtable{'+ form.db_table + "}\n"
     h << '\semester{'+ (curSem.title) + "}\n"
 
     if hasTutors
@@ -380,14 +382,13 @@ namespace :pest do
   # first key that comes along. The language should exist for every
   # key, even though this is currently not enforced. Will be though,
   # once a graphical form creation interface exists.
-  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml. Specify true if you want existing files to be overwritten.'
-  task :getyamls, :overwrite do |t,o|
-    overwrite = (!o.overwrite.nil? && o.overwrite == "true")
+  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml.'
+  task :getyamls do |t,o|
     `mkdir -p ./tmp/images`
     curSem.forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
         target = "./tmp/images/#{form.id}_#{lang}.yaml"
-        next if File.exists?(target) && !overwrite
+        next if File.exists?(target)
         file = make_sample_sheet(form, lang)
         `./pest/latexfix.rb "#{file}.posout"`
         `mv -f "#{file}.yaml" "#{target}"`
@@ -458,7 +459,9 @@ namespace :pdf do
       return if f.nil? || s.nil?
 
       filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
-      filename << '_'+ s.dirFriendlyName + '.tex'
+      filename << '_' << s.dirFriendlyName
+      filename << '_' << (I18n.tainted? ? "mixed" : I18n.default_locale).to_s
+      filename << '.tex'
 
       File.open(directory + filename, 'w') do |h|
         h.puts(s.evaluate(f))
@@ -468,22 +471,37 @@ namespace :pdf do
       Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
   end
 
-  desc "create report pdf file for a given semester and faculty (leave empty for: sem = current, fac = all)"
-  task :semester, :semester_id, :faculty_id, :needs => ['pdf:samplesheets'] do |t, a|
+  desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
+  task :semester, :lang_code, :semester_id, :faculty_id do |t, a|
     sem = a.semester_id.nil? ? curSem.id : a.semester_id
+    lang_code = a.lang_code || "mixed"
 
     dirname = './tmp/results/'
     FileUtils.mkdir_p(dirname)
 
     # we have been given a specific faculty, so evaluate it and exit.
     if not a.faculty_id.nil?
+      I18n.default_locale = Seee::Config.settings[:default_locale]
+      # taint I18n to get a mixed-language results file. Otherwise set
+      # the locale that will be used
+      if lang_code == "mixed"
+        I18n.taint
+      else
+        I18n.untaint
+        I18n.default_locale = lang_code.to_sym
+        I18n.locale = lang_code.to_sym
+      end
+      I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+
+      Rake::Task["pdf:samplesheets".to_sym].invoke
       evaluate(sem, a.faculty_id, dirname)
       exit
     end
 
     # no faculty specified, just find all and process them in parallel.
     Faculty.find(:all).each do |f|
-      job = fork { exec "rake pdf:semester[#{sem},#{f.id}]" }
+      args = [lang_code, sem, f.id].join(",")
+      job = fork { exec "rake pdf:semester[#{args}]" }
       # we don't want to wait for the process to finish
       Process.detach(job)
     end
@@ -769,7 +787,7 @@ namespace :summary do
   # error code
   def testTeXCode(content)
     include FunkyTeXBits
-    head = praeambel("Blaming Someone For Bad LaTeX")
+    head = preamble("Blaming Someone For Bad LaTeX")
     foot = "\\end{document}"
 
     File.open("./tmp/blame.tex", 'w') do |f|

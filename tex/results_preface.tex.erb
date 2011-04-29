@@ -1,0 +1,18 @@
+<% if single.nil? %>
+  \chapter{Vorwort}
+<% else %>
+  \pagebreak
+  \section{Vorwort}
+<% end %>
+
+<%
+preface = File.join(Rails.root, "../tex/preface_#{I18n.locale}.tex")
+unless File.exists?(preface)
+  preface = File.join(Rails.root, "../tex/preface.tex")
+  puts "WARNING: Missing preface_#{I18n.locale}.tex"
+end
+%>
+
+\newcommand{\facultylong}{<%=facultylong%>}
+\newcommand{\semesterlong}{<%=semesterlong%>}
+\input{<%=preface%>}

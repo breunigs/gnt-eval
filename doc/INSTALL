@@ -398,7 +398,7 @@ Typing the comments/summaries
 When you’re done, switch to the webinterface and type the comments,
 write a summary for each course and/or tutor. Each field is directly
 passed to LaTeX so you’re not limited to some design options. If you
-need further packages add them in lib/FunkyTeXBits.rb#praeambel. If you
+need further packages add them in tex/results_preamble.tex.erb. If you
 want to draw images you can use “Dia” which can export as LaTeX PGF. The
 code can be pasted directly into the comment field and should render out
 of the box. If you want to include raster images, specify an absolute

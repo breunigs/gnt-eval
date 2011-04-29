@@ -13,3 +13,16 @@ de:
     :singular: Es wurde nur ein Fragebogen abgegeben. Um die Anonymität des Teilnehmers zu wahren, wurden die Ergebnisse ausgelassen.
     :plural: "Es wurden nur #1 Fragebögen abgegeben. Um die Anonymität der Teilnehmer zu bewahren, wurden die Ergebnisse ausgelassen."
   none: keine
+
+  eval_results: Ergebnis der Evaluation
+  tex_babel_lang: ngerman
+  teaching_eval_pdf_title: Lehrevaluation $faculty_semester
+  teaching_eval_headline: Lehrevaluation\\$faculty_semester
+
+  scope_of_this_eval: 'Umfang dieser Evaluation:'
+  courses: Veranstaltungen
+  lecturers: DozentInnen
+  study_groups: Übungsgruppen
+  processed_questionnaires: ausgewertete Fragebögen
+
+  the_questionnaires: Die Fragebögen

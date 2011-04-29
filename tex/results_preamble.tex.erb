@@ -1,0 +1,52 @@
+<% if single.nil? %>
+  \documentclass[pagesize,halfparskip-,headsepline,cleardoubleempty]{scrbook}
+<% else %>
+   \documentclass[pagesize,halfparskip-]{scrartcl}
+<% end %>
+
+\areaset[1cm]{17cm}{26cm}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[<%=t :tex_babel_lang%>]{babel}
+\usepackage{pgf} % drawings with jpgjdraw
+\usepackage{lmodern}
+\usepackage{longtable}
+\usepackage{dsfont}
+\usepackage{marvosym}
+\usepackage[protrusion=true,expansion]{microtype}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[pdftex,
+  pdftitle={<%= t(:teaching_eval_pdf_title).gsub("$faculty_semester", evalname)%>},
+  pdfauthor={<%= Seee::Config.settings[:author_pdf] %>},
+  pdfborder=0 0 1,  bookmarks=true, pdftoolbar=true, pdfmenubar=true, colorlinks=true,  linkcolor=black, citecolor=black, filecolor=black, urlcolor=black]{hyperref}
+\author{<%=Seee::Config.settings[:author_page_headline] %>}
+\renewcommand{\labelitemi}{-}
+\newcommand{\spellingerror}[1]{\textcolor{red}{#1}}
+
+\newcommand{\kurskopf}[6]{\clearpage\pdfdest name{#4} xyz%
+  \chapter{#1 #5 #2}#6: #3}
+
+<% if single.nil? %>
+  \newcommand{\profkopf}[1]{\section*{#1}}
+  \newcommand{\fragenzudenuebungen}[1]{\section*{#1}}
+  \newcommand{\uebersichtuebungsgruppen}[1]{\section*{#1}}
+  \newcommand{\commentsprof}[1]{\textbf{#1}}
+  \newcommand{\commentstutor}[1]{\textbf{#1}}
+  \title{<%=t(:teaching_eval_headline).gsub("$faculty_semester", evalname)%>}
+  \date{\today}
+<% else %>
+  \newcommand{\profkopf}[1]{\section{#1}}
+  \newcommand{\fragenzudenuebungen}[1]{\section{#1}}
+  \newcommand{\uebersichtuebungsgruppen}[1]{\section{#1}}
+  \newcommand{\zusammenfassung}[1]{\section{#1}}
+  \title{
+    \Large{<%=t :eval_results%>}\\
+    \huge{<%=evalname%>}\\
+    \vspace{0.1cm}
+    \large{(<%=dozent%>)}
+    \vspace{1.2cm}}
+  \date{\today}"
+<% end %>
+
+\begin{document}

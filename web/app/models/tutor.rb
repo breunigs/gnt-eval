@@ -22,10 +22,9 @@ class Tutor < ActiveRecord::Base
       b << "\n\n"
       return b, sheet_count
     end
-
-    I18n.locale = course.language
-    I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
-    b << I18n.translate(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
+    # only set locale if we want a mixed-lang document
+    I18n.locale = course.language if I18n.tainted?
+    b << I18n.t(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }

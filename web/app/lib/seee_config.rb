@@ -96,10 +96,22 @@ module Seee
       :standard_mail_from => 'evaluation@some.domain.name.asdf',
       :standard_mail_bcc => 'evaluation@some.domain.name.asdf',
 
+      # who is responsible for the resulting PDF files? _headline will
+      # be displayed at the title page, _pdf will be put into PDF meta
+      # data.
+      :author_page_headline => "Universität Heidelberg\\\\Fachschaft MathPhys",
+      :author_pdf => "Fachschaft MathPhys, Universität Heidelberg",
+
       # defines how many sheets need to be handed in before a course or
       # tutor gets an evaluation. Otherwise a sheet might be matched to
       # the person who filled it in, destroying anonymity.
-      :minimum_sheets_required => 3
+      :minimum_sheets_required => 3,
+
+      # Set the default locale that will be used for the result PDFs. If
+      # no locale is given on the command line, courses will be printed
+      # in their selected language and all other pieces of text in the
+      # language below.
+      :default_locale => :en
     }
 
     @@file_paths = {

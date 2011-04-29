@@ -1,0 +1,19 @@
+<% if single.nil? %>
+  \chapter{<%=t :the_questionnaires %>}
+<% else %>
+  \pagebreak
+  \section{<%=t :the_questionnaires %>}
+<% end %>
+
+<% files.each do |path, info| %>
+  \subsection*{<%=info[:name]%>}
+  <% 1.upto(info[:pages]) do |i| %>
+    \fbox{
+      \includegraphics[height=.85\textheight,page=<%=i%>]{<%=path%>}
+    }
+    \clearpage
+  <% end %>
+<% end %>
+
+
+\end{document}

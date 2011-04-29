@@ -13,3 +13,19 @@ en:
     :singular: Only one questionnaire has been submitted. In order to retain the participant's anonymity the results have been excluded.
     :plural: "Only #1 questionnaires have been submitted. In order to retain the participants' anonymity, the results have been excluded."
   none: none
+
+  eval_results: Result of the Evaluationd
+  tex_babel_lang: english
+  teaching_eval_pdf_title: Teaching Evaluation $faculty_semester
+  teaching_eval_headline: Teaching Evaluation\\$faculty_semester
+
+  # displayed in the result PDFs on the 2nd page in the lower left
+  # corner
+  scope_of_this_eval: 'scope of this evaluation:'
+  courses: courses
+  lecturers: lecturers
+  study_groups: study groups
+  processed_questionnaires: processes questionnaires
+
+  # headline before the example questionnaires are shown
+  the_questionnaires: The Questionnaires
