@@ -217,7 +217,7 @@ def askUser(text, default, candidates, save_similar)
     puts
     puts "Your choice:"
     a = STDIN.gets.strip
-    return default if a == ""
+    return default if a == "" || a.empty?
     a = a.to_i
     next if a <= 0 || a > csort.length
     $savedSimilar[default] = csort[a-1][0] if save_similar
@@ -231,21 +231,22 @@ end
 def parseCSV(x)
   puts "Processing CSV #{x}"
   CSV.open(x, 'r') do |row|
+    # 8: Tutor 1st name
+    # 7: Tutor last name
+    tut = "#{row[8]} #{row[7]}".gsub(/\s+/, " ").strip
+
     next if row[0].nil? # lecture
     next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
 
     t = row[0].strip.downcase
     next if $skipMes.include?(t)
 
-    # 8: Tutor 1st name
-    # 7: Tutor last name
-    tut = "#{row[8]} #{row[7]}".gsub(/\s+/, " ").strip
     next if tut == "NN" || tut == "N.N." || tut == "NN."
 
     row[0] = "Einführung in die #{row[0].gsub(/ Einführung$/, "")}" if row[0].match(/ Einführung$/)
 
     # try to find a similar named lecture
-    name = findLecture(row[0])
+    name = findLecture(row[0].strip)
 
     $lectures[name] = Lecture.new if $lectures[name].nil?
     $lectures[name].tutors << findTutor($lectures[name].tutors, tut)
