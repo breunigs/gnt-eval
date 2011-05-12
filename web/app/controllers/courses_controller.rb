@@ -200,7 +200,7 @@ class CoursesController < ApplicationController
   end
 
   caches_page :index, :new, :show, :edit, :preview
-  def kill_caches course
+  def kill_caches(course = nil)
     puts "="*50
 
     expire_page :action => "index"
