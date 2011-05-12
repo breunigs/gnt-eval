@@ -97,11 +97,11 @@ class FacultiesController < ApplicationController
     expire_page :action => "edit", :id => faculty
 
     expire_page :controller => "courses", :action => "index"
+    expire_page :controller => "courses", :action => "new"
     # need to expire all edit/new pages, in case a faculty was added
     Course.find(:all).each do |c|
       puts "Expiring courses#new+edit for #{c.title}"
       expire_page :controller => "courses", :action => "edit", :id => c
-      expire_page :controller => "courses", :action => "new", :id => c
     end
 
     return unless faculty

@@ -104,10 +104,12 @@ class FormsController < ApplicationController
     expire_page :action => "edit", :id => form
 
     # need to expire all edit+new pages, in case a form was added
-    Courses.find(:all) do |c|
-      puts "Expiring courses#edit+new caches for #{c.title}"
-      expire_page :controller => "courses", :action => "edit", :id => c
-      expire_page :controller => "courses", :action => "new", :id => c
+    if defined? Courses && !Courses.nil?
+      Courses.find(:all) do |c|
+        puts "Expiring courses#edit+new caches for #{c.title}"
+        expire_page :controller => "courses", :action => "edit", :id => c
+        expire_page :controller => "courses", :action => "new", :id => c
+      end
     end
 
     return unless form

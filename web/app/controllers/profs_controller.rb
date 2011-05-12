@@ -96,10 +96,22 @@ class ProfsController < ApplicationController
     expire_page :action => "new"
     expire_page :action => "edit", :id => prof
 
+    # the list of profs is shown on both new and show pages, therefore
+    # these need to be expired, regardless which prof changed
+    expire_page :controller => "courses", :action => "new"
+    Course.find(:all).each do |c|
+      expire_page :controller => "courses", :action => "edit", :id => c
+    end
+
+    # courses#index shows the prof as well
+    expire_page :controller => "courses", :action => "index"
+
+    # courses#edit pages show the name of the prof, so only update
+    # courses with that prof.
     return unless prof
     prof.courses.each do |c|
-      puts "Expiring courses#show for #{c.title}"
-      expire_page :controller => "courses", :action => "show", :id => c
+      puts "Expiring courses#edit for #{c.title}"
+      expire_page :controller => "courses", :action => "edit", :id => c
     end
   end
 end
