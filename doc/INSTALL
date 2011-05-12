@@ -216,8 +216,8 @@ user. To do so, run:
   sudo -u postgres -s
 Now you’ll be able to execute PostgreSQL specific commands. First, run
   createuser -P gnt-eval
-to create a new user called “eval”. The -P switch will prompt you for a
-password, leave it out to create a user with no password (our password
+to create a new user called “gnt-eval”. The -P switch will prompt you for
+a password, leave it out to create a user with no password (our password
 will again be “gnt-eval”). You will be asked some questions, answer them
 as you see fit.
 

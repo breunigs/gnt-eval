@@ -82,6 +82,7 @@ end
 # Generates a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
   path = File.expand_path(path)
+  return if File.exists?(path)
   FileUtils.mkdir_p(File.join(Dir.tmpdir, "seee"))
   tmp = Dir.mktmpdir("seee/barcode-")
   worked = false

@@ -1,5 +1,9 @@
 de:
   semester_distribution: Semesterverteilung
+  # Note: semester and “academic semester” differ. For example, if you
+  # first studied maths for 10 semesters and then matriculate for
+  # physics, you'll be in the 1st “academic semester” in physics, but in
+  # the 11th in maths.
   academic_term: Fachsemester
   degree_course: Studiengänge
   other: sonstiges
@@ -26,3 +30,10 @@ de:
   processed_questionnaires: ausgewertete Fragebögen
 
   the_questionnaires: Die Fragebögen
+
+  # these form the "data line" in each form
+  title: Titel
+  lecturer:
+    :male: Dozent
+    :female: Dozentin
+  semester: Semester

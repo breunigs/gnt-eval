@@ -54,6 +54,7 @@ class Question
   # (tutoren, studienfach, semesterzahl)
 
   attr_accessor :special_care
+  attr_accessor :care_type
   attr_accessor :donotuse
 
   # FIXME: remove failchoice
@@ -143,7 +144,7 @@ class Question
   end
 
   # export a single question to tex
-  def to_tex
+  def to_tex(language = :en)
     #     \qvm{Gibt es Probleme mit dem mündlichen Vortrag? Wenn ja, welche?}{
     # keine}{zu leiss
     # e Verstärkeranlage}{mangelnde Sprachkenntnisse}{Studis zu
@@ -152,13 +153,54 @@ class Question
     # hier könnte ein echter algorithmus hin
     # FIXME: kommentarfelder
 
-    unless @special_care
+    if @special_care
+      s = ""
+      case @care_type
+        when "tutor_table":
+          # automatically prints tutors, if they have been defined
+          s << "\\printtutors{#{@qtext[language]}}\n\n"
+
+        when "variable_width":
+          s << "\\bluu[#{@qtext[language]}][#{@db_column}]\n"
+          s << "\\makebox[1.0\\textwidth][l]{"
+          s << "\\textbf{#{@qtext[language]}:}"
+          s << " }\\vspace{0.1cm}\n\n"
+
+          s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+          boxes = []
+          @boxes.each do |b|
+            boxes << "\\bxss[#{b.choice}][#{b.choice}]\\hspace{-0.5em}#{b.text[language]}"
+          end
+          s << boxes.join(" \\hfill ")
+          s << "}\\vspace{0.1cm}\n\n"
+
+        when "fixed_width__last_is_rightmost":
+          s << "\\bluu[#{@qtext[language]}][#{@db_column}]\n"
+          s << "\\makebox[1.0\\textwidth][l]{"
+          s << "\\hspace*{-0.05em}"
+          s << "\\textbf{#{@qtext[language]}:}"
+          s << " }\\vspace{0.05cm}\n"
+
+          s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+          @boxes.each do |b|
+            next if b == @boxes.last
+            s << "\\bxss[#{b.choice}][#{b.text[language]}] "
+            s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{b.text[language]}}}"
+            s << "\\makebox[0.15cm]{} "
+          end
+
+          s << "\\makebox[#{3.25*(6-@boxes.size)}cm]{} "
+          last = @boxes.last
+          s << "\\bxss[#{last.choice}][#{last.text[language]}] "
+          s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{last.text[language]}}}"
+          s << "}\\vspace{0.1cm}\n\n"
+      end
+      s
+    else
       '\q' + ['i','ii','iii','iv','v','vi'][@boxes.count-1] +
         (multi? ? 'm' : '') +  '{' + text + '}' + boxes.map{|b| '{' +
         b.text.to_s + '}'}.join('') + '{' + tex_db_column + '}' +
         "\n\n"
-    else
-      ''
     end
   end
 
@@ -234,6 +276,10 @@ class Page
       @sections.collect {|s| s.questions}.flatten
     end
   end
+
+  def special_care_questions
+    questions.select { |q| q.special_care && q.special_care.to_i > 0 }
+  end
 end
 
 
@@ -241,6 +287,14 @@ end
 #
 
 class AbstractForm
+  # printed headline of the form
+  attr_accessor :title
+
+  # introductory text just below the main headline
+  attr_accessor :intro
+
+  # the language class that should be passed to TeX's babel
+  attr_accessor :babelclass
 
   # list of pages
   attr_accessor :pages
@@ -265,9 +319,32 @@ class AbstractForm
     @db_table = db_table
   end
 
+  # builds the tex header for the form
+  def header(language = :en, gender = :female)
+    I18n.locale = language
+    I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+
+    # writes yaml header on texing
+    s = "\\head{#{title[language]}}{00000000}\n\n"
+    s << "#{intro[language]}\n\n"
+    s << "\\\dataline{#{I18n.t(:title)}}"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
+    # print special questions
+    special_care_questions.each { |q| s << q.to_tex(language) }
+    s << "\\vspace{0.1cm}"
+    s
+  end
+
   # direct access to questions
   def questions
     @pages.collect { |p| p.questions }.flatten
+  end
+
+  # returns all special care questions for that form
+  def special_care_questions
+    q = []
+    @pages.each { |p| q += p.special_care_questions }
+    q
   end
 
   # find the question-object belonging to a db_column

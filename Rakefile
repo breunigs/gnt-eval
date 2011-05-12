@@ -40,16 +40,7 @@ def find_barcode(filename)
   end
 end
 
-def tex_head_for(form, lang='')
-  h = form.abstract_form.texhead
-  if h.is_a?(String)
-    h
-  else
-    h[lang]
-  end
-end
-
-def tex_foot_for(form, lang='')
+def tex_foot_for(form, lang = :en)
   f = form.abstract_form.texfoot
   if f.is_a?(String)
     f
@@ -114,7 +105,7 @@ def make_sample_sheet(form, lang)
     return filename
   end
 
-  generate_barcode("00000000", dir + "barcode.pdf")
+  generate_barcode("00000000", dir + "barcode00000000.pdf")
   File.open(filename + ".tex", "w") do |h|
     h << '\documentclass[ngerman]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
@@ -133,8 +124,9 @@ def make_sample_sheet(form, lang)
     end
 
     h << '\begin{document}' + "\n"
-    h << tex_head_for(form, lang) + "\n\n\n"
+    h << form.abstract_form.header(lang) + "\n\n\n"
     h << tex_questions_for(form, lang) + "\n"
+    h << tex_foot_for(form, lang) + "\n"
     h << '\end{document}'
   end
 
@@ -151,13 +143,13 @@ end
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
   # first: the barcode
-  generate_barcode(cp.barcode, dirname + "barcode.pdf")
+  generate_barcode(cp.barcode, dirname + "barcode#{cp.barcode}.pdf")
 
   # second: the form
   filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
 
   File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\documentclass[' + cp.course.form.babelclass + ']{eval}' + "\n"
     h << '\dbtable{' + escape_for_tex(cp.course.form.db_table) + "}\n"
     h << '\dozent{' + escape_for_tex(cp.prof.fullname) + '}' + "\n"
     h << '\vorlesung{' + escape_for_tex(cp.course.title) + '}' + "\n"
@@ -180,7 +172,7 @@ def make_pdf_for(s, cp, dirname)
 
     lang = cp.course.language.to_sym
     h << '\begin{document}' + "\n"
-    h << tex_head_for(cp.course.form, lang) + "\n\n\n"
+    h << cp.course.form.abstract_form.header(lang, cp.prof.gender) + "\n\n\n"
     h << tex_questions_for(cp.course.form, lang) + "\n"
     h << tex_foot_for(cp.course.form, lang) + "\n"
     h << '\end{document}'

@@ -1,664 +1,779 @@
---- !ruby/object:AbstractForm 
+--- !ruby/object:AbstractForm
 db_table: evaldaten_WS_2010_11_1
-lecturer_header: 
-  :de: 
+babelclass:
+  :en: english
+  :de: ngerman
+title:
+  :de: Lehrevaluation -- Seminare
+  :en: Quality of Teaching -- Seminars
+intro:
+  :de: Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachschaft MathPhys durchgeführt. Dieser Bogen soll helfen, die Lehre zu verbessern bzw. Lehrveranstaltungen guter Qualität zu erhalten. Auch in eurem Interesse bitten wir euch, den Bogen sorgfältig und deutlich lesbar auszufüllen.\vspace{0.3cm}
+  :en: This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly.\vspace{0.1cm}
+lecturer_header:
+  :de:
     :male: "Fragen zum Seminar (Dozent: #1, B\xC3\xB6gen: #2)"
     :female: "Fragen zum Seminar (Dozentin: #1, B\xC3\xB6gen: #2)"
-pages: 
-- !ruby/object:Page 
-  sections: 
-  - !ruby/object:Section 
-    questions: 
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+  :en:
+    :male: "Questions about the seminar (Lecturer: #1, Questionnaires: #2)"
+    :female: "Questions about the seminar (Lecturer: #1, Questionnaires: #2)"
+pages:
+- !ruby/object:Page
+  sections:
+  - !ruby/object:Section
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: Diplom
-      - !ruby/object:Box 
+          :en: Diploma
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: Lehramt
-      - !ruby/object:Box 
+          :en: Edu. Degree
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: Bachelor
-      - !ruby/object:Box 
+          :en: Bachelor
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: Master
-      - !ruby/object:Box 
+          :en: Master
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: Promotion
-      - !ruby/object:Box 
+          :en: Ph.D.
+      - !ruby/object:Box
         choice: 6
-        text: 
+        text:
           :de: Sonstiges
+          :en: Other
       db_column: studienziel
-      failchoice: -1
-      nochoice: 
-      qtext: 
-        :de: 
+      nochoice:
+      qtext:
+        :de: Studienfach
+        :en: Pursued degree
       special_care: 1
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+      care_type: fixed_width__last_is_rightmost
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: Mathematik
-      - !ruby/object:Box 
+          :en: Mathematics
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: Informatik
-      - !ruby/object:Box 
+          :en: Computer Science
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: Physik
-      - !ruby/object:Box 
+          :en: Physics
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: Sonstiges
+          :en: Other
       db_column: hauptfach
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Hauptfach
+        :en: Major
       special_care: 1
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+      care_type: fixed_width__last_is_rightmost
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: 1
-      - !ruby/object:Box 
+          :en: 1
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: 2
-      - !ruby/object:Box 
+          :en: 2
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: 3
-      - !ruby/object:Box 
+          :en: 3
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: 4
-      - !ruby/object:Box 
+          :en: 4
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: 5
-      - !ruby/object:Box 
+          :en: 5
+      - !ruby/object:Box
         choice: 6
-        text: 
+        text:
           :de: 6
-      - !ruby/object:Box 
+          :en: 6
+      - !ruby/object:Box
         choice: 7
-        text: 
+        text:
           :de: 7
-      - !ruby/object:Box 
+          :en: 7
+      - !ruby/object:Box
         choice: 8
-        text: 
+        text:
           :de: 8
-      - !ruby/object:Box 
+          :en: 8
+      - !ruby/object:Box
         choice: 9
-        text: 
+        text:
           :de: 9
-      - !ruby/object:Box 
+          :en: 9
+      - !ruby/object:Box
         choice: 10
-        text: 
+        text:
           :de: 10
-      - !ruby/object:Box 
+          :en: 10
+      - !ruby/object:Box
         choice: 11
-        text: 
+        text:
           :de: 11
-      - !ruby/object:Box 
+          :en: 11
+      - !ruby/object:Box
         choice: 12
-        text: 
+        text:
           :de: 12
-      - !ruby/object:Box 
+          :en: 12
+      - !ruby/object:Box
         choice: 13
-        text: 
+        text:
           :de: 13
-      - !ruby/object:Box 
+          :en: 13
+      - !ruby/object:Box
         choice: 14
-        text: 
+        text:
           :de: 14
-      - !ruby/object:Box 
+          :en: 14
+      - !ruby/object:Box
         choice: 15
-        text: 
+        text:
           :de: 15
-      - !ruby/object:Box 
+          :en: 15
+      - !ruby/object:Box
         choice: 16
-        text: 
+        text:
           :de: "> 15"
+          :en: "> 15"
       db_column: semester
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Fachsemester
+        :en: Academic Term
       special_care: 1
-    title: 
+      care_type: variable_width
+    title:
       :de: Metakram
-  - !ruby/object:Section 
-    questions: 
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+      :en: Metastuff
+  - !ruby/object:Section
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: Abschluss\-thema
-      - !ruby/object:Box 
+          :en: topic of thesis
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: sonstiges Interesse
-      - !ruby/object:Box 
+          :en: misc. interest
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: "ben\xC3\xB6tigter Schein"
-      - !ruby/object:Box 
+          :en: obligatory credit points
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: leichter Schein
+          :en: easy credit points
       db_column: v1
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Warum hast du genau dieses Seminar gew\xC3\xA4hlt?"
+        :en: "Why did you choose particularly this seminar?"
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: "Einf\xC3\xBChrung"
-      - !ruby/object:Box 
+          :en: introduction
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: Vertiefung
-      - !ruby/object:Box 
+          :en: academic specialisation
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: Forschungsbezug
-      - !ruby/object:Box 
+          :en: relation to research
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: Spezialthema
+          :en: advanced topic
       db_column: v2
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Welche Erwartung hattest du an das Seminar?
+        :en: What did you expect from the seminar?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: Nein
-      - !ruby/object:Box 
+          :en: no
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: Abschlussarbeit
-      - !ruby/object:Box 
+          :en: thesis
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: weiteres Seminar
-      - !ruby/object:Box 
+          :en: additional seminar
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: Spezialvorlesung
+          :en: advanced course
       db_column: v3
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Willst du dich weiter im Themengebiet vertiefen? Wenn ja, wie?
+        :en: Do you plan to deepen your knowledge in this topic? If so, how?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: sehr gut
-      - !ruby/object:Box 
+          :en: very well
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: gut
-      - !ruby/object:Box 
+          :en: well
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: !binary |
             bcOkw59pZw==
 
-      - !ruby/object:Box 
+          :en: average
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: schlecht
-      - !ruby/object:Box 
+          :en: badly
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: gar nicht
+          :en: not at all
       db_column: v4
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Wie gut wurdest du bei der Vorbereitung deines Vortrages betreut?
+        :en: How well were you supported during the preparation of your talk?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: keine
-      - !ruby/object:Box 
+          :en: none
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: zu viel Literatur
-      - !ruby/object:Box 
+          :en: too much literature
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: zu wenig Literatur
-      - !ruby/object:Box 
+          :en: too little literature
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: zu wenig Zeit
-      - !ruby/object:Box 
+          :en: too little time
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: Thema zu \-vage
+          :en: topic too imprecise
       db_column: v5
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Gab es Probleme bei der Vorbereitung deines Vortrages? Wenn ja, welche?
+        :en: Did you encounter any problems while preparing the talk? If so, give details.
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: "\xC3\xBCberfordert"
-      - !ruby/object:Box 
+          :en: too much
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: genau richtig
-      - !ruby/object:Box 
+          :en: just right
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: unterfordert
+          :en: too little
       db_column: v6
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Wie sehr wurdest du im Seminar gefordert?
+        :en: How much did you feel challenged in this seminar?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: sehr gut
-      - !ruby/object:Box 
+          :en: very well
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: gut
-      - !ruby/object:Box 
+          :en: well
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: !binary |
             bcOkw59pZw==
 
-      - !ruby/object:Box 
+          :en: average
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: schlecht
+          :en: hardly
       db_column: v7
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Ist der Stoff in der dir zur Verf\xC3\xBCgung stehenden Zeit darstellbar?"
+        :en: Is your topic presentable in sufficient detail in the time available?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: <10\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: 10--20\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: 20--30\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: 30--40\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: ">40\\,h"
       db_column: v8
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Wie viel Zeit hast du f\xC3\xBCr die Vorbereitung investiert?"
+        :en: How much time did you spend preparing the talk?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: <5\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: 5--10\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: 10--15\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: 15--20\,h
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: ">20\\,h"
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 6
-        text: 
+        text:
           :de: keine Hausarbeit
+          :en: no script required
       db_column: v9
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Wenn eine Hausarbeit angefertigt wurde, wie hoch war dein Arbeitsaufwand?
+        :en: In case a seminar paper was required, how much time did you spend writing it?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: "v\xC3\xB6llig"
-      - !ruby/object:Box 
+          :en: completely
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: gar nicht
-      - !ruby/object:Box 
+          :en: no
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: "wei\xC3\x9F nicht"
+          :en: don't know
       db_column: v10
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Sind die verschiedenen Vortr\xC3\xA4ge in den Anforderungen der Ausarbeitung vergleichbar?"
+        :en: Did you consider the diverse talks as being equally challenging?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: viel zu wenig
-      - !ruby/object:Box 
+          :en: no, far too few
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en: ""
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: angemessen
-      - !ruby/object:Box 
+          :en: yes, appropriate
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en:
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: viel zu viel
+          :en: no, far too many
       db_column: v11
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Sind die vergebenen Leistungspunkte gemessen am Arbeitsaufwand f\xC3\xBCr diese Vorlesung angemessen (1\\,LP entspricht 25-30\\,h)?"
+        :en: "Is the amount of credit points awarded adequate for your workload? (1\\,CP equals 25-30\\,h)?"
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: ja, optimal
-      - !ruby/object:Box 
+          :en: yes, perfectly
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en: ""
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en: ""
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: nein, gar nicht
+          :en: no, not at all
       db_column: v12
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Setzt der/die Dozent/in bei der Themenauswahl die richtigen Schwerpunkte?
+        :en: Does the lecturer set the right priorities in her/his choice of topics?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: sehr gut
-      - !ruby/object:Box 
+          :en: very well
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: gut
-      - !ruby/object:Box 
+          :en: well
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: !binary |
             bcOkw59pZw==
 
-      - !ruby/object:Box 
+          :en: average
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: schlecht
+          :en: hardly
       db_column: v13
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Sind die Vortr\xC3\xA4ge inhaltlich gut aufeinander abgestimmt?"
+        :en: Did the talks complement each other well with regard to their content?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: sehr
-      - !ruby/object:Box 
+          :en: always
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: !binary |
             bcOkw59pZw==
 
-      - !ruby/object:Box 
+          :en: often
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: wenig
-      - !ruby/object:Box 
+          :en: sometimes
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: gar nicht
+          :en: not at all
       db_column: v14
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Wie h\xC3\xA4ufig hast du aktiv die Vortr\xC3\xA4ge verfolgt?"
+        :en: How often did you follow the talks actively?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: ja, sehr viel
-      - !ruby/object:Box 
+          :en: yes, very much
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en: ""
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: ""
-      - !ruby/object:Box 
+          :en: ""
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: nein, gar nicht
+          :en: no, nothing
       db_column: v15
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Hast du im Seminar \xC3\xBCber deinen eigenen Vortrag hinaus etwas gelernt?"
+        :en: Have you learned anything beyond the scope of your own talk in this seminar?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: ja
-      - !ruby/object:Box 
+          :en: yes
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: nein
+          :en: no
       db_column: v16
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: Hast du ausreichend Feedback bekommen?
+        :en: Did you get sufficient feedback?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: nein, zuviel
-      - !ruby/object:Box 
+          :en: nein, too much
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ja
-      - !ruby/object:Box 
+          :en: yes
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: nein, gar nicht
+          :en: no, not at all
       db_column: v17
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "Hat der/die Dozent/in angemessen fragend und korrigierend in Vortr\xC3\xA4ge eingegriffen?"
+        :en: Did the lecturer intervene during talks to ask questions and correct mistakes in an appropriate way?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: zuviel
-      - !ruby/object:Box 
+          :en: too much
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: ja, optimal
-      - !ruby/object:Box 
+          :en: yes, perfectly
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: meist aufmerksam
-      - !ruby/object:Box 
+          :en: usually attentive
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: oft uninteressiert
-      - !ruby/object:Box 
+          :en: often uninterested
+      - !ruby/object:Box
         choice: 5
-        text: 
+        text:
           :de: nein, gar nicht
+          :en: no, not at all
       db_column: v18
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "War der/die Dozent/in w\xC3\xA4hrend der Vortr\xC3\xA4ge ausreichend pr\xC3\xA4sent?"
+        :en: Was the lecturer sufficiently present during the talks?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: auf jeden Fall
-      - !ruby/object:Box 
+          :en: definitely
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: eventuell
-      - !ruby/object:Box 
+          :en: maybe
+      - !ruby/object:Box
         choice: 3
-        text: 
+        text:
           :de: eher nicht
-      - !ruby/object:Box 
+          :en: rather not
+      - !ruby/object:Box
         choice: 4
-        text: 
+        text:
           :de: nein
+          :en: no
       db_column: v19
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "W\xC3\xBCrdest du ein Seminar mit diesem Thema weiterempfehlen?"
+        :en: Would you recommend a seminar on this topic to your fellow students?
       save_as: ""
       type: square
-    - !ruby/object:Question 
-      boxes: 
-      - !ruby/object:Box 
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
         choice: 1
-        text: 
+        text:
           :de: ja
-      - !ruby/object:Box 
+          :en: yes
+      - !ruby/object:Box
         choice: 2
-        text: 
+        text:
           :de: nein
+          :en: no
       db_column: v20
-      failchoice: -1
-      nochoice: 
-      qtext: 
+      nochoice:
+      qtext:
         :de: "W\xC3\xBCrdest du erneut ein Seminar bei diesem/dieser Dozenten/in besuchen?"
+        :en: Would you attend a seminar with this lecturer again?
       save_as: ""
       type: square
-    title: 
+    title:
       :de: Fragen zum Seminar
-texfoot: "\\\\[0.2cm]\n Ist dir an dem Seminar zus\xC3\xA4tzlich noch etwas aufgefallen? (Falls ja, bitte auf der R\xC3\xBCckseite Stichworte angeben)\n\n\
+      :en: Questions about the Seminar
+texfoot:
+  :en: "\\\\[0.2cm]\n Is there anything else you'd like to mention about the seminar? (If so, give keywords on the back)\n\n\
   \\ikkifthagn"
-texhead: \kopf{0}
+  :de: "\\\\[0.2cm]\n Ist dir an dem Seminar zus\xC3\xA4tzlich noch etwas aufgefallen? (Falls ja, bitte auf der R\xC3\xBCckseite Stichworte angeben)\n\n\
+  \\ikkifthagn"
