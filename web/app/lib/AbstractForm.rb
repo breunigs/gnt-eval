@@ -320,12 +320,12 @@ class AbstractForm
   end
 
   # builds the tex header for the form
-  def header(language = :en, gender = :female)
+  def header(language = :en, gender = :female, barcode = "00000000")
     I18n.locale = language
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
     # writes yaml header on texing
-    s = "\\head{#{title[language]}}{00000000}\n\n"
+    s = "\\head{#{title[language]}}{#{barcode}}\n\n"
     s << "#{intro[language]}\n\n"
     s << "\\\dataline{#{I18n.t(:title)}}"
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"

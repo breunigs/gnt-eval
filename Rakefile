@@ -107,7 +107,7 @@ def make_sample_sheet(form, lang)
 
   generate_barcode("00000000", dir + "barcode00000000.pdf")
   File.open(filename + ".tex", "w") do |h|
-    h << '\documentclass[ngerman]{eval}' + "\n"
+    h << '\documentclass['+form.abstract_form.babelclass[lang]+']{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\dbtable{'+ form.db_table + "}\n"
@@ -149,7 +149,7 @@ def make_pdf_for(s, cp, dirname)
   filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
 
   File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[' + cp.course.form.babelclass + ']{eval}' + "\n"
+    h << '\documentclass[' + cp.course.form.abstract_form.babelclass[cp.course.language] + ']{eval}' + "\n"
     h << '\dbtable{' + escape_for_tex(cp.course.form.db_table) + "}\n"
     h << '\dozent{' + escape_for_tex(cp.prof.fullname) + '}' + "\n"
     h << '\vorlesung{' + escape_for_tex(cp.course.title) + '}' + "\n"
@@ -172,7 +172,7 @@ def make_pdf_for(s, cp, dirname)
 
     lang = cp.course.language.to_sym
     h << '\begin{document}' + "\n"
-    h << cp.course.form.abstract_form.header(lang, cp.prof.gender) + "\n\n\n"
+    h << cp.course.form.abstract_form.header(lang, cp.prof.gender, cp.barcode) + "\n\n\n"
     h << tex_questions_for(cp.course.form, lang) + "\n"
     h << tex_foot_for(cp.course.form, lang) + "\n"
     h << '\end{document}'
