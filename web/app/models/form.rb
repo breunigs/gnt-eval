@@ -16,6 +16,7 @@ class Form < ActiveRecord::Base
 
   # the AbstractForm object belonging to this form
   # this is NOT relational, we just dump the AbstractForm into the database as a YAML-string
+  # expiring will be handled in the forms_controller#expire_cache
   def abstract_form
     # cache yaml files for speeeed
     $loaded_yaml_sheets ||= {}
@@ -23,13 +24,17 @@ class Form < ActiveRecord::Base
     $loaded_yaml_sheets[id]
   end
 
-  # pretty printing an AbstrctForm is a bit
+  # pretty printing an AbstrctForm is a bit tricky
   def pretty_abstract_form
-    if abstract_form.is_a? String
-      "This is not a valid form. Here's the source: \n\n\n" + abstract_form.to_s
-    else
+    if abstract_form_valid?
       abstract_form.pretty_print_me
+    else
+      "This is not a valid form. Here's what could be parsed: \n\n\n" + PP.pp(abstract_form, "")
     end
+  end
+
+  def abstract_form_valid?
+    abstract_form.is_a? AbstractForm
   end
 
   # what languages does this form support?

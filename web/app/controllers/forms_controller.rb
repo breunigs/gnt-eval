@@ -100,8 +100,11 @@ class FormsController < ApplicationController
     puts "Expiring form caches" + (form ? " for #{form.name}" : "")
     expire_page :action => "index"
     expire_page :action => "new"
-    expire_page :action => "show", :id => form
-    expire_page :action => "edit", :id => form
+    if form
+      expire_page :action => "show", :id => form
+      expire_page :action => "edit", :id => form
+      $loaded_yaml_sheets[form.id] = nil
+    end
 
     # need to expire all edit+new pages, in case a form was added
     if defined? Courses && !Courses.nil?

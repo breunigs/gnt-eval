@@ -7,7 +7,9 @@
     <tr>
       <th>Semester</th>
       <th>Name</th>
+      <th>Table</th>
       <th colspan="3">Actions</th>
+      <th></th>
     </tr>
 
   <% for form in @forms.sort { |x,y|
@@ -17,6 +19,7 @@
     <tr style="background:#<%= cycle('efefef', 'fff')%>">
       <td><%=h form.semester.title %></td>
       <td><%= link_to form.name, form %></td>
+      <td><%= (form.abstract_form_valid? ? form.abstract_form.db_table : "") %></td>
 
       <% if form.critical? %>
         <td colspan="2">Semester critical</td>
@@ -24,6 +27,7 @@
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
       <% end %>
+      <%= (not form.abstract_form_valid?) ? "<td>⚠ Form is invalid</td>" : ""%>
     </tr>
   <% end %>
   </table>
