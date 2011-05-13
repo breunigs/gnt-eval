@@ -59,7 +59,7 @@ pages:
         :de: Studienfach
         :en: Pursued degree
       special_care: 1
-      care_type: fixed_width__last_is_rightmost
+      type: fixed_width__last_is_rightmost
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -88,7 +88,7 @@ pages:
         :de: Hauptfach
         :en: Major
       special_care: 1
-      care_type: fixed_width__last_is_rightmost
+      type: fixed_width__last_is_rightmost
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -177,7 +177,7 @@ pages:
         :de: Fachsemester
         :en: Academic Term
       special_care: 1
-      care_type: variable_width
+      type: variable_width
     title:
       :de: Metakram
       :en: Metastuff

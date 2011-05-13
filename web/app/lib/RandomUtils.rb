@@ -1,5 +1,7 @@
 require 'enumerator'
 require 'tmpdir'
+require 'rubygems'
+require 'work_queue'
 
 class String
   # keeps only characters that may be used in a table name or column for
@@ -152,4 +154,13 @@ def temp_dir
   File.makedirs(tmp)
   `chmod 0777 -R #{tmp}`
   tmp
+end
+
+# creates or returns a global work queue. Executes (amount of cpus)
+# threads simultaneously. Usage:
+# work_queue.enqueue_b { puts "Hello from the WorkQueue" }
+# work_queue.join
+def work_queue
+  $global_work_queue ||= WorkQueue.new(number_of_processors)
+  $global_work_queue
 end

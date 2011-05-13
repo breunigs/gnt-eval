@@ -56,25 +56,10 @@ def tex_questions_for(form, lang)
     p.sections.each do |s|
       # ist das ein abschnitt, der uns kümmert?
       next if s.questions.find_all{|q| q.special_care != 1}.empty?
-      b << "\n\n" + '\sect{' + s.title[lang] + "}"
+      b << "\n\n\\sect{#{s.title[lang]}}"
       s.questions.each do |q|
-        b << "\n\n"
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-        if q.db_column =~ /comment/
-          b << '\kommentar{' + q.text(lang) + '}{' + q.db_column + '}{' +
-            q.db_column + "}\n\n"
-        else
-          b << '\q' + ['ii','iii','iv','v', 'vi'][q.size - 2]
-          b << 'm' if q.multi?
-          b << "{#{q.text(lang)}}"
-          b << q.boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| '{' +
-            x.text[lang].to_s + '}' }.join('')
-          if q.multi?
-            b << '{' + q.db_column.first[0..-2] + '}'
-          else
-            b << "{#{q.db_column}}"
-          end
-        end
+        b << q.to_tex(lang)
       end
     end
     b << p.tex_at_bottom.to_s
@@ -114,13 +99,13 @@ def make_sample_sheet(form, lang)
     h << '\semester{'+ (curSem.title) + "}\n"
 
     if hasTutors
-      h << '\tutoren{'
-      h << '\mmm[1][Mustafa Mustermann] & \mmm[2][Fred Nurk]     & \mmm[3][Ashok Kumar] & \mmm[4][Juan Pérez]     & \mmm[5][Jakob Mierscheid] \\\\'
-      h << '\mmm[6][Iwan Iwanowitsch]   & \mmm[7][Pierre Dupont] & \mmm[8][John Smith]  & \mmm[9][Eddi Exzellenz] & \mmm[10][Joe Bloggs]      \\\\'
-      h << '\mmm[11][John Doe]          & \mmm[12][\ ]           & \mmm[13][\ ]         & \mmm[14][\ ]            & \mmm[15][\ ]              \\\\'
-      h << '\mmm[16][\ ]                & \mmm[17][\ ]           & \mmm[18][\ ]         & \mmm[19][\ ]            & \mmm[20][\ ]              \\\\'
-      h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\'
-      h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }'
+      h << '\tutoren{' + "\n"
+      h << '\mmm[1][Mustafa Mustermann] & \mmm[2][Fred Nurk]     & \mmm[3][Ashok Kumar] & \mmm[4][Juan Pérez]     & \mmm[5][Jakob Mierscheid] \\\\' + "\n"
+      h << '\mmm[6][Iwan Iwanowitsch]   & \mmm[7][Pierre Dupont] & \mmm[8][John Smith]  & \mmm[9][Eddi Exzellenz] & \mmm[10][Joe Bloggs]      \\\\' + "\n"
+      h << '\mmm[11][John Doe]          & \mmm[12][\ ]           & \mmm[13][\ ]         & \mmm[14][\ ]            & \mmm[15][\ ]              \\\\' + "\n"
+      h << '\mmm[16][\ ]                & \mmm[17][\ ]           & \mmm[18][\ ]         & \mmm[19][\ ]            & \mmm[20][\ ]              \\\\' + "\n"
+      h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\' + "\n"
+      h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }' + "\n"
     end
 
     h << '\begin{document}' + "\n"
@@ -302,40 +287,35 @@ namespace :images do
       puts "Working directory is: #{d.directory}"
       files = Dir.glob(File.join(d.directory, '*.tif'))
       files_size = files.size
-      split = files.chunk(number_of_processors)
       curr = 0
       threads = []
-      split.each do |files|
-        threads << Thread.new do
-          files.each do |f|
-            unless File.writable?(f)
-              puts "No write access, cancelling."
-              break
-            end
+      files.each do |f|
+        unless File.writable?(f)
+          puts "No write access, cancelling."
+          break
+        end
 
-            basename = File.basename(f, '.tif')
-            barcode = (find_barcode(f).to_f / 10).floor.to_i
+        work_queue.enqueue_b do
+          basename = File.basename(f, '.tif')
+          barcode = (find_barcode(f).to_f / 10).floor.to_i
 
-            if barcode.nil? || (not CourseProf.exists?(barcode))
-              puts "bizarre #{basename}, exiting"
-              File.makedirs('tmp/images/bizarre')
-              File.move(f, 'tmp/images/bizarre')
-              next
-            end
-
+          if barcode.nil? || (not CourseProf.exists?(barcode))
+            puts "bizarre #{basename}"
+            File.makedirs('tmp/images/bizarre')
+            File.move(f, 'tmp/images/bizarre')
+          else
             form = CourseProf.find(barcode).course.form.id.to_s + '_' +
               CourseProf.find(barcode).course.language.to_s
 
             File.makedirs("tmp/images/#{form}")
             File.move(f, File.join("tmp/images/#{form}", "#{barcode}_#{basename}.tif"))
-
-            #~ puts "Moved to #{form}/#{basename} (#{barcode})"
-            curr += 1
-            print_progress(curr, files_size)
           end
-        end # thread
-      end # split
-      threads.each { |t| t.join }
+
+          curr += 1
+          print_progress(curr, files_size)
+        end
+      end
+      work_queue.join
     end # else
   end
 end
@@ -423,11 +403,10 @@ namespace :pdf do
   desc "makes the result pdfs preliminary"
   task :make_preliminary do
     p = "./tmp/results"
-    threads = []
     Dir.glob("#{p}/*.tex") do |d|
       d = File.basename(d)
       next if d.match(/^orl_/)
-      threads << Thread.new do
+      work_queue.enqueue_b do
         dn = "orl_" + d.gsub('tex', 'pdf')
         puts "Working on " + d
         `sed 's/title{Lehrevaluation/title{vorl"aufige Lehrevaluation/' #{p}/#{d} | sed 's/Ergebnisse der Vorlesungsumfrage/nicht zur Weitergabe/'  > #{p}/orl_#{d}`
@@ -436,7 +415,7 @@ namespace :pdf do
         `rm -f #{p}/#{"orl_" + d.gsub('tex', '*')}`
       end
     end
-    threads.each { |t| t.join }
+    work_queue.join
     Rake::Task["clean".to_sym].invoke
   end
 
@@ -508,8 +487,9 @@ namespace :pdf do
     s = Semester.find(sem)
 
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
-      make_pdf_for(s, cp, dirname)
+      work_queue.enqueue_b { make_pdf_for(s, cp, dirname) }
     end
+    work_queue.join
 
     Rake::Task["clean".to_sym].invoke
   end
@@ -524,7 +504,7 @@ namespace :pdf do
     dirname << Semester.find(:last).dirFriendlyName.gsub('_', '\_')
     threads = []
     Dir.glob("./doc/howto_*.tex").each do |f|
-      threads << Thread.new do
+      work_queue.enqueue_b do
         data = File.read(f).gsub(/§§§/, dirname)
         file = saveto + File.basename(f)
         File.open(file, "w") { |x| x.write data }
@@ -532,7 +512,7 @@ namespace :pdf do
         File.delete(file)
       end
     end
-    threads.each { |t| t.join }
+    work_queue.join
     Rake::Task["clean".to_sym].invoke
   end
 

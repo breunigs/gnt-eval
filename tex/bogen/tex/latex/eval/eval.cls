@@ -330,3 +330,7 @@
     \vspace{0.1cm}
   }
 }
+
+\newcommand{\separator}[1]{
+  \vspace{-0.7em}\rule{19.2cm}{#1}
+}

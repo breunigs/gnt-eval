@@ -5,6 +5,7 @@ gem "dbi"
 gem "rubygems-update", "1.4.2"
 gem "rmagick"
 gem "gtk2"
+gem "work_queue"
 
 gem "mysql"
 gem "dbd-mysql"

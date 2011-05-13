@@ -28,7 +28,7 @@ pages:
         :en: Study Group
         :de: Übungsgruppe
       special_care: 1
-      care_type: tutor_table
+      type: tutor_table
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -67,7 +67,7 @@ pages:
         :de: Studienfach
         :en: Pursued degree
       special_care: 1
-      care_type: fixed_width__last_is_rightmost
+      type: fixed_width__last_is_rightmost
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -96,7 +96,7 @@ pages:
         :de: Hauptfach
         :en: Major
       special_care: 1
-      care_type: fixed_width__last_is_rightmost
+      type: fixed_width__last_is_rightmost
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -185,7 +185,7 @@ pages:
         :de: Fachsemester
         :en: Academic Term
       special_care: 1
-      care_type: variable_width
+      type: variable_width
     title: Metakram
   - !ruby/object:Section
     questions:
@@ -932,7 +932,7 @@ pages:
         :de: "Ist dir an der Veranstaltung zus\xC3\xA4tzlich noch etwas aufgefallen? (Falls ja, bitte Stichworte angeben)"
         :en: "Do you have comments regarding the lecture? If so, please give some keywords:"
       save_as: ""
-      type: square
+      type: text
     title:
       :de: Fragen zur Vorlesung
       :en: Questions Concerning the Lecture
@@ -1423,7 +1423,7 @@ pages:
         :de: "Bemerkung zur \xC3\x9Cbungsgruppe, insbesondere in Hinblick auf den/die Tutor/in:"
         :en: "Comments concerning your study group and your tutor:"
       save_as: ""
-      type: square
+      type: text
     title:
       :de: "Fragen zu den \xC3\x9Cbungen"
       :en: Questions Concerning the Study Groups
@@ -1436,4 +1436,4 @@ study_groups_overview:
 study_groups_overview_header:
   :de: "Tutor & Bögen & Seite"
   :en: Tutor & Questionnaires & Page
-texfoot: \vspace{-0.7em}\rule{19cm}{1pt}
+texfoot: \separator{1pt}

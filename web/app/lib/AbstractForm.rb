@@ -54,7 +54,6 @@ class Question
   # (tutoren, studienfach, semesterzahl)
 
   attr_accessor :special_care
-  attr_accessor :care_type
   attr_accessor :donotuse
 
   # FIXME: remove failchoice
@@ -144,64 +143,66 @@ class Question
   end
 
   # export a single question to tex
-  def to_tex(language = :en)
-    #     \qvm{Gibt es Probleme mit dem mündlichen Vortrag? Wenn ja, welche?}{
-    # keine}{zu leiss
-    # e Verstärkeranlage}{mangelnde Sprachkenntnisse}{Studis zu
-    # laut}{sonstige}{v18}
+  def to_tex(lang = :en)
+    s = ""
+    case @type
+      when "text_wholepage":
+        # don't need to do anything for that
+      when "text":
+        s << "\n\n\\kommentar{#{@qtext[lang]}}{#{@db_column}}{#{@db_column}}\n\n"
 
-    # hier könnte ein echter algorithmus hin
-    # FIXME: kommentarfelder
+      when "tutor_table":
+        # automatically prints tutors, if they have been defined
+        s << "\\printtutors{#{@qtext[lang]}}\n\n"
 
-    if @special_care
-      s = ""
-      case @care_type
-        when "tutor_table":
-          # automatically prints tutors, if they have been defined
-          s << "\\printtutors{#{@qtext[language]}}\n\n"
+      when "variable_width":
+        s << "\\bluu[#{@qtext[lang]}][#{@db_column}]\n"
+        s << "\\makebox[1.0\\textwidth][l]{"
+        s << "\\textbf{#{@qtext[lang]}:}"
+        s << " }\\vspace{0.1cm}\n\n"
 
-        when "variable_width":
-          s << "\\bluu[#{@qtext[language]}][#{@db_column}]\n"
-          s << "\\makebox[1.0\\textwidth][l]{"
-          s << "\\textbf{#{@qtext[language]}:}"
-          s << " }\\vspace{0.1cm}\n\n"
+        s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+        boxes = []
+        @boxes.each do |b|
+          boxes << "\\bxss[#{b.choice}][#{b.choice}]\\hspace{-0.5em}#{b.text[lang]}"
+        end
+        s << boxes.join(" \\hfill ")
+        s << "}\\vspace{0.1cm}\n\n"
 
-          s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
-          boxes = []
-          @boxes.each do |b|
-            boxes << "\\bxss[#{b.choice}][#{b.choice}]\\hspace{-0.5em}#{b.text[language]}"
-          end
-          s << boxes.join(" \\hfill ")
-          s << "}\\vspace{0.1cm}\n\n"
+      when "fixed_width__last_is_rightmost":
+        s << "\\bluu[#{@qtext[lang]}][#{@db_column}]\n"
+        s << "\\makebox[1.0\\textwidth][l]{"
+        s << "\\hspace*{-0.05em}"
+        s << "\\textbf{#{@qtext[lang]}:}"
+        s << " }\\vspace{0.05cm}\n"
 
-        when "fixed_width__last_is_rightmost":
-          s << "\\bluu[#{@qtext[language]}][#{@db_column}]\n"
-          s << "\\makebox[1.0\\textwidth][l]{"
-          s << "\\hspace*{-0.05em}"
-          s << "\\textbf{#{@qtext[language]}:}"
-          s << " }\\vspace{0.05cm}\n"
+        s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+        @boxes.each do |b|
+          next if b == @boxes.last
+          s << "\\bxss[#{b.choice}][#{b.text[lang]}] "
+          s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{b.text[lang]}}}"
+          s << "\\makebox[0.15cm]{} "
+        end
 
-          s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
-          @boxes.each do |b|
-            next if b == @boxes.last
-            s << "\\bxss[#{b.choice}][#{b.text[language]}] "
-            s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{b.text[language]}}}"
-            s << "\\makebox[0.15cm]{} "
-          end
+        s << "\\makebox[#{3.25*(6-@boxes.size)}cm]{} "
+        last = @boxes.last
+        s << "\\bxss[#{last.choice}][#{last.text[lang]}] "
+        s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{last.text[lang]}}}"
+        s << "}\\vspace{0.1cm}\n\n"
 
-          s << "\\makebox[#{3.25*(6-@boxes.size)}cm]{} "
-          last = @boxes.last
-          s << "\\bxss[#{last.choice}][#{last.text[language]}] "
-          s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{last.text[language]}}}"
-          s << "}\\vspace{0.1cm}\n\n"
-      end
-      s
-    else
-      '\q' + ['i','ii','iii','iv','v','vi'][@boxes.count-1] +
-        (multi? ? 'm' : '') +  '{' + text + '}' + boxes.map{|b| '{' +
-        b.text.to_s + '}'}.join('') + '{' + tex_db_column + '}' +
-        "\n\n"
+      when "square":
+        s << "\n\n"
+        s << '\q' + ['i','ii','iii','iv','v','vi'][@boxes.count-1]
+        s << 'm' if multi?
+        s << "{#{@qtext[lang]}}"
+        s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "{#{x.text[lang]}}" }.join
+        if multi?
+          s << '{' + @db_column.first[0..-2] + '}'
+        else
+          s << "{#{@db_column}}"
+        end
     end
+    s
   end
 
   def tex_db_column
