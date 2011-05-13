@@ -17,6 +17,9 @@ en:
     :singular: Only one questionnaire has been submitted. In order to retain the participant's anonymity the results have been excluded.
     :plural: "Only #1 questionnaires have been submitted. In order to retain the participants' anonymity, the results have been excluded."
   none: none
+  study_groups_overview_header: Tutor & Questionnaires & Page
+  study_groups_header: Questions concerning the study groups
+  study_groups_overview: Overview of study groups
 
   eval_results: Result of the Evaluationd
   tex_babel_lang: english

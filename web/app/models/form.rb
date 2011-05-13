@@ -80,16 +80,4 @@ class Form < ActiveRecord::Base
       I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, sheets.to_s)
     end
   end
-
-  def study_groups_overview_header(lang)
-    abstract_form.study_groups_overview_header[lang]
-  end
-
-  def study_groups_overview(lang)
-    abstract_form.study_groups_overview[lang]
-  end
-
-  def study_groups_header(lang)
-    abstract_form.study_groups_header[lang]
-  end
 end

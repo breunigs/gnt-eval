@@ -17,6 +17,9 @@ de:
     :singular: Es wurde nur ein Fragebogen abgegeben. Um die Anonymität des Teilnehmers zu wahren, wurden die Ergebnisse ausgelassen.
     :plural: "Es wurden nur #1 Fragebögen abgegeben. Um die Anonymität der Teilnehmer zu bewahren, wurden die Ergebnisse ausgelassen."
   none: keine
+  study_groups_overview_header: "Tutor & Bögen & Seite"
+  study_groups_header: Fragen zum Übungsbetrieb
+  study_groups_overview: "Übersicht der Übungsgruppen"
 
   eval_results: Ergebnis der Evaluation
   tex_babel_lang: ngerman

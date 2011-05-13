@@ -1427,13 +1427,4 @@ pages:
     title:
       :de: "Fragen zu den \xC3\x9Cbungen"
       :en: Questions Concerning the Study Groups
-study_groups_header:
-  :de: Fragen zum Übungsbetrieb
-  :en: Questions concerning the study groups
-study_groups_overview:
-  :de: "Übersicht der Übungsgruppen"
-  :en: Overview of study groups
-study_groups_overview_header:
-  :de: "Tutor & Bögen & Seite"
-  :en: Tutor & Questionnaires & Page
 texfoot: \separator{1pt}

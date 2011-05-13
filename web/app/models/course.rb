@@ -163,7 +163,7 @@ class Course < ActiveRecord::Base
     # Return early to avoid problems.
     return "" if profs.empty?
 
-    I18n.locale = language
+    I18n.locale = language if I18n.tainted?
     I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
     b = ''
@@ -174,13 +174,13 @@ class Course < ActiveRecord::Base
     puts "   #{title}"
     b << eval_lecture_head
 
-    # vorlesungseval pro dozi
+    # lecture eval per lecturer
     course_profs.each do |cp|
       b << cp.evaluate.to_s
     end
 
     # Do not print a "too few sheets" message here because if there are
-    # to few sheets, it will have been printed for at least one lecturer
+    # too few sheets, it will have been printed for at least one lecturer
     # above already.
     if returned_sheets >= Seee::Config.settings[:minimum_sheets_required]
       unless summary.to_s.strip.empty?
@@ -195,7 +195,7 @@ class Course < ActiveRecord::Base
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?
 
-      b << "\\fragenzudenuebungen{"+ form.study_groups_header(language) +"}\n"
+      b << "\\fragenzudenuebungen{"+ I18n.t[:study_groups_header] +"}\n"
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
@@ -206,10 +206,10 @@ class Course < ActiveRecord::Base
     return b if tutors.empty?
 
     c = ''
-    c << "\\uebersichtuebungsgruppen{"+form.study_groups_overview(language)+"}\n"
+    c << "\\uebersichtuebungsgruppen{"+I18n.t[:study_groups_overview]+"}\n"
     c << "\\begin{longtable}[l]{lrr}\n"
     c << "\\hline\n"
-    c << form.study_groups_overview_header(language) + " \\\\ \n"
+    c << I18n.t[:study_groups_overview_header] + " \\\\ \n"
     c << "\\hline\n"
     c << "\\endhead\n"
     cc = ''
