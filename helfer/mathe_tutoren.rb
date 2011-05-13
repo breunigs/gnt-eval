@@ -154,11 +154,11 @@ def findLecture(name)
     dis = dis.compact.sort[0]
     next if dis.nil?
 
-    ratio = dis.to_f / name.length.to_f
+    ratio = (((dis-name.length).abs.to_f / name.length.to_f)* 10**2).round.to_f/10**2
 
-    next if ratio > 0.9
+    next if ratio < 0.5
 
-    candidates[k] = dis
+    candidates[k] = "#{dis.to_s.rjust(2)} (#{ratio.to_s.rjust(4)} similar)"
   end
 
   return name if candidates.empty?
@@ -171,6 +171,12 @@ end
 # new = new tutor)
 def findTutor(list, new)
   return new if list.empty?
+  if new.is_a? Array
+    (0..(new.length-1)).each do |i|
+      new[i] = findTutor(list, new[i])
+    end
+    return new
+  end
 
   # find possible candidates
   candidates = Hash.new
@@ -183,11 +189,11 @@ def findTutor(list, new)
     dis = dis.compact.sort[0]
     next if dis.nil?
 
-    ratio = dis.to_f / name.length.to_f
+    ratio = (((dis-name.length).abs.to_f / name.length.to_f)* 10**2).round.to_f/10**2
 
-    next if ratio > 0.9
+    next if ratio < 0.5
 
-    candidates[name] = dis
+    candidates[name] = "#{dis.to_s.rjust(2)} (#{ratio.to_s.rjust(4)} similar)"
   end
 
   return new if candidates.empty?
@@ -206,17 +212,18 @@ def askUser(text, default, candidates, save_similar)
   puts "-"*(text.length - "".bold.length)
   csort = candidates.to_a.sort { |x,y| x[1] <=> y[1] }
   csort.each_with_index do |item,i|
-    puts "##{(i+1).to_s.rjust(2)}  ⎸ Δ: #{item[1].to_s.rjust(2)}  ⎸ #{item[0]}"
+    puts "##{(i+1).to_s.rjust(2)}  ⎸ Δ: #{item[1]}  ⎸ #{item[0]}"
   end
   puts "Hit enter if there's no match"
   while true
     puts
     puts "Your choice:"
     a = STDIN.gets.strip
-    return default if a == ""
+    return default if a == "" || a.empty?
     a = a.to_i
     next if a <= 0 || a > csort.length
     $savedSimilar[default] = csort[a-1][0] if save_similar
+    puts
     return csort[a-1][0]
   end
 end
@@ -227,23 +234,24 @@ end
 def parseCSV(x)
   puts "Processing CSV #{x}"
   CSV.open(x, 'r') do |row|
+    # 8: Tutor 1st name
+    # 7: Tutor last name
+    tut = "#{row[8]} #{row[7]}".gsub(/\s+/, " ").strip
+
     next if row[0].nil? # lecture
     next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
 
     t = row[0].strip.downcase
     next if $skipMes.include?(t)
 
-    # 8: Tutor 1st name
-    # 7: Tutor last name
-    tut = "#{row[8]} #{row[7]}".gsub(/\s+/, " ").strip
     next if tut == "NN" || tut == "N.N." || tut == "NN."
 
     row[0] = "Einführung in die #{row[0].gsub(/ Einführung$/, "")}" if row[0].match(/ Einführung$/)
 
     # try to find a similar named lecture
-    name = findLecture(row[0])
+    name = findLecture(row[0].strip)
 
-    $lectures[name] = Lecture.new if $lectures[name].nil?
+    $lectures[name] ||= Lecture.new
     $lectures[name].tutors << findTutor($lectures[name].tutors, tut)
     $lectures[name].lecturer = row[11].strip
   end
@@ -252,19 +260,23 @@ end
 # Tries to parse the given YAML sheet. Stores data directly in $lectures
 def parseYAML(x)
   puts "Processing YAML #{x}"
+  lecture=""
   begin
     YAML::load(File.read(x)).each do |l|
       # try to find a similar lecture
       lecture = findLecture(l["name"])
       tuts = l["tutors"].collect { |t| t.gsub(/\s+/, " ").strip }
 
-      $lectures[lecture] = Lecture.new if $lectures[lecture].nil?
+      $lectures[lecture] ||= Lecture.new
       $lectures[lecture].tutors += findTutor($lectures[lecture].tutors, tuts)
       $lectures[lecture].student_count = l["student_count"]
       $lectures[lecture].lecturer = l["lecturer"]
     end
-  rescue
+  rescue => e
     puts "#{x} does not appear to be a 'good' YML file for the task at hand. Skipping."
+    puts "Lecture was: #{lecture}"
+    puts "Error:"
+    pp e
     return
   end
 end
