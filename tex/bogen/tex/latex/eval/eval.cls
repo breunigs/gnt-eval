@@ -3,17 +3,13 @@
 
 \LoadClass[twoside,8pt]{scrartcl}
 
-\DeclareOption*{%
-\PassOptionsToClass{\CurrentOption}{scrartcl}%
-}
-\ProcessOptions\relax
-
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
 \RequirePackage{amssymb}
 \RequirePackage{array}
 \RequirePackage{babel}
 \RequirePackage{booktabs}
+\RequirePackage{bophook}
 \RequirePackage{boxedminipage}
 \RequirePackage{color}
 \RequirePackage{fancyhdr}
@@ -26,10 +22,32 @@
 \RequirePackage{tokeniz0r}
 \RequirePackage{tgheros}
 \RequirePackage[breakall]{truncate}
+\RequirePackage{xparse}
 \renewcommand{\rmdefault}{\sfdefault}
 
 \renewcommand{\TruncateMarker}{\textasciitilde}
 
+\AtBeginPage{
+}
+
+\DeclareOption{kanten}{\AtBeginPage
+{\put(10, -10){\rule{1cm}{1pt}}
+\put(10, -38){\rule{1pt}{1cm}}
+\put(10, -835){\rule{1cm}{1pt}}
+\put(10, -835){\rule{1pt}{1cm}}
+\put(560, -10){\rule{1cm}{1pt}}
+\put(587.5, -38){\rule{1pt}{1cm}}
+\put(560, -835){\rule{1cm}{1pt}}
+\put(587.5, -835){\rule{1pt}{1cm}}
+\write\posout{- !ruby/object:Page}
+\write\posout{u questions:}
+}}
+
+
+\DeclareOption*{%
+\PassOptionsToClass{\CurrentOption}{scrartcl}%
+}
+\ProcessOptions\relax
 
 \date{}
 \pagestyle{fancy}
@@ -52,44 +70,44 @@
 	\write\posout{uuu y: \number\pdflastypos}
 }
 
-\def\stefanistdoof{
-        \pdfsavepos
-                \write\posout{u ylast: \number\pdflastypos}
-}
-
-\def\np{\newpage
-\write\posout{- !ruby/object:Page}
-\write\posout{u questions:}
-}
-
-\def\mm[#1][#2]{\write\posout{uu- !ruby/object:Box}
- \write\posout{uuu choice: "#1"}
- \write\posout{uuu height: 0}
- \write\posout{uuu text: "#2"}
- \write\posout{uuu width: 0}
-}
-
-\def\mmm[#1][#2]{ \write\posout{uuu choice: "#1"}
- \write\posout{uuu height: 0}
- \write\posout{uuu text: "#2"}
- \write\posout{uuu width: 0}
- \vspace{-0.3cm}
- \truncate{3cm}{#2}
+\def\tutorbox[#1][#2]{%
+	\write\posout{uuu choice: "#1"}
+	\write\posout{uuu height: 0}
+	\write\posout{uuu text: "#2"}
+	\write\posout{uuu width: 0}
+	\vspace{-0.3cm}
+	\truncate{3cm}{#2}
 }
 
 \def\bx{\huge{$\Box$}\normalsize\SaveMyYPos}
-\def\bxs[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{0.5em}\huge{$\Box$}\normalsize\SaveMyYPos}
-\def\bxss[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{-0.43cm}\huge{$\Box$}\normalsize\SaveMyYPos}
-%\def\bxs[#1][#2]{\vspace{-0.8em}\mm[#1][#2]\hspace{0.5em}{$\bigcirc$}\normalsize\SaveMyYPos}
 
-\newcommand{\Typ}[1]{\def\typ{#1}}
+\def\bxs[#1][#2]{%
+	\vspace{-0.8em}
+	\write\posout{uu- !ruby/object:Box}
+	\write\posout{uuu choice: "#1"}
+	\write\posout{uuu height: 0}
+	\write\posout{uuu text: "#2"}
+	\write\posout{uuu width: 0}
+	\hspace{0.5em}
+	\huge{$\Box$}\normalsize\SaveMyYPos}
+
+\def\bxss[#1][#2]{%
+	\vspace{-0.8em}
+  	\write\posout{uu- !ruby/object:Box}
+	 \write\posout{uuu choice: "#1"}
+	 \write\posout{uuu height: 0}
+	 \write\posout{uuu text: "#2"}
+	 \write\posout{uuu width: 0}
+	\hspace{-0.43cm}
+	\huge{$\Box$}\normalsize\SaveMyYPos}
+
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
-\def\blu[#1]{\write\posout{u - !ruby/object:Question}
+\def\SaveMultiInfo[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
     \write\posout{uu qtext: "#1"}
     %\write\posout{uu save_as: ""}
@@ -103,7 +121,7 @@
 	}
     \write\posout{uu boxes:}
 }
-\def\bluu[#1][#2]{\write\posout{u - !ruby/object:Question}
+\def\SaveNormalInfo[#1][#2]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu active: true}
     \write\posout{uu qtext: "#1"}
     \write\posout{uu save_as: ""}
@@ -127,7 +145,7 @@
 \vspace{-1.2em}\rule{19cm}{1.5pt}\vspace{0.5em}
 }
 
-\newcommand{\kommentar}[3]{\write\posout{u - !ruby/object:Question}
+\newcommand{\comment}[3]{\write\posout{u - !ruby/object:Question}
 	\write\posout{uu active: true}
 	\write\posout{uu choice: }
 	\write\posout{uu qtext: "#1"}
@@ -139,168 +157,60 @@
  	\write\posout{uuu width: 39020584}
 }
 
-\newcommand{\comment}[4]{\write\posout{u - !ruby/object:Question}
-	\write\posout{uu active: true}
-	\write\posout{uu choice: }
-	\write\posout{uu qtext: "#1"}
-    	\write\posout{uu save_as: "#3"}
-    	\write\posout{uu type: text}
-    	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{1.2cm}
-	\write\posout{uuu height: #4}
- 	\write\posout{uuu width: 39020584}
+
+\NewDocumentCommand\quest{d<> m m o o o o o o}{%
+%This is to test if we have a Multiple Choice Question
+\IfNoValueTF{#1}{%
+		\SaveNormalInfo[#3][#2]
+}{
+ 		\def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,}
+		\SaveMultiInfo[#3]
 }
-
-
-
-\newcommand{\qvi}[8]{
-%\def\Source{#8,}
-\bluu[#1][#8]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.48cm}>{\centering}p{1.45cm}>{\centering}p{1.46cm}>{\centering}p{1.47cm}>{\centering}p{1.45cm}>{\centering}p{1.4cm}p{0.49cm}}
-\multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] & \bxs[6][#7] &\\
-   & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
+%Print the question, depending on how many answers are given, for this I will burn in hell!
+		\begin{minipage}{17cm}
+		\IfNoValueTF{#9}{
+		 \IfNoValueTF{#8}{
+    		  \IfNoValueTF{#7}{
+		   \IfNoValueTF{#6}{
+		    \IfNoValueTF{#5}{
+ 			\Huge{Wir sind doch nicht in der DDR hier!}\\
+ 			}{%2
+			 \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.85cm}p{4.65cm}p{0.2cm}}
+			 \multirow{2}{9.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &  \\
+			 & \small#4 & \small#5 & & \\
+			\bottomrule
+			\end{tabular}
 }
-
-\newcommand{\qv}[7]{
-\bluu[#1][#7]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.8cm}>{\centering}p{1.9cm}>{\centering}p{1.8cm}>{\centering}p{2cm}p{0.2cm}}
-\multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] &\\
-   &  \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qvs}[7]{
-\bluu[#1][#7]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.8cm}>{\centering}p{1.9cm}>{\centering}p{1.8cm}|>{\centering}p{2cm}p{0.2cm}}
-\multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] &\\
-   &  \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qvm}[7]{
-\def\Source{uu - #7a,uu - #7b,uu - #7c,uu - #7d,uu - #7e,}
-\blu[#1]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.8cm}>{\centering}p{1.9cm}>{\centering}p{1.8cm}>{\centering}p{2cm}p{0.2cm}}
-\multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] &\\
-   &  \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qvl}[7]{
-\def\Source{#7,}
-\blu[#1]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.8cm}>{\centering}p{1.9cm}>{\centering}p{1.8cm}>{\centering}p{2cm}p{0.2cm}}
-\multirow{3}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \bxs[5][#6] &\\
-   &  \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \\
-& & & & &\\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qiv}[6]{
-\bluu[#1][#6]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.75cm}>{\centering}p{2.75cm}>{\centering}p{2cm}p{0.2cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \\
-   &  \small#2 & \small#3 & \small#4 & \small#5 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qivm}[6]{
-\def\Source{uu - #6a,uu - #6b,uu - #6c,uu - #6d,}
-\blu[#1]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.75cm}>{\centering}p{2.75cm}>{\centering}p{2cm}p{0.2cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \bxs[4][#5] & \\
-   & \small#2 & \small#3 & \small#4 & \small#5 & \\
-\bottomrule
- \end{tabular}
-\end{minipage}
-\vspace{0.2em}
-}
-
-\newcommand{\qiii}[5]{
-\bluu[#1][#5]
-\begin{minipage}{15cm}
+			}{%3
  \begin{tabular}{p{10cm}>{\centering}p{1.5cm}p{1cm}>{\centering}p{3.5cm}p{1cm}>{\centering}p{2cm}p{0.2cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & & \bxs[2][#3] & & \bxs[3][#4] &  \\
-   & \small#2 & & \small#3 &  & \small#4 & \\
+ \multirow{2}{9.4cm}{#3} & \bxs[1][#4] & & \bxs[2][#5] & & \bxs[3][#6] &  \\
+   & \small#4 & & \small#5 &  & \small#6 & \\
 \bottomrule
  \end{tabular}
-\end{minipage}
-\vspace{0.2em}
 }
-
-\newcommand{\qiiim}[5]{
-\def\Source{uu - #5a,uu - #5b,uu - #5c,}
-\blu[#1]
-\begin{minipage}{15cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{5.5cm}>{\centering}p{2cm}p{0.1cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] & \bxs[3][#4] &  \\
-   & \small#2 & \small#3 & \small#4 & \\
+			}{%4
+			 \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.75cm}>{\centering}p{2.75cm}>{\centering}p{2cm}p{0.2cm}}
+			 \multirow{2}{9.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \\
+   &  \small#4 & \small#5 & \small#6 & \small#7 & \\
 \bottomrule
  \end{tabular}
-\end{minipage}
-\vspace{0.2em}
 }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiih%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\ikkifthagn}{
-\write\posout{- !ruby/object:Page}
-\write\posout{u questions:}
-\write\posout{u - !ruby/object:Question}
-\write\posout{uu type: text_wholepage}
-\write\posout{uu save_as: "-comment"}
-}
-
-
-\newcommand{\qii}[4]{
-\bluu[#1][#4]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.85cm}p{4.65cm}p{0.2cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[1][#2] & \bxs[2][#3] &  \\
-   & \small#2 & \small#3 & & \\
- \bottomrule
+			}{%5
+ \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{1.8cm}>{\centering}p{1.9cm}>{\centering}p{1.8cm}>{\centering}p{2cm}p{0.2cm}}
+\multirow{2}{9.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] &\\
+   &  \small#4 & \small#5 & \small#6 & \small#7 & \small#8 & \\
+\bottomrule
  \end{tabular}
-\end{minipage}
-\vspace{0.2em}
 }
-
-\newcommand{\qiim}[4]{
-\def\Source{uu- #4a,uu- #4b,}
-\blu[#1]
-\begin{minipage}{17cm}
- \begin{tabular}{p{10cm}>{\centering}p{1.5cm}>{\centering}p{2.85cm}p{4.65cm}p{0.2cm}}
- \multirow{2}{9.4cm}{#1} & \bxs[#1][#2] & \bxs[#2][#3] &  \\
-   & \small#2 & \small#3 & & \\
- \bottomrule
+			}{%6
+ \begin{tabular}{p{10cm}>{\centering}p{1.48cm}>{\centering}p{1.45cm}>{\centering}p{1.46cm}>{\centering}p{1.47cm}>{\centering}p{1.45cm}>{\centering}p{1.4cm}p{0.49cm}}
+\multirow{2}{9.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] &\\
+   & \small#4 & \small#5 & \small#6 & \small#7 & \small#8 & \small#9 & \\
+\bottomrule
  \end{tabular}
-\end{minipage}
-\vspace{0.2em}
+}
+		\end{minipage}
+		\vspace{0.2em}
 }
 
 \newcommand{\head}[2]{
@@ -320,7 +230,7 @@
 
 \newcommand{\printtutors}[1]{
   \ifthenelse{\isundefined{\tut}}{}{
-    \bluu[#1][tutnum]%
+    \SaveNormalInfo[#1][tutnum]%
     \makebox[1.0\textwidth][l]{\hspace*{0.0cm}\textbf{#1:}}\vspace{0.05cm}
     \makebox[1.0\textwidth][l]{
     \hspace*{-0.105cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
@@ -329,8 +239,4 @@
     }
     \vspace{0.1cm}
   }
-}
-
-\newcommand{\separator}[1]{
-  \vspace{-0.7em}\rule{19.2cm}{#1}
 }

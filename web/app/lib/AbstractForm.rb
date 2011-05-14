@@ -149,14 +149,14 @@ class Question
       when "text_wholepage":
         # don't need to do anything for that
       when "text":
-        s << "\n\n\\kommentar{#{@qtext[lang]}}{#{@db_column}}{#{@db_column}}\n\n"
+        s << "\n\n\\comment{#{@qtext[lang]}}{#{@db_column}}{#{@db_column}}\n\n"
 
       when "tutor_table":
         # automatically prints tutors, if they have been defined
         s << "\\printtutors{#{@qtext[lang]}}\n\n"
 
       when "variable_width":
-        s << "\\bluu[#{@qtext[lang]}][#{@db_column}]\n"
+        s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
         s << "\\makebox[1.0\\textwidth][l]{"
         s << "\\textbf{#{@qtext[lang]}:}"
         s << " }\\vspace{0.1cm}\n\n"
@@ -170,7 +170,7 @@ class Question
         s << "}\\vspace{0.1cm}\n\n"
 
       when "fixed_width__last_is_rightmost":
-        s << "\\bluu[#{@qtext[lang]}][#{@db_column}]\n"
+        s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
         s << "\\makebox[1.0\\textwidth][l]{"
         s << "\\hspace*{-0.05em}"
         s << "\\textbf{#{@qtext[lang]}:}"
@@ -184,7 +184,7 @@ class Question
           s << "\\makebox[0.15cm]{} "
         end
 
-        s << "\\makebox[#{3.25*(6-@boxes.size)}cm]{} "
+        s << "\\makebox[#{3.309*(6-@boxes.size)}cm]{} "
         last = @boxes.last
         s << "\\bxss[#{last.choice}][#{last.text[lang]}] "
         s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{last.text[lang]}}}"
@@ -192,15 +192,18 @@ class Question
 
       when "square":
         s << "\n\n"
-        s << '\q' + ['i','ii','iii','iv','v','vi'][@boxes.count-1]
-        s << 'm' if multi?
-        s << "{#{@qtext[lang]}}"
-        s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "{#{x.text[lang]}}" }.join
+        s << '\quest'
+        s << '<m>' if multi?
+        # db column
         if multi?
           s << '{' + @db_column.first[0..-2] + '}'
         else
           s << "{#{@db_column}}"
         end
+        # question
+        s << "{#{@qtext[lang]}}"
+        # possible answers
+        s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "[#{x.text[lang]}]" }.join
     end
     s
   end

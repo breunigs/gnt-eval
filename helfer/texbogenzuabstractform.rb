@@ -12,7 +12,7 @@ def pretty_abstract_form abstract_form
   $stdout = sio
   pp abstract_form
   $stdout = orig
-  
+
   # aber bitte ohne die ids und ohne @
   sio.string.gsub(/0x[^\s]*/,'').gsub(/@/,'')
 end
@@ -39,7 +39,7 @@ content.each do |l|
     if x[0] =~ /m\{/
       multi = true
     end
-    
+
     x.first.gsub!(/^.*?\{/,'')
     boxes = []
     x.each_index do |i|
@@ -51,13 +51,13 @@ content.each do |l|
   elsif l =~ /\\sect/
     title = l.match(/\\sect\{(.*?)\}/)[1]
     f.pages.last.sections.push(Section.new(title))
-  elsif l =~ /\\np/
+  elsif l =~ /\\np/ # FIXME: np not available anymore in new eval.cls
     f.pages.push(Page.new)
   elsif l =~ /\\kommentar/
     x = l.split('}{')
     x.last.gsub!("}",'').gsub!("\n",'')
     x.first.gsub!(/^.*?\{/,'')
-    
+
     q = Question.new([], x[0])
     q.db_column = x[-3]
     q.donotuse = 1

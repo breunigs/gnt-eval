@@ -63,7 +63,6 @@ def tex_questions_for(form, lang)
       end
     end
     b << p.tex_at_bottom.to_s
-    b << "\\np\n\n" unless i == (form.pages.count - 1)
   end
   b
 end
@@ -92,7 +91,7 @@ def make_sample_sheet(form, lang)
 
   generate_barcode("00000000", dir + "barcode00000000.pdf")
   File.open(filename + ".tex", "w") do |h|
-    h << '\documentclass['+form.abstract_form.babelclass[lang]+']{eval}' + "\n"
+    h << '\documentclass['+form.abstract_form.babelclass[lang]+', kanten]{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\dbtable{'+ form.db_table + "}\n"
@@ -100,12 +99,12 @@ def make_sample_sheet(form, lang)
 
     if hasTutors
       h << '\tutoren{' + "\n"
-      h << '\mmm[1][Mustafa Mustermann] & \mmm[2][Fred Nurk]     & \mmm[3][Ashok Kumar] & \mmm[4][Juan Pérez]     & \mmm[5][Jakob Mierscheid] \\\\' + "\n"
-      h << '\mmm[6][Iwan Iwanowitsch]   & \mmm[7][Pierre Dupont] & \mmm[8][John Smith]  & \mmm[9][Eddi Exzellenz] & \mmm[10][Joe Bloggs]      \\\\' + "\n"
-      h << '\mmm[11][John Doe]          & \mmm[12][\ ]           & \mmm[13][\ ]         & \mmm[14][\ ]            & \mmm[15][\ ]              \\\\' + "\n"
-      h << '\mmm[16][\ ]                & \mmm[17][\ ]           & \mmm[18][\ ]         & \mmm[19][\ ]            & \mmm[20][\ ]              \\\\' + "\n"
-      h << '\mmm[21][\ ]                & \mmm[22][\ ]           & \mmm[23][\ ]         & \mmm[24][\ ]            & \mmm[25][\ ]              \\\\' + "\n"
-      h << '\mmm[26][\ ]                & \mmm[27][\ ]           & \mmm[28][\ ]         & \mmm[29][\ ]            & \mmm[30][\ keine]            }' + "\n"
+      h << '\tutorbox[1][Mustafa Mustermann] & \tutorbox[2][Fred Nurk]     & \tutorbox[3][Ashok Kumar] & \tutorbox[4][Juan Pérez]     & \tutorbox[5][Jakob Mierscheid] \\\\' + "\n"
+      h << '\tutorbox[6][Iwan Iwanowitsch]   & \tutorbox[7][Pierre Dupont] & \tutorbox[8][John Smith]  & \tutorbox[9][Eddi Exzellenz] & \tutorbox[10][Joe Bloggs]      \\\\' + "\n"
+      h << '\tutorbox[11][John Doe]          & \tutorbox[12][\ ]           & \tutorbox[13][\ ]         & \tutorbox[14][\ ]            & \tutorbox[15][\ ]              \\\\' + "\n"
+      h << '\tutorbox[16][\ ]                & \tutorbox[17][\ ]           & \tutorbox[18][\ ]         & \tutorbox[19][\ ]            & \tutorbox[20][\ ]              \\\\' + "\n"
+      h << '\tutorbox[21][\ ]                & \tutorbox[22][\ ]           & \tutorbox[23][\ ]         & \tutorbox[24][\ ]            & \tutorbox[25][\ ]              \\\\' + "\n"
+      h << '\tutorbox[26][\ ]                & \tutorbox[27][\ ]           & \tutorbox[28][\ ]         & \tutorbox[29][\ ]            & \tutorbox[30][\ '+tex_none(lang)+']            }' + "\n"
     end
 
     h << '\begin{document}' + "\n"
