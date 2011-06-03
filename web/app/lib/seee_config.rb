@@ -197,5 +197,5 @@ rescue
   # because either the path invalid (e.g. unescaped tildes that cannot
   # be expanded) or no home directory is set. The latter is usually true
   # if gnt-eval is run from Apache.
-  puts "couldn't import user_config for seee_config."
+  logger.warn "couldn't import user_config for seee_config."
 end
