@@ -148,7 +148,7 @@ def make_pdf_for(s, cp, dirname)
 
       tutoren.each_with_index do |t, i|
         t = escape_for_tex(t)
-        h << "\\mmm[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
+        h << "\\tutorbox[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
       end
 
       h << '}' + "\n"
