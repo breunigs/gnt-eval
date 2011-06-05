@@ -108,7 +108,6 @@
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 
 \def\SaveMultiInfo[#1]{\write\posout{u - !ruby/object:Question}
-    \write\posout{uu active: true}
     \write\posout{uu qtext: "#1"}
     %\write\posout{uu save_as: ""}
     \write\posout{uu type: square}
@@ -122,7 +121,6 @@
     \write\posout{uu boxes:}
 }
 \def\SaveNormalInfo[#1][#2]{\write\posout{u - !ruby/object:Question}
-    \write\posout{uu active: true}
     \write\posout{uu qtext: "#1"}
     \write\posout{uu save_as: ""}
     \write\posout{uu type: square}
@@ -130,10 +128,10 @@
     \write\posout{uu boxes:}
 }
 
-\definecolor{grau}{rgb}{.88,.88,.88}
+\definecolor{gray}{rgb}{.88,.88,.88}
 
 \newcommand{\sect}[1]{
-\fcolorbox{black}{grau}{
+\fcolorbox{black}{gray}{
 \begin{minipage}{18.8cm}
 \centering\Large{#1}
 \end{minipage}
@@ -146,7 +144,6 @@
 }
 
 \newcommand{\comment}[3]{\write\posout{u - !ruby/object:Question}
-	\write\posout{uu active: true}
 	\write\posout{uu choice: }
 	\write\posout{uu qtext: "#1"}
     	\write\posout{uu save_as: "#3"}
@@ -219,21 +216,42 @@
   \write\posout{pages: }
   \write\posout{- !ruby/object:Page }
   \write\posout{u questions: }
+  \vspace*{-0.4cm}
   \Huge{#1}\normalsize
-  \hfill\includegraphics[width=3cm,height=1.5cm]{barcode#2.pdf}\\
-  \vspace{0.1cm}
+  % the raisebox makes the headline and barcode to have the same baseline
+  \hfill\raisebox{-2.55ex}{\includegraphics[width=3cm,height=1.5cm]{barcode#2.pdf}}\\
 }
 
 \newcommand{\dataline}[3]{
   \textbf{#1:} \vor \hfill\textbf{#2:} \doz \hfill\textbf{#3:} \sem \\[0.2em]
 }
 
+\newcommand{\printspecialheader}[1]{
+  \makebox[1.0\textwidth][l]{\hspace*{0.0cm}\textbf{#1:}}\vspace{0.1cm}
+}
+
+\newcommand{\boxfixed}[2]{
+  \bxss[#1][#2]
+  \makebox[2.31cm][l]{\truncate{2.31cm}{\raisebox{0.4ex}{#2}}}
+  \makebox[0.05cm]{}
+}
+
+\newcommand{\boxfixedempty}{
+  \phantom{\bxss[][]}
+  \makebox[2.31cm][l]{}
+  \makebox[0.05cm]{}
+}
+
+\newcommand{\boxvariable}[2]{
+  \bxss[#1][#2]\raisebox{0.4ex}{#2}
+}
+
 \newcommand{\printtutors}[1]{
   \ifthenelse{\isundefined{\tut}}{}{
     \SaveNormalInfo[#1][tutnum]%
-    \makebox[1.0\textwidth][l]{\hspace*{0.0cm}\textbf{#1:}}\vspace{0.05cm}
+    \printspecialheader{#1}
     \makebox[1.0\textwidth][l]{
-    \hspace*{-0.105cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
+    \hspace*{-0.1cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
     \tut
     \end{tabular}
     }

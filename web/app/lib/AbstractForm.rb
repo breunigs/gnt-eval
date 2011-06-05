@@ -157,38 +157,30 @@ class Question
 
       when "variable_width":
         s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
-        s << "\\makebox[1.0\\textwidth][l]{"
-        s << "\\textbf{#{@qtext[lang]}:}"
-        s << " }\\vspace{0.1cm}\n\n"
+        s << "\\printspecialheader{#{@qtext[lang]}}"
 
-        s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+        s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         boxes = []
         @boxes.each do |b|
-          boxes << "\\bxss[#{b.choice}][#{b.choice}]\\hspace{-0.5em}#{b.text[lang]}"
+          boxes << "\\boxvariable{#{b.choice}}{\\hspace{-0.5em}#{b.text[lang]}}"
         end
         s << boxes.join(" \\hfill ")
-        s << "}\\vspace{0.1cm}\n\n"
+        s << "}\n\n"
 
       when "fixed_width__last_is_rightmost":
         s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
-        s << "\\makebox[1.0\\textwidth][l]{"
-        s << "\\hspace*{-0.05em}"
-        s << "\\textbf{#{@qtext[lang]}:}"
-        s << " }\\vspace{0.05cm}\n"
+        s << "\\printspecialheader{#{@qtext[lang]}}"
 
-        s << "\\hspace*{0.05em}\\makebox[1.0\\textwidth][l]{"
+        s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         @boxes.each do |b|
           next if b == @boxes.last
-          s << "\\bxss[#{b.choice}][#{b.text[lang]}] "
-          s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{b.text[lang]}}}"
-          s << "\\makebox[0.15cm]{} "
+          s << "\\boxfixed{#{b.choice}}{#{b.text[lang]}} "
         end
 
-        s << "\\makebox[#{3.309*(6-@boxes.size)}cm]{} "
+        (6-@boxes.size).times { s << "\\boxfixedempty" }
         last = @boxes.last
-        s << "\\bxss[#{last.choice}][#{last.text[lang]}] "
-        s << "\\makebox[2.34cm][l]{\\truncate{2.34cm}{#{last.text[lang]}}}"
-        s << "}\\vspace{0.1cm}\n\n"
+        s << "\\boxfixed{#{last.choice}}{#{last.text[lang]}} "
+        s << "}\n\n"
 
       when "square":
         s << "\n\n"
