@@ -84,26 +84,26 @@ end
 # Generates a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
   path = File.expand_path(path)
-  return if File.exists?(path)
+  return true if File.exists?(path)
   FileUtils.mkdir_p(File.join(Dir.tmpdir, "seee"))
   tmp = Dir.mktmpdir("seee/barcode-")
-  worked = false
-  Dir.chdir(tmp) do
-    `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o barcode.ps`
-    `ps2pdf barcode.ps barcode.pdf`
-    break unless pdf_crop_tex("barcode.pdf")
-    `mv -f cropped.pdf "#{path}"`
-    worked = true
-  end
+  # Can't change into the tmp directory here because Dir.chdir cannot
+  # be nested and we might need this feature elsewhere.
+  `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o #{tmp}/barcode.ps`
+  `ps2pdf #{tmp}/barcode.ps #{tmp}/barcode.pdf`
+  return false unless pdf_crop_tex("barcode.pdf", tmp)
+  `mv -f #{tmp}/cropped.pdf "#{path}"`
   `rm -rf #{tmp}`
-  worked
+  true
 end
 
 # helper function, that generates a cropped version named "cropped.pdf"
 # of the pdffile in the current working directory. Usually you want to
 # call this like pdf_crop or generate_barcode
-def pdf_crop_tex(pdffile)
-  gs_out = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{pdffile}' 2>&1 1>/dev/null`
+def pdf_crop_tex(pdffile, dir = "./")
+  dir += "/" unless dir.end_with?"/"
+
+  gs_out = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{dir}#{pdffile}' 2>&1 1>/dev/null`
   bboxes = gs_out.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
   if bboxes.nil? || bboxes.empty?
     puts "Could not run ghostscript or couldn't find suitable bounding boxes in given file"
@@ -111,11 +111,13 @@ def pdf_crop_tex(pdffile)
   end
   twice_print_bug = gs_out.split("\n")[1].start_with?("%%Bounding")
 
-  File.open("cropped.tex", "w") do |h|
+  File.open("#{dir}cropped.tex", "w") do |h|
     h << "\\csname pdfmapfile\\endcsname{}\n"
     h << "\\def\\page #1 [#2 #3 #4 #5]{%\n"
     h << "  \\count0=#1\\relax\n"
     h << "  \\setbox0=\\hbox{%\n"
+    # relative path is okay here, because we will cd into the right
+    # directory before calling TeX
     h << "    \\pdfximage page #1{#{pdffile}}%\n"
     h << "    \\pdfrefximage\\pdflastximage\n"
     h << "  }%\n"
@@ -139,10 +141,10 @@ def pdf_crop_tex(pdffile)
     h << "\\csname @@end\\endcsname\n"
     h << "\\end\n"
   end
-  `#{Seee::Config.application_paths[:pdftex]} -halt-on-error cropped.tex`
+  `cd "#{dir}" && #{Seee::Config.application_paths[:pdftex]} -halt-on-error cropped.tex`
   if $?.exitstatus != 0
     puts "Could not crop \"#{File.basename(pdffile)}\". Try to remove spaces or {} chars in the path+filename if any. Specifiying a working *pdftex* command in the config might work as well."
-    puts `cat cropped.log`
+    puts `cat #{dir}cropped.log`
     return false
   end
   true
