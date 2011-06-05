@@ -389,13 +389,11 @@ namespace :pdf do
   desc "create samples for all available sheets for printing or inclusion. "
   task :samplesheets do
     curSem.forms.each do |f|
-      puts "sample for #{f.name}"
-
       f.languages.each do |l|
-         make_sample_sheet(f, l)
+        work_queue.enqueue_b { make_sample_sheet(f, l) }
       end
     end
-
+    work_queue.join
     Rake::Task["clean".to_sym].invoke
   end
 
