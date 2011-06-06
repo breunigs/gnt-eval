@@ -111,7 +111,11 @@ module Seee
       # no locale is given on the command line, courses will be printed
       # in their selected language and all other pieces of text in the
       # language below.
-      :default_locale => :en
+      :default_locale => :en,
+
+      # set to true if you want to enable omr edges on each page for
+      # better recognition
+      :omr_edges => true
     }
 
     @@file_paths = {
@@ -197,5 +201,5 @@ rescue
   # because either the path invalid (e.g. unescaped tildes that cannot
   # be expanded) or no home directory is set. The latter is usually true
   # if gnt-eval is run from Apache.
-end  
+end
 

@@ -91,7 +91,8 @@ def make_sample_sheet(form, lang)
 
   generate_barcode("00000000", dir + "barcode00000000.pdf")
   File.open(filename + ".tex", "w") do |h|
-    h << '\documentclass['+form.abstract_form.babelclass[lang]+', kanten]{eval}' + "\n"
+    edges = Seee::Config.settings[:omr_edges] ? ",kanten" : ""
+    h << '\documentclass['+form.abstract_form.babelclass[lang]+edges+']{eval}' + "\n"
     h << '\dozent{Fachschaft MathPhys}' + "\n"
     h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
     h << '\dbtable{'+ form.db_table + "}\n"
@@ -133,7 +134,8 @@ def make_pdf_for(s, cp, dirname)
   filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
 
   File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[' + cp.course.form.abstract_form.babelclass[cp.course.language] + ']{eval}' + "\n"
+    edges = Seee::Config.settings[:omr_edges] ? ",kanten" : ""
+    h << '\documentclass[' + cp.course.form.abstract_form.babelclass[cp.course.language] + edges + ']{eval}' + "\n"
     h << '\dbtable{' + escape_for_tex(cp.course.form.db_table) + "}\n"
     h << '\dozent{' + escape_for_tex(cp.prof.fullname) + '}' + "\n"
     h << '\vorlesung{' + escape_for_tex(cp.course.title) + '}' + "\n"
