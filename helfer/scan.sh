@@ -6,7 +6,6 @@ if [ "$1" = "" ]; then
 		--buffermode=yes \
 		--stapledetect=yes \
 		--rollerdeskew=yes \
-		--swdeskew=yes \
 		--df-length=yes \
 		--df-thickness=yes \
 		-x 210 \
