@@ -31,14 +31,14 @@
 }
 
 \DeclareOption{kanten}{\AtBeginPage
-{\put(10, -10){\rule{1cm}{1pt}}
-\put(10, -38){\rule{1pt}{1cm}}
-\put(10, -835){\rule{1cm}{1pt}}
-\put(10, -835){\rule{1pt}{1cm}}
-\put(560, -10){\rule{1cm}{1pt}}
-\put(587.5, -38){\rule{1pt}{1cm}}
-\put(560, -835){\rule{1cm}{1pt}}
-\put(587.5, -835){\rule{1pt}{1cm}}
+{\put(10, -15){\rule{1cm}{1pt}}
+\put(10, -43){\rule{1pt}{1cm}}
+\put(10, -830){\rule{1cm}{1pt}}
+\put(10, -830){\rule{1pt}{1cm}}
+\put(559, -15){\rule{1cm}{1pt}}
+\put(586.5, -43){\rule{1pt}{1cm}}
+\put(559, -830){\rule{1cm}{1pt}}
+\put(586.5, -830){\rule{1pt}{1cm}}
 \write\posout{- !ruby/object:Page}
 \write\posout{u questions:}
 }}
