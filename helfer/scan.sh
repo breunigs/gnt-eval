@@ -24,14 +24,14 @@ nn=$(echo $1 | sed -r 's/.*\_([0-9]+).*/\1/')
 n=$(( $nn - 1 ))
 
 
-pnmtotiff "foo_${nn}.pnm" > "foo_${nn}.tiff"
+pnmtotiff "foo_${nn}.pnm" > "foo_${nn}.tif"
 rm "${1}"
 
 rem=$(( $nn % 2 ))
 
 if [ $rem -eq 0 ]; then
 	newid=$(( $nn / 2 ))
-	convert "foo_${n}.tiff" "foo_${nn}.tiff" -adjoin "scanned_${newid}.tiff"
-	rm "foo_${n}.tiff" "foo_${nn}.tiff"
+	convert "foo_${n}.tif" "foo_${nn}.tif" -adjoin "scanned_${newid}.tif"
+	rm "foo_${n}.tif" "foo_${nn}.tif"
 fi
 
