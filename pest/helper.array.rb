@@ -8,8 +8,18 @@
 # PEST components.
 
 class Array
+    def x; self[0]; end
+    def y; self[1]; end
+    def x=(x); self[0]=x; end
+    def y=(y); self[1]=y; end
+
+    def any_nil?
+      self.each { |x| return true if x.nil? }
+      false
+    end
+
     # Sums the array
-    def sum;
+    def sum
         inject(nil) { |sum,x| sum ? sum+x : x }
     end
 

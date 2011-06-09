@@ -375,7 +375,12 @@ namespace :pest do
     Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
-      system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+      if Seee::Config.settings[:omr_edges]
+        system("./pest/omr2.rb -d -v -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+      else
+        # legacy pseudo support
+        system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+      end
     end
   end
 

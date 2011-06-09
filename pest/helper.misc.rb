@@ -19,7 +19,13 @@ module Math
 end
 
 class Integer
+  # legacy
   def makePos
+    puts "makePos is deprecated"
+    self < 0 ? 0 : self
+  end
+
+  def make_min_0
     self < 0 ? 0 : self
   end
 end
