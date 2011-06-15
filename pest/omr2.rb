@@ -13,9 +13,9 @@
 # group/question). Outputs images for each fill out free text field if
 # specified.
 #
-# Call omr.rb without arguments for list of possible/required arguments
+# Call omr2.rb without arguments for list of possible/required arguments
 #
-# This is version 2 which assumes the 'edges' option is enabled.
+# This is version 2 which assumes the 'corners' option is enabled.
 
 cdir = File.dirname(__FILE__)
 
@@ -42,9 +42,9 @@ require Seee::Config.file_paths[:rmagick]
 
 require cdir + '/../lib/FunkyDBBits.rb'
 
-require cdir + '/helper.array.rb'
 require cdir + '/helper.boxtools.rb'
 require cdir + '/helper.database.rb'
+require cdir + '/helper.drawing.rb'
 require cdir + '/helper.constants.rb'
 require cdir + '/helper.misc.rb'
 
@@ -58,6 +58,8 @@ require cdir + '/../lib/RandomUtils.rb'
 
 
 class PESTOmr < PESTDatabaseTools
+  include PESTDrawingTools
+
   # Finds the percentage of black/white pixels for the given rectangle
   # and image.
   def black_percentage(img_id, x, y, width, height)
@@ -90,12 +92,11 @@ class PESTOmr < PESTDatabaseTools
       # width or height or requesting pixels outside the image.
       # Output some nice debugging data and just return 0.
       if @debug
-        puts
-        puts "x: #{x.to_s.ljust(10)} y: #{y}".strip
-        puts "\nw: #{width.to_s.ljust(10)} h: #{height}".strip
-        #puts "g: " + @currentQuestion
+        debug
+        debug "    x: #{x.to_s.ljust(10)} y: #{y}".strip
+        debug "    w: #{width.to_s.ljust(10)} h: #{height}".strip
       else
-        puts "Critical Error: Invalid Geometry"
+        debug "Critical Error: Invalid Geometry"
         @cancelProcessing = true
       end
       return 0
@@ -108,12 +109,12 @@ class PESTOmr < PESTDatabaseTools
   # searches for the first line that has more than thres% black pixels
   # in the given area.
   # imd_id: image to process
-  # tl: top left edge of the rectangle to search (specify an array with
+  # tl: top left corner of the rectangle to search (specify an array with
   #     the first value being top, the second being left. Negative
   #     values are supported and will be interpreted as “from the bottom”
   #     or “from the right” respectively. [0,0] is in the upper left
   #     corner.
-  # br: bottom right edge of the rectangle to search.
+  # br: bottom right corner of the rectangle to search.
   # dir: The direction in which to search. Possible values: :left,
   #     :right, :up, :down
   # thres: the amount of pixels that ought to be black to trigger
@@ -123,7 +124,13 @@ class PESTOmr < PESTDatabaseTools
   #     around the page due to misalignment while scanning.
   # Automatically prints debug output. A blue box marks a successful
   # search, a red one that the search failed.
-  def search(img_id, tl, br, dir, thres, prefer_2nd = false)
+  def search(img_id, tl, br, dir, thres, prefer_2nd = false, with_text = false)
+    # round here, so we don't have to take care elsewhere
+    tl.x = tl.x.round
+    tl.y = tl.y.round
+    br.x = br.x.round
+    br.y = br.y.round
+
     raise "top and bottom have been switched" if !(tl[0] <= br[0])
     raise "left and right have been switched" if !(tl[1] <= br[1])
 
@@ -159,257 +166,182 @@ class PESTOmr < PESTDatabaseTools
       br.y = i if dir == :down
       br.x = i if dir == :right
       tl.x = i if dir == :left
-      draw_search_box(img_id, tl, br, "blue", dir)
+      draw_search_box(img_id, tl, br, "blue", dir, with_text)
 
       return i
     end
-    draw_search_box(img_id, tl, br, "red", dir)
+    draw_search_box(img_id, tl, br, "red", dir, with_text)
     nil
   end
 
-  # draws a transparent rectangle for the area and highlights one side
-  # of the border, depending on search direction. Also inserts an arrow
-  # automatically to hint in which direction was being searched.
-  def draw_search_box(img_id, tl, br, color, dir)
-    return if !@debug or tl.any_nil? or br.any_nil?
-    t = { :right => "→", :left => "←", :up => "↑", :down => "↓" }
-    draw_transparent_box(img_id, tl, br, color, t[dir])
-    tl.x = br.x if dir == :right
-    br.x = tl.x if dir == :left
-    tl.y = br.y if dir == :down
-    br.y = tl.y if dir == :up
-    draw_line(img_id, tl, br, color)
+  # Tries to locate a square box exactly that has been roughly located
+  # using the position given by TeX and after applying offset+rotation.
+  # Returns x, y coordinates that may be nil and also modifies the box
+  # coordinates themselves (unless the box isn't found)
+  def search_square_box(img_id, box)
+    # TWEAK HERE
+    box.width, box.height = 40, 40
+
+    # Original position as given by TeX
+    draw_transparent_box(img_id, box.tl, box.br, "yellow")
+    tl = correct(img_id, [box.x, box.y])
+    box.x, box.y = tl.x, tl.y
+
+    # Where the box was put after correction
+    draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
+
+    # Find the pre-printed box
+    x = search(img_id, [box.tl.x-6, box.tl.y-10],
+          [box.br.x - box.width/3*2, box.br.y+10], :right, 30, true)
+    y = search(img_id, [box.tl.x-10, box.tl.y-6],
+          [box.br.x+10, box.br.y - box.height/3*2], :down, 30, true)
+
+    # If any coordinate couldn't be found, try again further away. Only
+    # searches the newly added area.
+    x = search(img_id, [box.tl.x-15, box.tl.y-10],
+          [box.tl.x-6, box.br.y+10], :right, 30) if x.nil?
+    y = search(img_id, [box.tl.x-10, box.tl.y-15],
+          [box.br.x+10, box.tl.y-6], :down, 30) if y.nil?
+
+    box.x = x unless x.nil?
+    box.y = y unless y.nil?
+
+    draw_text(img_id, [x-15,y+20], "black", box.choice)
+
+    return x, y
   end
 
-  # draws a colored transparent box for the given coordinates to the
-  # image at @ilist[img_id]. If text is given, it will be drawn in the
-  # approx. center of the box.
-  def draw_transparent_box(img_id, tl, br, color, text = nil, border = false)
-    return if !@debug or tl.any_nil? or br.any_nil?
-    @draw[img_id].fill(color)
-    @draw[img_id].stroke(color)
-    @draw[img_id].fill_opacity(0.1)
-    @draw[img_id].stroke_opacity(border ? 0.3 : 0)
-    @draw[img_id].rectangle(tl.x, tl.y, br.x, br.y)
-    return if text.nil?
+  # Finds and stores the black percentage for all boxes for the given
+  # question in box.bp. Returns an array of box coordinates which
+  # indicates which areas were being searched. Automatically runs more
+  # thorough searches if no checkmarks are found.
+  def process_square_boxes_blackness(img_id, question)
+    # TWEAK HERE
+    # thickness of the stroke
+    stroke_width = 4
+    # in certain cases the space around the printed box is searched.
+    # _small describes the additional interval that should be excluded
+    # around the box in pixels. Including the box in the black pixels
+    # result makes it impossible to get good results. So don't set
+    # this too low.
+    # _large describes the area around the box to search.
+    # In other words: the annulus with maximum norm and radii:
+    # r = box/2 + _small  R = box/2 + _large
+    around_small = 2
+    around_large = 8
 
-    @draw[img_id].stroke_opacity(1)
-    xmid = tl.x + (br.x - tl.x)/2.0
-    ymid = tl.y + (br.y - tl.y)/2.0
-    m = @draw[img_id].get_type_metrics(text.to_s)
+    debug_box = []
 
-    @draw[img_id].text(xmid-m.width/2.0, ymid, text.to_s)
+    question.boxes.each_with_index do |box, i|
+      x, y = search_square_box(img_id, box)
+      # Looks like the box doesn't exist. Assume it's empty.
+      if x.nil? || y.nil?
+        debug "Couldn't find box for page=#{img_id} box=#{box.choice}"
+        debug "“#{question.qtext}”"
+        debug "Assuming there is no box and no choice was made."
+        box.bp = 0
+        next
+      end
+
+      # inside the box
+      tl = [x+stroke_width, y+stroke_width]
+      br = [x+box.width-stroke_width, y+box.height-stroke_width]
+      box.bp = black_percentage(img_id, tl.x, tl.y, br.x-tl.x, br.y-tl.y)
+      debug_box[i] = [tl, br]
+    end
+
+    # reject all boxes with low fill grade to see if there are any
+    # checkmarks. If not, look outside the boxes in case the user has
+    # an odd checking style (e.g. circling the checkboxes)
+    checked = question.boxes.select do |x|
+      x.bp.between?(MIN_FILL_GRADE, MAX_FILL_GRADE)
+    end
+    return debug_box unless checked.empty?
+
+    question.boxes.each_with_index do |box, i|
+      ow = box.width+around_large
+      oh = box.height+around_large
+      outer = black_pixels(img_id, box.x-around_large,
+                box.y-around_large, ow, oh)
+
+      # this includes the pre-printed box as well
+      iw = box.width+around_small
+      ih = box.height+around_small
+      inner = black_pixels(img_id, box.x-around_small,
+                box.y-around_small, iw , ih)
+
+      # add outer and existing black percentage
+      box.bp = (box.bp + 100*(outer-inner).to_f/(ow*oh-iw*ih).to_f)/2
+
+      debug_box[i] = [[box.x-around_large, box.y-around_large],
+          [box.x+box.width+around_large, box.y+box.height+around_large]]
+    end
+
+    debug_box
   end
 
-  # draws a line from and to the given coordinates on @ilist[img_id].
-  def draw_line(img_id, top_left, bottom_right, color)
-    return if !@debug || top_left.any_nil? || bottom_right.any_nil?
-    @draw[img_id].stroke(color)
-    @draw[img_id].stroke_width(1)
-    @draw[img_id].stroke_opacity(1)
-    @draw[img_id].line(top_left.x, top_left.y, bottom_right.x, bottom_right.y)
-  end
+  # evaluates a single- or multiple choice question with square check-
+  # boxes. Automatically corrects the boxes' position and computes the
+  # black percentage and which boxes are checked and which are not. All
+  # results are stored in the box themselves, but it also returns an
+  # integer for single choice questions with the 'choice' attribute of
+  # the selected box. Returns -1 if user intervention is required and 0
+  # if no checkbox was selected. For multiple choice an array with the
+  # choice attributes of the checked boxes is returned. This array may
+  # be empty.
+  def process_square_boxes(img_id, question)
+    # calculate blackness for each box
+    debug_box = process_square_boxes_blackness(img_id, question)
 
-  # draws a small dot (actually a circle) at the specified coordinates
-  # coord: top, left
-  def draw_dot(img_id, coord, color)
-    return if !@debug or coord.any_nil?
-    @draw[img_id].stroke(color)
-    @draw[img_id].stroke_width(1)
-    @draw[img_id].stroke_opacity(1)
-    @draw[img_id].fill_opacity(0)
-    @draw[img_id].circle(coord.x, coord.y, coord.x+3, coord.y)
-  end
-
-  # This function encapsulates the process for determining if a set of
-  # square boxes is checked and returns the appropriate answer.
-  def typeSquareParse(imgid, group)
-    checks = []
-    first = 0
-    inner = (SQUARE_SIZE - 2*SQUARE_STROKE)*@dpifix
-
-    group.boxes.each do |box|
-      x, y = calcSkew(imgid, box.x, box.y)
-
-      # Find the pre-printed box
-      mx = search_from_left(x, y, (SQUARE_SEARCH[0]/2)*@dpifix, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid]).makePos
-
-      # If we get the right end of the search area returned, we
-      # probably didn't find anything, but stopped searching. It
-      # is more likely that we started search too far to the right
-      # in the first place. Thus, try again starting "more left".
-      # Similar if we succeed right away: We know we are somewhere
-      # on the line, but we need the left start.
-      maxCorr = 3
-      interval = (SQUARE_SEARCH[0]/2)*@dpifix
-      while (mx == x+interval || mx == x) && maxCorr > 0 && x > 0
-        x = (x-(SQUARE_STROKE*2)*@dpifix).makePos
-        mx = search_from_left(x, y, interval, (SQUARE_SEARCH[1])*@dpifix, 50, @ilist[imgid])
-        maxCorr -= 1
+    # reject all boxes above maximum fill grade and mark them critical
+    c = question.boxes.reject do |box|
+      if box.bp > MAX_FILL_GRADE
+        box.fill_critical = true
       end
-
-      # Hopefully we have found a vertical line of the box by now.
-      # However, we do not yet know if we found the left or right
-      # one. Therefore we peek to the left and right and try to
-      # find the other vertical bar of the box.
-      # width, height, left, right, top, bottom
-      w = SQUARE_STROKE*@dpifix*4
-      h = SQUARE_SEARCH[1]*@dpifix
-      l = mx - (SQUARE_SIZE + SQUARE_STROKE)*@dpifix
-      r = mx + (SQUARE_SIZE - SQUARE_STROKE)*@dpifix
-      t = y - SQUARE_STROKE*@dpifix
-
-      lbp = black_percentage(l, t, w, h, @ilist[imgid])
-      rbp = black_percentage(r, t, w, h, @ilist[imgid])
-
-      # if this is true, we found the right bar. Since we need the
-      # left one, we start a search once more
-      if lbp > rbp
-        mx = search_from_left(l, t, w, h, 50, @ilist[imgid])
-      end
-
-      # Draw where the correct line has been found
-      if @debug
-        @draw.stroke("green")
-        @draw.fill("green")
-        @draw.line(mx, t, mx, t+h)
-      end
-
-      my = search_from_top(mx, y, SQUARE_SEARCH[0]*@dpifix, (SQUARE_SEARCH[1]/2)*@dpifix, 50, @ilist[imgid]).makePos
-      # This is not a typo:    ^^
-      # If we managed to find left already, we have better chances
-      # of finding the correct top. If we found a wrong left we're
-      # doomed anyway
-
-      maxCorr = 3
-      interval = (SQUARE_SEARCH[1]/2)*@dpifix
-      while my == y + interval && maxCorr > 0 && y > 0
-        y = (y-(SQUARE_STROKE*2)*@dpifix).makePos
-        my = search_from_top(mx, y, SQUARE_SEARCH[0]*@dpifix, interval, 50, @ilist[imgid])
-        maxCorr -= 1
-      end
-#~
-      #~ tbp = black_percentage(mx, my-h, w, h, @ilist[imgid])
-      #~ bbp = black_percentage(mx, my, w, h, @ilist[imgid])
-      #~ if tbp > bbp
-        #~ my = search_from_top(mx, my-h, SQUARE_SEARCH[0]*@dpifix, interval, 50, @ilist[imgid])
-      #~ end
-
-      # Save corrected values to sheet so the FIX component doesn't
-      # need to re-calculate this
-      box.x = x
-      box.y = y
-
-      # Used for debugging below
-      box.mx = mx
-      box.my = my
-
-      # First check for the inner pixels. If there are any, we al-
-      # most absolutely have a checkmark
-      bp = black_percentage(mx + SQUARE_STROKE*@dpifix, my + SQUARE_STROKE*@dpifix, inner, inner, @ilist[imgid])
-
-      # Save the raw value to the yaml
-      box.bp = bp
-
-      # Draw the rotation-correction-guidelines and the search
-      # radius for each checkbox
-      if @debug
-        @draw.stroke("black")
-        @draw.fill("black")
-        @draw.fill_opacity(1)
-        @draw.text(x+(SQUARE_SEARCH[0]+5)*@dpifix, y+20*@dpifix, ((bp * 100).round.to_f / 100).to_s)
-
-        @draw.line(x - 100*@dpifix, y, x + 100*@dpifix, y)
-        @draw.line(x, y - 100*@dpifix, x, y + 200*@dpifix)
-
-        if first == 0 && !group.db_column.is_a?(Array)
-          @draw.text((x - 50*@dpifix).makePos, y + 20*@dpifix, group.db_column)
-        end
-        first += 1
-
-        if group.db_column.is_a?(Array)
-          @draw.text((x - 50*@dpifix).makePos, y + 20*@dpifix, group.db_column[first-1])
-        end
-
-        @draw.stroke("blue")
-        @draw.fill_opacity(0)
-        @draw.rectangle(x, y, x + SQUARE_SEARCH[0]*@dpifix, y + SQUARE_SEARCH[1]*@dpifix)
-      end
+      box.bp > MAX_FILL_GRADE
     end
 
-    # At first, use very high thresholds so that question that are
-    # clearly marked are not affected by small errors due to dirt or
-    # imperfect scanning. If no checkmark is found, lower the thres-
-    # hold each time. This makes it more prone to false-positives,
-    # but at least keeps them to a minimum on questions that do not
-    # need such a low limit. The last entry will be marked as "low
-    # threshold".
-    thresholds = [3.5, 1.5, 0.5]
-    # This ensures that single boxes won't get checked because of
-    # dirt. This might result in undetected checkmarks but no answer
-    # is preferable over a wrong one.
-    thresholds.pop if group.boxes.size == 1
-    # Upper limit. All checked boxes with a black percentage above
-    # this threshold are disregarded if and only if there is more
-    # than one checkmark. Single choice questions above this thres-
-    # hold are marked as failed and thus presented to the user.
-    # Multiple choice questions will be handled like there was no
-    # upper limit if this occurs.
-    thres_max = 90
+    checked = c.reject { |x| x.bp < MIN_FILL_GRADE }
+    checked.each { |box| box.is_checked = true }
 
-    low_threshold = false
-    thresholds.each do |t|
-      low_threshold = t == thresholds.last
-      group.boxes.each do |box|
-        checks << box if box.bp > t
-      end
-      break if checks.size >= 1
+    # don't do fancy stuff for multiple choice questions
+    is_multi = question.db_column.is_a? Array
+    result = if is_multi
+      checked.collect { |box| box.choice }
+    else # single choice question
+      case checked.size
+        # only one checkbox remains, so go for it
+        when 1: checked.first.choice
+        when 0: # no checkboxes. We're officially desperate now.
+          # try again with lower standards
+          checked = c.reject { |x| x.bp < DESPERATE_MIN_FILL_GRADE }
+          checked.each { |box| box.is_checked = true; box.fill_critical = true }
+          case checked.size
+            when 1: checked.first.choice
+            else     -1
+          end
+        else -1 # at least two boxes are checked, ask the user
+      end # case
+    end # else
+
+    # print debug boxes
+    question.boxes.each_with_index do |box, i|
+      # this happens if a box couldn't be found. So don't debug it.
+      next if debug_box[i].nil?
+
+      color = "orange" # light orange; i.e. empty
+      color = "red" if box.fill_critical # i.e. overfull
+      color = "green" if box.is_checked # i.e. a nice checkmark
+      color = "#5BF1B2" if box.fill_critical && box.is_checked # i.e. just barely filled
+
+      draw_transparent_box(img_id, debug_box[i][0], debug_box[i][1],
+        color, box.bp.round_to(1), true)
+      draw_text(img_id, [box.x-20,box.y+40], "black", "X") if box.is_checked?
     end
-
-    result = nil
-
-    # it's a single choice question and the upper limit has been
-    # reached. Mark it as failed.
-    if group.boxes.size == 1 && checks.size == 1 && checks[0].bp > thres_max
-      result = -1
-    end
-
-    # it's a multiple choice question. Remove all checkmarks that
-    # are above the threshold but only if there are at least two
-    # checkmarks (catches the case where someone used a fat marker)
-    if group.boxes.size >= 2 && checks.size >= 2
-      del = checks.find_all { |x| x.bp > thres_max }
-      del.each { |d| d.fill_critical = true }
-      checks -= del
-      # We lost all checkmarks… let's ask the user
-      result = -1 if checks.empty?
-    end
-
-    # Cover all normal cases
-    result = case checks.length
-      when 0 then 0
-      when 1 then checks[0].choice
-      else -1
-    end unless result
-
-    # store for each box if it was checked
-    checks.each { |c| c.is_checked = true }
-    # store for each box if it was selected with a low threshld
-    checks.each { |c| c.fill_critical = true } if low_threshold
-
-    # Draws the red/green/yellow boxes for each answer
-    if @debug
-      group.boxes.each do |box|
-        # only draw a yellow box if the checkmark has been
-        # dismissed due to its high black percentage.
-        color = box.bp > thres_max ? "yellow" : "red"
-        color = "green" if checks.include?(box)
-        @draw.fill(color)
-        @draw.fill_opacity(0.3)
-        @draw.stroke(color)
-        @draw.rectangle(box.mx + SQUARE_STROKE*@dpifix, box.my + SQUARE_STROKE*@dpifix, box.mx + SQUARE_STROKE*@dpifix + inner, box.my + SQUARE_STROKE*@dpifix + inner)
-      end
-    end
+    # print question's db_column left of question
+    q = question.db_column
+    draw_text(img_id, [10, debug_box.compact.first[0].y+10], "black", \
+      (q.is_a?(Array) ? q.join(", ") : q))
 
     result
   end
@@ -476,6 +408,9 @@ class PESTOmr < PESTDatabaseTools
     return 1
   end
 
+  # detects if a text box contains enough text and reports the result
+  # (0 = no text, 1 = has text). It will automatically extract the
+  # portion of the scanned sheet with the text and save it as .jpg.
   def process_text_box(img_id, question)
     # TWEAK HERE
     limit = 1000 * @dpifix
@@ -486,8 +421,8 @@ class PESTOmr < PESTDatabaseTools
     boxes.flatten!
 
     boxes.each do |box|
-      tl = correct(img_id, [box.x, box.y])
-      br = correct(img_id, [box.x+box.width, box.y+box.height])
+      tl = correct(img_id, box.tl)
+      br = correct(img_id, box.br)
       box.x, box.y = tl.x, tl.y
       box.width, box.height =  br.x-tl.x, br.y-tl.y
       bp += black_pixels(img_id, box.x, box.y, box.width, box.height)
@@ -505,74 +440,21 @@ class PESTOmr < PESTDatabaseTools
 
   # Saves a given area (in form of a boxes array) for the current image.
   def save_text_image(img_id, save_as, boxes)
-    return if question.save_as.empty?
-    puts "  Saving Comment Image: #{save_as}" if @verbose
+    return if save_as.nil? || save_as.empty?
+    debug("    Saving Comment Image: #{save_as}", "save_image") if @verbose
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
-    x, y, w, h = calculateBounds(boxes, group)
+    x, y, w, h = calculateBounds(boxes)
     @ilist[img_id].crop(x, y, w, h).minify.write filename
-  end
-
-  # This function tries to determine if a text field is filled out
-  # If so and the "saveas" attribute is specified the comment will be
-  # saved to the given filename.
-  def typeTextParse(imgid, group)
-    bp = 0
-    limit = 1000*@dpifix
-    boxes = []
-    # Split up the text fields into many smaller boxes. Is is needed
-    # for rotated sheets as the box would otherwise cover preprinted
-    # areas and produce a false positive. If cut, large areas would
-    # be missing and if would produce false negatives.
-    # Splitting the boxes allows to circumvent this while still
-    # being reasonable fast.
-    group.boxes.each { |box| boxes << splitBoxes(box, 150, 150) }
-    boxes.flatten!
-    boxes.each do |box|
-      # LaTeX' coordinates are shifted by default for some reason.
-      # Fix this here.
-      x, y = calcSkew(imgid, box.x + 60*@dpifix, box.y + 20*@dpifix)
-
-      # We may need to shrink the detection rectangle on severe
-      # rotations. Otherwise it would cover pre-printed text which
-      # chould result in a false positive
-      skewx, skewy = x - box.x, y - box.y
-
-      # Save corrected values to sheet so the FIX component
-      # doesn't need to re-calculate this
-      box.x = x
-      box.y = y
-
-      bp += black_pixels(x, y, box.width, box.height, @ilist[imgid], true)
-
-      if @debug
-        color = bp > limit ? "green" : "red"
-        @draw.fill(color)
-        @draw.fill_opacity(0.3)
-        @draw.stroke(color)
-        @draw.rectangle(x, y, x + box.width, y + box.height)
-        @draw.stroke("black")
-        @draw.fill_opacity(1)
-        @draw.text(x+5*@dpifix, y+20*@dpifix, bp.to_s)
+    if @debug
+      tl = [PAGE_WIDTH, PAGE_HEIGHT]
+      boxes.each do |b|
+        tl.x = [tl.x, b.x].min; tl.y = [tl.y, b.y].min
       end
-
-      break if bp > limit
+      draw_text(img_id, tl, "green", "Saved as: #{filename}")
+      draw_transparent_box(img_id, [x,y], [x+w,y+h], "#DBFFD8", "", true)
     end
-
-    # Save the comment as extra file if possible/required
-    if !group.saveas.empty? && bp > limit
-      if @verbose
-        print "  Saving Comment Image: "
-        puts group.saveas
-      end
-      filename = @path + "/" + File.basename(@currentFile, ".tif")
-      filename << "_" + group.saveas + ".jpg"
-      x, y, w, h = calculateBounds(boxes, group)
-      @ilist[imgid].crop(x, y, w, h).minify.write filename
-    end
-
-    # use "1" for yes and "0" for no text (= no choice)
-    return bp > limit ? 1 : 0
+    debug("    Saved Comment Image", "save_image") if @verbose
   end
 
   # Looks at each group listed in the yaml file and calls the appro-
@@ -580,14 +462,13 @@ class PESTOmr < PESTDatabaseTools
   # "type" attribute as specified in the YAML file. Results are saved
   # directly into the loaded sheet.
   def process_questions
-    start_time = Time.now
-    puts "  Recognizing Image" if @verbose
+    debug("  Recognizing Image", "recog_img") if @verbose
 
     0.upto(page_count - 1) do |i|
       if @doc.pages[i].questions.nil?
-        puts "WARNING: Page does not contain any questions."
-        puts "Are you sure there's a correct 'questions:' marker in the"
-        puts "YAML file?"
+        debug "WARNING: Page does not contain any questions."
+        debug "Are you sure there's a correct 'questions:' marker in the"
+        debug "YAML file?"
         next
       end
 
@@ -595,98 +476,123 @@ class PESTOmr < PESTDatabaseTools
         @currentQuestion = g.db_column
         case g.type
           when "square" then
-            #g.value = typeSquareParse(i, g)
+            g.value = process_square_boxes(i, g)
           when "text" then
-            #g.value = typeTextParse(i, g)
             g.value = process_text_box(i, g)
           when "text_wholepage" then
-            #g.value = typeTextWholePageParse(i, g)
+            g.value = typeTextWholePageParse(i, g)
           else
-            puts "Unsupported type: " + g.type.to_s
+            debug "    Unsupported type: " + g.type.to_s
         end
       end
     end
-
-    puts "  (took: " + (Time.now-start_time).to_s + " s)" if @verbose
+    debug("  Recognized Image", "recog_img") if @verbose
   end
 
-  def locate_edges
-    @edges = []
+  # Tries to find the corners on each corner of the page and stores them
+  # in @corners. Only adds a corner if both parts of it are found.
+  def locate_corners
+    debug("  Locating corners…", "locate_corners") if @verbose
+    @corners = []
     0.upto(page_count-1) do |i|
-      @edges[i] = {}
+      @corners[i] = {:tr => [nil, nil], :tl => [nil, nil], \
+                     :bl => [nil, nil], :br => [nil, nil]}
       # TWEAK HERE
 
-      # top right edge
-      x = search(i, [-1-200, 20], [-1, 20+150], :left, 20, true)
-      y = search(i, [-20-150, 1], [-20, 1+150], :down, 20, true)
-      draw_dot(i, [x, y], "red") unless [x, y].any_nil?
-      @edges[i].merge!({:tr => [x,y]})
+      # top right corner
+      x = search(i, [-1-200, 20], [-1, 20+150], :left, 30, true, true)
+      y = search(i, [-20-150, 1], [-20, 1+150], :down, 30, true, true)
+      draw_dot(i, [x, y], "red")
+      @corners[i].merge!({:tr => [x,y]}) unless [x, y].any_nil?
 
-      # top left edge
-      x = search(i, [1, 20], [1+200, 20+150], :right, 20, true)
-      y = search(i, [20, 1], [20+150, 1+150], :down, 20, true)
-      draw_dot(i, [x, y], "red") unless [x, y].any_nil?
-      @edges[i].merge!({:tl => [x,y]})
+      # top left corner
+      x = search(i, [1, 20], [1+110, 20+150], :right, 30, true, true)
+      y = search(i, [20, 1], [20+150, 1+90], :down, 30, true, true)
+      draw_dot(i, [x, y], "red")
+      @corners[i].merge!({:tl => [x,y]}) unless [x, y].any_nil?
 
-      # bottom left edge
-      x = search(i, [1, -60-150], [1+200, -40], :right, 20, true)
-      y = search(i, [20, -1-150], [20+150, -1], :up, 20, true)
-      draw_dot(i, [x, y], "red") unless [x, y].any_nil?
-      @edges[i].merge!({:bl => [x,y]})
+      # bottom left corner
+      x = search(i, [1, -60-150], [1+200, -40], :right, 30, true, true)
+      y = search(i, [20, -1-150], [20+150, -1], :up, 30, true, true)
+      draw_dot(i, [x, y], "red")
+      @corners[i].merge!({:bl => [x,y]}) unless [x, y].any_nil?
 
-      # bottom right edge
-      x = search(i, [-1-200, -60-150], [-1, -40], :left, 20, true)
-      y = search(i, [-20-150, -1-150], [-20, -1], :up, 20, true)
-      draw_dot(i, [x, y], "red") unless [x, y].any_nil?
-      @edges[i].merge!({:br => [x,y]})
+      # bottom right corner
+      x = search(i, [-1-200, -60-150], [-1, -40], :left, 30, true, true)
+      y = search(i, [-20-150, -1-150], [-20, -1], :up, 30, true, true)
+      draw_dot(i, [x, y], "red")
+      @corners[i].merge!({:br => [x,y]}) unless [x, y].any_nil?
 
       # Debug prints that have only limited use
-      #draw_line(i, @edges[i][:tl], @edges[i][:br], "yellow")
-      #draw_line(i, @edges[i][:tr], @edges[i][:bl], "yellow")
-      #draw_line(i, [0,0],    [2480, 3508], "yellow")
-      #draw_line(i, [2480,0], [0, 3508], "yellow")
+      #draw_line(i, @corners[i][:tl], @corners[i][:br], "yellow")
+      #draw_line(i, @corners[i][:tr], @corners[i][:bl], "yellow")
+      #draw_line(i, [0,0],    [PAGE_WIDTH, PAGE_HEIGHT], "yellow")
+      #draw_line(i, [PAGE_WIDTH,0], [0, PAGE_HEIGHT], "yellow")
 
     end
+    debug("  Located corners", "locate_corners") if @verbose
   end
 
-  # Calculate the rotation from the edges. To do so, we calc the
+  # Calculate the rotation from the corners. To do so, we calc the
   # angle between the diagonal of the page and the diagonal between
-  # the detected edges. If possible, we do so for both diagonals to
+  # the detected corners. If possible, we do so for both diagonals to
   # reduce the measuring error.
   def determine_rotation
-    perfect_abs = 4296.09869532812 # Math.sqrt(2480**2 + 3508**2)
+    debug "  Determining rotation" if @verbose
     @rotation = []
     0.upto(page_count-1) do |i|
-      @rotation[i] = nil
-      e = @edges[i]
+      @rotation[i] = []
+      e = @corners[i]
+
       if !e[:tl].any_nil? and !e[:br].any_nil?
         # it appears the top left to bottom right diagonal is fine
-        measured = [e[:br].x-e[:tl].x, e[:br].y-e[:tl].y]
-        measured_abs = Math.sqrt(measured.x**2 + measured.y**2)
-        scalar = measured.x*2480 + measured.y*3508
-        @rotation[i] = Math.acos(scalar/(measured_abs*perfect_abs))
+        adja = (e[:br].x - e[:tl].x).to_f
+        oppo = (e[:br].y - e[:tl].y).to_f
+        @rotation[i] << (Math.atan(adja/oppo) - PAGE_DIAG_ANGLE)
       end
 
       if !e[:tr].any_nil? and !e[:bl].any_nil?
         # it appears the top right to bottom left diagonal is fine
-        measured = [e[:bl].x-e[:tr].x, e[:bl].y-e[:tr].y]
-        measured_abs = Math.sqrt(measured.x**2 + measured.y**2)
-        scalar = measured.x*2480 - measured.y*3508
-        rot = Math::PI - Math.acos(scalar/(measured_abs*perfect_abs))
-        @rotation[i] = @rotation[i].nil? ? rot : (@rotation[i]+rot)/2
+        adja = (e[:bl].x - e[:tr].x).to_f
+        oppo = (e[:bl].y - e[:tr].y).to_f
+        @rotation[i] << (PAGE_DIAG_ANGLE + Math.atan(adja/oppo))
       end
+
+      if !e[:tl].any_nil? and !e[:bl].any_nil?
+        # it appears the top left to bottom left side is fine
+        adja = (e[:bl].y - e[:tl].y).to_f#.abs
+        oppo = (e[:bl].x - e[:tl].x).to_f#.abs
+        @rotation[i] << Math.atan(oppo/adja)
+      end
+
+      if !e[:tr].any_nil? and !e[:br].any_nil?
+        # it appears the top right to bottom right side is fine
+        adja = (e[:br].y - e[:tr].y).to_f
+        oppo = (e[:br].x - e[:tr].x).to_f
+        @rotation[i] << Math.atan(oppo/adja)
+      end
+
+      if @rotation[i].empty?
+        debug "    Couldn't determine rotation for current sheet on page #{i+1}."
+        debug "    This means that less than two corners could be detected."
+        debug "    Marking #{File.basename(@currentFile)} as bizarre."
+        @cancelProcessing = true
+        next
+      end
+
+      debug("    #{i}: #{@rotation[i].join(", ")}") if @verbose
+      @rotation[i] = @rotation[i].compact.sum / @rotation[i].size
 
       # We actually need to rotate in the other direction, but I am too
       # lazy to fix the code above. Feel free to FIXME
-      @rotation[i] = 2*Math::PI - @rotation[i]
+      @rotation[i] = (2*Math::PI - @rotation[i])
 
-      if @rotation[i].nil?
-        puts "Couldn't determine rotation for current sheet on page #{i+1}."
-        puts "This means that no diagonal edges could be detected."
-        puts "Marking this sheet as bizarre."
-        @cancelProcessing = true
-      end
 
+
+      # Draw a line near the top to be able to see in which direction
+      # the rotation was detected. Draw a box around the main area to be
+      # able to judge the rotation in comparison to the scanned sheet.
+      draw_text(i, [200, 40], "green", "Rotation: #{(@rotation[i]*RAD2DEG)%360}°")
       draw_line(i, rotate(i, [10, 15]), rotate(i, [2470, 15]), "green")
       # top line
       draw_line(i, rotate(i, [120, 270]), rotate(i, [2420, 270]), "green")
@@ -699,89 +605,174 @@ class PESTOmr < PESTDatabaseTools
     end
   end
 
-  def determine_offset
-    @offset = []
-    0.upto(page_count-1) do |i|
-      @offset[i] = {}
-
-      l = [@edges[i][:tl].x, @edges[i][:bl].x].compact
-      r = [@edges[i][:tr].x, @edges[i][:br].x].compact
-      t = [@edges[i][:tl].y, @edges[i][:tr].y].compact
-      b = [@edges[i][:bl].y, @edges[i][:br].y].compact
-      @offset[i][:l] = l.sum / l.size
-      @offset[i][:r] = r.sum / r.size
-      @offset[i][:t] = t.sum / t.size
-      @offset[i][:b] = b.sum / b.size
-    end
-  end
-
   # corrects the rotation for a given point using the determined rotation
   def rotate(img_id, coord)
-    ox = 2480.0/2.0
-    oy = 3508.0/2.0
+    return [nil, nil] if coord.any_nil?
+
+    ox = PAGE_WIDTH/2.0
+    oy = PAGE_HEIGHT/2.0
     rad = @rotation[img_id]
 
     newx = ox + (Math.cos(rad)*(coord.x-ox) - Math.sin(rad) * (coord.y-oy))
-    newy = oy + (Math.sin(rad)*(coord.x-ox) + Math.cos(rad) * (coord.y-oy) )
+    newy = oy + (Math.sin(rad)*(coord.x-ox) + Math.cos(rad) * (coord.y-oy))
 
     [newx, newy]
   end
 
+  def supplement_missing_corners
+    0.upto(page_count-1) do |i|
+      c = @corners[i]
+      # top left corner
+      # if top left is missing we can assume the tr-bl diagonal is fine,
+      # otherwise we're doomed anyway.
+      if c[:tl].any_nil?
+        c[:tl].x ||= rotate(i, [c[:bl].x, c[:tr].y]).x
+        c[:tl].y ||= rotate(i, [c[:bl].x, c[:tr].y]).y
+        c[:tl] = rotate(i, c[:tl])
+        draw_dot(i, c[:tl], "orange")
+      end
+
+      # top right corner (assume tl-br is fine)
+      if c[:tr].any_nil?
+        c[:tr].x ||= rotate(i, [c[:br].x, c[:tl].y]).x
+        c[:tr].y ||= rotate(i, [c[:br].x, c[:tl].y]).y
+        c[:tr] = rotate(i, c[:tr])
+        draw_dot(i, c[:tr], "orange")
+      end
+
+      # bottom left corner (assume tl-br is fine)
+      if c[:bl].any_nil?
+        c[:bl].x ||= rotate(i, [c[:tl].x, c[:br].y]).x
+        c[:bl].y ||= rotate(i, [c[:tl].x, c[:br].y]).y
+        c[:bl] = rotate(i, c[:bl])
+        draw_dot(i, c[:bl], "orange")
+      end
+
+      # bottom right corner (assume tr-bl is fine)
+      if c[:br].any_nil?
+        c[:br].x ||= rotate(i, [c[:tr].x, c[:bl].y]).x
+        c[:br].y ||= rotate(i, [c[:tr].x, c[:bl].y]).y
+        c[:br] = rotate(i, c[:br])
+        draw_dot(i, c[:br], "orange")
+      end
+
+      # Connect found corners
+      draw_line(i, c[:tr], c[:tl], "orange")
+      draw_line(i, c[:tl], c[:bl], "orange")
+      draw_line(i, c[:bl], c[:br], "orange")
+      draw_line(i, c[:br], c[:tr], "orange")
+
+      if c.any_nil?
+        debug "    Couldn't supplement corners for current sheet on page #{i+1}."
+        debug "    Marking this sheet as bizarre."
+        @cancelProcessing = true
+      end
+    end
+  end
+
+  # Tries to determine the offset of the scanned image.
+  def determine_offset
+    debug "  Determining offset" if @verbose
+    @offset = []
+    0.upto(page_count-1) do |i|
+      @offset[i] = {:l => nil, :r => nil, :b => nil, :t => nil}
+
+      l = [@corners[i][:tl].x, @corners[i][:bl].x].compact
+      r = [@corners[i][:tr].x, @corners[i][:br].x].compact
+      t = [@corners[i][:tl].y, @corners[i][:tr].y].compact
+      b = [@corners[i][:bl].y, @corners[i][:br].y].compact
+      @offset[i][:l] = l.sum / l.size if l.size > 0
+      @offset[i][:r] = r.sum / r.size if r.size > 0
+      @offset[i][:t] = t.sum / t.size if t.size > 0
+      @offset[i][:b] = b.sum / b.size if b.size > 0
+
+      if @offset[i].any_nil?
+        debug "    Couldn't determine offset for current sheet on page #{i+1}."
+        debug "    Marking this sheet as bizarre."
+        @cancelProcessing = true
+        next
+      end
+    end
+  end
+
+  # translates (moves) a coordinate to the correct position using the
+  # determined offset.
   def translate(img_id, coord)
-    # expected offset from top left corner
     # TWEAK HERE
-    off_top = 0
-    off_left = -60
+    move_top = 90
+    move_left = 96
 
     o = @offset[img_id]
-    x = (o[:r]-o[:l]) * (coord.x/2480.0) + off_left
-    y = (o[:b]-o[:t]) * (coord.y/3508.0) + off_top
+    c = @corners[img_id]
+
+
+    px = coord.x/PAGE_WIDTH
+    py = coord.y/PAGE_HEIGHT
+
+    # these take the position into account instead of simply using the
+    # arithmetic mean. Since the corners themselves are subjected to
+    # rotation, this also corrects the rotation.
+    off_top = c[:tl].y * (1-px) + c[:tr].y * px
+    off_bottom = c[:bl].y * (1-px) + c[:br].y * px
+    off_left = c[:tl].x * (1-py) + c[:bl].x * py
+    off_right = c[:tr].x * (1-py) + c[:br].x * py
+
+    x =  coord.x - move_left + off_left # 0.9995
+    y = 0.997*(coord.y - move_top + off_top)
+
+    # draw_text(img_id, [x,y], "blue", asd.round_to(4))
 
     [x, y]
   end
 
+  # Translates and rotates a given coordinate (e.g. from TeX) into a
+  # real coordinate (i.e. where it is located in the image). Requires
+  # rotation and offset to be calculated beforehand.
   def correct(img_id, coord)
-    rotate(img_id, translate(img_id, coord))
+    #~ rotate(img_id, translate(img_id, coord))
+    translate(img_id, coord)
   end
 
   # Does all of the overhead work required to be able to recognize an
-  # image. More or less, it glues together all other functions and
-  # saves the output to an YAML named like the input image.
-  def parseFile(file)
+  # image. More or less, it glues together all other functions and at
+  # the end the result will be stored in the database
+  def process_file(file)
     @cancelProcessing = false
     if !File.exists?(file) || File.zero?(file)
-      puts "WARNING: File not found: " + file
+      debug "WARNING: File not found: " + file
       return
     end
 
     @currentFile = file
 
     start_time = Time.now
-    print "  Loading Image: " + file if @verbose
+    debug("  Loading Image: #{file}", "loading_image") if @verbose
 
     # Load image and yaml sheet
-    @doc = loadYAMLsheet
+    @doc = load_yaml_sheet
     @ilist = Magick::ImageList.new(file)
-    puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
 
     if @debug
       # Create @draw element for each page for debugging
       @draw = []
       0.upto(page_count-1) do |i|
-        @draw[i] = Magick::Draw.new
-        @draw[i].font_weight = 100
-        @draw[i].pointsize = 20*@dpifix
+        create_drawable(i)
+        draw_boilerplate(i, Dir.pwd, @omrsheet, file)
       end
     end
 
+    debug("  Loaded Image", "loading_image") if @verbose
+
     # do the hard work
-    locate_edges
-    determine_offset
+    locate_corners
     determine_rotation
-    process_questions
+    determine_offset
+    supplement_missing_corners unless @cancelProcessing
+    process_questions unless @cancelProcessing
 
     # Draw debugging image with thresholds, selected fields, etc.
     if @debug
+      debug("  Applying debug drawing", "debug_print") if @verbose
       0.upto(page_count-1) do |i|
         begin
           # reduce black to light gray so transparent debug output may
@@ -792,21 +783,20 @@ class PESTOmr < PESTDatabaseTools
           @draw[i].draw(@ilist[i])
         rescue; end
       end
+      debug("  Applied drawing", "debug_print") if @verbose
 
-      start_time = Time.now
+
+      dbgFlnm = gen_new_filename(file, "_DEBUG.jpg")
+      debug("  Saving Image: #{dbgFlnm}", "saving_image") if @verbose
       img = @ilist.append(false)
-      #~ img = img.scale(0.5)
-      dbgFlnm = getNewFileName(file, "_DEBUG.jpg")
-      print "  Saving Image: " + dbgFlnm if @verbose
-      img.write(dbgFlnm) { self.quality = 75 }
-      puts " (took: " + (Time.now-start_time).to_s + " s)" if @verbose
+      img.write(dbgFlnm) { self.quality = 100 }
+      debug("  Saved Image", "saving_image") if @verbose
     end
-    #exit # FIXME
 
     if @cancelProcessing
-      puts
-      puts "  Found boxes to be out of bounds. Moving to bizzare:"
-      puts "  " + File.basename(file)
+      debug "  Something went wrong while recognizing this sheet."
+      debug "  " + File.basename(file)
+      return @test_mode # don't move the sheet if in test_mode
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
       File.makedirs(dir)
       File.move(file, File.join(dir, File.basename(file)))
@@ -859,143 +849,137 @@ class PESTOmr < PESTDatabaseTools
     q << (["?"]*(vals.size)).join(", ")
     q << ")"
 
-    begin
-      #FIXME
-      #dbh.do("DELETE FROM #{yaml.db_table} WHERE path = ?", filename)
-      #dbh.do(q, *vals)
-    rescue DBI::DatabaseError => e
-      puts "Failed to insert #{File.basename(filename)} into database."
-      puts q
-      puts "Error code: #{e.err}"
-      puts "Error message: #{e.errstr}"
-      puts "Error SQLSTATE: #{e.state}"
-      puts
-      puts "Aborting."
-      exit
+
+    # only create YAMLs in debug and test mode
+    if @debug || @test_mode
+      fout = File.open(gen_new_filename(filename), "w")
+      fout.puts YAML::dump(@doc)
+      fout.close
     end
 
-    # only create YAMLs in debug mode
-    return unless @debug
-    fout = File.open(getNewFileName(filename), "w")
-    fout.puts YAML::dump(@doc)
-    fout.close
-  end
-
-  # Finds if a given page for the currently loaded @doc requires
-  # knowledge about offset and rotation.
-  def pageNeedsPositionData(id)
-    throw :documentHasTooFewPages_CheckForMissingPageBreak if @doc.pages[id].nil?
-    q = @doc.pages[id].questions
-    !(q.nil? || q.empty? || q.any? {|x| x.type == "text_wholepage"})
+    # don't write to DB in test mode
+    return if @test_mode
+    begin
+      dbh.do("DELETE FROM #{yaml.db_table} WHERE path = ?", filename)
+      dbh.do(q, *vals)
+    rescue DBI::DatabaseError => e
+      debug "Failed to insert #{File.basename(filename)} into database."
+      debug q
+      debug "Error code: #{e.err}"
+      debug "Error message: #{e.errstr}"
+      debug "Error SQLSTATE: #{e.state}"
+      debug
+      debug "Aborting due to database error."
+      exit 4
+    rescue
+      debug "Failed to insert #{File.basename(filename)} into database."
+      debug "Aborting due to random error."
+      exit 5
+    end
   end
 
   # Helper function that determines where the parsed data should go
-  def getNewFileName(file, ending = ".yaml")
+  def gen_new_filename(file, ending = ".yaml")
     return @path + "/" + File.basename(file, ".tif") + ending
   end
 
   # Checks for existing files and issues a warning if so. Returns a
   # list of non-existing files
   def remove_processed_images_from(files)
-    puts "Checking for existing files" if @verbose
+    debug "Checking for existing files" if @verbose
 
     oldsize = files.size
     dbh.execute("SELECT path FROM #{db_table}").each do |row|
       files -= row
     end
-    puts "  WARNING: #{oldsize-files.size} files already exist and have been skipped." if oldsize != files.size
+    if oldsize != files.size
+      debug "  WARNING: #{oldsize-files.size} files already exist and have been skipped."
+    end
 
     files
   end
 
   # Iterates a list of filenames and parses each. Checks for existing
-  # files if told so and does all that "processing time" yadda yadda.
-  def parseFilenames(files)
-    i = 0
-    f = Float.induced_from(files.length)
-    allfile = f.to_i.to_s
-
+  # files if told so.
+  def process_file_list(files)
     overall_time = Time.now
-    skippedFiles = 0
+    skipped_files = 0
 
-    files.each do |file|
+    debug "Processing first of #{files.length} files"
+
+    files.each_with_index do |file, i|
       # Processes the file and prints processing time
       file_time = Time.now
-      i += 1
 
-      curfile = i.to_i.to_s
-      percentage = (i/f*100.0).to_i.to_s
-
-      if @verbose
-        print "Processing File " + curfile + "/" + allfile
-        puts  " (" + percentage + "%)"
-      end
+      percentage = (i.to_f/files.length*100.0).to_i
+      debug("Processing File #{i}/#{files.length} (#{percentage}%)", "whole_file") if @verbose
 
       begin
-        parseFile(file)
+        process_file(file)
       rescue => e
-        puts "FAILED: #{file}"
+        debug "FAILED: #{file}"
+        message = "\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace.join("\n")}"
         File.open("PEST_OMR_ERROR.log", 'a+') do |errlog|
-        errlog.write("\n\n\n\nFAILED: #{file}\n#{e.message}\n#{e.backtrace.join("\n")}")
+          errlog.write(message)
         end
-        puts "="*20
-        puts "OMR is EXITING! Fix this issue before attemping again! (See PEST_OMR_ERROR.log)"
-        exit
+        debug "="*20
+        debug "OMR is EXITING! Fix this issue before attemping again! (See PEST_OMR_ERROR.log)"
+        debug message if @verbose
+        exit 1
       end
 
       if @verbose
-        puts "  Processing Time: " + (Time.now-file_time).to_s + " s"
-        puts ""
+        debug("Processed file", "whole_file")
+        debug
       end
 
       # Calculates and prints time remaining
-      rlFiles = Float.induced_from(i - skippedFiles)
-      if rlFiles > 0
-        timePerFile = (Time.now-overall_time)/rlFiles
-        filesLeft = (files.length-rlFiles)
-        timeleft = ((timePerFile*filesLeft/60)+0.5).to_i.to_s
+      processed_files = i+1 - skipped_files
+      if processed_files > 0
+        time_per_file = (Time.now-overall_time)/processed_files.to_f
+        remaining_files = (files.length-processed_files)
+        timeleft = time_per_file*remaining_files/60.0
         if @verbose
-          puts "Time remaining: " + timeleft + " m"
+          debug "Time remaining: #{timeleft.as_time}"
         else
-          puts timeleft + " m left (" + percentage + "%, " + curfile + "/" + allfile + ")"
+          percentage = ((i+1).to_f/files.length*100.0).to_i
+          debug "#{timeleft.as_time} left (#{percentage}%, #{i+1}/#{files.length})"
         end
       end
     end
 
     # Print some nice stats
-    puts
-    puts
-    puts
-    puts
+    debug
+    debug
     t = Time.now-overall_time
-    f = files.length - skippedFiles
-    print "Total Time: " + (t/60).to_s + " m "
-    puts "(for " + f.to_s + " files)"
-    puts "(that's " + (t/f).to_s + " s per file)"
+    f = files.length - skipped_files
+    debug "Total Time: #{(t/60).as_time} (for #{f} files)"
+    debug "(that's #{((t/f)/60).as_time} per file)"
   end
 
   # Parses the given OMR sheet and extracts globally interesting data
   # and ensures the database table exists.
   def parse_omr_sheet
     return unless @db_table.nil?
+    debug "Parsing OMR sheet…"
 
     if !File.exists?(@omrsheet)
-      puts "Couldn't find given OMR sheet (" + @omrsheet + ")"
-      exit
+      debug "Couldn't find given OMR sheet (" + @omrsheet + ")"
+      exit 6
     end
-    # can’t use loadYAMLsheet here because it needs more dependencies
+    # can’t use load_yaml_sheet here because it needs more dependencies
     # that are not yet available
     doc = YAML::load(File.read(@omrsheet))
 
     @page_count = doc.pages.count
     @db_table = doc.db_table
     if @db_table.nil?
-      puts "ERROR: OMR Sheet #{@omrsheet} doesn’t define in which table the results should be stored. Add a db_table value to the form in the YAML root."
-      puts "Exiting."
-      exit 1
+      debug "ERROR: OMR Sheet #{@omrsheet} doesn’t define in which table the results should be stored. Add a db_table value to the form in the YAML root."
+      debug "Exiting."
+      exit 2
     end
 
-    create_table_if_required(doc)
+    create_table_if_required(doc) unless @test_mode
   end
 
   # returns the db_table that is used for the currently processed form
@@ -1011,52 +995,8 @@ class PESTOmr < PESTDatabaseTools
     @page_count
   end
 
-  # creates the database table as defined by the given YAML document.
-  def create_table_if_required(f)
-    # Note that the barcode is only unique for each CourseProf, but
-    # not for each sheet. That's why path is used as unique key.
-    q = "CREATE TABLE #{f.db_table} ("
-
-    f.questions.each do |quest|
-      next if quest.db_column.nil?
-      if quest.db_column.is_a?(Array)
-        quest.db_column.each do |a|
-          q << "#{a} INTEGER, "
-        end
-      else
-        q << "#{quest.db_column} INTEGER, "
-      end
-    end
-
-    q << "path VARCHAR(255) NOT NULL UNIQUE, "
-    q << "barcode INTEGER default NULL, "
-    q << "abstract_form TEXT default NULL "
-    q << ");"
-
-    begin
-      dbh.do(q)
-      puts "Created #{f.db_table}"
-    rescue => e
-      # There is no proper method supported by MySQL, PostgreSQL and
-      # SQLite to find out if a table already exists. So, if above
-      # command failed because the table exists, selecting something
-      # from it should work fine. If it doesn’t, print an error message.
-      begin
-        dbh.do("SELECT * FROM #{f.db_table}")
-      rescue
-        puts "Note: Creating #{name} (table: #{f.db_table}) failed. Possible causes:"
-        puts "* SQL backend is down/misconfigured"
-        puts "* used SQL query is not supported by your SQL backend"
-        puts "Query was #{q}"
-        print "Error: "
-        pp e
-        exit
-      end
-    end
-  end
-
   # Loads the YAML file and converts LaTeX's scalepoints into pixels
-  def loadYAMLsheet
+  def load_yaml_sheet
     # it is faster create new YAMLs by marshaling them instead of having
     # to parse them again.
     return Marshal.load(@omrsheet_parsed) if @omrsheet_parsed
@@ -1065,15 +1005,15 @@ class PESTOmr < PESTDatabaseTools
       next if p.questions.nil?
       p.questions.each do |q|
         if q.saveas && q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
-          puts "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
-          exit
+        debug "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
+          exit 7
         end
         next if q.boxes.nil?
         q.boxes.each do |b|
           b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
           b.height = b.height/SP_TO_PX*@dpifix unless b.height.nil?
           b.x = b.x / SP_TO_PX*@dpifix
-          b.y = 3508.0*@dpifix - (b.y / SP_TO_PX*@dpifix)
+          b.y = PAGE_HEIGHT*@dpifix - (b.y / SP_TO_PX*@dpifix)
         end
       end
     end
@@ -1083,59 +1023,65 @@ class PESTOmr < PESTDatabaseTools
 
   # Reads the commandline arguments and does some basic sanity checking
   # Returns non-empty list of files to be processed.
-  def parseArguments
+  def parse_commandline
     # Define useful default values
-    @omrsheet  = nil
-    @path    = nil
-    @overwrite = false
-    @debug   = false
-    dpi    = 300.0
-    @cores   = 1
+    @omrsheet,  @path  = nil, nil
+    @overwrite, @debug = false, false
+    @test_mode = false
+    dpi        = 300.0
+    @cores     = 1
 
     # Option Parser
-    opt = OptionParser.new do |opts|
-      opts.banner = "Usage: omr.rb --omrsheet omrsheet.yaml --path workingdir [options] [file1 file2 ...]"
-      opts.separator("")
-      opts.separator("REQUIRED ARGUMENTS:")
-      opts.on("-s", "--omrsheet OMRSHEET", "Path to the OMR Sheet that should be used to parse the sheets") { |sheet| @omrsheet = sheet }
+    begin
+      opt = OptionParser.new do |opts|
+        opts.banner = "Usage: omr2.rb --omrsheet omrsheet.yaml --path workingdir [options] [file1 file2 …]"
+        opts.separator("")
+        opts.separator("REQUIRED ARGUMENTS:")
+        opts.on("-s", "--omrsheet OMRSHEET", "Path to the OMR Sheet that should be used to parse the sheets") { |sheet| @omrsheet = sheet }
 
-      opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the output will be saved.", "All image paths are relative to this.") { |path| @path = path.chomp("/") }
+        opts.on("-p", "--path WORKINGDIR", "Path to the working directory where all the output will be saved.", "All image paths are relative to this.") { |path| @path = path.chomp("/") }
 
-      opts.separator("")
-      opts.separator("OPTIONAL ARGUMENTS:")
-      opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { @overwrite = true }
+        opts.separator("")
+        opts.separator("OPTIONAL ARGUMENTS:")
+        opts.on("-o", "--overwrite", "Specify if you want to output files in the working directory to be overwritten") { @overwrite = true }
 
-      opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| @cores = c }
+        opts.on("-c", "--cores CORES", Integer, "Number of cores to use (=processes to start)", "This spawns a new ruby process for each core, so if you want to stop processing you need to kill each process. If there are no other ruby instances running, type this command: killall ruby") { |c| @cores = c }
 
-      opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
+        opts.on("-q", "--dpi DPI", Float, "The DPI the sheets have been scanned with.", "This value is autodetected ONCE. This means you cannot mix sheets with different DPI values") { |dpi| @dpifix = dpi/300.0 }
 
-      opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
+        opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
 
-      opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.") { @debug = true }
+        opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.", "Automatically activates debug database.") { @debug = true }
 
-      opts.on( '-h', '--help', 'Display this screen' ) { puts opts; exit }
-    end
-    opt.parse!
+        opts.on("-t", "--testmode", "Sets useful values for running tests.", "Disables database access and stops files from being moved to bizarre/.") { @test_mode = true }
 
-    # For some reason, the option parser doesn't halt the app over
-    # missing mandatory arguments, so we do have to check manually
-    if !@path || !@omrsheet
-      opt.parse(["-h"])
-    end
-
-    if !File.directory?(@path)
-      puts "Given directory #{@path} does not exist, skipping."
+        opts.on( '-h', '--help', 'Display this screen' ) { puts opts; exit }
+      end
+      opt.parse!
+    rescue
+      puts "Parsing arguments didn't work. Please check your commandline is correct."
+      puts
+      opt.parse(["-h"]) if !@path || !@omrsheet
       exit
     end
 
-    # if debug is activated, use SQLite database instead
-    #set_debug_database if @debug # FIXME FIXME
+    # For some reason, the option parser doesn't halt the app over
+    # missing mandatory arguments, so we do have to check manually
+    opt.parse(["-h"]) if !@path || !@omrsheet
+
+    if !File.directory?(@path)
+      debug "Given directory #{@path} does not exist, skipping."
+      exit
+    end
+
+    # if debug is activated, use SQLite database instead.
+    set_debug_database if @debug
 
     # Verbose and multicore processing don't really work together,
     # the output is just too ugly.
     if @verbose && @cores > 1
       @cores = 1
-      puts "WARNING: Disabled multicore processing because verbose is enabled."
+      debug "WARNING: Disabled multicore processing because verbose is enabled."
     end
 
     files = []
@@ -1144,7 +1090,7 @@ class PESTOmr < PESTDatabaseTools
     if ARGV.empty?
       files = Dir.glob(@path + "/*.tif")
       if files.empty?
-        puts "No tif images found in #{@path}. Exiting."
+        debug "No tif images found in #{@path}. Exiting."
         exit
       end
     else
@@ -1155,7 +1101,7 @@ class PESTOmr < PESTDatabaseTools
     # wants them to be overwritten
     files = remove_processed_images_from(files) if !@overwrite
     if files.empty?
-      puts "All files have been processed already. Exiting."
+      debug "All files have been processed already. Exiting."
       exit
     end
 
@@ -1163,84 +1109,78 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # Splits the given file and reports the status of each sub-process.
-  def delegateWork(files)
-    puts "Owning certain software, " + @cores.to_s + " sheets at a time"
+  def delegate_work(files)
+    debug "Owning certain software, #{@cores} sheets at a time"
     splitFiles = files.chunk(@cores)
 
-    path = " -p " + @path.gsub(/(?=\s)/, "\\")
+    path  = " -p " + @path.gsub(/(?=\s)/, "\\")
     sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
-    d = @debug   ? " -d " : " "
-    v = @verbose   ? " -v " : " "
-    o = @overwrite ? " -o " : " "
+    d = @debug      ? " -d " : " "
+    db = @test_mode ? " -t " : " "
+    o = @overwrite  ? " -o " : " "
 
-    tmpfiles = []
-    threads = []
+    tmpfiles, threads, exit_codes = [], [], []
 
-    corecount = 0
-    splitFiles.each do |f|
-      corecount += 1
+    splitFiles.each_with_index do |f, corecount|
       next if f.empty?
 
-      tmp = Tempfile.new("pest-omr-status-#{corecount}")
+      tmp = Tempfile.new("pest-omr-status-#{corecount}").path
       tmpfiles << tmp
 
       list = ""
       f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
-      # This is the amount of spaces the output of newly
-      # spawned instances are indented. Quite useful to keep
-      # the console output readable.
-      #~ i = " -i " + (corecount*35).to_s
       threads << Thread.new do
-        `ruby #{File.dirname(__FILE__)}/omr.rb #{sheet} #{path} #{v} #{d} #{o} #{list} &> #{tmp.path}`
+        `ruby #{File.dirname(__FILE__)}/omr2.rb #{sheet} #{path} #{db} #{d} #{o} #{list} > #{tmp}`
+        exit_codes[corecount] = $?.exitstatus
       end
     end
-    puts
 
     STDOUT.sync = false
     begin
       print_progress(tmpfiles)
     rescue SystemExit, Interrupt
-      puts
-      puts
-      puts "Halting processing threads..."
+      debug
+      debug "Halting processing threads..."
       threads.each { |x| x.kill }
-      puts "Exiting."
+      debug "All threads stopped. Exiting."
       STDOUT.flush
       exit
     end
+    exit_codes
   end
 
   # prints the progress that is printed into the given tmpfiles.
   # Returns once all tmpfiles are deleted
   def print_progress(tmpfiles)
+    last_length = 0
     while Thread.list.length > 1
       tmpfiles.reject! { |x| !File.exists?(x) }
-      print "\r"
+      print "\r" + " "*last_length + "\r"
+      last_length = 0
       tmpfiles.each_with_index do |x, i|
-        dat = `tail -n 1 #{x.path}`.strip
-        if i == tmpfiles.size - 1
-          print dat
-        else
-          print dat.ljust([dat.length+10, 50].max)
-        end
+        dat = `tail -n 1 #{x}`.strip
+        dat = dat.ljust([dat.length+10, 60].max) if i < tmpfiles.size - 1
+        print dat
+        last_length += dat.length
       end
 
       STDOUT.flush
       sleep 1
     end
-    puts "Done."
+    puts
+    debug "Done."
   end
 
   # Report if a 'unsuitable' ImageMagick version will be used
   def check_magick_version
     return if Magick::Magick_version.include?("Q8")
-    puts
-    puts "WARNING: ImageMagick version does not seem to be compiled"
-    puts "with --quantum-depth=8. This will make processing slower."
-    puts "Try running 'rake magick:all' to build a custom version"
-    puts "with all neccessary flags set. Version as reported:"
-    puts Magick::Magick_version
-    puts
+    debug
+    debug "WARNING: ImageMagick version does not seem to be compiled"
+    debug "with --quantum-depth=8. This will make processing slower."
+    debug "Try running 'rake magick:all' to build a custom version"
+    debug "with all neccessary flags set. Version as reported:"
+    debug Magick::Magick_version
+    debug
   end
 
   # Class Constructor
@@ -1248,13 +1188,18 @@ class PESTOmr < PESTDatabaseTools
     # required for multi core processing. Otherwise the data will
     # not be written to the tempfiles before the sub-process exits.
     STDOUT.sync = true
-    files = parseArguments
-    ensure_database_access
+    files = parse_commandline
+    ensure_database_access unless @test_mode
     check_magick_version
 
     # Let other ruby instances do the hard work for multi core...
     if @cores > 1
-      delegateWork(files)
+      exit_codes = delegate_work(files)
+      if exit_codes.sum > 0
+        debug "Some of the work processes failed for some reason."
+        debug "Consult PEST_OMR_ERROR.log for more information."
+        debug "Exitcodes are: #{exit_codes.join(", ")}"
+      end
     # or do it in this instance for single core processing
     else
       # Unless set manually, grab a sample image and use it to
@@ -1269,11 +1214,12 @@ class PESTOmr < PESTDatabaseTools
 
       # Iterates over the given filenames and recognizes them
       begin
-        parseFilenames(files)
-      rescue SystemExit, Interrupt
-        puts
-        puts "Exiting."
-        exit
+        process_file_list(files)
+      rescue Interrupt, SystemExit => e
+        ex = e.status if e && e.is_a?(SystemExit)
+        debug
+        debug "Caught exit or interrupt signal. Exiting. #{ex}"
+        exit 3
       end
     end
   end
