@@ -24,7 +24,7 @@ nn=$(echo $1 | sed -r 's/.*\_([0-9]+).*/\1/')
 n=$(( $nn - 1 ))
 
 
-pnmtotiff "foo_${nn}.pnm" > "foo_${nn}.tif"
+pnmtotiff -lzw "foo_${nn}.pnm" > "foo_${nn}.tif"
 rm "${1}"
 
 rem=$(( $nn % 2 ))
