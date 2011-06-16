@@ -1,0 +1,1851 @@
+--- !ruby/object:AbstractForm
+db_table: evaldaten_SS_11_0
+pages: 
+- !ruby/object:Page 
+  questions: 
+  - !ruby/object:Question
+    qtext: "\IeC {\"U}bungsgruppe"
+    save_as: ""
+    type: square
+    db_column: tutnum
+    boxes:
+    - !ruby/object:Box
+      x: 2517241
+      y: 46341936
+      choice: "1"
+      height: 0
+      text: "Mustafa Mustermann"
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 46341936
+      choice: "2"
+      height: 0
+      text: "Fred Nurk"
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 46341936
+      choice: "3"
+      height: 0
+      text: "Ashok Kumar"
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 46341936
+      choice: "4"
+      height: 0
+      text: "Juan P\IeC {\'e}rez"
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 46341936
+      choice: "5"
+      height: 0
+      text: "Jakob Mierscheid"
+      width: 0
+    - !ruby/object:Box
+      x: 2517241
+      y: 45518148
+      choice: "6"
+      height: 0
+      text: "Iwan Iwanowitsch"
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 45518148
+      choice: "7"
+      height: 0
+      text: "Pierre Dupont"
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 45518148
+      choice: "8"
+      height: 0
+      text: "John Smith"
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 45518148
+      choice: "9"
+      height: 0
+      text: "Eddi Exzellenz"
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 45518148
+      choice: "10"
+      height: 0
+      text: "Joe Bloggs"
+      width: 0
+    - !ruby/object:Box
+      x: 2517241
+      y: 44694360
+      choice: "11"
+      height: 0
+      text: "John Doe"
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 44694360
+      choice: "12"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 44694360
+      choice: "13"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 44694360
+      choice: "14"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 44694360
+      choice: "15"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2517241
+      y: 43870572
+      choice: "16"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 43870572
+      choice: "17"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 43870572
+      choice: "18"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 43870572
+      choice: "19"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 43870572
+      choice: "20"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2517241
+      y: 43046784
+      choice: "21"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 43046784
+      choice: "22"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 43046784
+      choice: "23"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 43046784
+      choice: "24"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 43046784
+      choice: "25"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 2517241
+      y: 42222996
+      choice: "26"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 9655471
+      y: 42222996
+      choice: "27"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 16793701
+      y: 42222996
+      choice: "28"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 23931931
+      y: 42222996
+      choice: "29"
+      height: 0
+      text: "\ "
+      width: 0
+    - !ruby/object:Box
+      x: 31070161
+      y: 42222996
+      choice: "30"
+      height: 0
+      text: "\ keine"
+      width: 0
+  - !ruby/object:Question
+    qtext: "Studienfach"
+    save_as: ""
+    type: square
+    db_column: studienziel
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "Diplom"
+      width: 0
+      x: 2515380
+      y: 40257541
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Lehramt"
+      width: 0
+      x: 8888759
+      y: 40257541
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "Bachelor"
+      width: 0
+      x: 15262138
+      y: 40257541
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "Master"
+      width: 0
+      x: 21635517
+      y: 40257541
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "Promotion"
+      width: 0
+      x: 28008896
+      y: 40257541
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "Sonstiges"
+      width: 0
+      x: 34382275
+      y: 40257541
+  - !ruby/object:Question
+    qtext: "Hauptfach"
+    save_as: ""
+    type: square
+    db_column: hauptfach
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "Mathematik"
+      width: 0
+      x: 2515380
+      y: 38616587
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Physik"
+      width: 0
+      x: 8888759
+      y: 38616587
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "Informatik"
+      width: 0
+      x: 15262138
+      y: 38616587
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "Sonstiges"
+      width: 0
+      x: 34382275
+      y: 38616587
+  - !ruby/object:Question
+    qtext: "Fachsemester"
+    save_as: ""
+    type: square
+    db_column: semester
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "\hspace  {-0.5em}1"
+      width: 0
+      x: 2515380
+      y: 37089926
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "\hspace  {-0.5em}2"
+      width: 0
+      x: 4631684
+      y: 37089926
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "\hspace  {-0.5em}3"
+      width: 0
+      x: 6747987
+      y: 37089926
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "\hspace  {-0.5em}4"
+      width: 0
+      x: 8864291
+      y: 37089926
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "\hspace  {-0.5em}5"
+      width: 0
+      x: 10980595
+      y: 37089926
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "\hspace  {-0.5em}6"
+      width: 0
+      x: 13096898
+      y: 37089926
+    - !ruby/object:Box
+      choice: "7"
+      height: 0
+      text: "\hspace  {-0.5em}7"
+      width: 0
+      x: 15213202
+      y: 37089926
+    - !ruby/object:Box
+      choice: "8"
+      height: 0
+      text: "\hspace  {-0.5em}8"
+      width: 0
+      x: 17329506
+      y: 37089926
+    - !ruby/object:Box
+      choice: "9"
+      height: 0
+      text: "\hspace  {-0.5em}9"
+      width: 0
+      x: 19445809
+      y: 37089926
+    - !ruby/object:Box
+      choice: "10"
+      height: 0
+      text: "\hspace  {-0.5em}10"
+      width: 0
+      x: 21562113
+      y: 37089926
+    - !ruby/object:Box
+      choice: "11"
+      height: 0
+      text: "\hspace  {-0.5em}11"
+      width: 0
+      x: 23969921
+      y: 37089926
+    - !ruby/object:Box
+      choice: "12"
+      height: 0
+      text: "\hspace  {-0.5em}12"
+      width: 0
+      x: 26377728
+      y: 37089926
+    - !ruby/object:Box
+      choice: "13"
+      height: 0
+      text: "\hspace  {-0.5em}13"
+      width: 0
+      x: 28785536
+      y: 37089926
+    - !ruby/object:Box
+      choice: "14"
+      height: 0
+      text: "\hspace  {-0.5em}14"
+      width: 0
+      x: 31193344
+      y: 37089926
+    - !ruby/object:Box
+      choice: "15"
+      height: 0
+      text: "\hspace  {-0.5em}15"
+      width: 0
+      x: 33601151
+      y: 37089926
+    - !ruby/object:Box
+      choice: "16"
+      height: 0
+      text: "\hspace  {-0.5em}> 15"
+      width: 0
+      x: 36008959
+      y: 37089926
+  - !ruby/object:Question
+    qtext: "Welcher Anteil der Studierenden, die am Anfang an der Vorlesung teilgenommen haben, ist deiner Sch\IeC {\"a}tzung nach noch dabei?"
+    save_as: ""
+    type: square
+    db_column: v5
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "0--20\%"
+      width: 0
+      x: 22294469
+      y: 34713358
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "20--40\%"
+      width: 0
+      x: 25371193
+      y: 34713358
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "40--60\%"
+      width: 0
+      x: 28820848
+      y: 34713358
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "60--80\%"
+      width: 0
+      x: 32270502
+      y: 34713358
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "80--100\%"
+      width: 0
+      x: 35813396
+      y: 34713358
+  - !ruby/object:Question
+    qtext: "Stimmt das von der/dem Dozent/in erwartete Vorwissen mit deinem eigenen \IeC {\"u}berein?"
+    save_as: ""
+    type: square
+    db_column: v6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 32864803
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 32864803
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 32864803
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 32864803
+  - !ruby/object:Question
+    qtext: "Wurden die Lernziele zu Beginn klar definiert?"
+    save_as: ""
+    type: square
+    db_column: v7
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, sehr"
+      width: 0
+      x: 22294469
+      y: 31016247
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 31016247
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28820848
+      y: 31016247
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 31016247
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 31016247
+  - !ruby/object:Question
+    qtext: "Wie ist der Stoffumfang der Vorlesung?"
+    save_as: ""
+    type: square
+    db_column: v8
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "zu gro\IeC {\ss }"
+      width: 0
+      x: 22294469
+      y: 29167691
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "angemessen"
+      width: 0
+      x: 28820847
+      y: 29167691
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "zu gering"
+      width: 0
+      x: 35813395
+      y: 29167691
+  - !ruby/object:Question
+    qtext: "Sind die vergebenen Leistungspunkte gemessen am Arbeitsaufwand f\IeC {\"u}r diese Vorlesung angemessen (1\,LP entspricht 25-30\,h)?"
+    save_as: ""
+    type: square
+    db_column: v9
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "viel zu wenig"
+      width: 0
+      x: 22294469
+      y: 27319135
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 27319135
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "angemessen"
+      width: 0
+      x: 28820848
+      y: 27319135
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 27319135
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "viel zu viel"
+      width: 0
+      x: 35813396
+      y: 27319135
+  - !ruby/object:Question
+    qtext: "Wie sch\IeC {\"a}tzt du deinen Lernzuwachs ein?"
+    save_as: ""
+    type: square
+    db_column: v10
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr hoch"
+      width: 0
+      x: 22294469
+      y: 25470580
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 25470580
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28820848
+      y: 25470580
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 25470580
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "gering"
+      width: 0
+      x: 35813396
+      y: 25470580
+  - !ruby/object:Question
+    qtext: "Wie ist das durchschnittliche Tempo der Vorlesung f\IeC {\"u}r dich?"
+    save_as: ""
+    type: square
+    db_column: v11
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "viel zu hoch"
+      width: 0
+      x: 22294469
+      y: 23622024
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 23622024
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "genau richtig"
+      width: 0
+      x: 28820848
+      y: 23622024
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 23622024
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "viel zu niedrig"
+      width: 0
+      x: 35813396
+      y: 23622024
+  - !ruby/object:Question
+    qtext: "Wie gut ist die Vorlesung strukturiert?"
+    save_as: ""
+    type: square
+    db_column: v12
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 21773468
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 21773468
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28820848
+      y: 21773468
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 21773468
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 21773468
+  - !ruby/object:Question
+    qtext: "Wird der Lehrstoff verst\IeC {\"a}ndlich vermittelt?"
+    save_as: ""
+    type: square
+    db_column: v13
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, sehr"
+      width: 0
+      x: 22294469
+      y: 19924913
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 19924913
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28820848
+      y: 19924913
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 19924913
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "garnicht"
+      width: 0
+      x: 35813396
+      y: 19924913
+  - !ruby/object:Question
+    qtext: "Wie empfindest du den Vorlesungsstil?"
+    save_as: ""
+    type: square
+    db_column: v14
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "motivierend"
+      width: 0
+      x: 22294469
+      y: 18076357
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 18076357
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 18076357
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "frustrierend"
+      width: 0
+      x: 35813396
+      y: 18076357
+  - !ruby/object:Question
+    qtext: "Ist die Vorlesung an den \emph  {richtigen} Stellen ausf\IeC {\"u}hrlich?"
+    save_as: ""
+    type: square
+    db_column: v15
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, optimal"
+      width: 0
+      x: 22294469
+      y: 16227801
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 16227801
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 16227801
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "nein, gar nicht"
+      width: 0
+      x: 35813396
+      y: 16227801
+  - !ruby/object:Question
+    qtext: "Wie gut gelingt es der/dem Dozentin/en, schwierige Themen verst\IeC {\"a}ndlich zu erkl\IeC {\"a}ren?"
+    save_as: ""
+    type: square
+    db_column: v16
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 14379245
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 14379245
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 14379245
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 14379245
+  - !ruby/object:Question
+    qtext: "Gelingt es der/dem Dozentin/en, wesentliche Sachverhalte besonders herauszuarbeiten?"
+    save_as: ""
+    type: square
+    db_column: v17
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja"
+      width: 0
+      x: 22294469
+      y: 12530690
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "nein"
+      width: 0
+      x: 26350153
+      y: 12530690
+  - !ruby/object:Question
+    qtext: "Ist das Pr\IeC {\"a}sentationsmedium (Tafel/Folien\dots  ) angemessen?"
+    save_as: ""
+    type: square
+    db_column: v18
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja"
+      width: 0
+      x: 22294469
+      y: 10682134
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "nein"
+      width: 0
+      x: 26350153
+      y: 10682134
+  - !ruby/object:Question
+    qtext: "Wie gut ist die Pr\IeC {\"a}sentation (Tafelbild\dots  )?"
+    save_as: ""
+    type: square
+    db_column: v19
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 8833578
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 8833578
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 8833578
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 35813396
+      y: 8833578
+  - !ruby/object:Question
+    qtext: "Gibt es Probleme mit der Pr\IeC {\"a}sentation? Wenn ja, welche?"
+    type: square
+    db_column: 
+    - v20a
+    - v20b
+    - v20c
+    - v20d
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "keine"
+      width: 0
+      x: 22294469
+      y: 6985022
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Darstellung wirr"
+      width: 0
+      x: 26256913
+      y: 6985022
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "Schrift unleserlich"
+      width: 0
+      x: 31384782
+      y: 6985022
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "sonstige"
+      width: 0
+      x: 35813396
+      y: 6985022
+  - !ruby/object:Question
+    qtext: "Wie ist die akustische/sprachliche Verst\IeC {\"a}ndlichkeit des m\IeC {\"u}ndlichen Vortrags?"
+    save_as: ""
+    type: square
+    db_column: v21
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 5136467
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 5136467
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 5136467
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 35813396
+      y: 5136467
+  - !ruby/object:Question
+    qtext: "Gibt es Probleme mit dem m\IeC {\"u}ndlichen Vortrag? Wenn ja, welche?"
+    type: square
+    db_column: 
+    - v22a
+    - v22b
+    - v22c
+    - v22d
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "keine"
+      width: 0
+      x: 22294469
+      y: 3287911
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "zu leise Verst\IeC {\"a}rkeranlage"
+      width: 0
+      x: 25371193
+      y: 3287911
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "mangelnde Sprachkenntnisse"
+      width: 0
+      x: 28820848
+      y: 3287911
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "Studis zu laut"
+      width: 0
+      x: 32270502
+      y: 3287911
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "sonstige"
+      width: 0
+      x: 35813396
+      y: 3287911
+- !ruby/object:Page
+  questions:
+  - !ruby/object:Question
+    qtext: "Traust du dich, der/dem Dozentin/en w\IeC {\"a}hrend (oder nach) der Vorlesung Fragen zu stellen?"
+    save_as: ""
+    type: square
+    db_column: v23
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja"
+      width: 0
+      x: 22294469
+      y: 51693489
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "nein"
+      width: 0
+      x: 26350153
+      y: 51693489
+  - !ruby/object:Question
+    qtext: "Wird auf Fragen und Belange der Studierenden eingegangen?"
+    save_as: ""
+    type: square
+    db_column: v24
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja sehr"
+      width: 0
+      x: 22294469
+      y: 49758684
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 25371193
+      y: 49758684
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 28820848
+      y: 49758684
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: ""
+      width: 0
+      x: 32270502
+      y: 49758684
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "garnicht"
+      width: 0
+      x: 35813396
+      y: 49758684
+  - !ruby/object:Question
+    qtext: "Wie gut beantwortet der/die Dozent/in Fragen?"
+    save_as: ""
+    type: square
+    db_column: v25
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 47823878
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 47823878
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 31384782
+      y: 47823878
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 47823878
+  - !ruby/object:Question
+    qtext: "Wie gut ist das vorlesungsbegleitende Material (Skript/Folien/\dots  )?"
+    save_as: ""
+    type: square
+    db_column: v26
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 45889073
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 25371193
+      y: 45889073
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 28820848
+      y: 45889073
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 32270502
+      y: 45889073
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "nicht vorhanden"
+      width: 0
+      x: 35813396
+      y: 45889073
+  - !ruby/object:Question
+    qtext: "Bewerte die Vorlesung insgesamt mit einer Schulnote:"
+    save_as: ""
+    type: square
+    db_column: v27
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "1"
+      width: 0
+      x: 22275819
+      y: 43954267
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "2"
+      width: 0
+      x: 25007568
+      y: 43954267
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "3"
+      width: 0
+      x: 27720680
+      y: 43954267
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "4"
+      width: 0
+      x: 30452443
+      y: 43954267
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "5"
+      width: 0
+      x: 33174874
+      y: 43954267
+    - !ruby/object:Box
+      choice: "6"
+      height: 0
+      text: "6"
+      width: 0
+      x: 35832034
+      y: 43954267
+  - !ruby/object:Question
+    qtext: "W\IeC {\"u}rdest du diese Vorlesung bei dieser/m Dozentin/en weiterempfehlen?"
+    save_as: ""
+    type: square
+    db_column: v28
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja"
+      width: 0
+      x: 22294469
+      y: 42019462
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "nein"
+      width: 0
+      x: 26350153
+      y: 42019462
+  - !ruby/object:Question
+    choice: 
+    qtext: "Ist dir an der Veranstaltung zus\IeC {\"a}tzlich noch etwas aufgefallen? (Falls ja, bitte Stichworte angeben)"
+    save_as: "vcomment"
+    type: text
+    db_column: "vcomment"
+    boxes:
+    - !ruby/object:Box
+      type: start
+      height: 743249
+      x: 24501508
+      y: 40350072
+    - !ruby/object:Box
+      type: end
+      x: 37334317
+      y: 40350072
+    - !ruby/object:Box
+      x: 1823963
+      y: 39727480
+      height: 3300000
+      width: 39020584
+  - !ruby/object:Question
+    qtext: "Gehst du in die \IeC {\"U}bungen?"
+    save_as: ""
+    type: square
+    db_column: u1
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja"
+      width: 0
+      x: 22294469
+      y: 33943256
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "manchmal"
+      width: 0
+      x: 28820847
+      y: 33943256
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "nein"
+      width: 0
+      x: 35813395
+      y: 33943256
+  - !ruby/object:Question
+    qtext: "Gibt es Probleme bei der Organisation der \IeC {\"U}bungsgruppen? Wenn ja, welche?"
+    type: square
+    db_column: 
+    - u2a
+    - u2b
+    - u2c
+    - u2d
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "keine"
+      width: 0
+      x: 22294469
+      y: 32008450
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "\relax \fontsize  {7}{8}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{zu wenig Gruppen}"
+      width: 0
+      x: 25371193
+      y: 32008450
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "\relax \fontsize  {7}{8}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Anmelde\discretionary {-}{}{}modalit\IeC {\"a}ten}"
+      width: 0
+      x: 28820848
+      y: 32008450
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "\relax \fontsize  {7}{8}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Termin\discretionary {-}{}{}konflikte}"
+      width: 0
+      x: 32270502
+      y: 32008450
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "sonstige"
+      width: 0
+      x: 35813396
+      y: 32008450
+  - !ruby/object:Question
+    qtext: "Wie gut sind die Aufgaben auf die Vorlesung abgestimmt?"
+    save_as: ""
+    type: square
+    db_column: u3
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 29549357
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 29549357
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 29549357
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 35813396
+      y: 29549357
+  - !ruby/object:Question
+    qtext: "Wie sorgf\IeC {\"a}ltig (fehlerfrei, unmissverst\IeC {\"a}ndlich) sind die Aufgaben gestellt?"
+    save_as: ""
+    type: square
+    db_column: u4
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr"
+      width: 0
+      x: 22294469
+      y: 27614551
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 27614551
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 27614551
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 27614551
+  - !ruby/object:Question
+    qtext: "Wie hoch ist das Niveau der Aufgaben?"
+    save_as: ""
+    type: square
+    db_column: u5
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "zu hoch"
+      width: 0
+      x: 22294469
+      y: 25679746
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "genau richtig"
+      width: 0
+      x: 28820847
+      y: 25679746
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "zu niedrig"
+      width: 0
+      x: 35813395
+      y: 25679746
+  - !ruby/object:Question
+    qtext: "Wie lange brauchst du, um die Aufgaben zu bearbeiten?"
+    save_as: ""
+    type: square
+    db_column: u6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "<4 h"
+      width: 0
+      x: 22294469
+      y: 23744940
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "4--6 h"
+      width: 0
+      x: 25371193
+      y: 23744940
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "6--8 h"
+      width: 0
+      x: 28820848
+      y: 23744940
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "8--10 h"
+      width: 0
+      x: 32270502
+      y: 23744940
+    - !ruby/object:Box
+      choice: "5"
+      height: 0
+      text: "> 10 h"
+      width: 0
+      x: 35813396
+      y: 23744940
+  - !ruby/object:Question
+    qtext: "Ist dein/e \IeC {\"U}bungsgruppenleiter/in ein/e gute/r Lehrer/in?"
+    save_as: ""
+    type: square
+    db_column: t1
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, sehr"
+      width: 0
+      x: 22294469
+      y: 21810135
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 21810135
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 21810135
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "nein, gar nicht"
+      width: 0
+      x: 35813396
+      y: 21810135
+  - !ruby/object:Question
+    qtext: "H\IeC {\"a}ltst du deine/n \IeC {\"U}bungsgruppenleiter/in f\IeC {\"u}r fachlich kompetent?"
+    save_as: ""
+    type: square
+    db_column: t2
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, sehr"
+      width: 0
+      x: 22294469
+      y: 19875329
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 19875329
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 19875329
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "nein, gar nicht"
+      width: 0
+      x: 35813396
+      y: 19875329
+  - !ruby/object:Question
+    qtext: "Wie gut ist dein/e \IeC {\"U}bungsgruppenleiter/in vorbereitet?"
+    save_as: ""
+    type: square
+    db_column: t3
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 17940523
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 17940523
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 17940523
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 17940523
+  - !ruby/object:Question
+    qtext: "Wie geht der/die \IeC {\"U}bungsgruppenleiter/in auf Fragen zur Vorlesung ein?"
+    save_as: ""
+    type: square
+    db_column: t4
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 16005718
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 16005718
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 16005718
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 16005718
+  - !ruby/object:Question
+    qtext: "Nutzt der/die \IeC {\"U}bungsgruppenleiter/in die Zeit sinnvoll? Wenn nicht, was m\IeC {\"o}chtest du lieber mehr machen?"
+    type: square
+    db_column: 
+    - t5a
+    - t5b
+    - t5c
+    - t5d
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "ja, gut so"
+      width: 0
+      x: 22294469
+      y: 14070912
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "Aufgaben ausf\IeC {\"u}hrlicher besprechen"
+      width: 0
+      x: 28820847
+      y: 14070912
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "\relax \fontsize  {7}{8}\selectfont  \par@update \abovedisplayskip 5\p@ plus2\p@ minus2\p@ \abovedisplayshortskip \z@ plus1\p@ \belowdisplayshortskip 3\p@ plus\p@ minus2\p@ \def \leftmargin \leftmargini \parsep 4\p@ plus2\p@ minus\p@ \topsep 6\p@ plus2\p@ minus3\p@ \itemsep \parsep {\leftmargin \leftmargini \topsep 3\p@ plus\p@ minus\p@ \parsep 2\p@ plus\p@ minus\p@ \itemsep \parsep }\belowdisplayskip \abovedisplayskip \add@extra@listi {sml}{Vorlesung nachbearbeite}n"
+      width: 0
+      x: 35813395
+      y: 14070912
+  - !ruby/object:Question
+    qtext: "Wie motivierend ist dein/e \IeC {\"U}bungsgruppenleiter/in?"
+    save_as: ""
+    type: square
+    db_column: t6
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr"
+      width: 0
+      x: 22294469
+      y: 11611819
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 11611819
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 11611819
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 11611819
+  - !ruby/object:Question
+    qtext: "Wie verst\IeC {\"a}ndlich erkl\IeC {\"a}rt dein/e \IeC {\"U}bungsgruppenleiter/in?"
+    save_as: ""
+    type: square
+    db_column: t7
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 9677013
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 9677013
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 9677013
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 9677013
+  - !ruby/object:Question
+    qtext: "Wie sprachlich/akustisch verst\IeC {\"a}ndlich ist dein/e \IeC {\"U}bungsgruppenleiter/in?"
+    save_as: ""
+    type: square
+    db_column: t8
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr gut"
+      width: 0
+      x: 22294469
+      y: 7742208
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: "gut"
+      width: 0
+      x: 26256913
+      y: 7742208
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: "m\IeC {\"a}\IeC {\ss }ig"
+      width: 0
+      x: 31384782
+      y: 7742208
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "schlecht"
+      width: 0
+      x: 35813396
+      y: 7742208
+  - !ruby/object:Question
+    qtext: "Wie sorgf\IeC {\"a}ltig korrigiert dein/e \IeC {\"U}bungsgruppenleiter/in die abgegebenen L\IeC {\"o}sungen?"
+    save_as: ""
+    type: square
+    db_column: t9
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr"
+      width: 0
+      x: 22294469
+      y: 5807402
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 5807402
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 5807402
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "gar nicht"
+      width: 0
+      x: 35813396
+      y: 5807402
+  - !ruby/object:Question
+    qtext: "Wie hoch sch\IeC {\"a}tzt du den Nutzen der \IeC {\"U}bungsgruppe ein?"
+    save_as: ""
+    type: square
+    db_column: t10
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      height: 0
+      text: "sehr hoch"
+      width: 0
+      x: 22294469
+      y: 3872597
+    - !ruby/object:Box
+      choice: "2"
+      height: 0
+      text: ""
+      width: 0
+      x: 26256913
+      y: 3872597
+    - !ruby/object:Box
+      choice: "3"
+      height: 0
+      text: ""
+      width: 0
+      x: 31384782
+      y: 3872597
+    - !ruby/object:Box
+      choice: "4"
+      height: 0
+      text: "unn\IeC {\"o}tig"
+      width: 0
+      x: 35813396
+      y: 3872597
+  - !ruby/object:Question
+    choice: 
+    qtext: "Bemerkung zur \IeC {\"U}bungsgruppe, insbesondere in Hinblick auf den/die Tutor/in:"
+    save_as: "ucomment"
+    type: text
+    db_column: "ucomment"
+    boxes:
+    - !ruby/object:Box
+      type: start
+      height: 743249
+      x: 19687498
+      y: 2114341
+    - !ruby/object:Box
+      type: end
+      x: 37334317
+      y: 2114341
+    - !ruby/object:Box
+      x: 1823963
+      y: 1491749
+      height: 3300000
+      width: 39020584
