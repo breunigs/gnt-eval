@@ -170,8 +170,11 @@ def make_pdf_for(s, cp, dirname)
   end
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
-
-  `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+  # it may be useful for debugging to have a YAML for each course.
+  # however, it is not needed by gnt-eval itself, so remove it immediately
+  # before it causes any confusion.
+  `rm "#{filename}.posout"`
+  #`./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
 # automatically calls rake -T when no task is given
