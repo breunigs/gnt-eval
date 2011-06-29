@@ -143,14 +143,19 @@
 \vspace{-1.2em}\rule{19cm}{1.5pt}\vspace{0.5em}
 }
 
+% used at the end of the page to mark the end of a comment field
+\newcommand{\separator}[1]{
+  \vspace{-1.2em}\rule{19.2cm}{#1}
+}
+
 \newcommand{\comment}[3]{\write\posout{u - !ruby/object:Question}
 	\write\posout{uu choice: }
 	\write\posout{uu qtext: "#1"}
     	\write\posout{uu save_as: "#3"}
     	\write\posout{uu type: text}
     	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace{3300000sp}
-	\write\posout{uuu height: 3300000}
+	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
+	\write\posout{uuu height: 3200000}
  	\write\posout{uuu width: 39020584}
 }
 
@@ -257,4 +262,13 @@
     }
     \vspace{0.1cm}
   }
+}
+
+\newcommand{\backpagecomment}{
+  \write\posout{- !ruby/object:Page}
+  \write\posout{u questions:}
+  \write\posout{u - !ruby/object:Question}
+  \write\posout{uu type: text_wholepage}
+  \write\posout{uu save_as: "-comment"}
+  %\cleardoublepage
 }
