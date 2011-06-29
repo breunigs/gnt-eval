@@ -83,10 +83,15 @@ end
 
 # Generates a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
+  # skip if the barcode already exists
   path = File.expand_path(path)
   return true if File.exists?(path)
-  FileUtils.mkdir_p(File.join(Dir.tmpdir, "seee"))
-  tmp = Dir.mktmpdir("seee/barcode-")
+  # ensure the main temp directory exists
+  tmp = File.join(Dir.tmpdir, "seee-tmp")
+  FileUtils.mkdir_p(tmp)
+  FileUtils.chmod_R(0777, tmp)
+  # create own subfolder for each barcode
+  tmp = Dir.mktmpdir("seee-tmp/barcode-")
   # Can't change into the tmp directory here because Dir.chdir cannot
   # be nested and we might need this feature elsewhere.
   `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o #{tmp}/barcode.ps`
