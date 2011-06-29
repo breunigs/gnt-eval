@@ -22,10 +22,11 @@ class Form < ActiveRecord::Base
     $loaded_yaml_sheets ||= {}
     begin
       $loaded_yaml_sheets[id] ||= YAML::load(content)
-    rescue
+    rescue Exception => e
       # Sheet does not appear to be a valid YAML. In this case the
       # value will be nil (and thus not an AbstractForm). This will
       # later be picked up as an invalid form.
+      $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.inspect
     end
     $loaded_yaml_sheets[id]
   end
