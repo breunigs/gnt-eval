@@ -40,13 +40,14 @@ def find_barcode(filename)
   end
 end
 
+def tex_head_for(form, lang = :en)
+  f = form.abstract_form.texhead
+  f.is_a?(String) ? f : f[lang]
+end
+
 def tex_foot_for(form, lang = :en)
   f = form.abstract_form.texfoot
-  if f.is_a?(String)
-    f
-  else
-    f[lang]
-  end
+  f.is_a?(String) ? f : f[lang]
 end
 
 def tex_questions_for(form, lang)
@@ -82,6 +83,7 @@ def make_sample_sheet(form, lang)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
   hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
+
   # PDFs are required for result generation and the posouts for OMR
   # parsing. Only skip if both files are present.
   if File.exists?(filename+'.pdf') && File.exists?(filename+'.posout')
@@ -89,7 +91,8 @@ def make_sample_sheet(form, lang)
     return filename
   end
 
-  generate_barcode("00000000", dir + "barcode00000000.pdf")
+  generate_barcode("0"*8, dir + "barcode00000000.pdf")
+
   File.open(filename + ".tex", "w") do |h|
     edges = Seee::Config.settings[:omr_edges] ? ",kanten" : ""
     h << '\documentclass['+form.abstract_form.babelclass[lang]+edges+']{eval}' + "\n"
@@ -108,6 +111,7 @@ def make_sample_sheet(form, lang)
       h << '\tutorbox[26][\ ]                & \tutorbox[27][\ ]           & \tutorbox[28][\ ]         & \tutorbox[29][\ ]            & \tutorbox[30][\ '+tex_none(lang)+']            }' + "\n"
     end
 
+    h << tex_head_for(form, lang) + "\n"
     h << '\begin{document}' + "\n"
     h << form.abstract_form.header(lang) + "\n\n\n"
     h << tex_questions_for(form, lang) + "\n"
@@ -157,6 +161,7 @@ def make_pdf_for(s, cp, dirname)
     end
 
     lang = cp.course.language.to_sym
+    h << tex_head_for(form, lang) + "\n"
     h << '\begin{document}' + "\n"
     h << cp.course.form.abstract_form.header(lang, cp.prof.gender, cp.barcode) + "\n\n\n"
     h << tex_questions_for(cp.course.form, lang) + "\n"

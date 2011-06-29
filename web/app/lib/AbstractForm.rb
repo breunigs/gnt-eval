@@ -301,8 +301,14 @@ class AbstractForm
   # we differentiate gender here
   attr_accessor :lecturer_header
 
-  attr_accessor :texhead
-  attr_accessor :texfoot
+  # return an empty string instead of nil for texhead and texfoot
+  attr_writer :texhead, :texfoot
+  def texhead
+    @texhead || ""
+  end
+  def texfoot
+    @texfoot || ""
+  end
 
   def initialize(pages = [], db_table = '')
     @pages = pages
@@ -310,7 +316,7 @@ class AbstractForm
   end
 
   # builds the tex header for the form
-  def header(language = :en, gender = :female, barcode = "00000000")
+  def header(language = :en, gender = :female, barcode = "0"*8)
     I18n.locale = language
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
