@@ -50,7 +50,7 @@ def tex_foot_for(form, lang = :en)
   f.is_a?(String) ? f : f[lang]
 end
 
-def tex_questions_for(form, lang)
+def tex_questions_for(form, lang, gender = :both)
   b = ""
   form.pages.each_with_index do |p,i|
     b << p.tex_at_top.to_s
@@ -60,7 +60,7 @@ def tex_questions_for(form, lang)
       b << "\n\n\\sect{#{s.title[lang]}}"
       s.questions.each do |q|
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-        b << q.to_tex(lang)
+        b << q.to_tex(lang, gender)
       end
     end
     b << p.tex_at_bottom.to_s
@@ -161,10 +161,10 @@ def make_pdf_for(s, cp, dirname)
     end
 
     lang = cp.course.language.to_sym
-    h << tex_head_for(form, lang) + "\n"
+    h << tex_head_for(cp.course.form, lang) + "\n"
     h << '\begin{document}' + "\n"
     h << cp.course.form.abstract_form.header(lang, cp.prof.gender, cp.barcode) + "\n\n\n"
-    h << tex_questions_for(cp.course.form, lang) + "\n"
+    h << tex_questions_for(cp.course.form, lang, cp.prof.gender) + "\n"
     h << tex_foot_for(cp.course.form, lang) + "\n"
     h << '\end{document}'
   end
