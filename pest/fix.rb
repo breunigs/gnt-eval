@@ -42,7 +42,7 @@ cdir = File.dirname(__FILE__)
 RAILS_ROOT = "#{cdir}/../web"
 class Rails
   def self.root
-  RAILS_ROOT
+    RAILS_ROOT
   end
 end
 
@@ -51,7 +51,6 @@ require Seee::Config.file_paths[:rmagick]
 
 require cdir + '/../lib/FunkyDBBits.rb'
 
-require File.join(cdir, 'helper.array.rb')
 require File.join(cdir, 'helper.boxtools.rb')
 require File.join(cdir, 'helper.database.rb')
 require File.join(cdir, 'helper.constants.rb')
