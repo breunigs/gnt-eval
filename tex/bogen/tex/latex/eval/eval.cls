@@ -109,7 +109,6 @@
 
 \def\SaveMultiInfo[#1]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu qtext: "#1"}
-    %\write\posout{uu save_as: ""}
     \write\posout{uu type: square}
     \write\posout{uu db_column: }
     \whiledo{\not\equal{\Source}{}}
@@ -122,7 +121,6 @@
 }
 \def\SaveNormalInfo[#1][#2]{\write\posout{u - !ruby/object:Question}
     \write\posout{uu qtext: "#1"}
-    \write\posout{uu save_as: ""}
     \write\posout{uu type: square}
     \write\posout{uu db_column: #2}
     \write\posout{uu boxes:}
@@ -154,7 +152,7 @@
     	\write\posout{uu save_as: "#3"}
     	\write\posout{uu type: text}
     	\write\posout{uu db_column: "#2"}
-	#1\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 743249}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
+	#1\hspace*{0.5cm}\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 650000}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
 	\write\posout{uuu height: 3200000}
  	\write\posout{uuu width: 39020584}
 }
@@ -264,11 +262,11 @@
   }
 }
 
-\newcommand{\backpagecomment}{
-  \write\posout{- !ruby/object:Page}
-  \write\posout{u questions:}
+\newcommand{\backpagecomment}[1]{
+  \newpage
+  \mbox{}
   \write\posout{u - !ruby/object:Question}
   \write\posout{uu type: text_wholepage}
-  \write\posout{uu save_as: "-comment"}
-  %\cleardoublepage
+  \write\posout{uu db_column: "#1"}
+  \write\posout{uu save_as: "vcomment"}
 }

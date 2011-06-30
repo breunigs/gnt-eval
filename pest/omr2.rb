@@ -68,8 +68,9 @@ class PESTOmr < PESTDatabaseTools
     black/all*100.0
   end
 
-  # Counts the black pixels in the given area and image.
-  def black_pixels(img_id, x, y, width, height)
+  # counts the black pixels in the given area and image. Expects an
+  # RMagick image as the first parameter.
+  def black_pixels_img(image, x, y, width, height)
     # all hard coded values are for 300 DPI images. Adjust values here
     # to match actual scanned resolution
     x = (x*@dpifix).round
@@ -78,15 +79,15 @@ class PESTOmr < PESTDatabaseTools
     height = (height*@dpifix).round
 
     # limit values that go beyond the available pixels
-    return 0 if x >= @ilist[img_id].columns || y >= @ilist[img_id].rows
+    return 0 if x >= image.columns || y >= image.rows
     x = x.make_min_0
     y = y.make_min_0
-    width = Math.min(@ilist[img_id].columns - x, width)
-    height = Math.min(@ilist[img_id].rows - y, height)
+    width = Math.min(image.columns - x, width)
+    height = Math.min(image.rows - y, height)
     return 0 if width <= 0 || height <= 0
 
     begin
-      rect = @ilist[img_id].export_pixels(x, y, width, height, "G")
+      rect = image.export_pixels(x, y, width, height, "G")
     rescue => e
       # This occurs when we specified invalid geometry: i.e. zero
       # width or height or requesting pixels outside the image.
@@ -104,6 +105,13 @@ class PESTOmr < PESTDatabaseTools
     # this is faster than using NArray (needs conversion first) or
     # actually counting the objects using rect.count(QuantumRange)
     (rect - [Magick::QuantumRange]).size
+  end
+
+  # Counts the black pixels in the given area and image. The first
+  # parameter should be an integer which specifies the page of the
+  # loaded image.
+  def black_pixels(img_id, x, y, width, height)
+    black_pixels_img(@ilist[img_id], x, y, width, height)
   end
 
   # searches for the first line that has more than thres% black pixels
@@ -348,61 +356,65 @@ class PESTOmr < PESTDatabaseTools
 
   # Assumes a whole page for commentary. Crops a margin to remove any black
   # bars and then trims to any text if there.
-  def typeTextWholePageParse(imgid, group)
+  def process_whole_page(img_id, group)
+    i = @ilist[img_id]
     # Crop margins to remove black bars that appear due to rotated sheets
+    c = @corners[img_id]
+    x = ((c[:tr].x + c[:br].x)/2.0 - (c[:tl].x + c[:bl].x)/2.0).to_i
+    y = ((c[:bl].y + c[:br].y)/2.0 - (c[:tl].y + c[:tr].y)/2.0).to_i
+    # safety margin so that the edges are not included
     s = 2*30*@dpifix
-    i = @ilist[imgid]
-    c = i.crop(Magick::CenterGravity, i.columns-s, i.rows-s).trim(true)
+    c = i.crop(Magick::CenterGravity, x-s, y-s).trim(true)
+
+    # region is too small, assume it is empty
     return 0 if c.rows*c.columns < 500*@dpifix
 
     c = c.resize(0.4)
+
     step = 20*@dpifix
-    thres = 40
-    #   def black_pixels(x, y, width, height, img)
+    thres = 100
+
     # Find left border
     left = 0
     while left < c.columns
-      break if black_pixels(left, 0, step, c.rows, c) > thres
+      break if black_pixels_img(c, left, 0, step, c.rows) > thres
       left += step
     end
     return 0 if left >= c.columns
-    puts left
 
     # Find right border
     right = c.columns
     while right > 0
-      break if black_pixels(right-step, 0, step, c.rows, c) > thres
+      break if black_pixels_img(c, right-step, 0, step, c.rows) > thres
       right -= step
     end
     return 0 if right < 0
-    #puts right
 
     # Find top border
     top = 0
     while top < c.rows
-      break if black_pixels(0, top, c.columns, step, c) > thres
+      break if black_pixels_img(c, 0, top, c.columns, step) > thres
       top += step
     end
     return 0 if top >= c.rows
-    #puts top
 
     # Find bottom border
     bottom = c.rows
     while bottom > 0
-      break if black_pixels(0, bottom-step, c.columns, step, c) > thres
+      break if black_pixels_img(c, 0, bottom-step, c.columns, step) > thres
       bottom -= step
     end
     return 0 if bottom < 0
-    #puts bottom
 
-    c.crop!(left-10, top-10, right-left+20, bottom-top+20, true)
+    c.crop!(left-50, top-50, right-left+2*50, bottom-top+2*50)
     c.trim!(true)
 
+    # check again for size after cropping. Drop if too small.
     return 0 if c.rows*c.columns < 500*@dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + group.saveas + ".jpg"
-    puts "  Saving Comment Image: " + filename if @verbose
+    debug "  Saving Comment Image: " + filename if @verbose
     c.write filename
 
     return 1
@@ -414,6 +426,10 @@ class PESTOmr < PESTDatabaseTools
   def process_text_box(img_id, question)
     # TWEAK HERE
     limit = 1000 * @dpifix
+    # TeX puts the boxes very thight to the top. Push them down a
+    # a little.
+    movedown = 10
+
     bp = 0
 
     boxes = []
@@ -421,10 +437,19 @@ class PESTOmr < PESTDatabaseTools
     boxes.flatten!
 
     boxes.each do |box|
+      # correct skew
       tl = correct(img_id, box.tl)
       br = correct(img_id, box.br)
+      tl.y, br.y = tl.y + movedown, br.y + movedown
+      # limit boxes to within the edges (only x direction for now)
+      c = @corners[img_id]
+      left = [c[:tl].x, c[:bl].x].max
+      right = [c[:tr].x, c[:br].x].min
+      tl.x, br.x = tl.x.limit(left, right), br.x.limit(left, right)
+      # update box values
       box.x, box.y = tl.x, tl.y
-      box.width, box.height =  br.x-tl.x, br.y-tl.y
+      box.width, box.height =  br.x-tl.x, br.y-(tl.y)
+      # search
       bp += black_pixels(img_id, box.x, box.y, box.width, box.height)
       color = bp > limit ? "green" : "red"
       draw_transparent_box(img_id, tl, br, color, bp, true)
@@ -445,6 +470,9 @@ class PESTOmr < PESTDatabaseTools
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
     x, y, w, h = calculateBounds(boxes)
+    # include even more down the page, in case someone ignored the end
+    # of the text box
+    h += 40
     @ilist[img_id].crop(x, y, w, h).minify.write filename
     if @debug
       tl = [PAGE_WIDTH, PAGE_HEIGHT]
@@ -480,7 +508,7 @@ class PESTOmr < PESTDatabaseTools
           when "text" then
             g.value = process_text_box(i, g)
           when "text_wholepage" then
-            g.value = typeTextWholePageParse(i, g)
+            g.value = process_whole_page(i, g)
           else
             debug "    Unsupported type: " + g.type.to_s
         end
@@ -789,7 +817,7 @@ class PESTOmr < PESTDatabaseTools
       dbgFlnm = gen_new_filename(file, "_DEBUG.jpg")
       debug("  Saving Image: #{dbgFlnm}", "saving_image") if @verbose
       img = @ilist.append(false)
-      img.write(dbgFlnm) { self.quality = 100 }
+      img.write(dbgFlnm) { self.quality = 90 }
       debug("  Saved Image", "saving_image") if @verbose
     end
 
@@ -989,10 +1017,10 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # returns the amount of pages that are defined in the currently
-  # processed form
+  # processed form AND that are available in the loaded image
   def page_count
     parse_omr_sheet if @page_count.nil?
-    @page_count
+    [@page_count, @ilist.size].compact.min
   end
 
   # Loads the YAML file and converts LaTeX's scalepoints into pixels
