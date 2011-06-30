@@ -384,7 +384,7 @@ namespace :pest do
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
       if Seee::Config.settings[:omr_edges]
-        system("./pest/omr2.rb -d -v -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+        system("./pest/omr2.rb s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
       else
         # legacy pseudo support
         system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
