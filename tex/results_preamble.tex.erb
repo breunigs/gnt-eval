@@ -15,6 +15,7 @@
 \usepackage{marvosym}
 \usepackage[protrusion=true,expansion]{microtype}
 \usepackage{graphicx}
+\usepackage{multicol}
 \usepackage{color}
 \usepackage[pdftex,
   pdftitle={<%= t(:teaching_eval_pdf_title).gsub("$faculty_semester", evalname)%>},
@@ -48,5 +49,8 @@
     \vspace{1.2cm}}
   \date{\today}"
 <% end %>
+
+% height of the bars for the semester and degree distributions
+\newcommand{\thebarwidth}{35}
 
 \begin{document}

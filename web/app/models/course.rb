@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+require 'erb'
+
 # A course has many professors, belongs to a semester and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
@@ -91,34 +93,36 @@ class Course < ActiveRecord::Base
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
   def eval_lecture_head
-    b = ''
+    b = ""
 
     sheets = returned_sheets
 
     notspecified = t(:not_specified)
     b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
+    b << "\\begin{multicols}{2}"
 
-    # Semesterverteilung
-    b << "\\hfill\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{"+ t('semester_distribution') +":}} \\\\[.2em]\n"
 
+    data = IO.read(RAILS_ROOT + "/../tex/results_horiz_bars.tex.erb")
+
+    # semesterdistribution #############################################
     lang_sem = t(:academic_term)
-
-    # finds all different semesters for this course and counts them
     sems = get_distinct_values("semester", {:barcode => barcodes}).sort
+
+    lines = []
     (sems-[0]).each do |i|
       num = count_forms({:barcode => barcodes, :semester => i})
-      next if num == 0
-
-      b << "#{i == 16 ? "> 15" : i}. #{lang_sem}: & #{num} \\\\ \n"
+      lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
+        :count => num }
     end
     num = count_forms({:barcode => barcodes, :semester => 0})
-    b << "#{notspecified}: & #{num} \\\\ \n" if num > 0
-    b << "\\end{tabular}\\hfill\n"
+    lines << {:name => notspecified, :count => num}
 
-    # Hauptfach
-    b << "\\begin{tabular}[t]{lr}\n"
-    b << "  \\multicolumn{2}{l}{\\textbf{"+ t(:degree_course) + ":}}\\\\[.2em]\n"
+    title = t('semester_distribution')
+    b << ERB.new(data).result(binding)
+    b << "\\columnbreak"
+
+    # degree ###########################################################
+    lines = []
 
     # grab the description text for each checkbox from the form
     matchn = [notspecified] + form.get_question("hauptfach").get_choices(language)
@@ -133,25 +137,28 @@ class Course < ActiveRecord::Base
     0.upto(matchn.length) do |n|
       0.upto(matchm.length) do |m|
         num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
-        next if num == 0
+        # skip all entries with very few votes
+        next if num/sheets.to_f*100 < 2
         all += num
         # check for 'other' and skip
-        if n == matchn.length || m == matchm.length
-          next
-        end
+        next if n == matchn.length || m == matchm.length
 
         # check for 'not specified' and group them together
         if n == 0 || m == 0
           keinang += num
           next
         end
-        # print matches
-        b << matchn[n] + " " + matchm[m] + ": & " + num.to_s + "\\\\ \n"
+        lines << {:name => matchn[n] + " " + matchm[m], :count => num }
       end
     end
-    b << t(:other) + ": & " + (sheets-all).to_s + "\\\\ \n"  if sheets != all
-    b << notspecified + ": & " + (keinang).to_s + "\\\\ \n" if keinang > 0
-    b << "\\end{tabular}\\hfill\\null\n\n"
+    lines.sort! { |x,y| y[:count] <=> x[:count] }
+    lines << {:name => t(:other), :count => sheets-all } if sheets != all
+    lines << {:name => notspecified, :count => keinang } if keinang > 0
+
+    title = t(:degree_course)
+    b << ERB.new(data).result(binding)
+
+    b << "\\end{multicols}"
 
     b
   end
@@ -195,7 +202,7 @@ class Course < ActiveRecord::Base
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?
 
-      b << "\\fragenzudenuebungen{"+ I18n.t[:study_groups_header] +"}\n"
+      b << "\\fragenzudenuebungen{"+ I18n.t(:study_groups_header) +"}\n"
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
@@ -206,10 +213,10 @@ class Course < ActiveRecord::Base
     return b if tutors.empty?
 
     c = ''
-    c << "\\uebersichtuebungsgruppen{"+I18n.t[:study_groups_overview]+"}\n"
+    c << "\\uebersichtuebungsgruppen{"+I18n.t(:study_groups_overview)+"}\n"
     c << "\\begin{longtable}[l]{lrr}\n"
     c << "\\hline\n"
-    c << I18n.t[:study_groups_overview_header] + " \\\\ \n"
+    c << I18n.t(:study_groups_overview_header) + " \\\\ \n"
     c << "\\hline\n"
     c << "\\endhead\n"
     cc = ''

@@ -1,0 +1,20 @@
+\setlength{\unitlength}{1mm}
+\noindent%
+\begin{picture}(85,<%= 6+lines.size*6 %>)
+  \put(0, <%=lines.size*6%>){\makebox(38, 6)[r]{\textbf{<%=title%>}}}
+
+<%
+  all = 0.0
+  lines.each { |l| all += l[:count].to_f }
+%>
+
+<% lines.reverse.each_with_index do |line, i| %>
+  \put(0, <%= i*6 %>){\makebox(38, 6)[r]{<%=line[:name]%>}}
+  \put(40, <%= i*6 %>){\framebox(\thebarwidth, 5){}}
+% need to adjust the 5/2 factor if the horizontal width of the bar is
+% changed. happy experimenting! (tip: 100% == \thebarwidth)
+  \put(40, <%= i*6 %>){\rule{<%=(line[:count]/all*100*0.35).to_i%>mm}{5mm}}
+  \put(72, <%= i*6 %>){\makebox(10, 6)[r]{<%=line[:count]%>}}
+
+<% end %>
+\end{picture}
