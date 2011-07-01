@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-require 'RandomUtils'
+require File.dirname(__FILE__) + '/../lib/RandomUtils.rb'
 
 class Postoffice < ActionMailer::Base
   def profanrede(course)
