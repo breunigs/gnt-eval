@@ -214,7 +214,7 @@ class PESTOmr < PESTDatabaseTools
     box.x = x unless x.nil?
     box.y = y unless y.nil?
 
-    draw_text(img_id, [x-15,y+20], "black", box.choice)
+    draw_text(img_id, [x-15,y+20], "black", box.choice) unless [x,y].any_nil?
 
     return x, y
   end
@@ -362,7 +362,7 @@ class PESTOmr < PESTDatabaseTools
     c = @corners[img_id]
     x = ((c[:tr].x + c[:br].x)/2.0 - (c[:tl].x + c[:bl].x)/2.0).to_i
     y = ((c[:bl].y + c[:br].y)/2.0 - (c[:tl].y + c[:tr].y)/2.0).to_i
-    # safety margin so that the edges are not included
+    # safety margin so that the corners are not included
     s = 2*30*@dpifix
     c = i.crop(Magick::CenterGravity, x-s, y-s).trim(true)
 
@@ -441,7 +441,7 @@ class PESTOmr < PESTDatabaseTools
       tl = correct(img_id, box.tl)
       br = correct(img_id, box.br)
       tl.y, br.y = tl.y + movedown, br.y + movedown
-      # limit boxes to within the edges (only x direction for now)
+      # limit boxes to within the corners (only x direction for now)
       c = @corners[img_id]
       left = [c[:tl].x, c[:bl].x].max
       right = [c[:tr].x, c[:br].x].min
