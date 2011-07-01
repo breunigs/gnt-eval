@@ -40,16 +40,17 @@ def find_barcode(filename)
   end
 end
 
-def tex_foot_for(form, lang = :en)
-  f = form.abstract_form.texfoot
-  if f.is_a?(String)
-    f
-  else
-    f[lang]
-  end
+def tex_head_for(form, lang = :en)
+  f = form.abstract_form.texhead
+  f.is_a?(String) ? f : f[lang]
 end
 
-def tex_questions_for(form, lang)
+def tex_foot_for(form, lang = :en)
+  f = form.abstract_form.texfoot
+  f.is_a?(String) ? f : f[lang]
+end
+
+def tex_questions_for(form, lang, gender = :both)
   b = ""
   form.pages.each_with_index do |p,i|
     b << p.tex_at_top.to_s
@@ -59,7 +60,7 @@ def tex_questions_for(form, lang)
       b << "\n\n\\sect{#{s.title[lang]}}"
       s.questions.each do |q|
         next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-        b << q.to_tex(lang)
+        b << q.to_tex(lang, gender)
       end
     end
     b << p.tex_at_bottom.to_s
@@ -82,6 +83,7 @@ def make_sample_sheet(form, lang)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
   hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
+
   # PDFs are required for result generation and the posouts for OMR
   # parsing. Only skip if both files are present.
   if File.exists?(filename+'.pdf') && File.exists?(filename+'.posout')
@@ -89,7 +91,8 @@ def make_sample_sheet(form, lang)
     return filename
   end
 
-  generate_barcode("00000000", dir + "barcode00000000.pdf")
+  generate_barcode("0"*8, dir + "barcode00000000.pdf")
+
   File.open(filename + ".tex", "w") do |h|
     edges = Seee::Config.settings[:omr_edges] ? ",kanten" : ""
     h << '\documentclass['+form.abstract_form.babelclass[lang]+edges+']{eval}' + "\n"
@@ -108,6 +111,7 @@ def make_sample_sheet(form, lang)
       h << '\tutorbox[26][\ ]                & \tutorbox[27][\ ]           & \tutorbox[28][\ ]         & \tutorbox[29][\ ]            & \tutorbox[30][\ '+tex_none(lang)+']            }' + "\n"
     end
 
+    h << tex_head_for(form, lang) + "\n"
     h << '\begin{document}' + "\n"
     h << form.abstract_form.header(lang) + "\n\n\n"
     h << tex_questions_for(form, lang) + "\n"
@@ -157,16 +161,20 @@ def make_pdf_for(s, cp, dirname)
     end
 
     lang = cp.course.language.to_sym
+    h << tex_head_for(cp.course.form, lang) + "\n"
     h << '\begin{document}' + "\n"
     h << cp.course.form.abstract_form.header(lang, cp.prof.gender, cp.barcode) + "\n\n\n"
-    h << tex_questions_for(cp.course.form, lang) + "\n"
+    h << tex_questions_for(cp.course.form, lang, cp.prof.gender) + "\n"
     h << tex_foot_for(cp.course.form, lang) + "\n"
     h << '\end{document}'
   end
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
-
-  `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+  # it may be useful for debugging to have a YAML for each course.
+  # however, it is not needed by gnt-eval itself, so remove it immediately
+  # before it causes any confusion.
+  `rm "#{filename}.posout"`
+  #`./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
 end
 
 # automatically calls rake -T when no task is given
@@ -376,7 +384,7 @@ namespace :pest do
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
       if Seee::Config.settings[:omr_edges]
-        system("./pest/omr2.rb -d -v -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+        system("./pest/omr2.rb s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
       else
         # legacy pseudo support
         system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")

@@ -190,12 +190,12 @@ end
 
 # Load configuration files from other directories.
 system_config = File.expand_path(system_config)
-require system_config if File.exist? system_config
+load system_config if File.exist? system_config
 
 
 begin
   user_config = File.expand_path(user_config)
-  require user_config if File.exist? user_config
+  load user_config if File.exist? user_config
 rescue
   # If you get this error, it probably means that expand path failed
   # because either the path invalid (e.g. unescaped tildes that cannot

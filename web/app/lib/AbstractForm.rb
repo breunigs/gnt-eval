@@ -91,11 +91,7 @@ class Question
 
   # is the question active?
   def active?
-    if not @active.nil?
-      return true
-    else
-      return false
-    end
+    not @active.nil?
   end
 
   # for compatibility reasons
@@ -122,9 +118,10 @@ class Question
     end
   end
 
-  # question itself in appropriate language
-  def text(language = :en)
-    @qtext[language]
+  # question itself in appropriate language and gender
+  def text(language = :en, gender = :both)
+    q = @qtext[language]
+    q.is_a?(String) ? q : q[gender]
   end
 
   # did the user fail to answer the question?
@@ -143,21 +140,21 @@ class Question
   end
 
   # export a single question to tex
-  def to_tex(lang = :en)
+  def to_tex(lang = :en, gender = :both)
     s = ""
     case @type
       when "text_wholepage":
         # don't need to do anything for that
       when "text":
-        s << "\n\n\\comment{#{@qtext[lang]}}{#{@db_column}}{#{@db_column}}\n\n"
+        s << "\n\n\\comment{#{text(lang, gender)}}{#{@db_column}}{#{@db_column}}\n\n"
 
       when "tutor_table":
         # automatically prints tutors, if they have been defined
-        s << "\\printtutors{#{@qtext[lang]}}\n\n"
+        s << "\\printtutors{#{text(lang, gender)}}\n\n"
 
       when "variable_width":
-        s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{@qtext[lang]}}"
+        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{text(lang, gender)}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         boxes = []
@@ -168,8 +165,8 @@ class Question
         s << "}\n\n"
 
       when "fixed_width__last_is_rightmost":
-        s << "\\SaveNormalInfo[#{@qtext[lang]}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{@qtext[lang]}}"
+        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{text(lang, gender)}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         @boxes.each do |b|
@@ -193,7 +190,7 @@ class Question
           s << "{#{@db_column}}"
         end
         # question
-        s << "{#{@qtext[lang]}}"
+        s << "{#{text(lang, gender)}}"
         # possible answers
         s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "[#{x.text[lang]}]" }.join
     end
@@ -301,8 +298,14 @@ class AbstractForm
   # we differentiate gender here
   attr_accessor :lecturer_header
 
-  attr_accessor :texhead
-  attr_accessor :texfoot
+  # return an empty string instead of nil for texhead and texfoot
+  attr_writer :texhead, :texfoot
+  def texhead
+    @texhead || ""
+  end
+  def texfoot
+    @texfoot || ""
+  end
 
   def initialize(pages = [], db_table = '')
     @pages = pages
@@ -310,7 +313,7 @@ class AbstractForm
   end
 
   # builds the tex header for the form
-  def header(language = :en, gender = :female, barcode = "00000000")
+  def header(language = :en, gender = :female, barcode = "0"*8)
     I18n.locale = language
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
@@ -320,7 +323,7 @@ class AbstractForm
     s << "\\\dataline{#{I18n.t(:title)}}"
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
     # print special questions
-    special_care_questions.each { |q| s << q.to_tex(language) }
+    special_care_questions.each { |q| s << q.to_tex(language, gender) }
     s << "\\vspace{0.1cm}"
     s
   end

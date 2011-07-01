@@ -20,7 +20,14 @@ class Form < ActiveRecord::Base
   def abstract_form
     # cache yaml files for speeeed
     $loaded_yaml_sheets ||= {}
-    $loaded_yaml_sheets[id] ||= YAML::load(content)
+    begin
+      $loaded_yaml_sheets[id] ||= YAML::load(content)
+    rescue Exception => e
+      # Sheet does not appear to be a valid YAML. In this case the
+      # value will be nil (and thus not an AbstractForm). This will
+      # later be picked up as an invalid form.
+      $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.inspect
+    end
     $loaded_yaml_sheets[id]
   end
 
@@ -48,16 +55,16 @@ class Form < ActiveRecord::Base
 
   # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
   def db_table
-    abstract_form.db_table
+    abstract_form ? abstract_form.db_table : nil
   end
   def questions
-    abstract_form.questions
+    abstract_form ? abstract_form.questions : []
   end
   def lang
-    abstract_form.lang
+    abstract_form ? abstract_form.lang : nil
   end
   def pages
-    abstract_form.pages
+    abstract_form ? abstract_form.pages : []
   end
   def texheadnumber
     abstract_form.texheadnumber

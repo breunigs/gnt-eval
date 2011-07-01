@@ -89,10 +89,9 @@ def generate_barcode(barcode, path)
   return true if File.exists?(path)
   # ensure the main temp directory exists
   tmp = File.join(Dir.tmpdir, "seee-tmp")
-  FileUtils.mkdir_p(tmp)
-  FileUtils.chmod_R(0777, tmp)
+  FileUtils.mkdir_p(tmp, {:mode => 0777})
   # create own subfolder for each barcode
-  tmp = Dir.mktmpdir("seee-tmp/barcode-")
+  tmp = Dir.mktmpdir("barcode-", tmp)
   # Can't change into the tmp directory here because Dir.chdir cannot
   # be nested and we might need this feature elsewhere.
   `barcode -b "#{barcode}" -g 80x30 -u mm -e EAN -n -o #{tmp}/barcode.ps`

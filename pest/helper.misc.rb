@@ -38,7 +38,7 @@ module Math
   end
 end
 
-class Integer
+class Numeric
   # legacy
   def makePos
     puts "makePos is deprecated"
@@ -49,6 +49,12 @@ class Integer
     self < 0 ? 0 : self
   end
 
+  def limit(min, max)
+    raise "min and max switched" if min > max
+    return min if self < min
+    return max if self > max
+    self
+  end
 end
 
 class Float
