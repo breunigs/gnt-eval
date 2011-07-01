@@ -12,6 +12,7 @@ Dir.chdir(ARGV[0]) if ARGV[0]
 files = Dir.glob("*[0-9]pcs.pdf")
 
 files.each do |x|
+	next if File.basename(x).start_with?("multiple")
 	match = x.match(/^(.*?)([0-9]+)pcs.pdf$/)
 	num = match[2].to_i
 	nam = match[1]

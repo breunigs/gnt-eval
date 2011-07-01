@@ -2,15 +2,18 @@
 
 account = "re9"
 server = "kde05.urz.uni-heidelberg.de"
+homepath = "/Home/#{account}"
 ssh = "ssh -o \"ControlPath=/tmp/print_forms_%r@%h:%p\" #{account}@#{server}"
 
-RAILS_ROOT = File.dirname(__FILE__) + '/../web'
+mypath=File.dirname(__FILE__)
+
+RAILS_ROOT = mypath + '/../web'
 class Rails
   def self.root
     RAILS_ROOT
   end
 end
-require File.dirname(__FILE__) + '/../web/app/lib/ext_requirements.rb'
+require mypath + '/../web/app/lib/ext_requirements.rb'
 
 semester = Semester.find(:all).find { |s| s.now? }.title.gsub(/\s+/, "_").scan(/[-_a-z0-9]+/i).join
 
@@ -23,12 +26,13 @@ sheets = 0
 forms = {}
 
 puts "The following forms will be printed:"
-Dir.glob(File.dirname(__FILE__) + "/../tmp/forms/*pcs.pdf") do |f|
+Dir.glob(mypath + "/../tmp/forms/*pcs.pdf") do |f|
+  next if File.basename(f).start_with?("multiple")
   count = f.match(/.*\s([0-9]+)pcs.pdf/)
   next if count.nil? || count[1].nil? || count[1].to_i <= 0
   count = count[1].to_i
   sheets += count
-  forms[f] = count
+  forms[f.gsub("tmp/forms/", "tmp/forms/multiple ")] = count
   print count.to_s.rjust(5) + "   "
   puts File.basename(f, ".pdf")
 end
@@ -36,6 +40,12 @@ end
 puts "-----"
 puts sheets.to_s.rjust(5) + " in total"
 
+puts "For reasons unknown the -# switch does not work with lpr."
+puts "Didn't test lp, but just copying the PDF pages and printing a large sheet."
+puts "Multiply PDFs? (Press Enter)"
+gets
+system("cd \"#{mypath}/../tmp/forms/\" && ../../helfer/multiply_pdfs.rb")
+puts
 puts
 puts
 puts "If you continue, all forms listed above will be uploaded to:"
@@ -50,7 +60,7 @@ exit 3 if $?.exitstatus != 0
 puts
 puts
 `#{ssh} 'test -d ~/forms_#{semester}'`
-if $?.exitstatus == 0 
+if $?.exitstatus == 0
   puts "Target folder exists, aborting. Remove it manually before attemping again."
   exit 1
 end
@@ -58,16 +68,18 @@ end
 `#{ssh} 'mkdir -p ~/forms_#{semester}'`
 exit 3 if $?.exitstatus != 0
 
-puts "Copying files to server"
-`scp -o "ControlPath=/tmp/print_forms_%r@%h:%p" "#{forms.keys.join('" "')}" #{account}@#{server}:~/forms_#{semester}`
-exit 3 if $?.exitstatus != 0
+#~ puts "Copying files to server"
+#~ `scp -o "ControlPath=/tmp/print_forms_%r@%h:%p" "#{forms.keys.join('" "')}" #{account}@#{server}:~/forms_#{semester}`
+#~ exit 3 if $?.exitstatus != 0
 
 puts
 puts
 forms.each do |k,v|
-  name = "~/forms_#{semester}/#{File.basename(k)}"
-  system("echo 'SHALL I DO THIS: llllpr -Pqpsdup -o sides=two-sided-long-edge -# #{v} \"#{name}\"'")
+  system("scp -o \"ControlPath=/tmp/print_forms_%r@%h:%p\" \"#{k}\" #{account}@#{server}:~/forms_#{semester}")
+  # -# doesn't work :(
+  name = File.expand_path("#{homepath}/forms_#{semester}/#{File.basename(k)}")
+  system("echo 'SHALL I DO THIS: lpr -Pqpsdup -o sides=two-sided-long-edge \"#{name}\"'")
   gets
-  puts "skiiiping real lpr"
-  #`#{ssh} 'llllpr -Pqpsdup -o sides=two-sided-long-edge -# #{v} "#{name}"'`
+  `#{ssh} 'lpr -Pqpsdup -o sides=two-sided-long-edge  "#{name}"'`
+  `#{ssh} 'rm "#{name}"'`
 end
