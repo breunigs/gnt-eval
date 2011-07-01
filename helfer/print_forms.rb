@@ -41,7 +41,7 @@ puts "-----"
 puts sheets.to_s.rjust(5) + " in total"
 
 puts "For reasons unknown the -# switch does not work with lpr."
-puts "Didn't test lp, but just copying the PDF pages and printing a large sheet."
+puts "Didn't test lp, just copying the PDF pages and printing a large PDF instead."
 puts "Multiply PDFs? (Press Enter)"
 gets
 system("cd \"#{mypath}/../tmp/forms/\" && ../../helfer/multiply_pdfs.rb")
@@ -68,18 +68,19 @@ end
 `#{ssh} 'mkdir -p ~/forms_#{semester}'`
 exit 3 if $?.exitstatus != 0
 
-#~ puts "Copying files to server"
-#~ `scp -o "ControlPath=/tmp/print_forms_%r@%h:%p" "#{forms.keys.join('" "')}" #{account}@#{server}:~/forms_#{semester}`
-#~ exit 3 if $?.exitstatus != 0
-
+puts
+puts
+puts "Start the mayhem? (Press Enter)"
+gets
+puts
 puts
 puts
 forms.each do |k,v|
   system("scp -o \"ControlPath=/tmp/print_forms_%r@%h:%p\" \"#{k}\" #{account}@#{server}:~/forms_#{semester}")
   # -# doesn't work :(
   name = File.expand_path("#{homepath}/forms_#{semester}/#{File.basename(k)}")
-  system("echo 'SHALL I DO THIS: lpr -Pqpsdup -o sides=two-sided-long-edge \"#{name}\"'")
-  gets
-  `#{ssh} 'lpr -Pqpsdup -o sides=two-sided-long-edge  "#{name}"'`
-  `#{ssh} 'rm "#{name}"'`
+  system("#{ssh} 'lpr -Pqpsdup -o sides=two-sided-long-edge  \"#{name}\"'")
+  system("#{ssh} 'rm \"#{name}\"'")
 end
+
+puts "done"
