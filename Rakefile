@@ -384,7 +384,7 @@ namespace :pest do
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
       if Seee::Config.settings[:omr_edges]
-        system("./pest/omr2.rb s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+        system("./pest/omr2.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
       else
         # legacy pseudo support
         system("./pest/omr.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
@@ -517,7 +517,7 @@ namespace :pdf do
     threads = []
     Dir.glob("./doc/howto_*.tex").each do |f|
       work_queue.enqueue_b do
-        data = File.read(f).gsub(/§§§/, dirname)
+        data = File.read(f).gsub(/§§§/, "/home/stefan/seee/tmp/forms")
         file = saveto + File.basename(f)
         File.open(file, "w") { |x| x.write data }
         Rake::Task[(file.gsub(/\.tex$/, ".pdf")).to_sym].invoke
