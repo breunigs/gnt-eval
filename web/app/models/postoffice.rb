@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+
+require 'RandomUtils'
+
 class Postoffice < ActionMailer::Base
   def profanrede(course)
     return course.profs.map{ |p| 'sehr ' + {:female => 'geehrte Frau',
@@ -21,7 +24,7 @@ class Postoffice < ActionMailer::Base
     
     body[:course] = c
     body[:anrede] = profanrede(c)
-    body[:sprache] = c.form.abstract_form.lang == 'de' ? "Deutsch" : "Englisch"
+    body[:sprache] = {:de => 'Deutsch', :en => "Englisch"}[c.language]
   end
 
   def erinnerungsmail(course_id)
