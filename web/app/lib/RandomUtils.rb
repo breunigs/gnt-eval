@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'enumerator'
 require 'tmpdir'
 require 'rubygems'
@@ -28,7 +29,7 @@ class String
   # wraps text after a maximum of X cols. 72 is the default for mails,
   # so don’t change it here.
   def word_wrap(col = 72)
-    self.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "\\1\\3\n")
+    self.gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/, "\\1\\3")
   end
 
   def bold
