@@ -104,29 +104,12 @@ class Course < ActiveRecord::Base
 
     data = IO.read(RAILS_ROOT + "/../tex/results_horiz_bars.tex.erb")
 
-    # semesterdistribution #############################################
-    lang_sem = t(:academic_term)
-    sems = get_distinct_values("semester", {:barcode => barcodes}).sort
-
-    lines = []
-    (sems-[0]).each do |i|
-      num = count_forms({:barcode => barcodes, :semester => i})
-      lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
-        :count => num }
-    end
-    num = count_forms({:barcode => barcodes, :semester => 0})
-    lines << {:name => notspecified, :count => num}
-
-    title = t('semester_distribution')
-    b << ERB.new(data).result(binding)
-    b << "\\columnbreak"
-
     # degree ###########################################################
     lines = []
 
     # grab the description text for each checkbox from the form
-    matchn = [notspecified] + form.get_question("hauptfach").get_choices(language)
-    matchm = [""] + form.get_question("studienziel").get_choices(language)
+    matchn = [notspecified] + form.get_question("hauptfach").get_choices(I18n.locale)
+    matchm = [""] + form.get_question("studienziel").get_choices(I18n.locale)
     # remove "sonstiges" or "other" from the end of the array because
     # otherwise we get pretty useless combinations
     matchn.pop
@@ -157,9 +140,25 @@ class Course < ActiveRecord::Base
 
     title = t(:degree_course)
     b << ERB.new(data).result(binding)
+    b << "\\columnbreak"
+
+    # semesterdistribution #############################################
+    lang_sem = t(:academic_term)
+    sems = get_distinct_values("semester", {:barcode => barcodes}).sort
+
+    lines = []
+    (sems-[0]).each do |i|
+      num = count_forms({:barcode => barcodes, :semester => i})
+      lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
+        :count => num }
+    end
+    num = count_forms({:barcode => barcodes, :semester => 0})
+    lines << {:name => notspecified, :count => num}
+
+    title = t('semester_distribution')
+    b << ERB.new(data).result(binding)
 
     b << "\\end{multicols}"
-
     b
   end
 
@@ -206,7 +205,7 @@ class Course < ActiveRecord::Base
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
-        b << q.eval_to_tex(specific, general, form.db_table, language).to_s
+        b << q.eval_to_tex(specific, general, form.db_table, I18n.locale).to_s
       end
     end
 

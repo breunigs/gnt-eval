@@ -20,13 +20,15 @@ class CourseProf < ActiveRecord::Base
 
     b = ''
 
-    sheet_count = count_forms({:barcode => barcode.to_i})
+    # only set locale if we want a mixed-lang document
+    I18n.locale = course.language if I18n.tainted?
 
-    vorlhead = form.lecturer_header(prof.fullname, prof.gender, course.language, sheet_count)
+    sheet_count = count_forms({:barcode => barcode.to_i})
+    vorlhead = form.lecturer_header(prof.fullname, prof.gender, I18n.locale, sheet_count)
     b << "\\profkopf{#{vorlhead}}\n\n"
 
     if sheet_count < Seee::Config.settings[:minimum_sheets_required]
-      return b + form.too_few_questionnaires(course.language, sheet_count) + "\n\n"
+      return b + form.too_few_questionnaires(I18n.locale, sheet_count) + "\n\n"
     end
 
     # b << "\\fragenzurvorlesung\n\n"
@@ -34,7 +36,7 @@ class CourseProf < ActiveRecord::Base
     specific = { :barcode => barcode.to_i }
     general = { :barcode => $facultybarcodes }
     form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, course.language)
+      b << q.eval_to_tex(specific, general, form.db_table, I18n.locale, prof.gender)
     end
 
     return b

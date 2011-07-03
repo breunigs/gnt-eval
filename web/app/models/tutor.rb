@@ -17,19 +17,21 @@ class Tutor < ActiveRecord::Base
 
     b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
 
+    # only set locale if we want a mixed-lang document
+    I18n.locale = course.language if I18n.tainted?
+
     if sheet_count < Seee::Config.settings[:minimum_sheets_required]
-      b << form.too_few_questionnaires(course.language, sheet_count)
+      b << form.too_few_questionnaires(I18n.locale, sheet_count)
       b << "\n\n"
       return b, sheet_count
     end
-    # only set locale if we want a mixed-lang document
-    I18n.locale = course.language if I18n.tainted?
+
     b << I18n.t(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
 
     specific = { :barcode => course.barcodes, :tutnum => tutnum }
     general = { :barcode => course.barcodes }
     form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, course.language)
+      b << q.eval_to_tex(specific, general, form.db_table, I18n.locale)
     end
     unless comment.to_s.strip.empty?
       b << "\\commentstutor{#{I18n.t(:comments)}}"

@@ -139,7 +139,7 @@ class Question
     return @db_column.is_a?(Array)
   end
 
-  # export a single question to tex
+  # export a single question to tex (used for creating the forms)
   def to_tex(lang = :en, gender = :both)
     s = ""
     case @type
@@ -208,29 +208,22 @@ class Question
 
   include FunkyDBBits
 
+  # used in the result pdfs
   # h: hash correspoding to specific (!) where clause
   # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table, language)
+  def eval_to_tex(h, g, db_table, lang = :en, gender = :both)
     @db_table = db_table
 
     b = ''
+    if @db_column.is_a?(Array) # multi-q
 
-    if @db_column.is_a?(Array)
+      answers = multi_q(h, self, lang)
+      b << TeXMultiQuestion.new(text(lang, gender), answers).to_tex
 
-      answers = multi_q(h, self, language)
-
-      t = TeXMultiQuestion.new(text(language), answers)
-      b << t.to_tex
-
-      # single-q
-    else
+    else # single-q
       antw, anz, m, m_a, s, s_a = single_q(h, g, self)
-      if anz > 0
-        t = TeXSingleQuestion.new(text(language), ltext(language), rtext(language), antw,
-                                  anz, m, m_a, s, s_a)
-
-      b << t.to_tex
-      end
+      b << TeXSingleQuestion.new(text(lang, gender), ltext(lang),
+             rtext(lang), antw, anz, m, m_a, s, s_a).to_tex if anz > 0
     end
     return b
   end
