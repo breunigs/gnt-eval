@@ -9,6 +9,7 @@
 %>
 
 <% lines.reverse.each_with_index do |line, i| %>
+  <% next if line[:count] == 0 %>
   \put(0, <%= i*6 %>){\makebox(38, 6)[r]{<%=line[:name]%>}}
   \put(40, <%= i*6 %>){\framebox(\thebarwidth, 5){}}
 % need to adjust the 5/2 factor if the horizontal width of the bar is
