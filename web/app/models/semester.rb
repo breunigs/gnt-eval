@@ -7,6 +7,7 @@ class Semester < ActiveRecord::Base
   has_many :courses
   has_many :forms
   validates_presence_of :title
+  validates_presence_of :longtitle
 
   include FunkyTeXBits
   include FunkyDBBits
@@ -30,7 +31,7 @@ class Semester < ActiveRecord::Base
     b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
                    c.profs.count }, cs.inject(0) { |sum, c| sum +
                    c.tutors.count }, anzahl_boegen)
-    b << TeXVorwort(faculty.longname, title)
+    b << TeXVorwort(faculty.longname, title, longtitle)
 
     cs.each do |c|
       b << c.evaluate

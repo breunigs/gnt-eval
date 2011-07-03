@@ -10,6 +10,7 @@
           ["Firstday",                      f.date_select(:firstday), "required"],
           ["Lastday",                       f.date_select(:lastday),  "required"],
           [f.label(:title),                 f.text_field(:title),     "required"],
+          [f.label(:longtitle),             f.text_field(:longtitle), "required"],
           [f.label(:critical, "Critical?"), f.check_box(:critical) + f.label(:critical, "the semester is critical")]
 
         ]
@@ -29,5 +30,3 @@
 <% end %>
 
 </fieldset>
-
-

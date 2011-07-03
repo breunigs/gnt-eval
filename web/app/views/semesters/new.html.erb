@@ -21,6 +21,12 @@
         <td><%= f.text_field :title %></td>
         <td>required</td>
       </tr>
+
+      <tr>
+        <th><%= f.label :longtitle %></th>
+        <td><%= f.text_field :longtitle %></td>
+        <td>required</td>
+      </tr>
     </table>
     <p>
       <%= f.submit "Create new semester", :disable_with => "Saving&hellip;" %>

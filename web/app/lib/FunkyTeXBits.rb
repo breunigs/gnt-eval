@@ -135,8 +135,7 @@ module FunkyTeXBits
     b
   end
 
-  def TeXVorwort(facultylong, semestershort, single = nil)
-    semesterlong = semestershort.gsub("WS", "Wintersemester").gsub("SS", "Sommersemester")
+  def TeXVorwort(facultylong, semestershort, semesterlong, single = nil)
     data = IO.read(RAILS_ROOT + "/../tex/results_preface.tex.erb")
     ERB.new(data).result(binding)
   end
