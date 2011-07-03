@@ -72,7 +72,12 @@ class Form < ActiveRecord::Base
 
   # return a string like "Introduction to Astrophysics by John Doe"
   def lecturer_header(fullname, gender, language, sheets)
-    abstract_form.lecturer_header[language][gender].gsub(/#1/, fullname).gsub(/#2/, sheets.to_s)
+    h = abstract_form.lecturer_header
+    # if the desired lang/gender isn't available, try english/neutral
+    # next. If that fails as well, take whatever comes first.
+    h = h[language] || h[:en] || h.first[1]
+    h = h[gender] || h[:both] || h.first[1]
+    h.gsub(/#1/, fullname).gsub(/#2/, sheets.to_s)
   end
 
   def get_question(search)

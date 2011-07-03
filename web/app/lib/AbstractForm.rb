@@ -111,16 +111,20 @@ class Question
 
   # collect all possible choices and return as array
   def get_choices(language = nil)
-    if language.nil?
-      @boxes.collect { |x| x.text.nil? ? '' : x.text }
-    else
-      @boxes.collect { |x| x.text.nil? ? '' : x.text[language] }
+    @boxes.collect do |x|
+      if x.text.is_a?(Hash) && x.text[language]
+        x.text[language] || ""
+      elsif x.text.is_a?(Hash)
+        x.text[:en] || x.text.first[1] || ""
+      else
+        x.text || ""
+      end
     end
   end
 
   # question itself in appropriate language and gender
   def text(language = :en, gender = :both)
-    q = @qtext[language]
+    q = @qtext[language] || @qtext.first[1]
     q.is_a?(String) ? q : q[gender]
   end
 

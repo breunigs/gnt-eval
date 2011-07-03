@@ -32,7 +32,7 @@ en:
   courses: courses
   lecturers: lecturers
   study_groups: study groups
-  processed_questionnaires: processes questionnaires
+  processed_questionnaires: processed questionnaires
 
   # headline before the example questionnaires are shown
   the_questionnaires: The Questionnaires
