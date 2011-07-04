@@ -28,9 +28,10 @@ class Semester < ActiveRecord::Base
     evalname = faculty.longname + ' ' + title
     anzahl_boegen = count_forms({})
 
-    b << TeXKopf(evalname, cs.count, cs.inject(0) { |sum, c| sum +
-                   c.profs.count }, cs.inject(0) { |sum, c| sum +
-                   c.tutors.count }, anzahl_boegen)
+    b << TeXKopf(evalname, cs.count,
+            cs.inject(0) { |sum, c| sum + c.profs.count },
+            cs.inject(0) { |sum, c| sum + c.tutors.count },
+            anzahl_boegen)
     b << TeXVorwort(faculty.longname, title, longtitle)
 
     cs.each do |c|

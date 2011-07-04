@@ -125,13 +125,8 @@ module FunkyTeXBits
 
   def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
     b = preamble(evalname, single)
-    # FIXME: Need to encapsulate form stuff. I.e. if it's a seminar,
-    # a lecture and if it's German or English. The class should
-    # automatically provide appropriate strings for all language
-    # specifics
     data = IO.read(RAILS_ROOT + "/../tex/results_header.tex.erb")
     b << ERB.new(data).result(binding)
-
     b
   end
 

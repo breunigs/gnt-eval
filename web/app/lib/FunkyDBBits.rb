@@ -98,6 +98,8 @@ module FunkyDBBits
 
   def query(f, h, additional = '')
     ts = @db_table.to_a
+    # remove non existing tables
+    ts = ts.find_all { |t| table_exists?(t) }
     res = ts.map{ |t| query_single_table(f, h, t, additional)}
 
     # at this very moment we just use queries over multiple tables at
