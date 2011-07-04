@@ -261,13 +261,11 @@ namespace :images do
           next
         end
 
-        #~ puts "tutor  image: #{f}"
         p = Pic.new
         p.tutor_id = tutors[tut_num-1].id
         expire_tutor_cache << tutors[tut_num-1]
       else # files for the course/prof. Should be split up. FIXME.
         next if cpics.any? { |x| x.basename == bname }
-        #~ puts "course image: #{f}"
         p = CPic.new
         p.course_prof = course_prof
         expire_course_cache << course_prof.course
@@ -276,7 +274,7 @@ namespace :images do
       # let rails know about this comment
       p.save
       # move comment to correct location
-      system("#{cp} \"#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
+      system("#{cp} \"#{File.dirname(__FILE__)}/#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
       print_progress(curr+1, allfiles.size)
     end # Dir glob
 
