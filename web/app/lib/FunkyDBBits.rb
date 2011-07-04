@@ -100,10 +100,7 @@ module FunkyDBBits
     ts = @db_table.to_a
     # remove non existing tables
     ts = ts.find_all { |t| table_exists?(t) }
-    res = ts.map{ |t| query_single_table(f, h, t, additional)}
-
-    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("tables: #{ts.join(", ")}") }
-    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("res: #{PP.pp(res, "")}") }
+    res = ts.map{ |t| uncached_query_single_table(f, h, t, additional)}
 
     # at this very moment we just use queries over multiple tables at
     # the very beginning when counting all forms, so we can safely
@@ -123,14 +120,11 @@ module FunkyDBBits
 
   # returns count of stuff where i IN h[i] for each i + additional
   def count_forms(h, additional = '')
-    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("---") }
     begin
       res = query('COUNT(*)', h, additional)
     rescue => e
       # table that should be counted likely doesn't exist. Ignore
       # this and return 0 instead.
-      File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write(e.message) }
-      File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write(e.backtrace.inspect) }
       return 0
     end
     if res.nil?
