@@ -125,8 +125,8 @@ module FunkyDBBits
     rescue => e
       # table that should be counted likely doesn't exist. Ignore
       # this and return 0 instead.
-      logger.error e.message if logger
-      logger.error e.backtrace.inspect if logger
+      File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write(e.message) }
+      File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write(e.backtrace.inspect) }
       return 0
     end
     if res.nil?
