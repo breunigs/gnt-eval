@@ -100,7 +100,7 @@ module FunkyDBBits
     ts = @db_table.to_a
     # remove non existing tables
     ts = ts.find_all { |t| table_exists?(t) }
-    res = ts.map{ |t| uncached_query_single_table(f, h, t, additional)}
+    res = ts.map{ |t| query_single_table(f, h, t, additional)}
 
     # at this very moment we just use queries over multiple tables at
     # the very beginning when counting all forms, so we can safely
