@@ -83,11 +83,8 @@ class Course < ActiveRecord::Base
     return -1 if form.nil? || form.db_table.nil?
     @db_table = form.db_table
 
-    if not profs.empty?
-      count_forms({ :barcode => barcodes})
-    else
-      return 0
-    end
+    return 0 if profs.empty?
+    count_forms({ :barcode => barcodes})
   end
 
   # the head per course. this adds stuff like title, submitted
@@ -164,10 +161,20 @@ class Course < ActiveRecord::Base
 
   # eval me (baby)
   def evaluate
+    puts "   #{title}"
+
     # if this course doesn't have any lecturers it cannot have been
     # evaluated, since the sheets are coded with the course_prof id
     # Return early to avoid problems.
-    return "" if profs.empty?
+    if profs.empty?
+      puts "     no profs -- skipping"
+      return ""
+    end
+
+    unless table_exists?(form.db_table)
+      puts "     table #{form.db_table} does not exit yet -- skipping"
+      return ""
+    end
 
     I18n.locale = language if I18n.tainted?
     I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
@@ -177,7 +184,6 @@ class Course < ActiveRecord::Base
     # setup for FunkyDBBits
     @db_table = form.db_table
 
-    puts "   #{title}"
     b << eval_lecture_head
 
     # lecture eval per lecturer

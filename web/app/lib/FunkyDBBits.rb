@@ -21,6 +21,14 @@ module FunkyDBBits
     FunkyDBBits.dbh
   end
 
+  # returns true if the given table exists, false otherwise
+  def table_exists?(table)
+    sth = dbh.prepare("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?")
+    sth.execute(table)
+    sth.each { |r| return true }
+    false
+  end
+
   # query fields, where-hash and additional clauses
   # does caching, see uncached_query_single_table
   def query_single_table(f, h, t, additional = '', cache = true)
