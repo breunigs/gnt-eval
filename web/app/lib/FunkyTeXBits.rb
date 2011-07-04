@@ -84,7 +84,9 @@ module FunkyTeXBits
       error = ""
 
       # we don't really care if cropping worked or not
-      exitcodes << (pdf_crop("#{path}.pdf") ? 0 : 1)
+      crop_stat, crop_error = pdf_crop("#{path}.pdf")
+      error << crop_error.to_s
+      exitcodes << (crop_stat ? 0 : 1)
 
       error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
       exitcodes << $?.to_i

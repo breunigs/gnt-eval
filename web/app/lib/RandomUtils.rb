@@ -73,13 +73,15 @@ end
 def pdf_crop(pdffile)
   tmp = Dir.mktmpdir("seee/pdfcrop-")
   worked = false
+  crop_err = nil
   Dir.chdir(tmp) do
-    break unless pdf_crop_tex(pdffile)
+    crop_stat, crop_err = pdf_crop_tex(pdffile, "", true)
+    break unless crop_stat
     worked = true
     `mv -f cropped.pdf "#{pdffile}"`
   end
   `rm -rf #{tmp}`
-  worked
+  return worked, crop_err
 end
 
 # Generates a pdf file with the barcode in the specified location
@@ -105,7 +107,7 @@ end
 # helper function, that generates a cropped version named "cropped.pdf"
 # of the pdffile in the current working directory. Usually you want to
 # call this like pdf_crop or generate_barcode
-def pdf_crop_tex(pdffile, dir = "./")
+def pdf_crop_tex(pdffile, dir = "./", give_error = false)
   dir += "/" unless dir.end_with?"/"
   dir = "" if pdffile.start_with?"/"
 
@@ -113,7 +115,8 @@ def pdf_crop_tex(pdffile, dir = "./")
   bboxes = gs_out.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
   if bboxes.nil? || bboxes.empty?
     puts "Could not run ghostscript or couldn't find suitable bounding boxes in given file"
-    return false
+    return false if !give_error
+    return false, `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{dir}#{pdffile}'`
   end
   twice_print_bug = gs_out.split("\n")[1].start_with?("%%Bounding")
 
@@ -153,7 +156,7 @@ def pdf_crop_tex(pdffile, dir = "./")
     puts `cat #{dir}cropped.log`
     return false
   end
-  true
+  return true
 end
 
 def temp_dir
