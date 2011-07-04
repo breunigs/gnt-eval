@@ -102,6 +102,9 @@ module FunkyDBBits
     ts = ts.find_all { |t| table_exists?(t) }
     res = ts.map{ |t| query_single_table(f, h, t, additional)}
 
+    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("tables: #{ts.join(", ")}") }
+    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("res: #{PP.pp(res, "")}") }
+
     # at this very moment we just use queries over multiple tables at
     # the very beginning when counting all forms, so we can safely
     # (*cough*) do this:
@@ -120,6 +123,7 @@ module FunkyDBBits
 
   # returns count of stuff where i IN h[i] for each i + additional
   def count_forms(h, additional = '')
+    File.open('/home/stefan/DEBUG_test', 'a+') {|f| f.write("---") }
     begin
       res = query('COUNT(*)', h, additional)
     rescue => e
