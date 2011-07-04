@@ -325,6 +325,7 @@ class PESTOmr < PESTDatabaseTools
           checked = c.reject { |x| x.bp < DESPERATE_MIN_FILL_GRADE }
           checked.each { |box| box.is_checked = true; box.fill_critical = true }
           case checked.size
+            when 0: 0 # well, no checkmarks either
             when 1: checked.first.choice
             else     -1
           end
