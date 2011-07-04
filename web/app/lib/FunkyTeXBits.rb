@@ -52,8 +52,8 @@ module FunkyTeXBits
   def texpreview(code)
     return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
 
-	require 'rubygems'
-	require 'work_queue'
+    require 'rubygems'
+    require 'work_queue'
     require 'lib/RandomUtils.rb'
     require 'digest'
 

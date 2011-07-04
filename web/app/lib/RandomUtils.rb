@@ -73,8 +73,9 @@ end
 def pdf_crop(pdffile)
   tmp = Dir.mktmpdir("seee/pdfcrop-")
   worked = false
+  pdfdir = `pwd`.chomp
   Dir.chdir(tmp) do
-    break unless pdf_crop_tex(pdffile)
+    break unless pdf_crop_tex(pdffile, pdfdir)
     worked = true
     `mv -f cropped.pdf "#{pdffile}"`
   end
