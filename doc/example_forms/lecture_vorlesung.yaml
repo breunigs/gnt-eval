@@ -1,5 +1,9 @@
 --- !ruby/object:AbstractForm
-db_table: evaldaten_WS_2010_11_0
+db_table: evaldaten_SS_11_0
+texfoot: \separator{1pt}
+texhead:
+  :de: \renewcommand{\arraystretch}{0.979} % hack to make the german sheet fit onto two pages
+  :en: ""
 babelclass:
   :en: english
   :de: ngerman
@@ -93,8 +97,8 @@ pages:
       db_column: hauptfach
       nochoice:
       qtext:
-        :de: Hauptfach
-        :en: Major
+        :de: "(erstes) Hauptfach"
+        :en: "(first) Major"
       special_care: 1
       type: fixed_width__last_is_rightmost
     - !ruby/object:Question
@@ -248,7 +252,10 @@ pages:
       db_column: v6
       nochoice:
       qtext:
-        :de: "Stimmt das von der/dem Dozent/in erwartete Vorwissen mit deinem eigenen \xC3\xBCberein?"
+        :de:
+          :both: "Stimmt das von der/dem Dozent/in erwartete Vorwissen mit deinem eigenen \xC3\xBCberein?"
+          :male: "Stimmt das vom Dozenten erwartete Vorwissen mit deinem eigenen \xC3\xBCberein?"
+          :female: "Stimmt das von der Dozentin erwartete Vorwissen mit deinem eigenen \xC3\xBCberein?"
         :en: Does your knowledge match the knowledge expected by the lecturer?
       save_as: ""
       type: square
@@ -563,7 +570,10 @@ pages:
       db_column: v16
       nochoice:
       qtext:
-        :de: "Wie gut gelingt es der/dem Dozentin/en, schwierige Themen verst\xC3\xA4ndlich zu erkl\xC3\xA4ren?"
+        :de:
+          :both: "Wie gut gelingt es der/dem Dozentin/en, schwierige Themen verst\xC3\xA4ndlich zu erkl\xC3\xA4ren?"
+          :male: "Wie gut gelingt es dem Dozenten, schwierige Themen verst\xC3\xA4ndlich zu erkl\xC3\xA4ren?"
+          :female: "Wie gut gelingt es der Dozentin, schwierige Themen verst\xC3\xA4ndlich zu erkl\xC3\xA4ren?"
         :en: How well does the lecturer explain difficult subjects?
       save_as: ""
       type: square
@@ -582,7 +592,10 @@ pages:
       db_column: v17
       nochoice:
       qtext:
-        :de: Gelingt es der/dem Dozentin/en, wesentliche Sachverhalte besonders herauszuarbeiten?
+        :de:
+          :both: Gelingt es der/dem Dozentin/en, wesentliche Sachverhalte besonders herauszuarbeiten?
+          :male: Gelingt es dem Dozenten, wesentliche Sachverhalte besonders herauszuarbeiten?
+          :female: Gelingt es der Dozentin, wesentliche Sachverhalte besonders herauszuarbeiten?
         :en: Does the lecturer manage to especially elaborate the most important subjects?
       save_as: ""
       type: square
@@ -761,7 +774,10 @@ pages:
       db_column: v23
       nochoice:
       qtext:
-        :de: "Traust du dich, der/dem Dozentin/en w\xC3\xA4hrend (oder nach) der Vorlesung Fragen zu stellen?"
+        :de:
+          :both: "Traust du dich, der/dem Dozentin/en w\xC3\xA4hrend (oder nach) der Vorlesung Fragen zu stellen?"
+          :male: "Traust du dich, dem Dozenten w\xC3\xA4hrend (oder nach) der Vorlesung Fragen zu stellen?"
+          :female: "Traust du dich, der Dozentin w\xC3\xA4hrend (oder nach) der Vorlesung Fragen zu stellen?"
         :en: Are you nervous about asking questions during (or after) the lecture?
       save_as: ""
       type: square
@@ -824,7 +840,10 @@ pages:
       db_column: v25
       nochoice:
       qtext:
-        :de: Wie gut beantwortet der/die Dozent/in Fragen?
+        :de:
+          :both: Wie gut beantwortet der/die Dozent/in Fragen?
+          :male: Wie gut beantwortet der Dozent Fragen?
+          :female: Wie gut beantwortet die Dozentin Fragen?
         :en: How well does the lecturer answer questions?
       save_as: ""
       type: square
@@ -918,7 +937,10 @@ pages:
       db_column: v28
       nochoice:
       qtext:
-        :de: "W\xC3\xBCrdest du diese Vorlesung bei dieser/m Dozentin/en weiterempfehlen?"
+        :de:
+          :both: "W\xC3\xBCrdest du diese Vorlesung bei dieser/m Dozentin/en weiterempfehlen?"
+          :male: "W\xC3\xBCrdest du diese Vorlesung bei diesem Dozenten weiterempfehlen?"
+          :female: "W\xC3\xBCrdest du diese Vorlesung bei dieser Dozentin weiterempfehlen?"
         :en: Would you recommend this lecture with this lecturer?
       save_as: ""
       type: square
@@ -1427,4 +1449,3 @@ pages:
     title:
       :de: "Fragen zu den \xC3\x9Cbungen"
       :en: Questions Concerning the Study Groups
-texfoot: \separator{1pt}

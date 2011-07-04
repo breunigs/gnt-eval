@@ -1,5 +1,5 @@
 --- !ruby/object:AbstractForm
-db_table: evaldaten_WS_2010_11_1
+db_table: INSERT_TABLE_NAME_FOR_SEMINARS
 babelclass:
   :en: english
   :de: ngerman
@@ -85,8 +85,8 @@ pages:
       db_column: hauptfach
       nochoice:
       qtext:
-        :de: Hauptfach
-        :en: Major
+        :de: "(erstes) Hauptfach"
+        :en: "(first) Major"
       special_care: 1
       type: fixed_width__last_is_rightmost
     - !ruby/object:Question
@@ -430,22 +430,27 @@ pages:
         choice: 1
         text:
           :de: <5\,h
+          :en: <5\,h
       - !ruby/object:Box
         choice: 2
         text:
           :de: 5--10\,h
+          :en: 5--10\,h
       - !ruby/object:Box
         choice: 3
         text:
           :de: 10--15\,h
+          :en: 10--15\,h
       - !ruby/object:Box
         choice: 4
         text:
           :de: 15--20\,h
+          :en: 15--20\,h
       - !ruby/object:Box
         choice: 5
         text:
           :de: ">20\\,h"
+          :en: ">20\\,h"
       - !ruby/object:Box
         choice: 6
         text:
@@ -469,10 +474,12 @@ pages:
         choice: 2
         text:
           :de: ""
+          :en: ""
       - !ruby/object:Box
         choice: 3
         text:
           :de: ""
+          :en: ""
       - !ruby/object:Box
         choice: 4
         text:
@@ -549,7 +556,10 @@ pages:
       db_column: v12
       nochoice:
       qtext:
-        :de: Setzt der/die Dozent/in bei der Themenauswahl die richtigen Schwerpunkte?
+        :de:
+          :both: Setzt der/die Dozent/in bei der Themenauswahl die richtigen Schwerpunkte?
+          :male: Setzt der Dozent bei der Themenauswahl die richtigen Schwerpunkte?
+          :female: Setzt die Dozentin bei der Themenauswahl die richtigen Schwerpunkte?
         :en: Does the lecturer set the right priorities in her/his choice of topics?
       save_as: ""
       type: square
@@ -683,7 +693,10 @@ pages:
       db_column: v17
       nochoice:
       qtext:
-        :de: "Hat der/die Dozent/in angemessen fragend und korrigierend in Vortr\xC3\xA4ge eingegriffen?"
+        :de:
+          :both: "Hat der/die Dozent/in angemessen fragend und korrigierend in Vortr\xC3\xA4ge eingegriffen?"
+          :male: "Hat der Dozent angemessen fragend und korrigierend in Vortr\xC3\xA4ge eingegriffen?"
+          :female: "Hat die Dozentin angemessen fragend und korrigierend in Vortr\xC3\xA4ge eingegriffen?"
         :en: Did the lecturer intervene during talks to ask questions and correct mistakes in an appropriate way?
       save_as: ""
       type: square
@@ -717,7 +730,10 @@ pages:
       db_column: v18
       nochoice:
       qtext:
-        :de: "War der/die Dozent/in w\xC3\xA4hrend der Vortr\xC3\xA4ge ausreichend pr\xC3\xA4sent?"
+        :de:
+          :both: "War der/die Dozent/in w\xC3\xA4hrend der Vortr\xC3\xA4ge ausreichend pr\xC3\xA4sent?"
+          :male: "War der Dozent w\xC3\xA4hrend der Vortr\xC3\xA4ge ausreichend pr\xC3\xA4sent?"
+          :female: "War die Dozentin w\xC3\xA4hrend der Vortr\xC3\xA4ge ausreichend pr\xC3\xA4sent?"
         :en: Was the lecturer sufficiently present during the talks?
       save_as: ""
       type: square
@@ -765,7 +781,10 @@ pages:
       db_column: v20
       nochoice:
       qtext:
-        :de: "W\xC3\xBCrdest du erneut ein Seminar bei diesem/dieser Dozenten/in besuchen?"
+        :de:
+          :both: "W\xC3\xBCrdest du erneut ein Seminar bei diesem/dieser Dozenten/in besuchen?"
+          :male: "W\xC3\xBCrdest du erneut ein Seminar bei diesem Dozenten besuchen?"
+          :female: "W\xC3\xBCrdest du erneut ein Seminar bei dieser Dozentin besuchen?"
         :en: Would you attend a seminar with this lecturer again?
       save_as: ""
       type: square
@@ -773,7 +792,5 @@ pages:
       :de: Fragen zum Seminar
       :en: Questions about the Seminar
 texfoot:
-  :en: "\\\\[0.2cm]\n Is there anything else you'd like to mention about the seminar? (If so, give keywords on the back)\n\n\
-  \\ikkifthagn"
-  :de: "\\\\[0.2cm]\n Ist dir an dem Seminar zus\xC3\xA4tzlich noch etwas aufgefallen? (Falls ja, bitte auf der R\xC3\xBCckseite Stichworte angeben)\n\n\
-  \\ikkifthagn"
+  :en: "\\\\[0.2cm]\n Is there anything else you'd like to mention about the seminar? (If so, give keywords on the back)\n\n\\backpagecomment{backpagecomment}"
+  :de: "\\\\[0.2cm]\n Ist dir an dem Seminar zus\xC3\xA4tzlich noch etwas aufgefallen? (Falls ja, bitte auf der R\xC3\xBCckseite Stichworte angeben)\n\n\\backpagecomment{backpagecomment}"
