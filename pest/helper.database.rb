@@ -74,7 +74,7 @@ class PESTDatabaseTools
       begin
         dbh.do("SELECT * FROM #{f.db_table}")
       rescue
-        debug "Note: Creating #{name} (table: #{f.db_table}) failed. Possible causes:"
+        debug "Note: Creating table #{f.db_table} failed. Possible causes:"
         debug "* SQL backend is down/misconfigured"
         debug "* used SQL query is not supported by your SQL backend"
         debug "Query was #{q}"
