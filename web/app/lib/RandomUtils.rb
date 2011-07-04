@@ -73,9 +73,8 @@ end
 def pdf_crop(pdffile)
   tmp = Dir.mktmpdir("seee/pdfcrop-")
   worked = false
-  pdfdir = `pwd`.chomp
   Dir.chdir(tmp) do
-    break unless pdf_crop_tex(pdffile, pdfdir)
+    break unless pdf_crop_tex(pdffile)
     worked = true
     `mv -f cropped.pdf "#{pdffile}"`
   end
@@ -108,6 +107,7 @@ end
 # call this like pdf_crop or generate_barcode
 def pdf_crop_tex(pdffile, dir = "./")
   dir += "/" unless dir.end_with?"/"
+  dir = "" if pdffile.start_with?"/"
 
   gs_out = `gs -sDEVICE=bbox -dBATCH -dNOPAUSE -c save pop -f '#{dir}#{pdffile}' 2>&1 1>/dev/null`
   bboxes = gs_out.scan(/%%BoundingBox:\s*((?:[0-9]+\s*){4})/m)
@@ -160,7 +160,7 @@ def temp_dir
   tmp = Seee::Config.file_paths[:cache_tmp_dir]
   require 'ftools'
   File.makedirs(tmp)
-  `chmod 0777 -R #{tmp}`
+  `chmod 0777 -R #{tmp}  2> /dev/null`
   tmp
 end
 
