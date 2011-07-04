@@ -26,6 +26,7 @@ en:
   teaching_eval_pdf_title: Teaching Evaluation $faculty_semester
   teaching_eval_headline: Teaching Evaluation\\$faculty_semester
 
+  results_of_survey: results of the courses survey
   # displayed in the result PDFs on the 2nd page in the lower left
   # corner
   scope_of_this_eval: 'scope of this evaluation:'

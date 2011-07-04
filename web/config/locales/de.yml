@@ -26,6 +26,7 @@ de:
   teaching_eval_pdf_title: Lehrevaluation $faculty_semester
   teaching_eval_headline: Lehrevaluation\\$faculty_semester
 
+  results_of_survey: Ergebnisse der Veranstaltungsumfrage
   scope_of_this_eval: 'Umfang dieser Evaluation:'
   courses: Veranstaltungen
   lecturers: DozentInnen
