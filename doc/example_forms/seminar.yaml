@@ -527,7 +527,7 @@ pages:
       db_column: v11
       nochoice:
       qtext:
-        :de: "Sind die vergebenen Leistungspunkte gemessen am Arbeitsaufwand f\xC3\xBCr diese Vorlesung angemessen (1\\,LP entspricht 25-30\\,h)?"
+        :de: "Sind die vergebenen Leistungspunkte gemessen am Arbeitsaufwand f\xC3\xBCr dieses Seminar angemessen (1\\,LP entspricht 25-30\\,h)?"
         :en: "Is the amount of credit points awarded adequate for your workload? (1\\,CP equals 25-30\\,h)?"
       save_as: ""
       type: square
