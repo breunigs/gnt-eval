@@ -122,9 +122,11 @@ module FunkyDBBits
   def count_forms(h, additional = '')
     begin
       res = query('COUNT(*)', h, additional)
-    rescue
+    rescue => e
       # table that should be counted likely doesn't exist. Ignore
       # this and return 0 instead.
+      logger.error e.message if logger
+      logger.error e.backtrace.inspect if logger
       return 0
     end
     if res.nil?
