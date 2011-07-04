@@ -163,7 +163,23 @@
 \IfNoValueTF{#1}{%
 		\SaveNormalInfo[#3][#2]
 }{
- 		\def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,}
+		\IfNoValueTF{#9}{
+		\IfNoValueTF{#8}{
+		\IfNoValueTF{#7}{
+		\IfNoValueTF{#6}{
+		\IfNoValueTF{#5}{%1
+		    \def\Source{uu - #2a,}
+		}{%2
+		    \def\Source{uu - #2a,uu - #2b,}
+		}}{%3
+		    \def\Source{uu - #2a,uu - #2b,uu - #2c,}
+		}}{%4
+		    \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,}
+		}}{%5
+		    \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,uu - #2e,}
+		}}{%6
+		    \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,uu - #2e,uu - #2f,}
+		}
 		\SaveMultiInfo[#3]
 }
 %Print the question, depending on how many answers are given, for this I will burn in hell!
