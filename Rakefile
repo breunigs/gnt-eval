@@ -769,6 +769,9 @@ namespace :summary do
   # error code
   def testTeXCode(content)
     include FunkyTeXBits
+
+    I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
+
     head = preamble("Blaming Someone For Bad LaTeX")
     foot = "\\end{document}"
 
