@@ -722,6 +722,10 @@ namespace :summary do
 
   def warnAboutCommonTeXErrors(code)
     msg = []
+
+    msg << "Deprecated quotation mark use?" if code.match("\"`")
+    msg << "Deprecated quotation mark use?" if code.match("\"'")
+    msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
     msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
 
     begs = code.scan(/\\begin\{[a-z]+?\}/)
