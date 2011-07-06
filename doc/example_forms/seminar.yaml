@@ -401,22 +401,27 @@ pages:
         choice: 1
         text:
           :de: <10\,h
+          :en: <10\,h
       - !ruby/object:Box
         choice: 2
         text:
           :de: 10--20\,h
+          :en: 10--20\,h
       - !ruby/object:Box
         choice: 3
         text:
           :de: 20--30\,h
+          :en: 20--30\,h
       - !ruby/object:Box
         choice: 4
         text:
           :de: 30--40\,h
+          :en: 30--40\,h
       - !ruby/object:Box
         choice: 5
         text:
           :de: ">40\\,h"
+          :en: ">40\\,h"
       db_column: v8
       nochoice:
       qtext:
@@ -679,7 +684,7 @@ pages:
         choice: 1
         text:
           :de: nein, zuviel
-          :en: nein, too much
+          :en: no, too much
       - !ruby/object:Box
         choice: 2
         text:
