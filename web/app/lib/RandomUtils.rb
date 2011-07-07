@@ -68,22 +68,6 @@ def print_progress(val, max)
       STDOUT.flush
 end
 
-# crops the given pdf file in place. If cropping fails for some reason,
-# the original file is not overwritten
-def pdf_crop(pdffile)
-  tmp = Dir.mktmpdir("seee/pdfcrop-")
-  worked = false
-  crop_err = nil
-  Dir.chdir(tmp) do
-    crop_stat, crop_err = pdf_crop_tex(pdffile, "", true)
-    break unless crop_stat
-    worked = true
-    `mv -f cropped.pdf "#{pdffile}"`
-  end
-  `rm -rf #{tmp}`
-  return worked, crop_err
-end
-
 # Generates a pdf file with the barcode in the specified location
 def generate_barcode(barcode, path)
   # skip if the barcode already exists
@@ -102,6 +86,22 @@ def generate_barcode(barcode, path)
   `mv -f #{tmp}/cropped.pdf "#{path}"`
   `rm -rf #{tmp}`
   true
+end
+
+# crops the given pdf file in place. If cropping fails for some reason,
+# the original file is not overwritten
+def pdf_crop(pdffile)
+  tmp = Dir.mktmpdir("seee/pdfcrop-")
+  worked = false
+  crop_err = nil
+  Dir.chdir(tmp) do
+    crop_stat, crop_err = pdf_crop_tex(pdffile, "", true)
+    break unless crop_stat
+    worked = true
+    `mv -f cropped.pdf "#{pdffile}"`
+  end
+  `rm -rf #{tmp}`
+  return worked, crop_err
 end
 
 # helper function, that generates a cropped version named "cropped.pdf"
@@ -139,13 +139,15 @@ def pdf_crop_tex(pdffile, dir = "./", give_error = false)
     h << "  \\ht0=\\pdfpageheight\n"
     h << "  \\shipout\\box0\\relax\n"
     h << "}\n"
+    page = 1
     bboxes.each_with_index do |bbox,i|
       # for some gs versions each page appears twice, so skip every
       # 2nd entry if that is the case
       next if twice_print_bug && i%2 != 0
       bbox = bbox[0].strip.split(/\s+/)
       bbox[1] = bbox[1].to_i - 9
-      h << "\\page #{i/2 + 1} [#{bbox.join(" ")}]\n"
+      h << "\\page #{page} [#{bbox.join(" ")}]\n"
+      page += 1
     end
     h << "\\csname @@end\\endcsname\n"
     h << "\\end\n"
