@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+require 'rubygems'
 require 'erb'
+require 'work_queue'
+require 'lib/RandomUtils.rb'
+require 'digest'
 
 module FunkyTeXBits
   def spellcheck(code)
@@ -16,7 +20,6 @@ module FunkyTeXBits
     end
 
     # write code to tempfile
-    require 'digest'
     name = Digest::SHA256.hexdigest(code)
     path = File.join(temp_dir, "spellcheck_#{name}")
     File.open("#{path}", 'w') {|f| f.write(code) }
@@ -52,11 +55,6 @@ module FunkyTeXBits
   def texpreview(code)
     return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
 
-    require 'rubygems'
-    require 'work_queue'
-    require 'lib/RandomUtils.rb'
-    require 'digest'
-
     name = Digest::SHA256.hexdigest(code)
     path = File.join(temp_dir, "preview_#{name}")
 
@@ -65,37 +63,23 @@ module FunkyTeXBits
     exitcodes = []
     error = ""
 
-    head = preamble("Blaming Someone For Bad LaTeX")
-    head << "\\pagestyle{empty}\n\n"
-    foot = "\n\n\\end{document}"
+    preview = '\usepackage[active,displaymath,floats,textmath,graphics,sections,tightpage]{preview}'
+    head = preamble("Blaming Someone For Bad LaTeX", preview)
+    head << "\\pagestyle{empty}\n\\begin{preview}\n"
+    foot = "\n\\end{preview}\n\\end{document}"
 
     File.open(path + ".tex", 'w') do |f|
       f.write(head + spellcheck(code) + foot)
     end
 
-    error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} #{path}.tex 2>&1`
+    error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} "#{path}.tex" 2>&1`
     ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
     error << "<hr><pre>" << head << spellcheck(code) << foot << "</pre>"
     exitcodes << ex
 
     if ex == 0
-      # overwrite by design. Otherwise it's flooded with all
-      # the TeX output even though TeXing worked fine
-      error = ""
-
-      # we don't really care if cropping worked or not
-      crop_stat, crop_error = pdf_crop("#{path}.pdf")
-      error << crop_error.to_s
-      exitcodes << (crop_stat ? 0 : 1)
-
-      error << `#{Seee::Config.application_paths[:convert]} -density 100 #{path}.pdf #{path}.png  2>&1`
+      error << `#{Seee::Config.application_paths[:convert]} -density 100 "#{path}.pdf" "#{path}.png"  2>&1`
       exitcodes << $?.to_i
-      # convert creates one image per page, so join them
-      # for easier processing
-      unless File.exists?("#{path}.png")
-        error << `#{Seee::Config.application_paths[:convert]} #{path}-*.png -append #{path}.png  2>&1`
-        exitcodes << $?.to_i
-      end
     end
     failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
 
@@ -107,7 +91,8 @@ module FunkyTeXBits
     end
 
     # cleanup temp files
-    `rm -f "#{path}*"`
+    files = '"' + Dir.glob("#{path}*").join('" "') + '"'
+    `rm -f #{files}`
 
     return failed, exitcodes, error.gsub("\n", "<br/>"), base64
   end
@@ -120,24 +105,24 @@ module FunkyTeXBits
     I18n.translate(item.to_sym)
   end
 
-  def preamble(evalname, single = nil)
+  def preamble(evalname, additional_packages = "")
     data = IO.read(RAILS_ROOT + "/../tex/results_preamble.tex.erb")
     ERB.new(data).result(binding)
   end
 
-  def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0, single = nil)
-    b = preamble(evalname, single)
+  def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0)
+    b = preamble(evalname)
     data = IO.read(RAILS_ROOT + "/../tex/results_header.tex.erb")
     b << ERB.new(data).result(binding)
     b
   end
 
-  def TeXVorwort(facultylong, semestershort, semesterlong, single = nil)
+  def TeXVorwort(facultylong, semestershort, semesterlong)
     data = IO.read(RAILS_ROOT + "/../tex/results_preface.tex.erb")
     ERB.new(data).result(binding)
   end
 
-  def TeXFuss(single = nil)
+  def TeXFuss
     path = File.join(Rails.root, "../tmp/sample_sheets/sample_")
     files = {}
 
