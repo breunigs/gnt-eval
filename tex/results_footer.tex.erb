@@ -1,9 +1,5 @@
-<% if single.nil? %>
-  \chapter{<%=t :the_questionnaires %>}
-<% else %>
-  \pagebreak
-  \section{<%=t :the_questionnaires %>}
-<% end %>
+\chapter{<%=t :the_questionnaires %>}
+
 
 <% files.each do |path, info| %>
   \subsection*{<%=info[:name]%>}

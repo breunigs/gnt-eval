@@ -21,7 +21,8 @@ en:
   study_groups_header: Questions concerning the study groups
   study_groups_overview: Overview of study groups
 
-  eval_results: Result of the Evaluationd
+  preface: Preface
+  eval_results: Result of the Evaluation
   tex_babel_lang: english
   teaching_eval_pdf_title: Teaching Evaluation $faculty_semester
   teaching_eval_headline: Teaching Evaluation\\$faculty_semester

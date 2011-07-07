@@ -1,38 +1,34 @@
-<% if single.nil? %>
-  \begin{titlepage}
-    \null\vskip 2.5cm
-    \begin{center}
-      {
-	\parskip0pt
-	{\sectfont\Huge \makeatletter\@title\makeatother \par}
-	\vspace{2em}
-	{\usekomafont{sectioning}\mdseries\LARGE <%=t :results_of_survey %>\par}
-	\vfill
-	{\Large \makeatletter\@author\makeatother \par}
-	\vspace{4em}\
-	{\Large \makeatletter\@date\makeatother \par}
-	\vfill
-      }
-    \end{center}
-    \clearpage\thispagestyle{empty}\null\vfill
-    \noindent\begin{minipage}[b]{\textwidth}
-      \textbf{<%=t :scope_of_this_eval %>}\par\medskip
-      \begin{tabular}[b]{rl}
-	\hline
-	<%=c_courses%> & <%=t :courses %> \\
-	<%=c_profs%> & <%=t :lecturers %> \\
-	<%=c_tutors%> & <%=t :study_groups %>\\
-	<%=c_forms%> & <%=t :processed_questionnaires %>\\
-	\hline
-      \end{tabular}
-      \hfill
-    \end{minipage}
-  \end{titlepage}
+\begin{titlepage}
+  \null\vskip 2.5cm
+  \begin{center}
+    {
+      \parskip0pt
+      {\sectfont\Huge \makeatletter\@title\makeatother \par}
+      \vspace{2em}
+      {\usekomafont{sectioning}\mdseries\LARGE <%=t :results_of_survey %>\par}
+      \vfill
+      {\Large \makeatletter\@author\makeatother \par}
+      \vspace{4em}\
+      {\Large \makeatletter\@date\makeatother \par}
+      \vfill
+    }
+  \end{center}
+  \clearpage\thispagestyle{empty}\null\vfill
+  \noindent\begin{minipage}[b]{\textwidth}
+    \textbf{<%=t :scope_of_this_eval %>}\par\medskip
+    \begin{tabular}[b]{rl}
+      \hline
+      <%=c_courses%> & <%=t :courses %> \\
+      <%=c_profs%> & <%=t :lecturers %> \\
+      <%=c_tutors%> & <%=t :study_groups %>\\
+      <%=c_forms%> & <%=t :processed_questionnaires %>\\
+      \hline
+    \end{tabular}
+    \hfill
+  \end{minipage}
+\end{titlepage}
 
-  \makeatletter
-  \renewcommand{\l@section}{\@dottedtocline{1}{1.5em}{2.8em}}
-  \makeatother
-  \tableofcontents
-<% else %>
-  \maketitle\n\tableofcontents
-<% end %>
+\makeatletter
+\renewcommand{\l@section}{\@dottedtocline{1}{1.5em}{2.8em}}
+\makeatother
+\tableofcontents

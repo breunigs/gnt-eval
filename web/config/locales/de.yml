@@ -21,6 +21,7 @@ de:
   study_groups_header: Fragen zum Übungsbetrieb
   study_groups_overview: "Übersicht der Übungsgruppen"
 
+  preface: Vorwort
   eval_results: Ergebnis der Evaluation
   tex_babel_lang: ngerman
   teaching_eval_pdf_title: Lehrevaluation $faculty_semester

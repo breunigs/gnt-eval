@@ -1,9 +1,4 @@
-<% if single.nil? %>
-  \chapter{Vorwort}
-<% else %>
-  \pagebreak
-  \section{Vorwort}
-<% end %>
+\chapter{<%=t :preface%>}
 
 <%
 preface = File.join(Rails.root, "../tex/preface_#{I18n.locale}.tex")
