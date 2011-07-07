@@ -66,8 +66,8 @@ module FunkyTeXBits
     error = ""
 
     head = preamble("Blaming Someone For Bad LaTeX")
-    head << "\\pagestyle{empty}"
-    foot = "\\end{document}"
+    head << "\\pagestyle{empty}\n\n"
+    foot = "\n\n\\end{document}"
 
     File.open(path + ".tex", 'w') do |f|
       f.write(head + spellcheck(code) + foot)
