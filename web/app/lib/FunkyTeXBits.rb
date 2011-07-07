@@ -13,9 +13,9 @@ module FunkyTeXBits
     return code
 
     # check if hunspell is installed
-    `#{Seee::Config.application_paths[:aspell]} --version`
+    `#{Seee::Config.application_paths[:hunspell]} --version &> /dev/null`
     unless $?.to_i == 0
-      logger.warn "aspell does not seem to be installed. Skipping spellcheck."
+      logger.warn "hunspell does not seem to be installed. Skipping spellcheck."
       return code
     end
 
@@ -25,15 +25,15 @@ module FunkyTeXBits
     File.open("#{path}", 'w') {|f| f.write(code) }
 
     # spell check!
-    words = `cat #{path} | #{Seee::Config.commands[:aspell]}`.split("\n")
+    words = `cat #{path} | #{Seee::Config.commands[:hunspell]} 2> /dev/null`.split("\n")
 
     unless $?.to_i == 0
-      logger.warn "aspell failed for some reason. Exit code: #{$?}"
-      logger.warn "aspell: #{Seee::Config.commands[:aspell]}"
+      logger.warn "hunspell failed for some reason. Exit code: #{$?}"
+      logger.warn "hunspell: #{Seee::Config.commands[:hunspell]}"
       logger.warn "Path was: #{path}"
-      logger.warn "Whole command: cat #{path} | #{Seee::Config.commands[:aspell]}"
+      logger.warn "Whole command: cat #{path} | #{Seee::Config.commands[:hunspell]}"
       logger.warn "Code was: #{File.read(path)}"
-      logger.warn "aspell output: #{words.join("\n")}"
+      logger.warn "hunspell output: #{words.join("\n")}"
       return code
     end
     File.delete(path)

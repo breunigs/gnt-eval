@@ -161,7 +161,7 @@ module Seee
       :cp_comment_image_directory => 'cp',
       :mkdir_comment_image_directory => 'mkdir',
 
-      :hunspell => "#{@@application_paths[:hunspell]} -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
+      :hunspell => "#{@@application_paths[:hunspell]} -t -l -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
       :aspell => "#{@@application_paths[:aspell]} -t -d de_DE-neu list | #{@@application_paths[:aspell]} -t -d en list",
 
       :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}"
