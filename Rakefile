@@ -714,6 +714,7 @@ namespace :summary do
     # _ -> \_, '" -> "', `" -> "`
     code = code.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
     # correct common typos
+    code = code.gsub("\\textit", "\\emph")
     code = code.gsub("{itemsize}", "{itemize}").gsub("/begin{", "\\begin{")
     code = code.gsub("/end{", "\\end{").gsub("/item ", "\\item ")
     code = code.gsub("\\beign", "\\begin").gsub(/[.]{3,}/, "\\dots ")
@@ -725,6 +726,7 @@ namespace :summary do
 
     msg << "Deprecated quotation mark use?" if code.match("\"`")
     msg << "Deprecated quotation mark use?" if code.match("\"'")
+    msg << "Underline mustn't be used. Ever." if code.match("\\underline")
     msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
     msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
 
