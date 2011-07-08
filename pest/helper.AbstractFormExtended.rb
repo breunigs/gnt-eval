@@ -15,7 +15,7 @@ class Box
   # stores the amount of black pixels in the searched area
   attr_accessor :black
 
-  # set to true by omr.rb if it believes this box is checked. This is
+  # set to true by omr2.rb if it believes this box is checked. This is
   # later picked up by fix.rb and draws a special border around this box
   attr_accessor :is_checked
 
