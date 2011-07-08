@@ -9,9 +9,6 @@ require 'digest'
 
 module FunkyTeXBits
   def spellcheck(code)
-    # do nothing until we can fix this properly
-    return code
-
     # check if hunspell is installed
     `#{Seee::Config.application_paths[:hunspell]} --version &> /dev/null`
     unless $?.to_i == 0
