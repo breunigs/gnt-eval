@@ -717,11 +717,12 @@ namespace :summary do
   def warnAboutCommonTeXErrors(code)
     msg = []
 
+    msg << "Plain (i.e. \") quotation mark use?" if code.match("\"")
+    msg << "Unexpanded “&”?" if code.match("\\&")
     msg << "Deprecated quotation mark use?" if code.match("\"`")
     msg << "Deprecated quotation mark use?" if code.match("\"'")
     msg << "Underline mustn't be used. Ever." if code.match("\\underline")
-    msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
-    msg << "Unescaped %-sign?" if code.match(/[^\\]%/)
+    msg << "Unescaped %-signs?" if code.match(/[^\\]%/)
 
     begs = code.scan(/\\begin\{[a-z]+?\}/)
     ends = code.scan(/\\end\{[a-z]+?\}/)
