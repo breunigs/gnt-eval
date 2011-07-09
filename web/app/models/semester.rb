@@ -35,7 +35,7 @@ class Semester < ActiveRecord::Base
     b << TeXVorwort(faculty.longname, title, longtitle)
 
     cs.each do |c|
-      b << c.evaluate
+      b << c.evaluate.to_s
     end
 
     b << TeXFuss()

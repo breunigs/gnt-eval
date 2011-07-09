@@ -119,9 +119,10 @@ class Course < ActiveRecord::Base
         num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
         # skip all entries with very few votes
         next if num/sheets.to_f*100 < 2
-        all += num
         # check for 'other' and skip
         next if n == matchn.length || m == matchm.length
+
+        all += num
 
         # check for 'not specified' and group them together
         if n == 0 || m == 0
@@ -132,7 +133,7 @@ class Course < ActiveRecord::Base
       end
     end
     lines.sort! { |x,y| y[:count] <=> x[:count] }
-    lines << {:name => t(:other), :count => sheets-all } if sheets != all
+    lines << {:name => t(:other), :count => sheets-all } if sheets-all > 0
     lines << {:name => notspecified, :count => keinang } if keinang > 0
 
     title = t(:degree_course)
@@ -207,12 +208,17 @@ class Course < ActiveRecord::Base
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?
 
-      b << "\\fragenzudenuebungen{"+ I18n.t(:study_groups_header) +"}\n"
+      c = ""
       specific = { :barcode => barcodes }
       general = { :barcode => $facultybarcodes }
       ugquest.each do |q|
-        b << q.eval_to_tex(specific, general, form.db_table, I18n.locale).to_s
+        c << q.eval_to_tex(specific, general, form.db_table, I18n.locale).to_s
       end
+
+      return b if c.strip.empty? && tutors.empty?
+
+      b << "\\fragenzudenuebungen{"+ I18n.t(:study_groups_header) +"}\n"
+      b << c
     end
 
     return b if tutors.empty?
