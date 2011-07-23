@@ -11,18 +11,42 @@
 #     "Reinhard Schmidt" <reinhard.schmidt@urz.uni-heidelberg.de>
 # who is in charge of this LSF service.
 
+require 'net/http'
+require 'pp'
+
+TOPLEVEL="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+BASELINK="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&trex=step&P.vx=mittel&"
+
+
+def findSuitableURLs(link = TOPLEVEL)
+    req = Net::HTTP.get_response(URI.parse(link))
+    unless req.is_a?(Net::HTTPSuccess)
+        puts "Sorry, couldn't load LSF :("
+        req.error!
+    end
+    dec = req.body.gsub(/\s+/, " ")
+    dec.scan(/state=wtree&amp;search=1&amp;trex=step&amp;(root[0-9][^&]+)[^"]+"\s+title="'([^']+)'/)
+end
+
 if ARGV.empty? || ARGV.length != 2
     puts "USAGE: ./lsf_parser_api.rb NAME URL"
     puts "The URL can be obtained by copying the link for one of the"
     puts "faculties listed here:"
-    puts "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+    puts TOPLEVEL
     puts
     puts "Ensure that you have selected the right semester, otherwise"
     puts "you will get old data."
+    puts
+    puts "These are the links available at top level:"
+
+    findSuitableURLs.each do |d|
+      puts "#{BASELINK}#{d[0].ljust(30)} #{d[1]}"
+    end
+
     exit
 else
     @name = ARGV[0].gsub(/[^a-z0-9_-]/, "")
-    crap = ARGV[1].scan(/root[0-9]([0-9]{5})=[0-9]{5,}\|([0-9]{5,})/)
+    crap = ARGV[1].scan(/root[0-9]([0-9]{5})=(?:[0-9]{5,}\|)+([0-9]{5,})/)
     @semester = crap[0][0]
     @rootid = crap[0][1]
     if @semester.nil? || @rootid.nil? || @semester.empty? || @rootid.empty? || @name.nil? || @name.empty?
@@ -35,9 +59,7 @@ else
 end
 
 require 'rubygems'
-require 'pp'
 require 'date'
-require 'net/http'
 require 'rexml/document'
 
 # semester, now auto-detected from input
@@ -139,6 +161,14 @@ end
 # parameters
 def getXML(parameters)
     url = @hostUrl + parameters
+
+    $cached_pages ||= {}
+    $cache_hits ||= 0
+    unless $cached_pages[url].nil?
+      $cache_hits += 1
+      return $cached_pages[url]
+    end
+
     req = Net::HTTP.get_response(URI.parse(url))
     unless req.is_a?(Net::HTTPSuccess)
         puts "XML failure!"
@@ -146,7 +176,8 @@ def getXML(parameters)
         req.error!
     end
 
-    REXML::Document.new(req.body).root
+    $cached_pages[url] = REXML::Document.new(req.body).root
+    $cached_pages[url]
 end
 
 # Takes a "root id" as argument and recursively parses the LSF tree
@@ -417,16 +448,16 @@ def printFinalList(data)
     s << "<th>Name</th>"
     s << "<th>Dozent_in</th>"
     s << "<th style='width:220px;overflow:hidden'>Raum</th>"
-    s << "<th>Zeit</th>"    
+    s << "<th>Zeit</th>"
     s << "<th style='width:100px;'>AccName?</th>"
     s << "<th style='width:50px;'>Hörer?</th>"
     s << "</tr>\n"
-    
+
      s << "<tr>"
     s << "<td><b>Beispielveranstaltung</b></td>"
     s << "<td>Evalteam</td>"
     s << "<td style='width:220px;overflow:hidden'>FS Raum</td>"
-    s << "<td>[&nbsp;&nbsp;] Mi, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup><br>[X] Mo, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup></td>"    
+    s << "<td>[&nbsp;&nbsp;] Mi, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup><br>[X] Mo, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup></td>"
     s << "<td style='width:100px;'>evaluation@</td>"
     s << "<td style='width:50px;'>&nbsp;37</td>"
     s << "</tr>\n"
@@ -503,3 +534,7 @@ getFile("lsf_parser_#{@name}_pre.html", true).puts printPreList(data)
 getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
 getFile("lsf_parser_#{@name}_final.html", true).puts printFinalList(data)
 getFile("lsf_parser_#{@name}_sws.txt", true).puts printSWSSheet(data)
+
+
+
+puts "Cache hits: #{$cache_hits}"
