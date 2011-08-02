@@ -406,16 +406,12 @@ namespace :pdf do
   desc "makes the result pdfs preliminary"
   task :make_preliminary do
     p = "./tmp/results"
-    Dir.glob("#{p}/*.tex") do |d|
+    Dir.glob("#{p}/*.pdf") do |d|
       d = File.basename(d)
-      next if d.match(/^orl_/)
+      next if d.match(/^preliminary_/)
       work_queue.enqueue_b do
-        dn = "orl_" + d.gsub('tex', 'pdf')
         puts "Working on " + d
-        `sed 's/title{Lehrevaluation/title{vorl"aufige Lehrevaluation/' #{p}/#{d} | sed 's/Ergebnisse der Vorlesungsumfrage/nicht zur Weitergabe/'  > #{p}/orl_#{d}`
-        Rake::Task[("#{p}/" + dn).to_sym].invoke
-        `pdftk #{p}/#{dn} background ./helfer/wasserzeichen.pdf output #{p}/preliminary_#{d.gsub('tex', 'pdf')}`
-        `rm -f #{p}/#{"orl_" + d.gsub('tex', '*')}`
+        `pdftk #{p}/#{d} background ./helfer/wasserzeichen.pdf output #{p}/preliminary_#{d}`
       end
     end
     work_queue.join
