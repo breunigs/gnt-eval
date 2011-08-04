@@ -55,16 +55,16 @@ class Form < ActiveRecord::Base
 
   # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
   def db_table
-    abstract_form ? abstract_form.db_table : nil
+    abstract_form.is_a?(AbstractForm) ? abstract_form.db_table : nil
   end
   def questions
-    abstract_form ? abstract_form.questions : []
+    abstract_form.is_a?(AbstractForm) ? abstract_form.questions : []
   end
   def lang
-    abstract_form ? abstract_form.lang : nil
+    abstract_form.is_a?(AbstractForm) ? abstract_form.lang : nil
   end
   def pages
-    abstract_form ? abstract_form.pages : []
+    abstract_form.is_a?(AbstractForm) ? abstract_form.pages : []
   end
   def texheadnumber
     abstract_form.texheadnumber
