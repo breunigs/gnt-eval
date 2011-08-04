@@ -125,6 +125,7 @@ class Question
   # question itself in appropriate language and gender
   def text(language = :en, gender = :both)
     q = @qtext[language] || @qtext.first[1]
+    return "" if q.nil?
     q.is_a?(String) ? q : q[gender]
   end
 
