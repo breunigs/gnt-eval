@@ -31,6 +31,15 @@ class Box
     @choice = c
     @text = t
   end
+
+  # just get any description from the @text field. This should probably
+  # be /the/ accessor for @text, similar to the way question#text works.
+  # TODO FIXME
+  def any_text
+    return @text if @text.is_a? String
+    return @text[:en] || @text.first[1] if @text.is_a? Hash
+    ""
+  end
 end
 
 # This is a question on a printed form. Nothing more.
