@@ -177,3 +177,48 @@ def work_queue
   $global_work_queue ||= WorkQueue.new(number_of_processors)
   $global_work_queue
 end
+
+
+# reads user input and validates it. Returns an array if valid was an
+# array and all items in the returned array are elements of valid. If
+# valid is a regular expression a string is returned iff it matches
+# the expression. Please note that all array values are converted to
+# strings and entries will be seperated by space.
+def get_user_input(valid)
+  valid = valid.collect { |x| x.to_s } if valid.is_a? Array
+  while true
+    print "> "
+    data = STDIN.gets.chomp
+    if valid.is_a? Array
+      data = data.strip.split(/\s+/)
+      return data if data.all? { |x| valid.include?(x) }
+      puts
+      puts "Sorry, your input isn't valid. All entries must be in the following list."
+      puts "Seperate entries by spaces if you want multiple values."
+      puts valid.join(" ")
+    else # regex
+      return data if data =~ valid
+      puts
+      puts "Sorry, your input isn't valid. It must match this regular expression: #{valid}"
+    end
+    puts
+    puts
+  end
+end
+
+# tries to get user input that validates (compare with get_user_input)
+# if the given "fake" value not nil. If it is, a input line with these
+# parameters is printed in order to fake the user input. Note that the
+# fake data is checked and the user will be asked if it appears to be
+# wrong.
+def get_or_fake_user_input(valid, fake)
+  valid = valid.collect { |x| x.to_s }
+  return get_user_input(valid) unless fake
+  if valid.is_a? Array
+    return get_user_input(valid) unless (fake.is_a?(Array) && fake.all? { |x| valid.include?(x) }) || valid.include?(fake)
+  else
+    return get_user_input(valid) unless fake =~ valid
+  end
+  puts "> #{fake.is_a?(Array) ? fake.join(" ") : fake}"
+  fake
+end
