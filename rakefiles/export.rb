@@ -134,6 +134,7 @@ namespace :helper do
       "profmail" => "e-mail adress of the lecturer",
       "profgender" => "gender of prof. m=male, f=female, o=other",
       "tutor" => "name of tutor, if available",
+      "semester" => "abbreviation of semester",
       "NONE" => "If you are absolutely sure you do not need any meta data" }
     meta.sort.each { |k,v| puts "#{k.ljust(10)}: #{v}" }
     meta = get_or_fake_user_input(meta.keys, a[:meta])
@@ -168,6 +169,7 @@ namespace :helper do
           when "barcode":    line << barcode
           when "table":      line << table
           when "lecture":    line << cp.course.title
+          when "semester":   line << cp.course.semester.title
           when "prof":       line << cp.prof.fullname
           when "profmail":   line << cp.prof.email
           when "profgender": line << cp.prof.gender.to_s[0..0]
