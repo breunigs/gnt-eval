@@ -6,7 +6,7 @@ require 'web/config/boot'
 require 'web/lib/ext_requirements.rb'
 require 'web/lib/FunkyDBBits.rb'
 require 'web/lib/RandomUtils.rb'
-require 'custom_build/build.rb'
+
 require 'pp'
 require 'yaml'
 
@@ -18,6 +18,11 @@ include Magick
 
 require 'rake/clean'
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
+
+
+# load external rakefiles
+require 'rakefiles/export.rb'
+require 'custom_build/build.rb'
 
 # requires database
 def curSem
@@ -540,6 +545,7 @@ namespace :pdf do
     File.delete './tmp/tutors.tex'
   end
 end
+
 
 namespace :helper do
   desc "Creates required amount of copies /within/ a PDF file. This saves you from having to specify the amount of copies when printing each form manually."
