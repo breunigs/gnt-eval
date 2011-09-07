@@ -60,8 +60,8 @@ end
 
 # Define data structures for events and professors.
 # The time is directly parsed into a string
-class Event < Struct.new(:id, :name, :times, :rooms, :profs, :type, :facul, :sws); end
-class Prof  < Struct.new(:id, :name, :mail, :tele); end
+class Event < Struct.new(:id, :name, :times, :rooms, :profs, :type, :facul, :sws, :lang, :est_part, :detailTime); end
+class Prof  < Struct.new(:id, :name, :mail, :tele, :first, :last, :title, :akad); end
 
 # Overwrite hash function as otherwise stuff like array#uniq yiels
 # wrong results
@@ -210,20 +210,23 @@ def getEventList(id)
     events
 end
 
-# Will read the Semesterwochenstunden for a given event
-def getSWS(vorlID)
+# Will read the Semesterwochenstunden, language for a given event
+def getEventDetails(vorlID)
     root = getXML('getVerDet?vid=' + vorlID.to_s)
     root.elements.each do |data|
-        return data.elements[getPrefix + ":sws"].text.to_i
+        sws = data.elements[getPrefix + ":sws"].text.to_i 
+        lang = data.elements[getPrefix + ":unterrsprache"].text.strip
+        est_part = data.elements[getPrefix + ":erwartteilnehmer"].text.to_i
+        return sws, lang, est_part == 0 ? "" : est_part.to_s
     end
-    return 0
+    return 0, ""
 end
 
 # Will read all the details like professor, room, time and so on for a
 # given event id. Returns nil if the event is/has a stoptype or stopname
 def getEvent(eventdata)
     id = Integer(eventdata[getPrefix + ':vorID'].text)
-    sws = getSWS(id)
+    sws, lang, est_part = getEventDetails(id)
 
     return nil unless @tempEvents[id].nil?
     @tempEvents[id] = true
@@ -236,12 +239,12 @@ def getEvent(eventdata)
 
     facul = Integer(eventdata[getPrefix + ':eid'].text)
 
-    times, rooms, profs = getTimetable(id)
+    times, rooms, profs, detailTime = getTimetable(id)
     # also skip all events that do not provide necessary information unless
     # there's SWS data available.
     return nil if (sws.nil? || sws == 0)  && (times.empty? || rooms.empty? || profs.empty?)
 
-    Event.new(id, name, times, rooms, profs, type, facul, sws)
+    Event.new(id, name, times, rooms, profs, type, facul, sws, lang, est_part, detailTime)
 end
 
 # Gets a room's name for the given id
@@ -276,14 +279,21 @@ end
 def getProfDetails(id, name)
     return @tempProfs[id] unless @tempProfs[id].nil?
 
-    puts "Reading Professor Details: " + id.to_s if @debug
+    puts "Reading Professor Details: #{id}" if @debug
+    root = getXML("getDet?pid=#{id}")[0]
+    first = root.elements[getPrefix + ':vorname'].text || ""
+    last = root.elements[getPrefix + ':nachname'].text || ""
+    title = root.elements[getPrefix + ':titel'].text || ""
+    akad = root.elements[getPrefix + ':akadgrad'].text || ""
+
+    puts "Reading Professor Contact Details: " + id.to_s if @debug
     root = getXML('getKontakt?pid=' + id.to_s)[0]
 
     mail = root.elements[getPrefix + ':email'].text || ""
     tele = root.elements[getPrefix + ':telefon'].text || ""
     kid = Integer(root.elements[getPrefix + ':kid'].text)
 
-    @tempProfs[id] = Prof.new(kid, name.strip, mail.strip, tele.strip)
+    @tempProfs[id] = Prof.new(kid, name.strip, mail.strip, tele.strip, first.strip, last.strip, title.strip, akad.strip)
 
     @tempProfs[id]
 end
@@ -301,6 +311,7 @@ def getTimetable(id)
     times = Array.new
     rooms = Array.new
     profs = Array.new
+    detailTime = { :ryth => [], :wday => [], :time => [], :date => [] }
     root = getXML('getTermine?vid=' + id.to_s)
     root.elements.each do |t|
         begin
@@ -325,6 +336,12 @@ def getTimetable(id)
             end
             # skip very short entries because they're probably just spaces/commas
             next if s.length < 7
+
+            # detailed times
+            detailTime[:ryth] << (x[getPrefix + ':rhythmus'].text || "").strip
+            detailTime[:wday] << (x[getPrefix + ':wochentag'].text || "").strip
+            detailTime[:time] << (x[getPrefix + ':beginn'].text || "?").strip + " – " + (x[getPrefix + ':ende'].text || "?").strip
+            detailTime[:date] << (x[getPrefix + ':begindat'].text || "?").strip + " – " + (x[getPrefix + ':endedat'].text || "?").strip
 
             # Get room
             room = Integer(x[getPrefix + ':terRaumID'].text)
@@ -354,7 +371,9 @@ def getTimetable(id)
         end
     end
 
-    return times, rooms, profs
+   detailTime.each { |k,v| detailTime[k] = v.join(", ") }
+
+    return times, rooms, profs, detailTime
 end
 
 # Helper function that will list the professors for each date comma
@@ -382,21 +401,40 @@ end
 
 def printAllmightyCSV(data)
   s = FasterCSV.generate({:headers => true}) do |csv|
-    csv << ["id", "name", "zeiten", "räume", "art", "fakultät-id", "sws", "prof", "profmail"]
+    csv << ["id", "titel", "zeiten", "räume", "art", "fakultät-id", "erwartete Teilnehmer", "sws", "prof", "profmail",  "akad. grad", "anrede", "vorname", "nachname"]
     data.each do |d|
       profs = d.profs.flatten.uniq unless d.profs.nil?
       if profs.empty?
-        csv << [d.id, d.name, d.times.join(", ").gsub(/<\/?[^>]*>/, ""), d.rooms.join(", "), d.type, d.facul, d.sws, "", ""]
+        csv << [d.id, d.name, d.times.join(", ").gsub(/<\/?[^>]*>/, ""), d.rooms.join(", "), d.type, d.facul, d.est_part, d.sws, "", "", "", "", "", ""]
         next
       end
 
       profs.each do |p|
-        csv << [d.id, d.name, d.times.join(", ").gsub(/<\/?[^>]*>/, ""), d.rooms.join(", "), d.type, d.facul, d.sws, p.name, p.mail]
+        csv << [d.id, d.name, d.times.join(", ").gsub(/<\/?[^>]*>/, ""), d.rooms.join(", "), d.type, d.facul, d.est_part, d.sws, p.name, p.mail, p.akad, p.title, p.first, p.last]
       end
     end
   end
   s
 end
+
+def printZuvEvalCSV(data)
+  s = FasterCSV.generate({:headers => true}) do |csv|
+    csv << ["Funktion", "Anrede", "Titel", "Vorname", "Nachname", "E-Mail-Adresse", "Lehrveranstatlung: Name/Titel", "Lehrveranstaltungskennung laut LSF", "Lehrveranstaltungsort(e)", "Hier können Sie eintragen: 1) Von welcher studienorganisatorischen Einheit wird die Lehrveranstaltung angeboten (relevant bei Import / Export)? 2) Für welchen / welche Studiengänge wird die LV angeboten?", "Lehrveranstaltungsart", "erwartete Teilnehmer / benötigte Fragebögen", "weitere/Sekundär-Dozenten", "Sprache", "veranschlagte SWS", "Leistungspunkte", "Modulzugehörigkeit (zu welchem Modul gehört die LV? Ggf. Kürzel angeben) --> ggf. bei Studiengang mit eintragen?", "Rhythmus (Blockveranstaltung oder wöchentlich)", "Wochentag", "Zeit (Uhrzeit)", "Dauer (von bis)", "Präsenzveranstaltung oder Moodle-Kurs / E-Learning", "Pflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Wahlpflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Semester", "Studienjahr"]
+    data.each do |d|
+      profs = d.profs.flatten.uniq unless d.profs.nil?
+      if profs.empty?
+        csv << ["", "", "", "", "", "", d.name, d.id, d.rooms.join(", "), "", "", d.est_part, "KEINE", d.lang, d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
+        next
+      end
+
+      profs.each do |p|
+        csv << ["", "", p.title, p.first, p.last, p.mail, d.name, d.id, d.rooms.join(", "), "", "", d.est_part, profs.size == 1 ? "KEINE" : "insg. #{profs.size}, siehe anliegende Zeilen",  d.lang, d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
+      end
+    end
+  end
+  s
+end
+
 
 def printSWSSheet(data)
     s = ""
