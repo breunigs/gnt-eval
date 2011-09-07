@@ -423,12 +423,12 @@ def printZuvEvalCSV(data)
     data.each do |d|
       profs = d.profs.flatten.uniq unless d.profs.nil?
       if profs.empty?
-        csv << ["", "", "", "", "", "", d.name, d.id, d.rooms.join(", "), "", "", d.est_part, "KEINE", d.lang, d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
+        csv << ["", "", "", "", "", "", d.name, d.id, d.rooms.join(", "), "", "", d.est_part, "KEINE", d.lang, d.sws == 0 ? "" : d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
         next
       end
 
       profs.each do |p|
-        csv << ["", "", p.title, p.first, p.last, p.mail, d.name, d.id, d.rooms.join(", "), "", "", d.est_part, profs.size == 1 ? "KEINE" : "insg. #{profs.size}, siehe anliegende Zeilen",  d.lang, d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
+        csv << ["", "", p.title, p.first, p.last, p.mail, d.name, d.id, d.rooms.join(", "), "", "", d.est_part, profs.size == 1 ? "KEINE" : "insg. #{profs.size}, siehe anliegende Zeilen",  d.lang, d.sws == 0 ? "" : d.sws, "", "", d.detailTime[:ryth], d.detailTime[:wday], d.detailTime[:time], d.detailTime[:date], "", "", "", ""]
       end
     end
   end
