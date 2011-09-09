@@ -23,6 +23,9 @@ namespace :helper do
     puts "if you put more than one semester in a single table you have"
     puts "graver problems anyway…"
     puts
+    puts "Be aware that ALL data will be exported. It’s up to you to"
+    puts "protect the participant’s anonymity if applicable."
+    puts
     puts
     # select semester to limit list of tables
     puts "========"
@@ -108,6 +111,7 @@ namespace :helper do
     allcols = export.values.flatten.uniq
 
     qry = []
+    qry_stats = []
     header = nil
     export.each do |db,cols|
       extracols = allcols-export[db]
@@ -115,11 +119,30 @@ namespace :helper do
       # if not yet defined
       header ||= cols + extracols
       cols = cols + (extracols.collect {|x| "\"\" AS #{x}"})
+      # note: the NULLIF command is used to exclude 0-valued columns from
+      # the average calculation
+      cols_stats = cols.collect { |x| "AVG(NULLIF(#{x}, 0)) as #{x}" } + (extracols.collect {|x| "\"\" AS #{x}"})
       qry << "SELECT barcode, tutnum, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+      qry_stats << "SELECT barcode, '#{db}' as tbl, COUNT(*) as returned_sheets, #{cols_stats.join(", ")} FROM #{db} GROUP BY barcode"
     end
     qry = qry.join(" UNION ALL ")
+    qry_stats = qry_stats.join(" UNION ALL ")
     # add the question text to each question header as well
     fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
+    header_stats = Array.new(fullheader)
+
+    puts
+    puts "================="
+    puts "Further aggregate"
+    puts "================="
+    puts "You can further aggregate (average) the first n questions you"
+    puts "chose above for the statistics file. Enter 0 if you do not want"
+    puts "this additional column, enter 2 to average the average of the"
+    puts "first two questions. If you think the average of an average"
+    puts "is kind of dumb, then you are a good person. It’s included"
+    puts "because some people thought up the \"LQI\"; you can find some"
+    puts "info about it here: http://www.kit.edu/visit/pi_2010_2933.php"
+    lqi = get_or_fake_user_input((0..header.size).to_a, [a[:lqi].to_s]).first.to_i
 
     puts
     puts "========"
@@ -130,6 +153,8 @@ namespace :helper do
       "barcode" => "uniq id for this semester+lecture+prof",
       "table" => "table where this sheet is stored",
       "lecture" => "name of the lecture",
+      "sheet" => "name of the sheet used to evaluate this lecture",
+      "lang" => "language of the form used",
       "prof" => "name of the prof to whom this sheet belongs",
       "profmail" => "e-mail adress of the lecturer",
       "profgender" => "gender of prof. m=male, f=female, o=other",
@@ -153,8 +178,9 @@ namespace :helper do
     puts "========="
     puts "Execution"
     puts "========="
-    puts "Running query: " + qry
 
+    # WHOLE DATA #######################################################
+    puts "Running query: " + qry
     data = $dbh.execute(qry)
     lines = []
 
@@ -169,6 +195,8 @@ namespace :helper do
           when "barcode":    line << barcode
           when "table":      line << table
           when "lecture":    line << cp.course.title
+          when "lang":       line << cp.course.language
+          when "sheet":      line << cp.course.form.name
           when "semester":   line << cp.course.semester.title
           when "prof":       line << cp.prof.fullname
           when "profmail":   line << cp.prof.email
@@ -195,6 +223,42 @@ namespace :helper do
       csv << fullheader.to_a
       lines.each { |l| csv << l }
     end
+
+    # STATISTICS #######################################################
+
+    puts
+    puts "Running stats query: " + qry_stats
+    data = $dbh.execute(qry_stats)
+    lines = []
+
+    # add metadata to stats (predefined)
+    data.each_with_index do |d,i|
+      barcode, table, returned_sheets = *d.shift(3)
+      cp = CourseProf.find_by_id(barcode)
+      line = []
+      line << cp.course.form.name
+      line << barcode
+      line << cp.prof.fullname
+      line << cp.course.title
+      line << cp.course.students
+      line << returned_sheets
+      line << (d[0..lqi].sum.to_f/lqi.to_f) if lqi > 0
+
+      line += d
+      lines << line
+    end
+
+    file_stats = "tmp/export/#{now} #{header.join(" ")} Statistics.csv"
+    puts "Writing statistics CSV"
+    FasterCSV.open(file_stats, "wb", opt) do |csv|
+      csv << ["questionnaire", "unique id (lecture+prof+semester)", "prof",   \
+                  "lecture", "expected students", "returned sheets"]          \
+              + (lqi > 0 ? ["lqi (average of the next #{lqi} columns)"] : []) \
+              + header_stats.to_a
+      lines.each { |l| csv << l }
+    end
+
+
     puts
     puts
     puts "============"
@@ -202,13 +266,23 @@ namespace :helper do
     puts "============"
     puts "Done, have a look at " + "\"#{file}\"".bold
     puts
+    puts "Some stats about the exported data/lectures has been written to:"
+    puts "\"#{file_stats}\""
+    puts "It’s recommended to not use this for anything, because it’s clearly"
+    puts "a reduction to some random values that have no meaning."
+    puts "The leftmost field is encoded as 1 and the count increases by one"
+    puts "for each checkbox to the right. These values are averaged. Wrong"
+    puts "answers, e.g. two answers checked or none at all are not included"
+    puts "in the statistic. Adding a \"don’t know\" column for the user is"
+    puts "planned, but not yet included in the sheets."
+    puts
     puts
     puts "=============="
     puts "Automatization"
     puts "=============="
     puts "If you want to run this query in the future, you can use:"
 
-    data = {:sems => sems, :dbs => dbs, :cols => export, :meta => meta_store}
+    data = {:sems => sems, :dbs => dbs, :cols => export, :meta => meta_store, :lqi => lqi}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
     print "rake \"helper:export["

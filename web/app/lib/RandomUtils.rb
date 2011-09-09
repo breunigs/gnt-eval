@@ -212,7 +212,7 @@ end
 # fake data is checked and the user will be asked if it appears to be
 # wrong.
 def get_or_fake_user_input(valid, fake)
-  valid = valid.collect { |x| x.to_s }
+  valid = valid.collect { |x| x.to_s } if valid.is_a? Array
   return get_user_input(valid) unless fake
   if valid.is_a? Array
     return get_user_input(valid) unless (fake.is_a?(Array) && fake.all? { |x| valid.include?(x) }) || valid.include?(fake)
