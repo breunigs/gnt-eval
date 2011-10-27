@@ -397,9 +397,10 @@ namespace :pest do
 end
 
 namespace :pdf do
-  desc "create samples for all available sheets for printing or inclusion. "
-  task :samplesheets do
-    curSem.forms.each do |f|
+  desc "create samples for all available sheets for printing or inclusion. leave semester_id empty for current term."
+  task :samplesheets, :semester_id do |t,a|
+    sem = a.semester_id.nil? ? curSem : Semester.find(a.semester_id)
+    sem.forms.each do |f|
       f.languages.each do |l|
         work_queue.enqueue_b { make_sample_sheet(f, l) }
       end
