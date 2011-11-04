@@ -728,8 +728,8 @@ class PESTOmr < PESTDatabaseTools
   # determined offset.
   def translate(img_id, coord)
     # TWEAK HERE
-    move_top = 90
-    move_left = 96
+    move_top = 91
+    move_left = 110
 
     o = @offset[img_id]
     c = @corners[img_id]
