@@ -157,16 +157,16 @@ class Question
   def to_tex(lang = :en, gender = :both)
     s = ""
     case @type
-      when "text_wholepage":
+      when "text_wholepage" then
         # don't need to do anything for that
-      when "text":
+      when "text" then
         s << "\n\n\\comment{#{text(lang, gender)}}{#{@db_column}}{#{@db_column}}\n\n"
 
-      when "tutor_table":
+      when "tutor_table" then
         # automatically prints tutors, if they have been defined
         s << "\\printtutors{#{text(lang, gender)}}\n\n"
 
-      when "variable_width":
+      when "variable_width" then
         s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
         s << "\\printspecialheader{#{text(lang, gender)}}"
 
@@ -178,7 +178,7 @@ class Question
         s << boxes.join(" \\hfill ")
         s << "}\n\n"
 
-      when "fixed_width__last_is_rightmost":
+      when "fixed_width__last_is_rightmost" then
         s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
         s << "\\printspecialheader{#{text(lang, gender)}}"
 
@@ -193,7 +193,7 @@ class Question
         s << "\\boxfixed{#{last.choice}}{#{last.text[lang]}} "
         s << "}\n\n"
 
-      when "square":
+      when "square" then
         s << "\n\n"
         s << '\quest'
         s << '<m>' if multi?
