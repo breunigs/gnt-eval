@@ -140,6 +140,8 @@ module Seee
 
       :scanned_pages_dir => File.join(RAILS_ROOT, "..", "tmp", "scanned"),
 
+      :sorted_pages_dir => File.join(RAILS_ROOT, "..", "tmp", "images"),
+
       # prefer the custom RMagick version over the default one. Its meant
       # to be used for "require" and should automatically fall back to
       # default if custom build is not available.

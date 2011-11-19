@@ -128,11 +128,6 @@ def make_sample_sheet(form, lang)
   filename
 end
 
-def escape_for_tex(string)
-  # escapes & and % signs if not already done so
-  string.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
-end
-
 # Creates form PDF file for given semester and CourseProf
 def make_pdf_for(s, cp, dirname)
   # first: the barcode
@@ -143,10 +138,10 @@ def make_pdf_for(s, cp, dirname)
 
   File.open(filename + '.tex', 'w') do |h|
     h << '\documentclass[' + cp.course.form.abstract_form.babelclass[cp.course.language] + ',kanten]{eval}' + "\n"
-    h << '\dbtable{' + escape_for_tex(cp.course.form.db_table) + "}\n"
-    h << '\dozent{' + escape_for_tex(cp.prof.fullname) + '}' + "\n"
-    h << '\vorlesung{' + escape_for_tex(cp.course.title) + '}' + "\n"
-    h << '\semester{' + escape_for_tex(s.title) + '}' + "\n"
+    h << '\dbtable{' + cp.course.form.db_table.escape_for_tex + "}\n"
+    h << '\dozent{' + cp.prof.fullname.escape_for_tex + '}' + "\n"
+    h << '\vorlesung{' + cp.course.title.escape_for_tex + '}' + "\n"
+    h << '\semester{' + s.title.escape_for_tex + '}' + "\n"
 
     # FIXME: insert check for tutors.empty? and also sort them into a different directory!
     if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
@@ -156,7 +151,7 @@ def make_pdf_for(s, cp, dirname)
       tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
 
       tutoren.each_with_index do |t, i|
-        t = escape_for_tex(t)
+        t = t.escape_for_tex
         h << "\\tutorbox[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
       end
 
@@ -193,7 +188,7 @@ namespace :db do
 end
 
 namespace :images do
-  desc "(0) Run the scan script to import pages to #{Seee::Config.file_paths[:scanned_pages_dir]}"
+  desc "(0) Run the scan script to import pages to #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
   task :scan do
     File.makedirs(Seee::Config.file_paths[:scanned_pages_dir])
     Dir.chdir(Seee::Config.file_paths[:scanned_pages_dir]) do
@@ -201,7 +196,7 @@ namespace :images do
     end
   end
 
-  desc "(4) Find all .jpg files in tmp/images, copy them to the correct location and let Rails know about them"
+  desc "(4) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
   task :insertcomments, :needs => ['db:connect'] do |t, d|
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
@@ -220,7 +215,7 @@ namespace :images do
     forms = curSem.forms.reject { |form| form.get_question("tutnum").nil? }
     tables = forms.collect { |form| form.db_table }
 
-    allfiles = Dir.glob('./tmp/images/**/*.jpg')
+    allfiles = Dir.glob(File.joib(Seee::Config.file_paths[:sorted_pages_dir], '**/*.jpg'))
     allfiles.each_with_index do |f, curr|
       bname = File.basename(f)
       barcode = find_barcode_from_path(f)
@@ -296,16 +291,28 @@ namespace :images do
     puts "Done."
   end
 
-  desc "(1) Work on the .tif's in directory and sort'em to tmp/images/..."
+  desc "(1) Sort scanned images by barcode (#{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])} → #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
   task :sortandalign, :directory do |t, d|
-    if d.directory.nil? || d.directory.empty? || !File.directory?(d.directory)
-      puts "No directory given or directory does not exist."
+    # use default directory if none given
+    if d.directory.nil? || d.directory.empty?
+      puts "No directory given, using default one: #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
+      d.directory = Seee::Config.file_paths[:scanned_pages_dir]
+      File.makedirs(d.directory)
+      puts
+    end
+
+    # abort if the directory of choice does not exist for some reason
+    if !File.directory?(d.directory)
+      puts "Given directory does not exist. Aborting."
+    # actually sort the images
     else
       puts "Working directory is: #{d.directory}"
       files = Dir.glob(File.join(d.directory, '*.tif'))
-      files_size = files.size
+      sort_path = Seee::Config.file_paths[:sorted_pages_dir]
+
       curr = 0
       threads = []
+
       files.each do |f|
         unless File.writable?(f)
           puts "No write access, cancelling."
@@ -318,18 +325,18 @@ namespace :images do
 
           if barcode.nil? || (not CourseProf.exists?(barcode))
             puts "bizarre #{basename}"
-            File.makedirs('tmp/images/bizarre')
-            File.move(f, 'tmp/images/bizarre')
+            File.makedirs(File.join(sort_path, "bizarre"))
+            File.move(f, File.join(sort_path, "bizarre"))
           else
             form = CourseProf.find(barcode).course.form.id.to_s + '_' +
               CourseProf.find(barcode).course.language.to_s
 
-            File.makedirs("tmp/images/#{form}")
-            File.move(f, File.join("tmp/images/#{form}", "#{barcode}_#{basename}.tif"))
+            File.makedirs(File.join(sort_path, form))
+            File.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
           end
 
           curr += 1
-          print_progress(curr, files_size)
+          print_progress(curr, files.size)
         end
       end
       work_queue.join
@@ -371,12 +378,12 @@ namespace :pest do
   # first key that comes along. The language should exist for every
   # key, even though this is currently not enforced. Will be though,
   # once a graphical form creation interface exists.
-  desc 'Finds all different forms for each folder and saves the form file as tmp/images/[form id].yaml.'
+  desc "Finds all different forms for each folder and saves the form file as #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])}/[form id].yaml."
   task :getyamls do |t,o|
     `mkdir -p ./tmp/images`
     curSem.forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
-        target = "./tmp/images/#{form.id}_#{lang}.yaml"
+        target = File.join(Seee::Config.file_paths[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")
         next if File.exists?(target)
         file = make_sample_sheet(form, lang)
         `./pest/latexfix.rb "#{file}.posout"`
@@ -385,13 +392,14 @@ namespace :pest do
     end
   end
 
-  desc "(2) Evaluates all sheets in ./tmp/images/"
+  desc "(2) Evaluates all sheets in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])}"
   task :omr, :needs => 'pest:getyamls' do
     # OMR needs the YAML files as TeX also outputs position information
-    Dir.glob("./tmp/images/[0-9]*.yaml").each do |f|
+    p = Seee::Config.file_paths[:sorted_pages_dir],
+    Dir.glob(File.join(p, "[0-9]*.yaml")).each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
-      system("./pest/omr2.rb -s \"#{f}\" -p \"./tmp/images/#{bn}\" -c #{number_of_processors}")
+      system("./pest/omr2.rb -s \"#{f}\" -p \"#{p}/#{bn}\" -c #{number_of_processors}")
     end
   end
 
@@ -510,6 +518,7 @@ namespace :pdf do
   task :howto, :needs => 'db:connect' do
     saveto = './tmp/howtos/'
     FileUtils.mkdir_p(saveto)
+    form_path = File.expand_path(File.join(RAILS_ROOT, "../tmp/forms")).escape_for_tex
 
     dirname = Seee::Config.file_paths[:forms_howto_dir]
     # Escape for TeX
@@ -517,7 +526,8 @@ namespace :pdf do
     threads = []
     Dir.glob("./doc/howto_*.tex").each do |f|
       work_queue.enqueue_b do
-        data = File.read(f).gsub(/§§§/, "/home/stefan/seee/tmp/forms")
+
+        data = File.read(f).gsub(/§§§/, form_path)
         file = saveto + File.basename(f)
         File.open(file, "w") { |x| x.write data }
         Rake::Task[(file.gsub(/\.tex$/, ".pdf")).to_sym].invoke

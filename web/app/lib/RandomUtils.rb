@@ -35,6 +35,19 @@ class String
   def bold
     "\e[1m#{self}\e[0m"
   end
+
+  # escapes & _ and % signs if not already done so
+  def escape_for_tex
+    self.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%').gsub(/\\?_/, '\\\_')
+  end
+end
+
+# Tries to simplify paths to make them more user-readable. The path will
+# be normalized and have its part pointing to the projects main dir
+# removed, if the path is a subfolder (or file within the project).
+def simplify_path(path)
+  rr = File.expand_path(File.join(RAILS_ROOT, "..")) + "/"
+  File.expand_path(path).gsub(/^#{rr}/, "")
 end
 
 # once the barcode has been recognized the images are stored in the
