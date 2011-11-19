@@ -6,6 +6,7 @@ gem "rubygems-update", "1.4.2"
 gem "rmagick"
 gem "gtk2"
 gem "work_queue"
+gem "open4"
 
 gem "mysql"
 gem "dbd-mysql"
