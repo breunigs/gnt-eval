@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# check all required programs are available
+hash scanadf 2>&- || { echo >&2 "Could not find \"scanadf\". Ensure that \"sane\" is installed."; exit 1; }
+hash pnmtotiff 2>&- || { echo >&2 "Could not find \"pnmtotiff\". Ensure that \"netpbm\" is installed."; exit 1; }
+hash convert 2>&- || { echo >&2 "Could not find \"pnmtotiff\". Ensure that \"imagemagick\" or \"graphicsmagick-imagemagick-compat\" are installed."; exit 1; }
+
 # start scanning
 if [ "$1" = "" ]; then
 	while  [ 1 ]; do
@@ -21,7 +26,7 @@ if [ "$1" = "" ]; then
 			-o 'foo_%d.pnm' \
 			-S "$0" \
 			--start-count "${final}"
-		echo "Continue? (Press Enter)"
+		echo "Continue? (Press Enter or hit CTRL-C to abort)"
 		read
 	done
 fi
