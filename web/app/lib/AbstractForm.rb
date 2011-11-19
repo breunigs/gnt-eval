@@ -360,9 +360,6 @@ class AbstractForm
       semester = "the same semester as last year",
       barcode = "00000000")
 
-    pp lang
-    pp gender
-
     # in case someone didn’t give us symbols
     lang, gender = lang.to_sym, gender.to_sym
 
