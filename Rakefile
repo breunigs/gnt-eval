@@ -45,40 +45,6 @@ def find_barcode(filename)
   end
 end
 
-def tex_head_for(form, lang = :en)
-  f = form.abstract_form.texhead
-  f.is_a?(String) ? f : f[lang]
-end
-
-def tex_foot_for(form, lang = :en)
-  f = form.abstract_form.texfoot
-  f.is_a?(String) ? f : f[lang]
-end
-
-def tex_questions_for(form, lang, gender = :both)
-  b = ""
-  form.pages.each_with_index do |p,i|
-    b << p.tex_at_top.to_s
-    p.sections.each do |s|
-      # ist das ein abschnitt, der uns kümmert?
-      next if s.questions.find_all{|q| q.special_care != 1}.empty?
-      b << "\n\n\\sect{#{s.title[lang]}}"
-      s.questions.each do |q|
-        next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-        b << q.to_tex(lang, gender)
-      end
-    end
-    b << p.tex_at_bottom.to_s
-  end
-  b
-end
-
-def tex_none(language)
-  I18n.locale = language
-  I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-  I18n.t(:none)
-end
-
 # Creates a sample sheet in tmp/sample_sheets for the given form (object)
 # and language name. Returns the full filepath, but without the file
 # extension. Does not re-create existing files.
@@ -86,7 +52,7 @@ def make_sample_sheet(form, lang)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
-  hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
+  #hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
 
   # PDFs are required for result generation and the posouts for OMR
@@ -99,28 +65,7 @@ def make_sample_sheet(form, lang)
   generate_barcode("0"*8, dir + "barcode00000000.pdf")
 
   File.open(filename + ".tex", "w") do |h|
-    h << '\documentclass['+form.abstract_form.babelclass[lang]+',kanten]{eval}' + "\n"
-    h << '\dozent{Fachschaft MathPhys}' + "\n"
-    h << '\vorlesung{Musterbogen für die Evaluation}' + "\n"
-    h << '\dbtable{'+ form.db_table + "}\n"
-    h << '\semester{'+ (curSem.title) + "}\n"
-
-    if hasTutors
-      h << '\tutoren{' + "\n"
-      h << '\tutorbox[1][Mustafa Mustermann] & \tutorbox[2][Fred Nurk]     & \tutorbox[3][Ashok Kumar] & \tutorbox[4][Juan Pérez]     & \tutorbox[5][Jakob Mierscheid] \\\\' + "\n"
-      h << '\tutorbox[6][Iwan Iwanowitsch]   & \tutorbox[7][Pierre Dupont] & \tutorbox[8][John Smith]  & \tutorbox[9][Eddi Exzellenz] & \tutorbox[10][Joe Bloggs]      \\\\' + "\n"
-      h << '\tutorbox[11][John Doe]          & \tutorbox[12][\ ]           & \tutorbox[13][\ ]         & \tutorbox[14][\ ]            & \tutorbox[15][\ ]              \\\\' + "\n"
-      h << '\tutorbox[16][\ ]                & \tutorbox[17][\ ]           & \tutorbox[18][\ ]         & \tutorbox[19][\ ]            & \tutorbox[20][\ ]              \\\\' + "\n"
-      h << '\tutorbox[21][\ ]                & \tutorbox[22][\ ]           & \tutorbox[23][\ ]         & \tutorbox[24][\ ]            & \tutorbox[25][\ ]              \\\\' + "\n"
-      h << '\tutorbox[26][\ ]                & \tutorbox[27][\ ]           & \tutorbox[28][\ ]         & \tutorbox[29][\ ]            & \tutorbox[30][\ '+tex_none(lang)+']            }' + "\n"
-    end
-
-    h << tex_head_for(form, lang) + "\n"
-    h << '\begin{document}' + "\n"
-    h << form.abstract_form.header(lang) + "\n\n\n"
-    h << tex_questions_for(form, lang) + "\n"
-    h << tex_foot_for(form, lang) + "\n"
-    h << '\end{document}'
+    h << form.abstract_form.to_tex(lang)
   end
 
   puts "Wrote #{filename}.tex"
@@ -137,37 +82,20 @@ def make_pdf_for(s, cp, dirname)
   filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
 
   File.open(filename + '.tex', 'w') do |h|
-    h << '\documentclass[' + cp.course.form.abstract_form.babelclass[cp.course.language] + ',kanten]{eval}' + "\n"
-    h << '\dbtable{' + cp.course.form.db_table.escape_for_tex + "}\n"
-    h << '\dozent{' + cp.prof.fullname.escape_for_tex + '}' + "\n"
-    h << '\vorlesung{' + cp.course.title.escape_for_tex + '}' + "\n"
-    h << '\semester{' + s.title.escape_for_tex + '}' + "\n"
-
-    # FIXME: insert check for tutors.empty? and also sort them into a different directory!
-    if cp.course.form.questions.map { |q| q.db_column}.include?('tutnum')
-      none = tex_none(cp.course.language)
-      h << '\tutoren{' + "\n"
-
-      tutoren = cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name } + (["\\ "] * (29-cp.course.tutors.count)) +  ["\\ #{none}"]
-
-      tutoren.each_with_index do |t, i|
-        t = t.escape_for_tex
-        h << "\\tutorbox[#{(i+1)}][#{t}] #{(i+1)%5==0 ? "\\\\ \n" : " & "}"
-      end
-
-      h << '}' + "\n"
-    end
-
-    lang = cp.course.language.to_sym
-    h << tex_head_for(cp.course.form, lang) + "\n"
-    h << '\begin{document}' + "\n"
-    h << cp.course.form.abstract_form.header(lang, cp.prof.gender, cp.barcode) + "\n\n\n"
-    h << tex_questions_for(cp.course.form, lang, cp.prof.gender) + "\n"
-    h << tex_foot_for(cp.course.form, lang) + "\n"
-    h << '\end{document}'
+    h << cp.course.form.abstract_form.to_tex(
+      cp.course.language,
+      cp.course.title,
+      cp.prof.fullname,
+      cp.prof.gender,
+      cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
+      s.title,
+      cp.barcode)
   end
   puts "Wrote #{filename}.tex"
+
+  # generate PDF
   Rake::Task[(filename + '.pdf').to_sym].invoke
+
   # it may be useful for debugging to have a YAML for each course.
   # however, it is not needed by gnt-eval itself, so remove it immediately
   # before it causes any confusion.

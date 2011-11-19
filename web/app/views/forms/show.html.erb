@@ -16,6 +16,11 @@
   </table>
 
   <p>
+    <b>TeX-Code:</b>
+    <pre><%=h @form.abstract_form.to_tex %></pre>
+  </p>
+
+  <p>
     <b>Content:</b>
     <pre><%=h (@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
   </p>

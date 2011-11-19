@@ -319,22 +319,6 @@ class AbstractForm
     @db_table = db_table
   end
 
-  # builds the tex header for the form
-  def header(language = :en, gender = :female, barcode = "0"*8)
-    I18n.locale = language
-    I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-
-    # writes yaml header on texing
-    s = "\\head{#{title[language]}}{#{barcode}}\n\n"
-    s << "#{intro[language]}\n\n"
-    s << "\\\dataline{#{I18n.t(:title)}}"
-    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
-    # print special questions
-    special_care_questions.each { |q| s << q.to_tex(language, gender) }
-    s << "\\vspace{0.1cm}"
-    s
-  end
-
   # direct access to questions
   def questions
     @pages.collect { |p| p.questions }.flatten
@@ -361,5 +345,102 @@ class AbstractForm
     # aber bitte ohne die ids und ohne @
     sio.gsub(/0x[^\s]*/,'').gsub(/@/,'')
   end
-end
 
+  # returns the complete TeX code required to generate the form. If no
+  # specific data is provided it will be filled with some default values
+  def to_tex(
+      lang = :en,
+      title = "Jasper ist doof 3",
+      lecturer ="Oliver ist doof",
+      gender = :both,
+      tutors = ["Mustafa Mustermann", "Fred Nurk", "Ashok Kumar",
+                "Juan Pérez", "Jakob Mierscheid", "Iwan Iwanowitsch",
+                "Pierre Dupont", "John Smith", "Eddi Exzellenz",
+                "Joe Bloggs", "John Doe", "Stefan ist doof"],
+      semester = "the same semester as last year",
+      barcode = "00000000")
+
+    pp lang
+    pp gender
+
+    # in case someone didn’t give us symbols
+    lang, gender = lang.to_sym, gender.to_sym
+
+    # set lang and load locales for default strings that are not part of
+    # the form
+    I18n.locale = lang
+    I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+    I18n.load_path.uniq!
+
+    tex = ""
+
+    # form header and preamble
+    tex << "\\documentclass[#{babelclass[lang.to_sym]},kanten]{eval}\n"
+    tex << "\\dozent{#{lecturer.escape_for_tex}}\n"
+    tex << "\\vorlesung{#{title.escape_for_tex}}\n"
+    tex << "\\dbtable{#{db_table}}\n"
+    tex << "\\semester{#{semester.escape_for_tex}}\n"
+
+    # tutors
+    tutors.collect! { |t| t.escape_for_tex }
+    tex << "\\tutoren{\n  "
+    (0..28).each do |i|
+      tex << "\\tutorbox[#{i+1}][#{tutors[i] || "\\\\ "}]".ljust(35)
+      tex << ((i%5 == 4) ? '\\\\'+"\n  " : ' & ')
+    end
+    tex << "\\tutorbox[30][\\ #{I18n.t(:none)}] \n"
+    tex << "}\n\n"
+
+    tex << get_texhead(lang) + "\n"
+    tex << "\\begin{document}\n"
+    tex << tex_header(lang, gender, barcode) + "\n\n\n"
+    tex << tex_questions(lang, gender) + "\n"
+    tex << get_texfoot(lang) + "\n"
+    tex << "\\end{document}"
+
+    tex
+  end
+
+  # small helper functions follow that are only used internally
+  private
+
+  def get_texhead(lang)
+    (texhead.is_a?(String) ? texhead : texhead[lang]) || ""
+  end
+
+  def get_texfoot(lang)
+    (texfoot.is_a?(String) ? texfoot : texfoot[lang]) || ""
+  end
+
+  # builds the tex header for the form
+  def tex_header(lang, gender, barcode)
+    # writes yaml header on texing
+    s = "\\head{#{title[lang]}}{#{barcode}}\n\n"
+    s << "#{intro[lang]}\n\n"
+    s << "\\\dataline{#{I18n.t(:title)}}"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
+    # print special questions
+    special_care_questions.each { |q| s << q.to_tex(lang, gender) }
+    s << "\\vspace{0.1cm}"
+    s
+  end
+
+  def tex_questions(lang, gender)
+    b = ""
+    pages.each_with_index do |p,i|
+      b << p.tex_at_top.to_s
+      p.sections.each do |s|
+        # skip special care questions. These are legacy ones and ought
+        # to be removed. Until this, let’s keep this magic. TODO
+        next if s.questions.find_all{|q| q.special_care != 1}.empty?
+        b << "\n\n\\sect{#{s.title[lang]}}"
+        s.questions.each do |q|
+          next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
+          b << q.to_tex(lang, gender)
+        end
+      end
+      b << p.tex_at_bottom.to_s
+    end
+    b
+  end
+end
