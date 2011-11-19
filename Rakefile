@@ -193,6 +193,13 @@ namespace :db do
 end
 
 namespace :images do
+  desc "(0) Run the scan script to import pages to #{Seee::Config.file_paths[:scanned_pages_dir]}"
+  task :scan do
+    File.makedirs(Seee::Config.file_paths[:scanned_pages_dir])
+    Dir.chdir(Seee::Config.file_paths[:scanned_pages_dir]) do
+      system(Seee::Config.commands[:scan])
+    end
+  end
 
   desc "(4) Find all .jpg files in tmp/images, copy them to the correct location and let Rails know about them"
   task :insertcomments, :needs => ['db:connect'] do |t, d|

@@ -70,6 +70,10 @@ module Seee
     @@application_paths = {
       :hunspell => 'hunspell',
       :pdflatex => 'pdflatex',
+      # point this to the script you use to import pages as 2-sided tif
+      # images. Either name them ".tif" (NOT tif_f_) if you want them to
+      # be recognized or send patches :)
+      :scan => File.join(RAILS_ROOT, '..', 'helfer', "scan.sh"),
       # this is the old zbar, which uses the default ImageMagick
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
@@ -133,6 +137,8 @@ module Seee
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
       :hunspell_personal_dic => File.join(Rails.root, "app", "lib", "persdic.dic"),
+
+      :scanned_pages_dir => File.join(RAILS_ROOT, "..", "tmp", "scanned"),
 
       # prefer the custom RMagick version over the default one. Its meant
       # to be used for "require" and should automatically fall back to
