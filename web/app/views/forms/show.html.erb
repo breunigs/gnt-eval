@@ -1,11 +1,13 @@
 <fieldset>
 <h1>Form <%=h @form.name %> (<%=h @form.semester.title %>) Preview</h1>
+  <%= (not @form.abstract_form_valid?) ? "<strong>⚠ Form is invalid</strong><br/>" : ""%>
 
  <table>
     <% for item in
       [
         ["Semester",      @form.semester.title],
-        ["Name",          @form.name]
+        ["Name",          @form.name],
+        ["Table",         @form.db_table]
       ]
     %>
       <tr style="background: #<%= cycle('efefef', 'fff') %>">
@@ -13,18 +15,27 @@
         <% for data in item do %> <td><%=h data %></td> <% end %>
       </tr>
     <% end %>
-  </table>
+  </table><br/>
 
-  <p>
-    <b>TeX-Code:</b>
-    <pre><%=h @form.abstract_form.to_tex %></pre>
-  </p>
+  <%= nav_links %>
+</fieldset>
 
-  <p>
-    <b>Content:</b>
-    <pre><%=h (@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
-  </p>
+<a id="tex-image-preview"></a>
+<%= render :partial => "shared/preview_big" %>
 
-  <%= link_to("Edit #{@form.name}", edit_form_path(@form))+' |' unless @form.critical? %>
-  <%= link_to 'List all available forms', forms_path %>
+
+<fieldset id="tex-code-preview">
+  <legend>TeX-Code used for generating the preview:</legend>
+  <%= nav_links %>
+  <pre style="max-width:850px; max-height:700px; overflow:scroll"><%=h @form.abstract_form.to_tex %></pre>
+</fieldset>
+
+<fieldset id="ruby-yaml-code">
+  <legend>Ruby-fied YAML Code:</legend>
+  <%= nav_links %>
+  <pre  style="max-width:850px; max-height:700px; overflow:scroll"><%=h (@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
+</fieldset>
+
+<fieldset>
+  <%= nav_links %>
 </fieldset>

@@ -65,6 +65,12 @@ class Array
     q, r = length.divmod(pieces)
     (0..pieces).map { |i| i * q + [r, i].min }.enum_cons(2).map { |a, b| slice(a...b) }
   end
+
+  # don’t name this "sum", it is blocked by Rails with a different
+  # implementation that requires an argument.
+  def total
+    inject( nil ) { |sum,x| sum ? sum+x : x }
+  end
 end
 
 def number_of_processors
