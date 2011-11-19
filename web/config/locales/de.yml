@@ -41,4 +41,5 @@ de:
   lecturer:
     :male: Dozent
     :female: Dozentin
+    :both: Dozent/in
   semester: Semester

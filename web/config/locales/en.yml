@@ -44,5 +44,6 @@ en:
   lecturer:
     :male: Lecturer
     :female: Lecturer
+    :both: Lecturer
   semester: Semester
 
