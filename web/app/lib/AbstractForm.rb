@@ -256,6 +256,14 @@ class Section
     @title = t
     @questions = q
   end
+
+  # tries to get the text in the following order:
+  # 1. given language, 2. in English, 3. whatever comes first
+  def any_title(lang)
+    return @title if @title.is_a? String
+    return (@title[lang] || @title[:en] || @title.first[1] || "") if @title.is_a?(Hash)
+    ""
+  end
 end
 
 # this is really just needed for tex and OMR
@@ -372,7 +380,7 @@ class AbstractForm
     tex = ""
 
     # form header and preamble
-    tex << "\\documentclass[#{babelclass[lang.to_sym]},kanten]{eval}\n"
+    tex << "\\documentclass[#{babelclass[lang.to_sym]}]{eval}\n"
     tex << "\\dozent{#{lecturer.escape_for_tex}}\n"
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
@@ -430,7 +438,12 @@ class AbstractForm
         # skip special care questions. These are legacy ones and ought
         # to be removed. Until this, let’s keep this magic. TODO
         next if s.questions.find_all{|q| q.special_care != 1}.empty?
-        b << "\n\n\\sect{#{s.title[lang]}}"
+        b << "\n\n"
+        b << "\\sect{#{s.any_title(lang)}}\n"
+        # until someone finds a way to put this command directly into
+        # \sect it is required in order to properly repeat the section
+        # header on new pages. TODO
+        b << "\\def\\lastSectionHead{#{s.any_title(lang)}}\n"
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           b << q.to_tex(lang, gender)
