@@ -28,6 +28,8 @@
   <legend>TeX-Code used for generating the preview:</legend>
   <%= nav_links %>
   <pre style="max-width:850px; max-height:700px; overflow:scroll"><%=h @form.abstract_form.to_tex %></pre>
+  You can use this line to compile the document yourself:
+  <pre><%=h Seee::Config.commands[:pdflatex_real] %> somefile.tex</pre>
 </fieldset>
 
 <fieldset id="ruby-yaml-code">
