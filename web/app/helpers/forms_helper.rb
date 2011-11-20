@@ -31,8 +31,6 @@ module FormsHelper
 
     header("Running PDF LaTex", logger)
     logger << `cd #{tmppath} && #{Seee::Config.commands[:pdflatex_real]} "#{path}.tex" 2>&1`
-    header("The TeX Code being used", logger)
-    logger << "<hr><pre>" << code << "</pre>"
 
     exitcodes << $?.to_i
     exitcodes << (File.exists?("#{path}.pdf") ? 0 : 1)
