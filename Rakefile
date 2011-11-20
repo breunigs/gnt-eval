@@ -143,7 +143,7 @@ namespace :images do
     forms = curSem.forms.reject { |form| form.get_question("tutnum").nil? }
     tables = forms.collect { |form| form.db_table }
 
-    allfiles = Dir.glob(File.joib(Seee::Config.file_paths[:sorted_pages_dir], '**/*.jpg'))
+    allfiles = Dir.glob(File.join(Seee::Config.file_paths[:sorted_pages_dir], '**/*.jpg'))
     allfiles.each_with_index do |f, curr|
       bname = File.basename(f)
       barcode = find_barcode_from_path(f)
@@ -324,7 +324,7 @@ namespace :pest do
   desc "(2) Evaluates all sheets in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])}"
   task :omr, :needs => 'pest:getyamls' do
     # OMR needs the YAML files as TeX also outputs position information
-    p = Seee::Config.file_paths[:sorted_pages_dir],
+    p = Seee::Config.file_paths[:sorted_pages_dir]
     Dir.glob(File.join(p, "[0-9]*.yaml")).each do |f|
       puts "Now processing #{f}"
       bn = File.basename(f, ".yaml")
