@@ -207,7 +207,7 @@ namespace :images do
       # let rails know about this comment
       p.save
       # move comment to correct location
-      system("#{cp} \"#{File.dirname(__FILE__)}/#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
+      system("#{cp} \"#{f}\" \"#{Seee::Config.file_paths[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
       print_progress(curr+1, allfiles.size)
     end # Dir glob
 
