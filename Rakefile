@@ -223,19 +223,20 @@ namespace :images do
   task :sortandalign, :directory do |t, d|
     # use default directory if none given
     if d.directory.nil? || d.directory.empty?
+      d = {}
       puts "No directory given, using default one: #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
-      d.directory = Seee::Config.file_paths[:scanned_pages_dir]
-      File.makedirs(d.directory)
-      puts
+      d[:directory] = Seee::Config.file_paths[:scanned_pages_dir]
+      File.makedirs(d[:directory])
+      puts d
     end
 
     # abort if the directory of choice does not exist for some reason
-    if !File.directory?(d.directory)
+    if !File.directory?(d[:directory])
       puts "Given directory does not exist. Aborting."
     # actually sort the images
     else
-      puts "Working directory is: #{d.directory}"
-      files = Dir.glob(File.join(d.directory, '*.tif'))
+      puts "Working directory is: #{d[:directory]}"
+      files = Dir.glob(File.join(d[:directory], '*.tif'))
       sort_path = Seee::Config.file_paths[:sorted_pages_dir]
 
       curr = 0
