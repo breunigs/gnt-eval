@@ -8,8 +8,6 @@
 \RequirePackage{amssymb}
 \RequirePackage{array}
 \RequirePackage{babel}
-\RequirePackage{booktabs}
-\RequirePackage{calc}
 \RequirePackage{bophook}
 \RequirePackage{color}
 \RequirePackage{geometry}
@@ -34,26 +32,7 @@
 % for-each-page stuff (e.g. headers, edges)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% default section headers are small headers
-\newcommand{\sect}{\sectsmall}
-\newcommand{\headerHeightForPut}{-33}
-\newcommand{\headerHeight}{5.2mm}
-
-% same options, but for large headers
-\DeclareOption{large}{
-  \renewcommand{\sect}{\sectlarge}
-  \renewcommand{\headerHeightForPut}{-32.2}
-  \renewcommand{\headerHeight}{5mm}
-}
-
-% add height of the header to each page margin, so repeated-headers can be placed on top of the
-% page easily. The margin for the for the first page, which cannot have a repeated header, is
-% corrected in the \head function by using a vspace.
-\geometry{left=9mm,right=9mm, top=0.8cm+\headerHeight, bottom=0.8cm}
-
-% define variables with empty text so TeX doesn't complain if there aren't
-% any sections (yet)
-\global\def\lastSectionHead{}
+\geometry{left=9mm,right=9mm, top=0.6cm, bottom=0.7cm}
 
 % print edges and repeated header (if available) for each page
 \AtBeginPage{
@@ -67,8 +46,6 @@
   \put(581.5, -830){\rule{1pt}{1cm}}
   \write\posout{- !ruby/object:Page}
   \write\posout{u questions:}
-  \put(21.1,\headerHeightForPut){\@ifundefined{lastSectionHeadReal}{}{\sect{\lastSectionHeadReal}}}
-  \global\edef\lastSectionHeadReal{\lastSectionHead}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -185,10 +162,15 @@
 % \preventBreak{%
 %    some content
 % }
-\newcommand{\preventBreak}[1]{
-  \makebox[192mm][l]{\hspace*{-0.8mm}
+\newcommand{\preventBreak}[1]{%
+  \makebox[192mm][l]{\hspace*{-0.8mm}%
+    #1%
+  }%
+}
+\renewcommand{\preventBreak}[1]{
+  \begin{tabular}[t]{p{192mm}}
     #1
-  }
+  \end{tabular}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,8 +184,7 @@
   \write\posout{pages: }
   \write\posout{- !ruby/object:Page }
   \write\posout{u questions: }
-  \vspace*{-0.4cm}
-  \vspace*{-\headerHeight}
+  \vspace*{-1.85mm}
   \Huge{#1}\normalsize
   \hfill\raisebox{-4.1mm}{\includegraphics[width=3cm,height=1cm]{barcode#2.pdf}}\\
   \vspace*{-2mm}
@@ -219,33 +200,17 @@
 % sections
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Note: all headers must have a black bottom line that matches the \hline which is used to
-% separate each question. This is due to the section being repeated at the top of the page but its
-% z-index is lower than the question's. If required, you can disable the hline for the question
-% following the section header by calling: \renewcommand{\hline}{}
-%
-% Adjust the height of each header
-
-% provides _large_ grey header to separate questions into groups
-\newcommand{\sectlarge}[1]{
-    \fcolorbox{black}{gray}{%
-      % allow 2*1.6mm for the border; the phantoms ensure each box has the
-      % same height
-      \makebox[188.8mm][c]{\Large{\phantom{\"Ay}#1\phantom{\"Ay}}}
-    }
-  %}
-  % prevent toprule for the following question
-  \renewcommand{\hline}{}
-  \vspace*{-0.5mm}
-}
-
 % provides _small_ grey header to separate questions into groups
-\newcommand{\sectsmall}[1]{
+\newcommand{\sect}[1]{
   \colorbox{gray}{% no idea why it isn't 192mm
     \makebox[189.1mm][l]{\textbf{#1\phantom{\"Ay}}}
   }
-  % line up the section's bottom with the question's hline
-  \vspace*{-0.5mm}
+
+  % newline required to put separator below text
+  \vspace*{1.6mm}\separator{\arrayrulewidth}
+
+  \vspace*{-3.1mm}
+  \renewcommand{\hline}{}
 }
 
 \newcommand{\secte}{
@@ -261,7 +226,15 @@
 % Questions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\NewDocumentCommand\quest{d<> m m o o o o o o}{%
+% allows up to six possible answers. Arguments are as follows:
+% \quest
+% <s*>  OR  <s>  OR  <m*>  OR  <m>  OR empty (=s*)    s=single choice, m=multi choice, *=add "no
+%                                                              answer" checkbox as last checkbox
+% {db_table_column_name}    multiple choice question get the names: namea, nameb, namec, named, ...
+% {first answer}
+% {second answer}
+% ...
+\NewDocumentCommand\quest{D<>{s*} m m o o o o o o}{%
   %This is to test if we have a Multiple Choice Question
   \IfNoValueTF{#1}{% single choice question
     \SaveNormalInfo[#3][#2]
@@ -295,45 +268,35 @@
   \IfNoValueTF{#5}{% 1 answer
     \Huge{Wir sind doch nicht in der DDR hier!}\\
   }{% 2 answers, is aligned to the 5-answers question
-    \preventBreak{%
-      \begin{tabular}{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
-	\hline\\[-0.8em]
-	\multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &   \\
-				& \small#4    & \small#5    &
-      \end{tabular}
-    }
+    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
+      \hline\\[-0.8em]
+      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &   \\
+                              & \small#4    & \small#5    &
+    \end{tabular}
   }}{% 3 answers
-    \preventBreak{%
-      \begin{tabular}{p{8cm}>{\centering}p{18.6mm}>{\centering}p{74.8mm}>{\centering}p{18.6mm}p{0cm}}
-	\hline\\[-0.8em]
-	\multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \\
-				& \small#4    & \small#5    & \small#6    &
-      \end{tabular}
-    }
+    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{74.8mm}>{\centering}p{18.6mm}p{0cm}}
+      \hline\\[-0.8em]
+      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \\
+                              & \small#4    & \small#5    & \small#6    &
+    \end{tabular}
   }}{% 4 answers
-    \preventBreak{%
-      \begin{tabular}{p{8cm}>{\centering}p{18.6mm}>{\centering}p{37.4mm}>{\centering}p{37.4mm}>{\centering}p{18.6mm}p{0mm}}
-	\hline\\[-0.8em]
-	\multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \\
-				&  \small#4   & \small#5    & \small#6    & \small#7    &
+    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{37.4mm}>{\centering}p{37.4mm}>{\centering}p{18.6mm}p{0mm}}
+      \hline\\[-0.8em]
+      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \\
+                              &  \small#4   & \small#5    & \small#6    & \small#7    &
       \end{tabular}
-    }
   }}{% 5 answers
-    \preventBreak{%
-      \begin{tabular}{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}>{\centering}p{24.9mm}>{\centering}p{24.95mm}>{\centering}p{18.6mm}p{0mm}}
-	\hline\\[-0.8em]
-	\multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \\
-				& \small#4    & \small#5    & \small#6    & \small#7    & \small#8    &
-      \end{tabular}
-    }
+    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}>{\centering}p{24.9mm}>{\centering}p{24.95mm}>{\centering}p{18.6mm}p{0mm}}
+      \hline\\[-0.8em]
+      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \\
+                              & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    &
+    \end{tabular}
   }}{% 6 answers
-    \preventBreak{%
-      \begin{tabular}{p{8cm}>{\centering}p{18.6mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.6mm}p{0mm}}
-	\hline\\[-0.8em]
-	\multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \\
-				& \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    &
-      \end{tabular}
-    }
+    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.6mm}p{0mm}}
+      \hline\\[-0.8em]
+      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \\
+                              & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    &
+    \end{tabular}
   }
   \vspace{0em} % for some reason this is required, otherwise "Argument of \@imakebox has an extra }." is raised
   % enable hline for the following questions
@@ -348,11 +311,12 @@
 }
 
 
-% prints tutors if they have been defined
+% prints tutors (requires them to have been set before)
 \newcommand{\printtutors}[1]{
-  \ifthenelse{\isundefined{\tut}}{}{
+  \vspace*{-1.2mm}
+  \preventBreak{
     \SaveNormalInfo[#1][tutnum]%
-    \printspecialheader{#1}
+    #1\\[1.1mm]
     \makebox[1.0\textwidth][l]{
     \hspace*{-0.1cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
     \tut
@@ -363,17 +327,20 @@
 }
 
 % comment field
-\newcommand{\comment}[3]{\write\posout{u - !ruby/object:Question}
-  \write\posout{uu choice: }
-  \write\posout{uu qtext: "#1"}
-  \write\posout{uu save_as: "#3"}
-  \write\posout{uu type: text}
-  \write\posout{uu db_column: "#2"}
-  \vspace{0.35cm}
-  \separator{\arrayrulewidth}
-  #1\hspace*{0.5cm}\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 650000}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
-  \write\posout{uuu height: 3200000}
-  \write\posout{uuu width: 39020584}
+\newcommand{\comment}[3]{
+  \preventBreak{
+    \write\posout{u - !ruby/object:Question}
+    \write\posout{uu choice: }
+    \write\posout{uu qtext: "#1"}
+    \write\posout{uu save_as: "#3"}
+    \write\posout{uu type: text}
+    \write\posout{uu db_column: "#2"}
+    \vspace{0.35cm}
+    \separator{\arrayrulewidth}
+    #1\hspace*{0.5cm}\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 650000}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
+    \write\posout{uuu height: 3200000}
+    \write\posout{uuu width: 39020584}
+  }
 }
 
 % makes the following page act as comment field

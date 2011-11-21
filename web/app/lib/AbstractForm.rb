@@ -164,7 +164,7 @@ class Question
 
       when "tutor_table" then
         # automatically prints tutors, if they have been defined
-        s << "\\printtutors{#{text(lang, gender)}}\n\n"
+        s << "\n\\printtutors{#{text(lang, gender)}}\n"
 
       when "variable_width" then
         s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
@@ -426,7 +426,7 @@ class AbstractForm
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
     # print special questions
     special_care_questions.each { |q| s << q.to_tex(lang, gender) }
-    s << "\\vspace{0.1cm}"
+    s << "\\vspace{-0.2cm}"
     s
   end
 
@@ -439,14 +439,13 @@ class AbstractForm
         # to be removed. Until this, let’s keep this magic. TODO
         next if s.questions.find_all{|q| q.special_care != 1}.empty?
         b << "\n\n"
-        b << "\\sect{#{s.any_title(lang)}}\n"
-        # until someone finds a way to put this command directly into
-        # \sect it is required in order to properly repeat the section
-        # header on new pages. TODO
-        b << "\\def\\lastSectionHead{#{s.any_title(lang)}}\n"
+        b << "\\preventBreak{\\sect{#{s.any_title(lang)}}"
+        sect_open = true
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           b << q.to_tex(lang, gender)
+          b << "\n}" if sect_open
+          sect_open = false
         end
       end
       b << p.tex_at_bottom.to_s
