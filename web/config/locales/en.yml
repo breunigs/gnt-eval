@@ -47,3 +47,6 @@ en:
     :both: Lecturer
   semester: Semester
 
+  # used to describe the checkbox if the evaluee does not want to or
+  # cannot answer this question
+  no_answer: no answer

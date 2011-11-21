@@ -59,6 +59,9 @@ class Question
   # postfix when saving file
   attr_accessor :save_as
 
+  # boolean that tells if an additional <no answer> field has been added
+  attr_accessor :no_answer
+
   # special care: boolean, true falls extra liebe benoetigt wird
   # (tutoren, studienfach, semesterzahl)
 
@@ -75,6 +78,7 @@ class Question
     @type = type
     @db_column = db_column
     @save_as = save_as
+    @no_answer = true
   end
 
   # how many choices are there?
@@ -96,6 +100,13 @@ class Question
     elsif first_letter == 'u'
       return 'uebungsgruppenbetrieb'
     end
+  end
+
+  # returns false iff no_answer has set been to false. Returns true if
+  # no_answer was either not set or has been explicitly set to true.
+  def no_answer?
+    return true if @no_answer.nil?
+    @no_answer
   end
 
   # is the question active?
@@ -194,9 +205,10 @@ class Question
         s << "}\n\n"
 
       when "square" then
+        na = (no_answer? ? "*" : "")
         s << "\n\n"
         s << '\quest'
-        s << '<m>' if multi?
+        s << (multi? ? "<m#{na}>" : "<s#{na}>")
         # db column
         if multi?
           s << '{' + @db_column.first[0..-2] + '}'
@@ -385,6 +397,7 @@ class AbstractForm
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
     tex << "\\semester{#{semester.escape_for_tex}}\n"
+    tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
 
     # tutors
     tutors.collect! { |t| t.escape_for_tex }

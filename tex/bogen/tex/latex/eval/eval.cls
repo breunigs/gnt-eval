@@ -70,12 +70,13 @@
 % common functions to write out data, headers, checkboxes, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% rename some variables(?)
+% let the user store data using these commands
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
+\newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
 
 % set output file
 \newwrite\posout
@@ -104,9 +105,9 @@
   \vspace{-0.8em}
   \write\posout{uu- !ruby/object:Box}
   \write\posout{uuu choice: "#1"}
-  \write\posout{uuu height: 0}
-  \write\posout{uuu text: "#2"}
-  \write\posout{uuu width: 0}
+%  \write\posout{uuu height: 0}
+%  \write\posout{uuu text: "#2"}
+%  \write\posout{uuu width: 0}
   \hspace{0.5em}
   \huge{$\Box$}\normalsize\SaveMyYPos}
 
@@ -114,9 +115,9 @@
   \vspace{-0.8em}
   \write\posout{uu- !ruby/object:Box}
   \write\posout{uuu choice: "#1"}
-  \write\posout{uuu height: 0}
-  \write\posout{uuu text: "#2"}
-  \write\posout{uuu width: 0}
+%  \write\posout{uuu height: 0}
+%  \write\posout{uuu text: "#2"}
+%  \write\posout{uuu width: 0}
   \hspace{-0.43cm}
   \huge{$\Box$}\normalsize\SaveMyYPos}
 
@@ -202,7 +203,7 @@
 
 % provides _small_ grey header to separate questions into groups
 \newcommand{\sect}[1]{
-  \colorbox{gray}{% no idea why it isn't 192mm
+  \colorbox{gray}{% no idea why it's this value
     \makebox[189.1mm][l]{\textbf{#1\phantom{\"Ay}}}
   }
 
@@ -226,6 +227,9 @@
 % Questions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newboolean{single}
+\newboolean{noanswer}
+
 % allows up to six possible answers. Arguments are as follows:
 % \quest
 % <s*>  OR  <s>  OR  <m*>  OR  <m>  OR empty (=s*)    s=single choice, m=multi choice, *=add "no
@@ -235,8 +239,28 @@
 % {second answer}
 % ...
 \NewDocumentCommand\quest{D<>{s*} m m o o o o o o}{%
+  \ifthenelse{\equal{#1}{s*}}{
+    \setboolean{single}{true}
+    \setboolean{noanswer}{true}
+  }{}
+
+  \ifthenelse{\equal{#1}{s}}{
+    \setboolean{single}{true}
+    \setboolean{noanswer}{false}
+  }{}
+
+  \ifthenelse{\equal{#1}{m*}}{
+    \setboolean{single}{false}
+    \setboolean{noanswer}{true}
+  }{}
+
+  \ifthenelse{\equal{#1}{m}}{
+    \setboolean{single}{false}
+    \setboolean{noanswer}{false}
+  }{}
+
   %This is to test if we have a Multiple Choice Question
-  \IfNoValueTF{#1}{% single choice question
+  \ifthenelse{\boolean{single}}{% single choice question
     \SaveNormalInfo[#3][#2]
   }{% multiple choice question
     \IfNoValueTF{#9}{
@@ -259,44 +283,88 @@
     \SaveMultiInfo[#3]
   }
 
-  %Print the question, depending on how many answers are given, for this I will burn in hell!
-  % Available space: 210mm - 2*9mm = 192mm
-  \IfNoValueTF{#9}{
-  \IfNoValueTF{#8}{
-  \IfNoValueTF{#7}{
-  \IfNoValueTF{#6}{
-  \IfNoValueTF{#5}{% 1 answer
-    \Huge{Wir sind doch nicht in der DDR hier!}\\
-  }{% 2 answers, is aligned to the 5-answers question
-    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
-      \hline\\[-0.8em]
-      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &   \\
-                              & \small#4    & \small#5    &
-    \end{tabular}
-  }}{% 3 answers
-    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{74.8mm}>{\centering}p{18.6mm}p{0cm}}
-      \hline\\[-0.8em]
-      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \\
-                              & \small#4    & \small#5    & \small#6    &
-    \end{tabular}
-  }}{% 4 answers
-    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{37.4mm}>{\centering}p{37.4mm}>{\centering}p{18.6mm}p{0mm}}
-      \hline\\[-0.8em]
-      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \\
-                              &  \small#4   & \small#5    & \small#6    & \small#7    &
+  % Print the question, depending on how many answers are given, for this I will burn in hell!
+  % Available space: 210mm - 2*9mm = 192mm, but TeX says our boxes are overfull. Added this
+  % to my "TeX is strange" encyclopedia and went on with my life. Using 190mm now, not be-
+  % cause it fixes the overfull boxes, but makes TeX at least compile.
+
+  \ifthenelse{\boolean{noanswer}}{ % "no answer" checkbox is added automatically
+    \IfNoValueTF{#9}{
+    \IfNoValueTF{#8}{
+    \IfNoValueTF{#7}{
+    \IfNoValueTF{#6}{
+    \IfNoValueTF{#5}{% 1 answer
+      \Huge{Wir sind doch nicht in der DDR hier!}\\
+    }{% 2 answers, is aligned to the 5-answers question %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \\
+                                & \small#4    & \small#5    &
       \end{tabular}
-  }}{% 5 answers
-    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}>{\centering}p{24.9mm}>{\centering}p{24.95mm}>{\centering}p{18.6mm}p{0mm}}
-      \hline\\[-0.8em]
-      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \\
-                              & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    &
-    \end{tabular}
-  }}{% 6 answers
-    \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.6mm}p{0mm}}
-      \hline\\[-0.8em]
-      \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \\
-                              & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    &
-    \end{tabular}
+    }}{% 3 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{39.25mm}>{\centering}p{39.25mm}>{\centering}p{15.75mm}p{0cm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
+      \end{tabular}
+    }}{% 4 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{26.17mm}>{\centering}p{26.16mm}>{\centering}p{26.17mm}>{\centering}p{15.75mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[99][\noAnswTxt]  &\\
+                                &  \small#4   & \small#5    & \small#6    & \small#7    & \small\noAnswTxt      &
+        \end{tabular}
+    }}{% 5 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{15.75mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    & \small\noAnswTxt      &
+      \end{tabular}
+    }}{% 6 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    & \small\noAnswTxt      &
+      \end{tabular}
+    }
+  }{ % "no answer" checkbox NOT included %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FIXME FIXME FIXME. Still need to set 190mm as new width to sync with above questions
+    \IfNoValueTF{#9}{
+    \IfNoValueTF{#8}{
+    \IfNoValueTF{#7}{
+    \IfNoValueTF{#6}{
+    \IfNoValueTF{#5}{% 1 answer
+      \Huge{Wir sind doch nicht in der DDR hier!}\\
+    }{% 2 answers, is aligned to the 5-answers question
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &   \\
+                                & \small#4    & \small#5    &
+      \end{tabular}
+    }}{% 3 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{74.8mm}>{\centering}p{18.6mm}p{0cm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \\
+                                & \small#4    & \small#5    & \small#6    &
+      \end{tabular}
+    }}{% 4 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{37.4mm}>{\centering}p{37.4mm}>{\centering}p{18.6mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \\
+                                &  \small#4   & \small#5    & \small#6    & \small#7    &
+        \end{tabular}
+    }}{% 5 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}>{\centering}p{24.9mm}>{\centering}p{24.95mm}>{\centering}p{18.6mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \\
+                                & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    &
+      \end{tabular}
+    }}{% 6 answers
+      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.6mm}p{0mm}}
+        \hline\\[-0.8em]
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \\
+                                & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    &
+      \end{tabular}
+    }
   }
   \vspace{0em} % for some reason this is required, otherwise "Argument of \@imakebox has an extra }." is raised
   % enable hline for the following questions
