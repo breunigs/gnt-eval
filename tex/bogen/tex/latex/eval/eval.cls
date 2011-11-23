@@ -285,7 +285,8 @@
 
   % Print the question, depending on how many answers are given, for this I will burn in hell!
   % Available space: 210mm - 2*9mm = 192mm, but TeX says our boxes are overfull. Added this
-  % to my "TeX is strange" encyclopedia and went on with my life. Using 190mm now, not be-
+  % to my "TeX is strange" encyclopedia and went on with my life.
+  % Using 190mm now, not be-
   % cause it fixes the overfull boxes, but makes TeX at least compile.
 
   \ifthenelse{\boolean{noanswer}}{ % "no answer" checkbox is added automatically
@@ -296,30 +297,30 @@
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
     }{% 2 answers, is aligned to the 5-answers question %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{58.09mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \\
-                                & \small#4    & \small#5    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] && \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    && \small#5    && \small\noAnswTxt      &
       \end{tabular}
-    }}{% 3 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{39.25mm}>{\centering}p{39.25mm}>{\centering}p{15.75mm}p{0cm}}
+    }}{% 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] && \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    && \small#5    & \small#6    && \small\noAnswTxt      &
       \end{tabular}
-    }}{% 4 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{26.17mm}>{\centering}p{26.16mm}>{\centering}p{26.17mm}>{\centering}p{15.75mm}p{0mm}}
+    }}{% 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[99][\noAnswTxt]  &\\
-                                &  \small#4   & \small#5    & \small#6    & \small#7    & \small\noAnswTxt      &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] && \bxs[99][\noAnswTxt]  &\\
+                                &  \small#4   && \small#5    & \small#6    & \small#7    && \small\noAnswTxt      &
         \end{tabular}
-    }}{% 5 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{19.625mm}>{\centering}p{15.75mm}p{0mm}}
+    }}{% 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    & \small\noAnswTxt      &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] && \bxs[99][\noAnswTxt]  &\\
+                                & \small#4    && \small#5    & \small#6    & \small#7    & \small#8    && \small\noAnswTxt      &
       \end{tabular}
-    }}{% 6 answers
+    }}{% 6 answers + no answer
       \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
         \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \bxs[99][\noAnswTxt]  &\\
