@@ -7,6 +7,15 @@
 # - Question: see class.
 # - Box: see class
 #
+# The boxes are coded as follows:
+# first box = 1, second box = 2, …, no answer box = 99
+# When processing the sheets, the additional values are:
+#  0 = no choice, i.e. the user did no cross anything
+# -1 = multiple checkmarks were detected, not yet confirmed by human
+# -2 = multiple checkmarks are there, confirmed by human
+
+# TODO: Remove "choice" from box if safe. First needs to be removed from
+# Pest and eval.cls
 
 require 'prettyprint'
 
@@ -34,10 +43,9 @@ class Box
 
   # just get any description from the @text field. This should probably
   # be /the/ accessor for @text, similar to the way question#text works.
-  # TODO FIXME
-  def any_text
+  def any_text(lang = :en)
     return @text if @text.is_a? String
-    return @text[:en] || @text.first[1] if @text.is_a? Hash
+    (return @text[lang.to_sym] || @text[:en] || @text.first[1]) if @text.is_a? Hash
     ""
   end
 end
@@ -68,13 +76,12 @@ class Question
   attr_accessor :special_care
   attr_accessor :donotuse
 
-  # FIXME: remove failchoice
+  # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='', save_as = '')
 
     @boxes = boxes
     @qtext = qtext
-    @nochoice = nochoice
     @type = type
     @db_column = db_column
     @save_as = save_as
@@ -121,25 +128,17 @@ class Question
 
   # leftmost choice in appropriate language
   def ltext(language = :en)
-    @boxes.first.text[language]
+    @boxes.first.any_text(language)
   end
 
   # rightmost choice in appropriate language
   def rtext(language = :en)
-    @boxes.last.text[language]
+    @boxes.last.any_text(language)
   end
 
   # collect all possible choices and return as array
-  def get_choices(language = nil)
-    @boxes.collect do |x|
-      if x.text.is_a?(Hash) && x.text[language]
-        x.text[language] || ""
-      elsif x.text.is_a?(Hash)
-        x.text[:en] || x.text.first[1] || ""
-      else
-        x.text || ""
-      end
-    end
+  def get_choices(language = :en)
+    @boxes.collect { |x| x.any_text(language) }
   end
 
   # question itself in appropriate language and gender
@@ -183,25 +182,27 @@ class Question
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         boxes = []
-        @boxes.each do |b|
-          boxes << "\\boxvariable{#{b.choice}}{\\hspace{-0.5em}#{b.text[lang]}}"
+        @boxes.each_with_index do |b,i|
+          boxes << "\\boxvariable{#{i+1}}{\\hspace{-0.5em}#{b.text[lang]}}"
         end
         s << boxes.join(" \\hfill ")
         s << "}\n\n"
 
+      # WARNING: Support for this type of question will be removed. Do not use.
+      # TODO: Remove function once safe.
       when "fixed_width__last_is_rightmost" then
         s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
         s << "\\printspecialheader{#{text(lang, gender)}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
-        @boxes.each do |b|
+        @boxes.each_with_index do |b,i|
           next if b == @boxes.last
-          s << "\\boxfixed{#{b.choice}}{#{b.text[lang]}} "
+          s << "\\boxfixed{#{i+1}}{#{b.text[lang]}} "
         end
 
         (6-@boxes.size).times { s << "\\boxfixedempty" }
         last = @boxes.last
-        s << "\\boxfixed{#{last.choice}}{#{last.text[lang]}} "
+        s << "\\boxfixed{#{@boxes.count}}{#{last.text[lang]}} "
         s << "}\n\n"
 
       when "square" then
@@ -218,7 +219,7 @@ class Question
         # question
         s << "{#{text(lang, gender)}}"
         # possible answers
-        s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "[#{x.text[lang]}]" }.join
+        s << @boxes.map{ |x| "[#{x.any_text(lang)}]" }.join
     end
     s
   end
@@ -435,8 +436,9 @@ class AbstractForm
     # writes yaml header on texing
     s = "\\head{#{title[lang]}}{#{barcode}}\n\n"
     s << "#{intro[lang]}\n\n"
-    s << "\\\dataline{#{I18n.t(:title)}}"
-    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
+    s << "\\dataline{#{I18n.t(:title)}}"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
+    s << "\\noAnswerText{#{I18n.t(:no_answer)}}\n\n"
     # print special questions
     special_care_questions.each { |q| s << q.to_tex(lang, gender) }
     s << "\\vspace{-0.2cm}"
