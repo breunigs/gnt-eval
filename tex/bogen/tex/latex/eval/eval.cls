@@ -204,7 +204,7 @@
 % provides _small_ grey header to separate questions into groups
 \newcommand{\sect}[1]{
   \colorbox{gray}{% no idea why it's this value
-    \makebox[189.1mm][l]{\textbf{#1\phantom{\"Ay}}}
+    \makebox[187.1mm][l]{\textbf{#1\phantom{\"Ay}}}
   }
 
   % newline required to put separator below text
@@ -220,7 +220,7 @@
 
 % used at the end of the page to mark the end of a comment field
 \newcommand{\separator}[1]{
-  \vspace{-1.2em}\rule{19.2cm}{#1}\\
+  \vspace{-1.15em}\rule{19cm}{#1}\\
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -328,7 +328,6 @@
       \end{tabular}
     }
   }{ % "no answer" checkbox NOT included %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FIXME FIXME FIXME. Still need to set 190mm as new width to sync with above questions
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
     \IfNoValueTF{#7}{
@@ -336,34 +335,34 @@
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
     }{% 2 answers, is aligned to the 5-answers question
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}p{68.45mm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] &   \\
-                                & \small#4    & \small#5    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] &   \\
+                                & \small#4    && \small#5    &
       \end{tabular}
     }}{% 3 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{74.8mm}>{\centering}p{18.6mm}p{0cm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{15.7mm}>{\centering}p{47.15mm}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \\
-                                & \small#4    & \small#5    & \small#6    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] && \bxs[3][#6] &  \\
+                                & \small#4    && \small#5    && \small#6    &
       \end{tabular}
     }}{% 4 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{37.4mm}>{\centering}p{37.4mm}>{\centering}p{18.6mm}p{0mm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \\
-                                &  \small#4   & \small#5    & \small#6    & \small#7    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] && \bxs[4][#7] & \\
+                                &  \small#4   && \small#5    & \small#6    && \small#7    &
         \end{tabular}
     }}{% 5 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{24.95mm}>{\centering}p{24.9mm}>{\centering}p{24.95mm}>{\centering}p{18.6mm}p{0mm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] & \\
-                                & \small#4    & \small#5    & \small#6    & \small#7    & \small#8    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] && \bxs[5][#8] & \\
+                                & \small#4    && \small#5    & \small#6    & \small#7    && \small#8    &
       \end{tabular}
     }}{% 6 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{18.6mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.7mm}>{\centering}p{18.6mm}p{0mm}}
+      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
         \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \\
-                                & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    &
+        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] && \bxs[6][#9] & \\
+                                & \small#4    && \small#5    & \small#6    & \small#7     & \small#8    && \small#9    &
       \end{tabular}
     }
   }
@@ -382,16 +381,15 @@
 
 % prints tutors (requires them to have been set before)
 \newcommand{\printtutors}[1]{
-  \vspace*{-1.2mm}
   \preventBreak{
     \SaveNormalInfo[#1][tutnum]%
     #1\\[1.1mm]
     \makebox[1.0\textwidth][l]{
-    \hspace*{-0.1cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
-    \tut
-    \end{tabular}
+      \hspace*{-0.1cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
+      \tut
+      \end{tabular}
     }
-    \vspace{0.1cm}
+    \vspace*{-5.5mm}
   }
 }
 
