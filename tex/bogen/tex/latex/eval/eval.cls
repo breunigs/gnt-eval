@@ -230,6 +230,7 @@
 \newboolean{single}
 \newboolean{noanswer}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % allows up to six possible answers. Arguments are as follows:
 % \quest
 % <s*>  OR  <s>  OR  <m*>  OR  <m>  OR empty (=s*)    s=single choice, m=multi choice, *=add "no
@@ -384,12 +385,10 @@
   \preventBreak{
     \SaveNormalInfo[#1][tutnum]%
     #1\\[1.1mm]
-    \makebox[1.0\textwidth][l]{
-      \hspace*{-0.1cm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
+    \hspace*{-0.3mm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
       \end{tabular}
-    }
-    \vspace*{-5.5mm}
+    \vspace*{-4mm}
   }
 }
 
