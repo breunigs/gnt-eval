@@ -1,0 +1,41 @@
+Software used by G'n'T-Eval:
+
+Name:    ZBar Barcode Reader
+Web:     http://zbar.sourceforge.net/
+License: GNU LGPL 2.1
+ …local: doc/licenses/lgpl-2.1.txt
+…online: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+
+Name:    Prototype
+Web:     http://www.prototypejs.org/
+License: MIT
+ …local: doc/licenses/prototype
+…online: https://raw.github.com/sstephenson/prototype/master/LICENSE
+
+
+Name:    Script.aculo.us
+Web:     http://script.aculo.us/
+License: MIT
+ …local: doc/licenses/script.aculo.us
+…online: http://madrobby.github.com/scriptaculous/license/
+
+
+Name:    js-yaml
+Web:     https://github.com/nodeca/js-yaml
+License: MIT
+ …local: doc/licenses/js-yaml
+…online: https://github.com/nodeca/js-yaml/blob/master/LICENSE
+
+
+Name:    Ruby on Rails
+Web:     http://rubyonrails.org/
+License: MIT
+…online: http://www.opensource.org/licenses/mit-license.php
+
+
+Name:    ImageMagick (system wide one, unless you build it)
+Web:     http://www.imagemagick.org/
+License: ImageMagick License
+ …local: doc/licenses/imagemagick
+…online: http://www.imagemag…ick.org/script/license.php
