@@ -510,13 +510,14 @@
 
 % prints tutors (requires them to have been set before)
 \newcommand{\printtutors}[1]{
+  \vspace*{-1.4mm}
   \preventBreak{
     \SaveNormalInfo[tutnum]%
     #1\\[1.1mm]
     \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
       \end{tabular}
-    \vspace*{-1mm}
+    \vspace*{2mm}
   }
 }
 
