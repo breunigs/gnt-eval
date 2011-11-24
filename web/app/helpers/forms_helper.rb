@@ -9,13 +9,16 @@ module FormsHelper
     s.join(" | ")
   end
 
+  def form_tex_code(form)
+    form.abstract_form_valid? ? form.abstract_form.to_tex : ""
+  end
 
   def render_preview
     require 'rubygems'
     require 'open4'
     require 'base64'
 
-    code = @form.abstract_form.to_tex
+    code = form_tex_code(@form)
     return false, ["(no data?)"], "", "" if code.nil? || code.strip.empty?
 
     name = Digest::SHA256.hexdigest(code)
