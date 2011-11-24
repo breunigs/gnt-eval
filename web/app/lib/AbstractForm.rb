@@ -207,20 +207,27 @@ class Question
         s << "}\n\n"
 
       when "square" then
-        na = (no_answer? ? "noanswer" : "")
-        s << "\n\n"
-        s << '\quest'
-        s << (multi? ? "<multi #{na}>" : "<single #{na}>")
+        answers = @boxes.map{ |x| "[#{x.any_text(lang)}]" }
+        # add dummy entry so the no answer checkbox in the first row is taken
+        # into account. it will be removed later.
+        answers.unshift(nil) if no_answer?
+        # split checkboxes into equal parts so there are the same amount of
+        # answers per row. If there are six or less answers, only one row is
+        # required.
+        answers = answers.chunk([1, (@boxes.count/6.0).ceil].max)
+        first = answers.shift
+        # print additional answers
+        answers.each { |x| s << "\\moreAnswers#{x.join}\n" }
+        s << "\\quest"
+        # single/multi and no_answer settings
+        s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")}>"
         # db column
-        if multi?
-          s << '{' + @db_column.first[0..-2] + '}'
-        else
-          s << "{#{@db_column}}"
-        end
+        s << "{#{multi? ? @db_column.first[0..-2] : @db_colum}}"
         # question
         s << "{#{text(lang, gender)}}"
-        # possible answers
-        s << @boxes.map{ |x| "[#{x.any_text(lang)}]" }.join
+        # first row of answers (compact removes dummy element, if required)
+        s << first.compact.join
+        s << "\n\n"
     end
     s
   end
@@ -454,13 +461,13 @@ class AbstractForm
         # skip special care questions. These are legacy ones and ought
         # to be removed. Until this, let’s keep this magic. TODO
         next if s.questions.find_all{|q| q.special_care != 1}.empty?
-        b << "\n\n"
-        b << "\\preventBreak{\\sect{#{s.any_title(lang)}}"
+        b << ""
+        b << "\\preventBreak{\n\\sect{#{s.any_title(lang)}}\n"
         sect_open = true
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           b << q.to_tex(lang, gender)
-          b << "\n}" if sect_open
+          b << "}\n\n" if sect_open
           sect_open = false
         end
       end

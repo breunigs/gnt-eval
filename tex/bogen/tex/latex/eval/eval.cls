@@ -15,12 +15,16 @@
 \RequirePackage{multirow}
 \RequirePackage{graphicx}
 \RequirePackage{microtype}
+\RequirePackage{tabularx}
 \RequirePackage{tokeniz0r}
 \RequirePackage{tgheros}
 \RequirePackage[breakall]{truncate}
 \RequirePackage{xparse}
 \RequirePackage{xstring}
 \renewcommand{\rmdefault}{\sfdefault}
+
+% centered, fixed width table column
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 
 % backup hline command. hline will be disabled when a new section begins in order to avoid several
 % rules. hlineback is used to restore hline functionality after each question.
@@ -219,7 +223,7 @@
 % box has the same height (except for weird characters)
 \newcommand{\sect}[1]{
   \colorbox{gray}{% no idea why it has to be this width
-    \makebox[187.1mm][l]{\textbf{#1\phantom{\"Ay}}}
+    \makebox[189.1mm][l]{\textbf{#1\phantom{\"Ay}}}
   }
 
   % newline required to put separator below text
@@ -235,7 +239,7 @@
 
 % used at the end of the page to mark the end of a comment field
 \newcommand{\separator}[1]{
-  \vspace{-1.15em}\rule{19cm}{#1}\\
+  \vspace{-1.15em}\rule{19.2cm}{#1}\\
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -252,50 +256,50 @@
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabNoAnswTwo}[3]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{58.09mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        && \bxs[99]              &\\
-                            & \small#2    && \small#3    && \small\noAnswTxt      &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs[99]              &\\
+                            & \small#2    & \small#3    & \small\noAnswTxt      &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
 \newcommand{\tabNoAnswThree}[4]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        && \bxs[99]              &\\
-                            & \small#2    && \small#3    & \small#4    && \small\noAnswTxt      &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                            & \small#2    & \small#3    & \small#4    & \small\noAnswTxt      &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
 \newcommand{\tabNoAnswFour}[5]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
-                            & \small#2    && \small#3    & \small#4    & \small#5    && \small\noAnswTxt      &
+    \multirow{2}{7.6cm}{#1} & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                            & \small#2  & \small#3    & \small#4    & \small#5    & \small\noAnswTxt      &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
 \newcommand{\tabNoAnswFive}[6]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
-                            & \small#2    && \small#3    & \small#4    & \small#5    & \small#6    && \small\noAnswTxt      &
+    \multirow{2}{7.6cm}{#1} & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                            & \small#2  & \small#3    & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 6 answers + no answer
 \newcommand{\tabNoAnswSix}[7]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{0mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}p{0mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
-                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    & \small#7    && \small\noAnswTxt      &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                            & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small\noAnswTxt      &
     \hasMoreAnswers
   \end{tabular}
 }
@@ -303,70 +307,70 @@
 %%%% these questions do not add a "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 answer
 \newcommand{\tabOne}[2]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        &&      &   \\
-                            & \small#2    &&      &
+    \multirow{2}{7.6cm}{#1} & \bxs        &      &   \\
+                            & \small#2    &      &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabTwo}[3]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        &   \\
-                            & \small#2    && \small#3    &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        &   \\
+                            & \small#2    & \small#3    &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 3 answers
 \newcommand{\tabThree}[4]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{15.7mm}>{\centering}p{47.15mm}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{15.7mm}}C{47.15mm}@{\hspace*{15.7mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        && \bxs        &  \\
-                            & \small#2    && \small#3    && \small#4    &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \\
+                            & \small#2    & \small#3    & \small#4    &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 4 answers
 \newcommand{\tabFour}[5]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}} % TODO
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        && \bxs        & \\
-                            & \small#2    && \small#3    & \small#4    && \small#5    &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                            & \small#2    & \small#3    & \small#4    & \small#5    &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 5 answers
 \newcommand{\tabFive}[6]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        && \bxs        & \\
-                            & \small#2    && \small#3    & \small#4    & \small#5    && \small#6    &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                            & \small#2    & \small#3    & \small#4    & \small#5    & \small#6    &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 6 answers
 \newcommand{\tabSix}[7]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        && \bxs        & \\
-                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    && \small#7    &
+    \multirow{2}{7.6cm}{#1} & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
+                            & \small#2   & \small#3    & \small#4    & \small#5     & \small#6    &  \small#7    &
     \hasMoreAnswers
   \end{tabular}
 }
 
 % 7 answers
 \newcommand{\tabSeven}[8]{
-  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{0mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}p{0mm}>{\centering}p{15.75mm}p{0mm}}
+  \begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        && \bxs           &\\
-                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    & \small#7    && \small#8       &
+    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
+                            & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small#8       &
     \hasMoreAnswers
   \end{tabular}
 }
@@ -470,28 +474,28 @@
       \\      & \small#1}}
   }{\addtocounter{answerCounter}{2}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     &
-      \\      & \small#1 && \small#2}}
+      \\[1mm] & \bxs     & \bxs     &
+      \\      & \small#1 & \small#2}}
   }}{\addtocounter{answerCounter}{3}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     & \bxs     &
-      \\      & \small#1 && \small#2 & \small#3}}
+      \\[1mm] & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 & \small#2 & \small#3}}
   }}{\addtocounter{answerCounter}{4}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     &
-      \\      &\small#1 && \small#2 & \small#3 & \small#4}}
+      \\[1mm] & \bxs    & \bxs     & \bxs     & \bxs     &
+      \\      &\small#1 & \small#2 & \small#3 & \small#4}}
   }}{\addtocounter{answerCounter}{5}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5}}
+      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5}}
   }}{\addtocounter{answerCounter}{6}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5 & \small#6}}
+      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6}}
   }}{\addtocounter{answerCounter}{7}
     \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
-      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     & \bxs     && \bxs     &
-      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5 & \small#6 && \small#7}}
+      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7}}
   }
 }
 
