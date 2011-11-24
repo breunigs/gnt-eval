@@ -19,14 +19,25 @@
 \RequirePackage{tgheros}
 \RequirePackage[breakall]{truncate}
 \RequirePackage{xparse}
+\RequirePackage{xstring}
 \renewcommand{\rmdefault}{\sfdefault}
 
-\renewcommand{\TruncateMarker}{\textasciitilde}
-
-% backup hline command. hline will be disabled when a new section begins in order
-% to avoid several rules. hlineback is used to restore hline functionality after
-% each question.
+% backup hline command. hline will be disabled when a new section begins in order to avoid several
+% rules. hlineback is used to restore hline functionality after each question.
 \let\hlineback\hline
+
+% Variable used to store further answers until they can be printed into the question table. See
+% \moreAnswers for a explanation on how to use this.
+\def\hasMoreAnswers{}
+
+% choice counter, used to increment each answer box by one. Reset at the start of \quest
+\newcounter{choiceCounter}
+% answer counter, used to count the # of answers. Currently only used to be able to print out the
+% db field for multiple choice questions correctly. Reset at the end of \quest.
+\newcounter{answerCounter}
+
+% shorthand to write information into posout file
+\def\wPosout{\write\posout}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % for-each-page stuff (e.g. headers, edges)
@@ -44,8 +55,8 @@
   \put(581.5, -43){\rule{1pt}{1cm}}
   \put(554, -830){\rule{1cm}{1pt}}
   \put(581.5, -830){\rule{1pt}{1cm}}
-  \write\posout{- !ruby/object:Page}
-  \write\posout{u questions:}
+  \wPosout{- !ruby/object:Page}
+  \wPosout{u questions:}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,6 +67,8 @@
 \PassOptionsToClass{\CurrentOption}{scrartcl}%
 }
 \ProcessOptions\relax
+
+\renewcommand{\TruncateMarker}{\textasciitilde}
 
 \pagestyle{empty}
 
@@ -86,75 +99,81 @@
 
 \def\SaveMyYPos{
   \pdfsavepos
-	\write\posout{uuu x: \number\pdflastxpos}
-	\write\posout{uuu y: \number\pdflastypos}
+	\wPosout{uuu x: \number\pdflastxpos}
+	\wPosout{uuu y: \number\pdflastypos}
 }
 
 \def\tutorbox[#1][#2]{%
-  \write\posout{uuu choice: "#1"}
-  \write\posout{uuu height: 0}
-  \write\posout{uuu text: "#2"}
-  \write\posout{uuu width: 0}
+  \wPosout{uuu choice: "#1"}
   \vspace{-0.3cm}
   \truncate{3cm}{#2}
 }
 
 \def\bx{\huge{$\Box$}\normalsize\SaveMyYPos}
 
-\def\bxs[#1][#2]{%
+% prints a box and stores its position in the posout file along with the given value. If no value
+% is given the global choiceCounter is incremented and its value is printed into the posout file
+%  instead.
+\newcommand{\bxs}[1][]{%
   \vspace{-0.8em}
-  \write\posout{uu- !ruby/object:Box}
-  \write\posout{uuu choice: "#1"}
-%  \write\posout{uuu height: 0}
-%  \write\posout{uuu text: "#2"}
-%  \write\posout{uuu width: 0}
+  \wPosout{uu- !ruby/object:Box}
+  \IfStrEq{#1}{}{
+    \stepcounter{choiceCounter}
+    \edef\saveText{uuu choice: "\arabic{choiceCounter}"}
+    \wPosout\expandafter{\saveText}
+  }{\wPosout{uuu choice: "#1"}}
   \hspace{0.5em}
-  \huge{$\Box$}\normalsize\SaveMyYPos}
+  \huge{$\Box$}\normalsize\SaveMyYPos
+}
 
-\def\bxss[#1][#2]{%
+\def\bxss[#1]{%
   \vspace{-0.8em}
-  \write\posout{uu- !ruby/object:Box}
-  \write\posout{uuu choice: "#1"}
-%  \write\posout{uuu height: 0}
-%  \write\posout{uuu text: "#2"}
-%  \write\posout{uuu width: 0}
+  \wPosout{uu- !ruby/object:Box}
+  \wPosout{uuu choice: "#1"}
   \hspace{-0.43cm}
-  \huge{$\Box$}\normalsize\SaveMyYPos}
+  \huge{$\Box$}\normalsize\SaveMyYPos
+}
 
 \newcommand{\boxfixed}[2]{
-  \bxss[#1][#2]
+  \bxss[#2]
   \makebox[2.31cm][l]{\truncate{2.31cm}{\raisebox{0.4ex}{#2}}}
   \makebox[0.05cm]{}
 }
 
 \newcommand{\boxfixedempty}{
-  \phantom{\bxss[][]}
+  \phantom{\bxss[]}
   \makebox[2.31cm][l]{}
   \makebox[0.05cm]{}
 }
 
 \newcommand{\boxvariable}[2]{
-  \bxss[#1][#2]\raisebox{0.4ex}{#2}
+  \bxss[#1]\raisebox{0.4ex}{#2}
 }
 
-
-\def\SaveMultiInfo[#1]{\write\posout{u - !ruby/object:Question}
-  \write\posout{uu qtext: "#1"}
-  \write\posout{uu type: square}
-  \write\posout{uu db_column: }
-  \whiledo{\not\equal{\Source}{}}
-    {
-      \GetTokens{TokenOne}{TokenTwo}{\Source}
-      \expandafter\write\expandafter\posout\expandafter{\TokenOne}
-      \let\Source\TokenTwo
-    }
-  \write\posout{uu boxes:}
+% writes the posout information for multiple choice questions give the database prefix
+% as first option and the amount of boxes as second.
+% The letters (a, b, c, ..., (noansw)) will be added automatically
+\newcounter{multiCounter}
+\def\SaveMultiInfo[#1][#2]{%
+  \wPosout{u - !ruby/object:Question}
+  \wPosout{uu type: square}
+  \wPosout{uu db_column: }
+  \setcounter{multiCounter}{0}
+  \whiledo{\value{multiCounter} < #2}{
+    \stepcounter{multiCounter}
+    \edef\saveText{uu - #1\alph{multiCounter}}
+    \wPosout\expandafter{\saveText}
+  }
+  \ifthenelse{\boolean{noanswer}}{\wPosout{uu - #1noansw}}{}
+  \wPosout{uu boxes:}
 }
-\def\SaveNormalInfo[#1][#2]{\write\posout{u - !ruby/object:Question}
-  \write\posout{uu qtext: "#1"}
-  \write\posout{uu type: square}
-  \write\posout{uu db_column: #2}
-  \write\posout{uu boxes:}
+
+% writes the posout information for single choice questions
+\def\SaveNormalInfo[#1]{%
+  \wPosout{u - !ruby/object:Question}
+  \wPosout{uu type: square}
+  \wPosout{uu db_column: #1}
+  \wPosout{uu boxes:}
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
@@ -163,12 +182,7 @@
 % \preventBreak{%
 %    some content
 % }
-\newcommand{\preventBreak}[1]{%
-  \makebox[192mm][l]{\hspace*{-0.8mm}%
-    #1%
-  }%
-}
-\renewcommand{\preventBreak}[1]{
+\newcommand{\preventBreak}[1]{
   \begin{tabular}[t]{p{192mm}}
     #1
   \end{tabular}
@@ -180,11 +194,11 @@
 
 % prints main caption and barcode
 \newcommand{\head}[2]{
-  \write\posout{--- !ruby/object:AbstractForm}
-  \write\posout{db_table: \dbt}
-  \write\posout{pages: }
-  \write\posout{- !ruby/object:Page }
-  \write\posout{u questions: }
+  \wPosout{--- !ruby/object:AbstractForm}
+  \wPosout{db_table: \dbt}
+  \wPosout{pages: }
+  \wPosout{- !ruby/object:Page }
+  \wPosout{u questions: }
   \vspace*{-1.85mm}
   \Huge{#1}\normalsize
   \hfill\raisebox{-4.1mm}{\includegraphics[width=3cm,height=1cm]{barcode#2.pdf}}\\
@@ -201,9 +215,10 @@
 % sections
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% provides _small_ grey header to separate questions into groups
+% provides _small_ grey header to separate questions into groups. The phantom part ensures each
+% box has the same height (except for weird characters)
 \newcommand{\sect}[1]{
-  \colorbox{gray}{% no idea why it's this value
+  \colorbox{gray}{% no idea why it has to be this width
     \makebox[187.1mm][l]{\textbf{#1\phantom{\"Ay}}}
   }
 
@@ -231,65 +246,173 @@
 \newboolean{noanswer}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% helper commands that print each of the tables depending on how many answers are required.
+
+%%%% these questions automatically add the "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 2 answers, is aligned to the 5-answers question
+\newcommand{\tabNoAnswTwo}[3]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{58.09mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        && \bxs[99]              &\\
+                            & \small#2    && \small#3    && \small\noAnswTxt      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
+\newcommand{\tabNoAnswThree}[4]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        && \bxs[99]              &\\
+                            & \small#2    && \small#3    & \small#4    && \small\noAnswTxt      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
+\newcommand{\tabNoAnswFour}[5]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
+                            & \small#2    && \small#3    & \small#4    & \small#5    && \small\noAnswTxt      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
+\newcommand{\tabNoAnswFive}[6]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
+                            & \small#2    && \small#3    & \small#4    & \small#5    & \small#6    && \small\noAnswTxt      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 6 answers + no answer
+\newcommand{\tabNoAnswSix}[7]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{0mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}p{0mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        && \bxs[99]              &\\
+                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    & \small#7    && \small\noAnswTxt      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+%%%% these questions do not add a "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1 answer
+\newcommand{\tabOne}[2]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        &&      &   \\
+                            & \small#2    &&      &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 2 answers, is aligned to the 5-answers question
+\newcommand{\tabTwo}[3]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        &   \\
+                            & \small#2    && \small#3    &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 3 answers
+\newcommand{\tabThree}[4]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{15.7mm}>{\centering}p{47.15mm}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        && \bxs        &  \\
+                            & \small#2    && \small#3    && \small#4    &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 4 answers
+\newcommand{\tabFour}[5]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        && \bxs        & \\
+                            & \small#2    && \small#3    & \small#4    && \small#5    &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 5 answers
+\newcommand{\tabFive}[6]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        & \bxs        && \bxs        & \\
+                            & \small#2    && \small#3    & \small#4    & \small#5    && \small#6    &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 6 answers
+\newcommand{\tabSix}[7]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        && \bxs        & \\
+                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    && \small#7    &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+% 7 answers
+\newcommand{\tabSeven}[8]{
+  \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{0mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}p{0mm}>{\centering}p{15.75mm}p{0mm}}
+    \hline\\[-0.8em]
+    \multirow{2}{7.4cm}{#1} & \bxs        && \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        && \bxs           &\\
+                            & \small#2    && \small#3    & \small#4    & \small#5     & \small#6    & \small#7    && \small#8       &
+    \hasMoreAnswers
+  \end{tabular}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % allows up to six possible answers. Arguments are as follows:
 % \quest
-% <s*>  OR  <s>  OR  <m*>  OR  <m>  OR empty (=s*)    s=single choice, m=multi choice, *=add "no
-%                                                              answer" checkbox as last checkbox
-% {db_table_column_name}    multiple choice question get the names: namea, nameb, namec, named, ...
+% <(single|multi) (noanswer)> All arguments are optional. noanswer will add a now answer box to
+%                             at the end. Single/multi make the question single/multi choice.
+% {db_table_column_name}      multiple choice question get the names: namea, nameb, namec, and so
+%                             on. If the question also has a noanswer box it will be named namenoansw
 % {first answer}
 % {second answer}
 % ...
-\NewDocumentCommand\quest{D<>{s*} m m o o o o o o}{%
-  \ifthenelse{\equal{#1}{s*}}{
-    \setboolean{single}{true}
-    \setboolean{noanswer}{true}
-  }{}
+\NewDocumentCommand\quest{D<>{} m m o o o o o o}{%
+  % set defaults
+  \setboolean{single}{true}
+  \setboolean{noanswer}{true}
+  \setcounter{choiceCounter}{0}
 
-  \ifthenelse{\equal{#1}{s}}{
-    \setboolean{single}{true}
-    \setboolean{noanswer}{false}
-  }{}
-
-  \ifthenelse{\equal{#1}{m*}}{
-    \setboolean{single}{false}
-    \setboolean{noanswer}{true}
-  }{}
-
-  \ifthenelse{\equal{#1}{m}}{
-    \setboolean{single}{false}
-    \setboolean{noanswer}{false}
-  }{}
+  \IfSubStr{#1}{single}{\setboolean{single}{true}}{}
+  \IfSubStr{#1}{multi}{\setboolean{single}{false}}{}
+  \IfSubStr{#1}{noanswer}{\setboolean{noanswer}{true}}{\setboolean{noanswer}{false}}
 
   %This is to test if we have a Multiple Choice Question
   \ifthenelse{\boolean{single}}{% single choice question
-    \SaveNormalInfo[#3][#2]
+    \SaveNormalInfo[#2]
   }{% multiple choice question
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
     \IfNoValueTF{#7}{
     \IfNoValueTF{#6}{
-    \IfNoValueTF{#5}{%1
-      \def\Source{uu - #2a,}
-    }{%2
-      \def\Source{uu - #2a,uu - #2b,}
-    }}{%3
-      \def\Source{uu - #2a,uu - #2b,uu - #2c,}
-    }}{%4
-      \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,}
-    }}{%5
-      \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,uu - #2e,}
-    }}{%6
-      \def\Source{uu - #2a,uu - #2b,uu - #2c,uu - #2d,uu - #2e,uu - #2f,}
-    }
-    \SaveMultiInfo[#3]
+    \IfNoValueTF{#5}{
+      \addtocounter{answerCounter}{1}
+    }{\addtocounter{answerCounter}{2}}
+    }{\addtocounter{answerCounter}{3}}
+    }{\addtocounter{answerCounter}{4}}
+    }{\addtocounter{answerCounter}{5}}
+    }{\addtocounter{answerCounter}{6}}
+    \SaveMultiInfo[#2][\arabic{answerCounter}]
   }
+  % move question closer to the previous one
+  %\vspace*{-3.5mm}
 
-  % Print the question, depending on how many answers are given, for this I will burn in hell!
-  % Available space: 210mm - 2*9mm = 192mm, but TeX says our boxes are overfull. Added this
-  % to my "TeX is strange" encyclopedia and went on with my life.
-  % Using 190mm now, not be-
-  % cause it fixes the overfull boxes, but makes TeX at least compile.
-
+  % Print the question, depending on how many answers are given
   \ifthenelse{\boolean{noanswer}}{ % "no answer" checkbox is added automatically
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
@@ -297,80 +420,80 @@
     \IfNoValueTF{#6}{
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
-    }{% 2 answers, is aligned to the 5-answers question %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{58.09mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] && \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    && \small#5    && \small\noAnswTxt      &
-      \end{tabular}
-    }}{% 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] && \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    && \small#5    & \small#6    && \small\noAnswTxt      &
-      \end{tabular}
-    }}{% 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] && \bxs[99][\noAnswTxt]  &\\
-                                &  \small#4   && \small#5    & \small#6    & \small#7    && \small\noAnswTxt      &
-        \end{tabular}
-    }}{% 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] & \bxs[5][#8] && \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    && \small#5    & \small#6    & \small#7    & \small#8    && \small\noAnswTxt      &
-      \end{tabular}
-    }}{% 6 answers + no answer
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] & \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] & \bxs[6][#9] & \bxs[99][\noAnswTxt]  &\\
-                                & \small#4    & \small#5    & \small#6    & \small#7     & \small#8    & \small#9    & \small\noAnswTxt      &
-      \end{tabular}
-    }
-  }{ % "no answer" checkbox NOT included %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    }{\tabNoAnswTwo{#3}{#4}{#5}}
+    }{\tabNoAnswThree{#3}{#4}{#5}{#6}}
+    }{\tabNoAnswFour{#3}{#4}{#5}{#6}{#7}}
+    }{\tabNoAnswFive{#3}{#4}{#5}{#6}{#7}{#8}}
+    }{\tabNoAnswSix{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
+  }{ % "no answer" checkbox NOT included
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
     \IfNoValueTF{#7}{
     \IfNoValueTF{#6}{
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
-    }{% 2 answers, is aligned to the 5-answers question
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}p{73.84mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] &   \\
-                                & \small#4    && \small#5    &
-      \end{tabular}
-    }}{% 3 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{15.7mm}>{\centering}p{47.15mm}p{15.7mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] && \bxs[3][#6] &  \\
-                                & \small#4    && \small#5    && \small#6    &
-      \end{tabular}
-    }}{% 4 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{7.85mm}>{\centering}p{31.4mm}>{\centering}p{31.4mm}p{7.85mm}>{\centering}p{15.75mm}p{0cm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] && \bxs[4][#7] & \\
-                                &  \small#4   && \small#5    & \small#6    && \small#7    &
-        \end{tabular}
-    }}{% 5 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{3.925mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}>{\centering}p{23.55mm}p{3.925mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] & \bxs[4][#7] && \bxs[5][#8] & \\
-                                & \small#4    && \small#5    & \small#6    & \small#7    && \small#8    &
-      \end{tabular}
-    }}{% 6 answers
-      \begin{tabular}[t]{p{8cm}>{\centering}p{15.75mm}p{1.57mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}>{\centering}p{18.84mm}p{1.57mm}>{\centering}p{15.75mm}p{0mm}}
-        \hline\\[-0.8em]
-        \multirow{2}{7.4cm}{#3} & \bxs[1][#4] && \bxs[2][#5] & \bxs[3][#6] &  \bxs[4][#7] & \bxs[5][#8] && \bxs[6][#9] & \\
-                                & \small#4    && \small#5    & \small#6    & \small#7     & \small#8    && \small#9    &
-      \end{tabular}
-    }
+    }{\tabTwo{#3}{#4}{#5}}
+    }{\tabThree{#3}{#4}{#5}{#6}}
+    }{\tabFour{#3}{#4}{#5}{#6}{#7}}
+    }{\tabFive{#3}{#4}{#5}{#6}{#7}{#8}}
+    }{\tabSix{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
   }
-  \vspace{0em} % for some reason this is required, otherwise "Argument of \@imakebox has an extra }." is raised
+  \vspace{0mm}
   % enable hline for the following questions
   \let\hline\hlineback
+  % reset answers for following question
+  \def\hasMoreAnswers{}
+  % reset answer counter for next question
+  \setcounter{answerCounter}{0}
 } % end of command quest
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% allows up to seven possible answers directly *before* a \quest. It is not suitable to be used on
+% its own. The alignment is determined by \quest, so you cannot have a different raster for each
+% line.
+% Currently only supports single choice questions.
+% \moreAnswers
+% {first answer}
+% {second answer}
+% ...
+\NewDocumentCommand\moreAnswers{o o o o o o o}{%
+  \IfNoValueTF{#7}{
+  \IfNoValueTF{#6}{
+  \IfNoValueTF{#5}{
+  \IfNoValueTF{#4}{
+  \IfNoValueTF{#3}{
+  \IfNoValueTF{#2}{
+    \addtocounter{answerCounter}{1}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     &
+      \\      & \small#1}}
+  }{\addtocounter{answerCounter}{2}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     &
+      \\      & \small#1 && \small#2}}
+  }}{\addtocounter{answerCounter}{3}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     & \bxs     &
+      \\      & \small#1 && \small#2 & \small#3}}
+  }}{\addtocounter{answerCounter}{4}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     &
+      \\      &\small#1 && \small#2 & \small#3 & \small#4}}
+  }}{\addtocounter{answerCounter}{5}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5}}
+  }}{\addtocounter{answerCounter}{6}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5 & \small#6}}
+  }}{\addtocounter{answerCounter}{7}
+    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+      \\[1mm] & \bxs     && \bxs     & \bxs     & \bxs     & \bxs     & \bxs     && \bxs     &
+      \\      & \small#1 && \small#2 & \small#3 & \small#4 & \small#5 & \small#6 && \small#7}}
+  }
+}
 
 
 
@@ -383,9 +506,9 @@
 % prints tutors (requires them to have been set before)
 \newcommand{\printtutors}[1]{
   \preventBreak{
-    \SaveNormalInfo[#1][tutnum]%
+    \SaveNormalInfo[tutnum]%
     #1\\[1.1mm]
-    \hspace*{-0.3mm}\begin{tabular}{@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\write\posout{uu- !ruby/object:Box}\bx}p{3.2cm}}
+    \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
       \end{tabular}
     \vspace*{-4mm}
@@ -395,17 +518,16 @@
 % comment field
 \newcommand{\comment}[3]{
   \preventBreak{
-    \write\posout{u - !ruby/object:Question}
-    \write\posout{uu choice: }
-    \write\posout{uu qtext: "#1"}
-    \write\posout{uu save_as: "#3"}
-    \write\posout{uu type: text}
-    \write\posout{uu db_column: "#2"}
+    \wPosout{u - !ruby/object:Question}
+    \wPosout{uu choice: }
+    \wPosout{uu save_as: "#3"}
+    \wPosout{uu type: text}
+    \wPosout{uu db_column: "#2"}
     \vspace{0.35cm}
     \separator{\arrayrulewidth}
-    #1\hspace*{0.5cm}\write\posout{uu boxes:}\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: start}\write\posout{uuu height: 650000}\SaveMyYPos\hfill\write\posout{uu- !ruby/object:Box}\write\posout{uuu type: end}\SaveMyYPos\\\write\posout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
-    \write\posout{uuu height: 3200000}
-    \write\posout{uuu width: 39020584}
+    #1\hspace*{0.5cm}\wPosout{uu boxes:}\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: start}\wPosout{uuu height: 650000}\SaveMyYPos\hfill\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: end}\SaveMyYPos\\\wPosout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
+    \wPosout{uuu height: 3200000}
+    \wPosout{uuu width: 39020584}
   }
 }
 
@@ -413,9 +535,9 @@
 \newcommand{\backpagecomment}[1]{
   \newpage
   \mbox{}
-  \write\posout{u - !ruby/object:Question}
-  \write\posout{uu type: text_wholepage}
-  \write\posout{uu db_column: "#1"}
-  \write\posout{uu save_as: "vcomment"}
+  \wPosout{u - !ruby/object:Question}
+  \wPosout{uu type: text_wholepage}
+  \wPosout{uu db_column: "#1"}
+  \wPosout{uu save_as: "vcomment"}
   \let\lastSectionHeadReal\undefined
 }

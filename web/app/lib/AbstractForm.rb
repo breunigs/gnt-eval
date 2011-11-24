@@ -207,10 +207,10 @@ class Question
         s << "}\n\n"
 
       when "square" then
-        na = (no_answer? ? "*" : "")
+        na = (no_answer? ? "noanswer" : "")
         s << "\n\n"
         s << '\quest'
-        s << (multi? ? "<m#{na}>" : "<s#{na}>")
+        s << (multi? ? "<multi #{na}>" : "<single #{na}>")
         # db column
         if multi?
           s << '{' + @db_column.first[0..-2] + '}'
