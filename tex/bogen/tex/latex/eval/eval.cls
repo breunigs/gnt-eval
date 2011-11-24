@@ -437,14 +437,14 @@
     }{\tabFour{#3}{#4}{#5}{#6}{#7}}
     }{\tabFive{#3}{#4}{#5}{#6}{#7}{#8}}
     }{\tabSix{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
-  }
-  \vspace{0mm}
+  }%
+  % end lines with %-signs, because otherwise there will be too much space between questions
   % enable hline for the following questions
-  \let\hline\hlineback
+  \let\hline\hlineback%
   % reset answers for following question
-  \def\hasMoreAnswers{}
+  \def\hasMoreAnswers{}%
   % reset answer counter for next question
-  \setcounter{answerCounter}{0}
+  \setcounter{answerCounter}{0}%
 } % end of command quest
 
 
@@ -517,13 +517,13 @@
 
 % comment field
 \newcommand{\comment}[3]{
+  \vspace{-1mm}
   \preventBreak{
     \wPosout{u - !ruby/object:Question}
     \wPosout{uu choice: }
     \wPosout{uu save_as: "#3"}
     \wPosout{uu type: text}
     \wPosout{uu db_column: "#2"}
-    \vspace{0.35cm}
     \separator{\arrayrulewidth}
     #1\hspace*{0.5cm}\wPosout{uu boxes:}\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: start}\wPosout{uuu height: 650000}\SaveMyYPos\hfill\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: end}\SaveMyYPos\\\wPosout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
     \wPosout{uuu height: 3200000}
