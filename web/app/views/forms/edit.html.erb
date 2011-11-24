@@ -29,6 +29,14 @@
 <% end %>
 
 <fieldset>
+  <legend>js-yaml playground</legend>
+  <script type="text/javascript">
+    var doc = jsyaml.load($("form_content").value);
+    alert(doc);
+  </script>
+</fieldset>
+
+<fieldset>
   <legend>Some helpful comments</legend>
   <ul>
     <li>If TeX fails with error messages that are clearly not related to your code: we are not sure why they appear, but they may usually be resolved by inserting page breaks manually or by fiddling with \vspaces.
