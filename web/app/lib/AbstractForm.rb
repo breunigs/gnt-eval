@@ -466,8 +466,10 @@ class AbstractForm
         sect_open = true
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-          b << q.to_tex(lang, gender)
-          b << "}\n\n" if sect_open
+          quest = q.to_tex(lang, gender)
+          # need to remove line breaks at the end to avoid spacing issues
+          b << (sect_open ? quest.strip : quest)
+          b << "\n}\n\n" if sect_open
           sect_open = false
         end
       end
