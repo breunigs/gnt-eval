@@ -457,12 +457,12 @@ class AbstractForm
     # writes yaml header on texing
     s = "\\head{#{title(lang)}}{#{barcode}}\n\n"
     s << "#{intro(lang)}\n\n"
+    s << "\\vspace{0.8mm}"
     s << "\\dataline{#{I18n.t(:title)}}"
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
-    s << "\\noAnswerText{#{I18n.t(:no_answer)}}\n\n"
     # print special questions
     special_care_questions.each { |q| s << q.to_tex(lang, gender) }
-    s << "\\vspace{-0.2cm}"
+    s << "\\vspace{-2.5mm}"
     s
   end
 

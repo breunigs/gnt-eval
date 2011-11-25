@@ -519,11 +519,12 @@
   \vspace*{-1.4mm}
   \preventBreak{
     \SaveNormalInfo[tutnum]%
+    \separator{\arrayrulewidth}%
     #1\\[1.1mm]
     \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
-      \end{tabular}
-    \vspace*{2mm}
+    \end{tabular}
+    \vspace*{1.7mm}
   }
 }
 
