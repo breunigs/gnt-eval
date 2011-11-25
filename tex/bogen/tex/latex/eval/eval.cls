@@ -87,6 +87,12 @@
 % common functions to write out data, headers, checkboxes, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% these two print out how boxes should be checked and/or corrected. Boxes are sized and aligned to
+% be used in vanilla text
+\newcommand{\checkLikeThis}{{\LARGE \raisebox{-0.1mm}{$\medsquare$\kern0em$\boxtimes$\kern0em$\medsquare$\kern0em$\medsquare$}}}
+\newcommand{\correctLikeThis}{{\LARGE \raisebox{-0.1mm}{$\medsquare$\kern0em$\filledmedsquare$\kern0em$\medsquare$\kern0em$\boxtimes$}}}
+
+
 % let the user store data using these commands
 \newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}

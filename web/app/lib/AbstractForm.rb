@@ -317,13 +317,26 @@ end
 
 class AbstractForm
   # printed headline of the form
-  attr_accessor :title
+  attr_writer :title
+  def title(lang)
+    return (@title || "") if @title.nil? || @title.is_a?(String)
+    return @title[lang.to_sym] || @title[:en] || ""
+  end
 
   # introductory text just below the main headline
-  attr_accessor :intro
+  attr_writer :intro
+  def intro(lang)
+    default = I18n.t(:default_intro)
+    return (@intro || default) if @intro.nil? || @intro.is_a?(String)
+    return @intro[lang.to_sym] || @intro[:en] || default
+  end
 
   # the language class that should be passed to TeX's babel
-  attr_accessor :babelclass
+  attr_writer :babelclass
+  def babelclass(lang)
+    return (@babelclass || "") if @babelclass.nil? || @babelclass.is_a?(String)
+    return @babelclass[lang.to_sym] || @babelclass[:en] || "english"
+  end
 
   # list of pages
   attr_accessor :pages
@@ -401,7 +414,7 @@ class AbstractForm
     tex = ""
 
     # form header and preamble
-    tex << "\\documentclass[#{babelclass[lang.to_sym]}]{eval}\n"
+    tex << "\\documentclass[#{babelclass(lang)}]{eval}\n"
     tex << "\\dozent{#{lecturer.escape_for_tex}}\n"
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
@@ -432,18 +445,18 @@ class AbstractForm
   private
 
   def get_texhead(lang)
-    (texhead.is_a?(String) ? texhead : texhead[lang]) || ""
+    (texhead.is_a?(String) ? texhead : texhead[lang.to_sym]) || ""
   end
 
   def get_texfoot(lang)
-    (texfoot.is_a?(String) ? texfoot : texfoot[lang]) || ""
+    (texfoot.is_a?(String) ? texfoot : texfoot[lang.to_sym]) || ""
   end
 
   # builds the tex header for the form
   def tex_header(lang, gender, barcode)
     # writes yaml header on texing
-    s = "\\head{#{title[lang]}}{#{barcode}}\n\n"
-    s << "#{intro[lang]}\n\n"
+    s = "\\head{#{title(lang)}}{#{barcode}}\n\n"
+    s << "#{intro(lang)}\n\n"
     s << "\\dataline{#{I18n.t(:title)}}"
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
     s << "\\noAnswerText{#{I18n.t(:no_answer)}}\n\n"
