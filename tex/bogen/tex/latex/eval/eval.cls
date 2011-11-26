@@ -273,6 +273,7 @@
 
 \newboolean{single}
 \newboolean{noanswer}
+\newboolean{printAnswers}
 
 % shorthand for the multirow command in each table. It only spans one row, which makes it look
 % superflous. However, if removed the question text will expand the first row instead of spreading
@@ -286,6 +287,11 @@
   }
 }
 
+% prints the answer text for each box unless printAnswers has been disabled for this question
+\newcommand{\aText}[1]{
+  \ifthenelse{\boolean{printAnswers}}{\small#1}{}
+}
+
 
 % measures the height of the question's text and the height of the table and adds some vertical
 % space if the text exceeds the table. This is due to multirow not extending the table as
@@ -293,17 +299,26 @@
 \newcommand{\printTable}[1]{
   % find height of (question text)-(table)+(magic value)
   \setlength{\questionHeight}{\totalheightof{\parbox{7.7cm}{#1}}-\totalheightof{\tbl}+2.5mm}
+  % if answers are hidden, subtract the amount of space the empty line needs
+  %\ifthenelse{\boolean{printAnswers}}{}{\addtolength{\questionHeight}{100mm}}
   % measuring the table lays it out, thus increasing the choiceCounter even though it shouldn't be
   \setcounter{choiceCounter}{0}
-  % ensure only space is added for the question text to fit, but never removed
-  \setlength{\questionHeight}{\maxof{\the\questionHeight}{0mm}}
+  % ensure only space is added for the question text to fit, but never removed. If the answers are
+  % hidden, allow up to 3mm to be removed to account for the now empty table row.
+  \ifthenelse{\boolean{printAnswers}}{
+    \setlength{\questionHeight}{\maxof{\the\questionHeight}{0mm}}
+  }{
+    \setlength{\questionHeight}{\maxof{\the\questionHeight}{-3mm}}
+  }
+
   %some unused debug info to print into the document
   %\settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
   %\settototalheight{\tmpb}{\tbl}
-  %\fbox{\the\questionHeight vs \the\tmpa vs \the\tmpb}
+  %\mbox{\the\questionHeight vs \the\tmpa vs \the\tmpb}
   % print the table
   \tbl
   \vspace*{\questionHeight}
+  %\ifthenelse{\boolean{printAnswers}}{}{\vspace*{-3mm}}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -316,7 +331,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs[99]              &\\
-                    & \small#2    & \small#3    & \small\noAnswTxt      &
+                    & \aText{#2}  & \aText{#3}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -327,7 +342,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                    & \small#2    & \small#3    & \small#4    & \small\noAnswTxt      &
+                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -338,7 +353,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                    & \small#2  & \small#3    & \small#4    & \small#5    & \small\noAnswTxt      &
+                    & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -349,7 +364,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                    & \small#2  & \small#3    & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
+                    & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -360,7 +375,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                    & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small\noAnswTxt      &
+                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -372,7 +387,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        &      &   \\
-                    & \small#2    &      &
+                    & \aText{#2}  &      &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -383,7 +398,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        &   \\
-                    & \small#2    & \small#3    &
+                    & \aText{#2}  & \aText{#3}  &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -394,7 +409,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{15.7mm}}C{47.15mm}@{\hspace*{15.7mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \\
-                    & \small#2    & \small#3    & \small#4    &
+                    & \aText{#2}  & \aText{#3}  & \aText{#4}  &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -405,7 +420,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                    & \small#2    & \small#3    & \small#4    & \small#5    &
+                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -413,13 +428,10 @@
 
 % 5 answers
 \newcommand{\tabFive}[6]{
-
-\settototalheight\questionTextHeight{\parbox{7.7cm}{#1}}
-
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}   & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                     & \small#2    & \small#3    & \small#4    & \small#5    & \small#6    &
+                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -430,7 +442,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
-                     & \small#2   & \small#3    & \small#4    & \small#5     & \small#6    &  \small#7    &
+                     & \aText{#2} & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  &  \aText{#7}  &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -441,7 +453,7 @@
   \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
-                    & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small#8       &
+                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{#8}     &
     \hasMoreAnswers
   \end{tabular}}
   \printTable{#1}
@@ -452,7 +464,12 @@
 % allows up to six possible answers. Arguments are as follows:
 % \quest
 % <(single|multi) (noanswer)> All arguments are optional. noanswer will add a now answer box to
-%                             at the end. Single/multi make the question single/multi choice.
+%  (printAnswers|hideAnswers) at the end. Single/multi make the question single/multi choice.
+%                             Use hideAnswers if you want to print them in a special header. This
+%                             is useful if you have a large block that share the same answers.
+%                             hideAnswers and \moreAnswers are incompatible and will likely lead
+%                             to space issues (combining them makes no sense anyway)
+%
 % {db_table_column_name}      multiple choice question get the names: namea, nameb, namec, and so
 %                             on. If the question also has a noanswer box it will be named namenoansw
 % {first answer}
@@ -462,11 +479,14 @@
   % set defaults
   \setboolean{single}{true}
   \setboolean{noanswer}{true}
+  \setboolean{printAnswers}{true}
   \setcounter{choiceCounter}{0}
 
   \IfSubStr{#1}{single}{\setboolean{single}{true}}{}
   \IfSubStr{#1}{multi}{\setboolean{single}{false}}{}
   \IfSubStr{#1}{noanswer}{\setboolean{noanswer}{true}}{\setboolean{noanswer}{false}}
+  \IfSubStr{#1}{printAnswers}{\setboolean{printAnswers}{true}}{}
+  \IfSubStr{#1}{hideAnswers}{\setboolean{printAnswers}{false}}{}
 
   %This is to test if we have a Multiple Choice Question
   \ifthenelse{\boolean{single}}{% single choice question
@@ -590,7 +610,7 @@
     \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
     \end{tabular}
-    \vspace*{1.7mm}
+    \vspace*{-1.5mm}
   }
 }
 
