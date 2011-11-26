@@ -1,7 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{eval}[2011/05/12 Evaluationsbögen]
 
+\RequirePackage{fix-cm}
 \LoadClass[twoside,8pt]{scrartcl}
+\RequirePackage{fixltx2e}
 
 \RequirePackage[utf8]{inputenc}
 \RequirePackage[T1]{fontenc}
@@ -297,24 +299,25 @@
 % space if the text exceeds the table. This is due to multirow not extending the table as
 % required, leading to overflows when the question text needs more space than the answers.
 \newcommand{\printTable}[1]{
+  \microtypesetup{activate=false} % causes height calculation errors
   % find height of (question text)-(table)+(magic value)
   \setlength{\questionHeight}{\totalheightof{\parbox{7.7cm}{#1}}-\totalheightof{\tbl}+2.5mm}
   % if answers are hidden, subtract the amount of space the empty line needs
   %\ifthenelse{\boolean{printAnswers}}{}{\addtolength{\questionHeight}{100mm}}
   % measuring the table lays it out, thus increasing the choiceCounter even though it shouldn't be
   \setcounter{choiceCounter}{0}
+  %some unused debug info to print into the document
+  %\settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
+  %\settototalheight{\tmpb}{\tbl}
+  %\fbox{\the\questionHeight\  \the\tmpa\  \the\tmpb}
   % ensure only space is added for the question text to fit, but never removed. If the answers are
   % hidden, allow up to 3mm to be removed to account for the now empty table row.
   \ifthenelse{\boolean{printAnswers}}{
     \setlength{\questionHeight}{\maxof{\the\questionHeight}{0mm}}
   }{
-    \setlength{\questionHeight}{\maxof{\the\questionHeight}{-3mm}}
+    \setlength{\questionHeight}{\maxof{\the\questionHeight}{-3.3mm}}
   }
-
-  %some unused debug info to print into the document
-  %\settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
-  %\settototalheight{\tmpb}{\tbl}
-  %\mbox{\the\questionHeight vs \the\tmpa vs \the\tmpb}
+  \microtypesetup{activate=true}
   % print the table
   \tbl
   \vspace*{\questionHeight}
