@@ -292,6 +292,8 @@
 \newcommand{\printTable}[1]{
   % find height of (question text)-(table)+(magic value)
   \setlength{\questionHeight}{\totalheightof{\parbox{7.7cm}{#1}}-\totalheightof{\tbl}+2.5mm}
+  % measuring the table lays it out, thus increasing the choiceCounter even though it shouldn't be
+  \setcounter{choiceCounter}{0}
   % ensure only space is added for the question text to fit, but never removed
   \setlength{\questionHeight}{\maxof{\the\questionHeight}{0mm}}
   %some unused debug info to print into the document
@@ -539,33 +541,33 @@
   \IfNoValueTF{#3}{
   \IfNoValueTF{#2}{
     \addtocounter{answerCounter}{1}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     &
-      \\      & \small#1}}
+      \\      & \small#1}
   }{\addtocounter{answerCounter}{2}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     & \bxs     &
-      \\      & \small#1 & \small#2}}
+      \\      & \small#1 & \small#2}
   }}{\addtocounter{answerCounter}{3}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 & \small#2 & \small#3}}
+      \\      & \small#1 & \small#2 & \small#3}
   }}{\addtocounter{answerCounter}{4}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs    & \bxs     & \bxs     & \bxs     &
-      \\      &\small#1 & \small#2 & \small#3 & \small#4}}
+      \\      &\small#1 & \small#2 & \small#3 & \small#4}
   }}{\addtocounter{answerCounter}{5}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5}}
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5}
   }}{\addtocounter{answerCounter}{6}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6}}
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6}
   }}{\addtocounter{answerCounter}{7}
-    \edef\hasMoreAnswers{\hasMoreAnswers \unexpanded{
+    \g@addto@macro\hasMoreAnswers{
       \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
-      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7}}
+      \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7}
   }
 }
 
