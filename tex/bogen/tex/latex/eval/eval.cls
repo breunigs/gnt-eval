@@ -9,6 +9,7 @@
 \RequirePackage{array}
 \RequirePackage{babel}
 \RequirePackage{bophook}
+\RequirePackage{calc}
 \RequirePackage{color}
 \RequirePackage{geometry}
 \RequirePackage{ifthen}
@@ -39,6 +40,23 @@
 % answer counter, used to count the # of answers. Currently only used to be able to print out the
 % db field for multiple choice questions correctly. Reset at the end of \quest.
 \newcounter{answerCounter}
+% same thing, but for rows. Used to correctly set the amount of rows the question may span.
+\newcounter{rowCounter}
+
+\newcommand{\resetQuestionCounters}{%
+  \setcounter{answerCounter}{0}%
+  \setcounter{rowCounter}{2}%
+}
+\resetQuestionCounters
+
+% a normal question fits only two lines of text. If a third one is needed the question will over-
+% flow into whatever comes next. This is because the multirow package does not increase the
+% tabular's height, even if required by the contents inside the multirow. Therefore we use this
+% variable to measure the question's height and add some \vspace if required.
+\newlength\questionHeight
+
+\newlength\tmpa
+\newlength\tmpb
 
 % shorthand to write information into posout file
 \def\wPosout{\write\posout}
@@ -256,6 +274,35 @@
 \newboolean{single}
 \newboolean{noanswer}
 
+% shorthand for the multirow command in each table
+\newcommand{\questText}[1]{
+  \multirow{\arabic{rowCounter}}{7.7cm}{%
+    #1
+    \vfill
+  }
+}
+% the parbox ensures the question is wrapped if it is too long, rather than it overflowing the
+% answers or the checkboxes. The mbox effectively makes the question have no extends, thus not
+% enlarging the first row to fit the question.
+%\newcommand{\questText}[1]{\multirow{10}{7.7cm}{\parbox{7.7cm}{#1}}}
+
+% measures the height of the question's text and the height of the table and adds some vertical
+% space if the text exceeds the table. This is due to multirow not extending the table as
+% required, leading to overflows when the question text needs more space than the answers.
+\newcommand{\printTable}[1]{
+  % find height of (question text)-(table)+(magic value)
+  \setlength{\questionHeight}{\totalheightof{\parbox{7.7cm}{#1}}-\totalheightof{\tbl}+2.5mm}
+  % ensure only space is added for the question text to fit, but never removed
+  \setlength{\questionHeight}{\maxof{\the\questionHeight}{0mm}}
+  %some unused debug info to print into the document
+  %\settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
+  %\settototalheight{\tmpb}{\tbl}
+  %\fbox{\the\questionHeight vs \the\tmpa vs \the\tmpb}
+  % print the table
+  \tbl
+  \vspace*{\questionHeight}
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % helper commands that print each of the tables depending on how many answers are required.
 
@@ -263,123 +310,138 @@
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabNoAnswTwo}[3]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs[99]              &\\
-                            & \small#2    & \small#3    & \small\noAnswTxt      &
+    \questText{#1}  & \bxs        & \bxs        & \bxs[99]              &\\
+                    & \small#2    & \small#3    & \small\noAnswTxt      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
 \newcommand{\tabNoAnswThree}[4]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                            & \small#2    & \small#3    & \small#4    & \small\noAnswTxt      &
+    \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                    & \small#2    & \small#3    & \small#4    & \small\noAnswTxt      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
 \newcommand{\tabNoAnswFour}[5]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                            & \small#2  & \small#3    & \small#4    & \small#5    & \small\noAnswTxt      &
+    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                    & \small#2  & \small#3    & \small#4    & \small#5    & \small\noAnswTxt      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
 \newcommand{\tabNoAnswFive}[6]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                            & \small#2  & \small#3    & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
+    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                    & \small#2  & \small#3    & \small#4    & \small#5    & \small#6    & \small\noAnswTxt      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 6 answers + no answer
 \newcommand{\tabNoAnswSix}[7]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
-                            & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small\noAnswTxt      &
+    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+                    & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small\noAnswTxt      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 %%%% these questions do not add a "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 answer
 \newcommand{\tabOne}[2]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        &      &   \\
-                            & \small#2    &      &
+    \questText{#1}  & \bxs        &      &   \\
+                    & \small#2    &      &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabTwo}[3]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        &   \\
-                            & \small#2    & \small#3    &
+    \questText{#1}  & \bxs        & \bxs        &   \\
+                    & \small#2    & \small#3    &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 3 answers
 \newcommand{\tabThree}[4]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{15.7mm}}C{47.15mm}@{\hspace*{15.7mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{15.7mm}}C{47.15mm}@{\hspace*{15.7mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \\
-                            & \small#2    & \small#3    & \small#4    &
+    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \\
+                    & \small#2    & \small#3    & \small#4    &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 4 answers
 \newcommand{\tabFour}[5]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}} % TODO
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}} % TODO
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                            & \small#2    & \small#3    & \small#4    & \small#5    &
+    \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                    & \small#2    & \small#3    & \small#4    & \small#5    &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 5 answers
 \newcommand{\tabFive}[6]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
+
+\settototalheight\questionTextHeight{\parbox{7.7cm}{#1}}
+
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                            & \small#2    & \small#3    & \small#4    & \small#5    & \small#6    &
+    \questText{#1}   & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                     & \small#2    & \small#3    & \small#4    & \small#5    & \small#6    &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 6 answers
 \newcommand{\tabSix}[7]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
-                            & \small#2   & \small#3    & \small#4    & \small#5     & \small#6    &  \small#7    &
+    \questText{#1}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
+                     & \small#2   & \small#3    & \small#4    & \small#5     & \small#6    &  \small#7    &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 % 7 answers
 \newcommand{\tabSeven}[8]{
-  \begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
     \hline\\[-0.8em]
-    \multirow{2}{7.6cm}{#1} & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
-                            & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small#8       &
+    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
+                    & \small#2    & \small#3    & \small#4    & \small#5     & \small#6    & \small#7    & \small#8       &
     \hasMoreAnswers
-  \end{tabular}
+  \end{tabular}}
+  \printTable{#1}
 }
 
 
@@ -454,8 +516,8 @@
   \let\hline\hlineback%
   % reset answers for following question
   \def\hasMoreAnswers{}%
-  % reset answer counter for next question
-  \setcounter{answerCounter}{0}%
+  % reset answer and row counter for next question
+  \resetQuestionCounters
 } % end of command quest
 
 
@@ -469,6 +531,7 @@
 % {second answer}
 % ...
 \NewDocumentCommand\moreAnswers{o o o o o o o}{%
+  \addtocounter{rowCounter}{2}%
   \IfNoValueTF{#7}{
   \IfNoValueTF{#6}{
   \IfNoValueTF{#5}{
