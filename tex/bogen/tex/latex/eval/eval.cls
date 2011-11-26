@@ -401,7 +401,7 @@
 
 % 4 answers
 \newcommand{\tabFour}[5]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}} % TODO
+  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
                     & \small#2    & \small#3    & \small#4    & \small#5    &
@@ -515,9 +515,9 @@
   }%
   % end lines with %-signs, because otherwise there will be too much space between questions
   % enable hline for the following questions
-  \let\hline\hlineback%
-  % reset answers for following question
-  \def\hasMoreAnswers{}%
+  \global\let\hline\hlineback%
+  % reset answers for following question.
+  \global\def\hasMoreAnswers{}%
   % reset answer and row counter for next question
   \resetQuestionCounters
 } % end of command quest
