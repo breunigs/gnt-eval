@@ -40,7 +40,7 @@
 % answer counter, used to count the # of answers. Currently only used to be able to print out the
 % db field for multiple choice questions correctly. Reset at the end of \quest.
 \newcounter{answerCounter}
-% same thing, but for rows. Used to correctly set the amount of rows the question may span.
+% same thing, but for rows. Currently unused, but stays because it might be useful.
 \newcounter{rowCounter}
 
 \newcommand{\resetQuestionCounters}{%
@@ -274,17 +274,18 @@
 \newboolean{single}
 \newboolean{noanswer}
 
-% shorthand for the multirow command in each table
+% shorthand for the multirow command in each table. It only spans one row, which makes it look
+% superflous. However, if removed the question text will expand the first row instead of spreading
+% into the following rows, wasting valuable space. The correct amount of rows is available in
+% \rowCounter, but even then multirow somehow gets it wrong and the question text is neither
+% centered nor on top. Long story short, multirow enables the text to overflow; height issues are
+% handled in \printTable.
 \newcommand{\questText}[1]{
-  \multirow{\arabic{rowCounter}}{7.7cm}{%
+  \multirow{1}{7.7cm}{%
     #1
-    \vfill
   }
 }
-% the parbox ensures the question is wrapped if it is too long, rather than it overflowing the
-% answers or the checkboxes. The mbox effectively makes the question have no extends, thus not
-% enlarging the first row to fit the question.
-%\newcommand{\questText}[1]{\multirow{10}{7.7cm}{\parbox{7.7cm}{#1}}}
+
 
 % measures the height of the question's text and the height of the table and adds some vertical
 % space if the text exceeds the table. This is due to multirow not extending the table as
@@ -542,31 +543,31 @@
   \IfNoValueTF{#2}{
     \addtocounter{answerCounter}{1}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     &
+      \\[4mm] & \bxs     &
       \\      & \small#1}
   }{\addtocounter{answerCounter}{2}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     & \bxs     &
+      \\[4mm] & \bxs     & \bxs     &
       \\      & \small#1 & \small#2}
   }}{\addtocounter{answerCounter}{3}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     & \bxs     & \bxs     &
+      \\[4mm] & \bxs     & \bxs     & \bxs     &
       \\      & \small#1 & \small#2 & \small#3}
   }}{\addtocounter{answerCounter}{4}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs    & \bxs     & \bxs     & \bxs     &
+      \\[4mm] & \bxs    & \bxs     & \bxs     & \bxs     &
       \\      &\small#1 & \small#2 & \small#3 & \small#4}
   }}{\addtocounter{answerCounter}{5}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\[4mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
       \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5}
   }}{\addtocounter{answerCounter}{6}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\[4mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
       \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6}
   }}{\addtocounter{answerCounter}{7}
     \g@addto@macro\hasMoreAnswers{
-      \\[1mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
+      \\[4mm] & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     & \bxs     &
       \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7}
   }
 }
