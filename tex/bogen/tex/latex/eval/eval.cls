@@ -56,6 +56,8 @@
 % tabular's height, even if required by the contents inside the multirow. Therefore we use this
 % variable to measure the question's height and add some \vspace if required.
 \newlength\questionHeight
+% in case one of the answers overflow, calculate the additional width required
+\newlength\sectionHeight
 
 \newlength\tmpa
 \newlength\tmpb
@@ -246,17 +248,52 @@
 % sections
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% provides _small_ grey header to separate questions into groups. The phantom part ensures each
-% box has the same height (except for weird characters)
-\newcommand{\sect}[1]{
-  \colorbox{gray}{% no idea why it has to be this width
-    \makebox[189.1mm][l]{\textbf{#1\phantom{\"Ay}}}
-  }
+% helper function that prints the main text in a header
+\newcommand{\sectText}[1]{\ \ \textbf{#1} \phantom{\"Ay}}
+% helper function prints the gray box around any content given in the style of a headline
+\newcommand{\sectBox}[1]{\colorbox{gray}{%
+  \hspace*{-1.05mm}%
+  \parbox{192mm}{%
+    #1%
+    \vspace*{-1mm}%
+  }%
+  \hspace*{-1.8mm}
+}}
+% helper function that sets the given options in a tabular environment so everything aligns. See
+% \sect for a better explanation.
+\NewDocumentCommand\sectFullBox{m o o o o o o o}{%
+    \IfNoValueTF{#8}{
+    \IfNoValueTF{#7}{
+    \IfNoValueTF{#6}{
+    \IfNoValueTF{#5}{
+    \IfNoValueTF{#4}{
+    \IfNoValueTF{#3}{
+    \IfNoValueTF{#2}{
+      \sectBox{\tabHeadOneAnsw   \sectText{#1} &          &          & \\[0.6mm]\hline \end{tabular}}
+    }{\sectBox{\tabHeadOneAnsw   \sectText{#1} & \small#2 &          & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadTwoAnsw   \sectText{#1} & \small#2 & \small#3 & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadThreeAnsw \sectText{#1} & \small#2 & \small#3 & \small#4 & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadFourAnsw  \sectText{#1} & \small#2 & \small#3 & \small#4 & \small#5 & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadFiveAnsw  \sectText{#1} & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadSixAnsw   \sectText{#1} & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7 & \\[0.6mm]\hline \end{tabular}}}
+    }{\sectBox{\tabHeadSevenAnsw \sectText{#1} & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7 & \small#8 & \\[0.6mm]\hline \end{tabular}}}
+}
 
-  % newline required to put separator below text
-  \vspace*{1.6mm}\separator{\arrayrulewidth}
+% prints out a new section header. First argument specifies the main bold text, following options are
+% placed to match the checkboxes from the answers. For example, specifying
+% \sect{header}[abc][][xyz]
+% would result in a header with text "header" and the other options aligned to questions with 3 answers.
+% "abc" would be centered above the 1st box, "xyz" above the 3rd (here: last) and the middle one would
+% have no text above it in the header.
+\NewDocumentCommand\sect{m o o o o o o o}{%
+  \setlength{\sectionHeight}{\totalheightof{\sectFullBox{#1}[#2][#3][#4][#5][#6][#7][#8]} - 15.38791pt}
+  \setlength{\sectionHeight}{\the\sectionHeight/2}
+  \setlength{\sectionHeight}{\maxof{\the\sectionHeight}{0mm}}
 
-  \vspace*{-3.1mm}
+  \sectFullBox{#1}[#2][#3][#4][#5][#6][#7][#8]
+
+  \vspace*{-2.4mm}
+  \vspace*{\the\sectionHeight}
   \renewcommand{\hline}{}
 }
 
@@ -327,11 +364,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % helper commands that print each of the tables depending on how many answers are required.
 
+\def\tabHeadOneAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}}
+\def\tabHeadTwoAnsw{\tabHeadOneAnsw}
+\def\tabHeadThreeAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}}
+\def\tabHeadFourAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}}
+\def\tabHeadFiveAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}}
+\def\tabHeadSixAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}}
+\def\tabHeadSevenAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}}
+
 %%%% these questions automatically add the "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabNoAnswTwo}[3]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadThreeAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs[99]              &\\
                     & \aText{#2}  & \aText{#3}  & \aText{\noAnswTxt}    &
@@ -342,7 +387,7 @@
 
 % 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
 \newcommand{\tabNoAnswThree}[4]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
+  \def\tbl{\tabHeadFourAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{\noAnswTxt}    &
@@ -353,7 +398,7 @@
 
 % 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
 \newcommand{\tabNoAnswFour}[5]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadFiveAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
                     & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{\noAnswTxt}    &
@@ -364,7 +409,7 @@
 
 % 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
 \newcommand{\tabNoAnswFive}[6]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadSixAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
                     & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{\noAnswTxt}    &
@@ -375,7 +420,7 @@
 
 % 6 answers + no answer
 \newcommand{\tabNoAnswSix}[7]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadSevenAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{\noAnswTxt}    &
@@ -387,7 +432,7 @@
 %%%% these questions do not add a "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 answer
 \newcommand{\tabOne}[2]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
+  \def\tbl{\tabHeadOneAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        &      &   \\
                     & \aText{#2}  &      &
@@ -398,7 +443,7 @@
 
 % 2 answers, is aligned to the 5-answers question
 \newcommand{\tabTwo}[3]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}
+  \def\tbl{\tabHeadTwoAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        &   \\
                     & \aText{#2}  & \aText{#3}  &
@@ -409,7 +454,7 @@
 
 % 3 answers
 \newcommand{\tabThree}[4]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{15.7mm}}C{47.15mm}@{\hspace*{15.7mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadThreeAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  &
@@ -420,7 +465,7 @@
 
 % 4 answers
 \newcommand{\tabFour}[5]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}
+  \def\tbl{\tabHeadFourAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  &
@@ -431,7 +476,7 @@
 
 % 5 answers
 \newcommand{\tabFive}[6]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadFiveAnsw
     \hline\\[-0.8em]
     \questText{#1}   & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
                      & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  &
@@ -442,7 +487,7 @@
 
 % 6 answers
 \newcommand{\tabSix}[7]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadSixAnsw
     \hline\\[-0.8em]
     \questText{#1}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
                      & \aText{#2} & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  &  \aText{#7}  &
@@ -453,7 +498,7 @@
 
 % 7 answers
 \newcommand{\tabSeven}[8]{
-  \def\tbl{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}
+  \def\tbl{\tabHeadSevenAnsw
     \hline\\[-0.8em]
     \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{#8}     &
@@ -613,7 +658,7 @@
     \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
     \end{tabular}
-    \vspace*{-1.5mm}
+    \vspace*{1.7mm}
   }
 }
 
