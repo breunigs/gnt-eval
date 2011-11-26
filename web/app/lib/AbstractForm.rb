@@ -222,7 +222,7 @@ class Question
         # single/multi and no_answer settings
         s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")}>"
         # db column
-        s << "{#{multi? ? @db_column.first[0..-2] : @db_colum}}"
+        s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
         # question
         s << "{#{text(lang, gender)}}"
         # first row of answers (compact removes dummy element, if required)
