@@ -372,22 +372,25 @@
 
 % places a divider on the left of a given box and fills the height of the whole table, but does
 % not touch the prev/next \hline.
-\def\divider{
+\def\divider{%
   % find whichever needs more space
-  \setlength{\tmpa}{\maxof{\tmpa}{\tmpb}}
+  \setlength{\tmpa}{\maxof{\tmpa}{\tmpb}}%
   % leave a little whitespace around the rule, thus subtract a little bit and also take missing
   % answers into account
-  \addtolength{\tmpa}{-1mm+\questionHeight}
+  \addtolength{\tmpa}{-1mm+\questionHeight}%
   % if there are \moreAnswers, simply assume they are evenly divided. This is not perfect but has
   % to suffice, until a better method is found that can directly measure the height of the first
   % and second row only.
-  \setlength{\tmpa}{\tmpa*2/\arabic{rowCounter}}
+  \setlength{\tmpa}{\tmpa*2/\arabic{rowCounter}}%
   % 2.8mm is the amount of space from the baseline of the "\Box"-row to the preceeding \hline.
   % In other words, moving the rule down its own height places its top (vertically) at the center
   % of each checkbox. The 2.8mm are used to move it up, so it aligns nicely with the \hline above.
-  \setlength{\tmpb}{-\tmpa+2.8mm}
-  % smash the rule so that the box doesn't appear out of place if the divider is there.
-  \smash{{\rule[\tmpb]{\arrayrulewidth}{\the\tmpa}}}
+  \setlength{\tmpb}{-\tmpa+2.8mm}%
+  % smash the rule so that the box doesn't appear out of place if the divider is there. The
+  % vspaces are required because \smash (and not the rule!) add some space for some reason which
+  % makes TeX break pages earlier than without smash. So, the vspaces prevent spurious page
+  % breaks while not affecting anything else at all. Way to go TeX!
+  \vspace*{-0.2mm}\smash{\rule[\tmpb]{\arrayrulewidth}{\the\tmpa}}\vspace*{-0.2mm}%
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
