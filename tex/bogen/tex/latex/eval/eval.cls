@@ -390,7 +390,7 @@
   % vspaces are required because \smash (and not the rule!) add some space for some reason which
   % makes TeX break pages earlier than without smash. So, the vspaces prevent spurious page
   % breaks while not affecting anything else at all. Way to go TeX!
-  \vspace*{-0.2mm}\smash{\rule[\tmpb]{\arrayrulewidth}{\the\tmpa}}\vspace*{-0.2mm}%
+  \vspace*{-0.2mm}\smash{\hspace*{-0.5mm}\rule[\tmpb]{\arrayrulewidth}{\the\tmpa}}\vspace*{-0.2mm}%
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
