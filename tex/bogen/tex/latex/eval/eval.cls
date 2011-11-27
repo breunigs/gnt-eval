@@ -14,10 +14,13 @@
 \RequirePackage{calc}
 \RequirePackage{color}
 \RequirePackage{geometry}
+\RequirePackage{graphicx}
 \RequirePackage{ifthen}
 \RequirePackage{multirow}
-\RequirePackage{graphicx}
 \RequirePackage{microtype}
+\let\amssymbBox\Box
+\RequirePackage{MnSymbol}
+\let\Box\amssymbBox
 \RequirePackage{tabularx}
 \RequirePackage{tokeniz0r}
 \RequirePackage{tgheros}
@@ -340,16 +343,19 @@
 % required, leading to overflows when the question text needs more space than the answers.
 \newcommand{\printTable}[1]{
   \microtypesetup{activate=false} % causes height calculation errors
+  % calc some basic heights. Also used by other functions that follow.
+  \settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
+  \settototalheight{\tmpb}{\tbl}
   % find height of (question text)-(table)+(magic value)
-  \setlength{\questionHeight}{\totalheightof{\parbox{7.7cm}{#1}}-\totalheightof{\tbl}+2.5mm}
+  \setlength{\questionHeight}{\tmpa-\tmpb+2.5mm}
   % if answers are hidden, subtract the amount of space the empty line needs
   %\ifthenelse{\boolean{printAnswers}}{}{\addtolength{\questionHeight}{100mm}}
   % measuring the table lays it out, thus increasing the choiceCounter even though it shouldn't be
   \setcounter{choiceCounter}{0}
   %some unused debug info to print into the document
-  %\settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
-  %\settototalheight{\tmpb}{\tbl}
-  %\fbox{\the\questionHeight\  \the\tmpa\  \the\tmpb}
+  %\setlength{\tmpb}{\maxof{\the\tmpa}{\the\tmpb}}
+  %\setlength{\tmpb}{\tmpb-5mm}
+  %\smash{\fbox{\the\questionHeight\  \the\tmpa\  \the\tmpb}}
   % ensure only space is added for the question text to fit, but never removed. If the answers are
   % hidden, allow up to 3mm to be removed to account for the now empty table row.
   \ifthenelse{\boolean{printAnswers}}{
@@ -357,11 +363,31 @@
   }{
     \setlength{\questionHeight}{\maxof{\the\questionHeight}{-3.3mm}}
   }
-  \microtypesetup{activate=true}
   % print the table
   \tbl
+  \microtypesetup{activate=true}
   \vspace*{\questionHeight}
   %\ifthenelse{\boolean{printAnswers}}{}{\vspace*{-3mm}}
+}
+
+% places a divider on the left of a given box and fills the height of the whole table, but does
+% not touch the prev/next \hline.
+\def\divider{
+  % find whichever needs more space
+  \setlength{\tmpa}{\maxof{\tmpa}{\tmpb}}
+  % leave a little whitespace around the rule, thus subtract a little bit and also take missing
+  % answers into account
+  \addtolength{\tmpa}{-1mm+\questionHeight}
+  % if there are \moreAnswers, simply assume they are evenly divided. This is not perfect but has
+  % to suffice, until a better method is found that can directly measure the height of the first
+  % and second row only.
+  \setlength{\tmpa}{\tmpa*2/\arabic{rowCounter}}
+  % 2.8mm is the amount of space from the baseline of the "\Box"-row to the preceeding \hline.
+  % In other words, moving the rule down its own height places its top (vertically) at the center
+  % of each checkbox. The 2.8mm are used to move it up, so it aligns nicely with the \hline above.
+  \setlength{\tmpb}{-\tmpa+2.8mm}
+  % smash the rule so that the box doesn't appear out of place if the divider is there.
+  \smash{{\rule[\tmpb]{\arrayrulewidth}{\the\tmpa}}}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -369,11 +395,14 @@
 
 \def\tabHeadOneAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{73.84mm}}p{0mm}}}
 \def\tabHeadTwoAnsw{\tabHeadOneAnsw}
-\def\tabHeadThreeAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}}
+%\def\tabHeadThreeAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}@{\hspace*{58.09mm}}C{15.75mm}p{0mm}}} % aligned with the 6-answ question
+\def\tabHeadThreeAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}@{\hspace*{39.25mm}}C{15.75mm}p{0mm}}} % aligned with the 4-answ question
 \def\tabHeadFourAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{7.85mm}}C{31.4mm}C{31.4mm}@{\hspace*{7.85mm}}C{15.75mm}p{0cm}}}
 \def\tabHeadFiveAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{3.925mm}}C{23.55mm}C{23.55mm}C{23.55mm}@{\hspace*{3.925mm}}C{15.75mm}p{0mm}}}
 \def\tabHeadSixAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}}
 \def\tabHeadSevenAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}}
+
+
 
 %%%% these questions automatically add the "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -381,7 +410,7 @@
 \newcommand{\tabNoAnswTwo}[3]{
   \def\tbl{\tabHeadThreeAnsw
     \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs[99]              &\\
+    \questText{#1}  & \bxs        & \bxs        & \divider \bxs[99]     &\\
                     & \aText{#2}  & \aText{#3}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
@@ -392,7 +421,7 @@
 \newcommand{\tabNoAnswThree}[4]{
   \def\tbl{\tabHeadFourAnsw
     \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+    \questText{#1}  & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
@@ -403,7 +432,7 @@
 \newcommand{\tabNoAnswFour}[5]{
   \def\tbl{\tabHeadFiveAnsw
     \hline\\[-0.8em]
-    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
                     & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
@@ -414,7 +443,7 @@
 \newcommand{\tabNoAnswFive}[6]{
   \def\tbl{\tabHeadSixAnsw
     \hline\\[-0.8em]
-    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
                     & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
@@ -425,7 +454,7 @@
 \newcommand{\tabNoAnswSix}[7]{
   \def\tbl{\tabHeadSevenAnsw
     \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs[99]              &\\
+    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
@@ -657,6 +686,7 @@
   \preventBreak{
     \SaveNormalInfo[tutnum]%
     \separator{\arrayrulewidth}%
+    \vspace{-3.4mm}%
     #1\\[1.1mm]
     \hspace*{-0.3mm}\begin{tabular}{@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}@{\wPosout{uu- !ruby/object:Box}\bx}p{3.2cm}}
       \tut
@@ -675,7 +705,8 @@
     \wPosout{uu type: text}
     \wPosout{uu db_column: "#2"}
     \wPosout{uu boxes:}%
-    \separator{\arrayrulewidth}
+    \separator{\arrayrulewidth}%
+    \vspace{-3.4mm}%
     #1
 %    % measure line next to text
 %    \hspace*{0.5cm}%
@@ -690,12 +721,11 @@
     \wPosout{uu- !ruby/object:Box}%
     \SaveMyYPos%
 
-    \fbox{\vbox to 3200000sp {\vfil
+    \fbox{\vbox to 2780000sp {\vfil
     \hbox to 189.7mm{}%
     \vfil
     }}
-
-    \wPosout{uuu height: 3200000}
+    \wPosout{uuu height: 2780000}
     \wPosout{uuu width: 39020584}
   }
 }
