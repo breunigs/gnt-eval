@@ -45,7 +45,7 @@ en:
     :male: Lecturer
     :female: Lecturer
     :both: Lecturer
-  semester: Semester
+  semester: Term
 
   # used to describe the checkbox if the evaluee does not want to or
   # cannot answer this question
