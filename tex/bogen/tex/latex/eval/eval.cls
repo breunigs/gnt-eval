@@ -674,8 +674,27 @@
     \wPosout{uu save_as: "#3"}
     \wPosout{uu type: text}
     \wPosout{uu db_column: "#2"}
+    \wPosout{uu boxes:}%
     \separator{\arrayrulewidth}
-    #1\hspace*{0.5cm}\wPosout{uu boxes:}\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: start}\wPosout{uuu height: 650000}\SaveMyYPos\hfill\wPosout{uu- !ruby/object:Box}\wPosout{uuu type: end}\SaveMyYPos\\\wPosout{uu- !ruby/object:Box}\SaveMyYPos\vspace*{3200000sp}
+    #1
+%    % measure line next to text
+%    \hspace*{0.5cm}%
+%    \wPosout{uu- !ruby/object:Box}%
+%    \wPosout{uuu type: start}%
+%    \wPosout{uuu height: 650000}%
+%    \SaveMyYPos\hfill%
+%    \wPosout{uu- !ruby/object:Box}%
+%    \wPosout{uuu type: end}%
+%    \SaveMyYPos\\%
+
+    \wPosout{uu- !ruby/object:Box}%
+    \SaveMyYPos%
+
+    \fbox{\vbox to 3200000sp {\vfil
+    \hbox to 189.7mm{}%
+    \vfil
+    }}
+
     \wPosout{uuu height: 3200000}
     \wPosout{uuu width: 39020584}
   }
