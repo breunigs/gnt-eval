@@ -70,6 +70,10 @@ class Question
   # boolean that tells if an additional <no answer> field has been added
   attr_accessor :no_answer
 
+  # boolean that tells if the answers below each question should be hidden
+  attr_accessor :hide_answers
+
+  # FIXME: special care is depricated
   # special care: boolean, true falls extra liebe benoetigt wird
   # (tutoren, studienfach, semesterzahl)
 
@@ -86,6 +90,7 @@ class Question
     @db_column = db_column
     @save_as = save_as
     @no_answer = true
+    @hide_answers = false
   end
 
   # how many choices are there?
@@ -114,6 +119,13 @@ class Question
   def no_answer?
     return true if @no_answer.nil?
     @no_answer
+  end
+
+  # returns false if hide_answers has set been to false or not been set
+  # up at all. Returns true iff it has been explicitly set.
+  def hide_answers?
+    return false if @hide_answers.nil?
+    @hide_answers
   end
 
   # is the question active?
@@ -220,7 +232,7 @@ class Question
         answers.each { |x| s << "\\moreAnswers#{x.join}\n" }
         s << "\\quest"
         # single/multi and no_answer settings
-        s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")}>"
+        s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")} #{(hide_answers? ? "hideAnswers" : "")}>"
         # db column
         s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
         # question
@@ -284,6 +296,13 @@ class Section
     return @title if @title.is_a? String
     return (@title[lang] || @title[:en] || @title.first[1] || "") if @title.is_a?(Hash)
     ""
+  end
+
+  attr_writer :answers
+  def answers(lang)
+    return @answers if @answers.is_a? Array
+    return (@title[lang.to_sym] || @title[:en] || @title.first[1]) if @answers.is_a?(Hash)
+    []
   end
 end
 
@@ -475,7 +494,9 @@ class AbstractForm
         # to be removed. Until this, let’s keep this magic. TODO
         next if s.questions.find_all{|q| q.special_care != 1}.empty?
         b << ""
-        b << "\\preventBreak{\n\\sect{#{s.any_title(lang)}}\n"
+        b << "\\preventBreak{\n\\sect{#{s.any_title(lang)}}"
+        b << s.answers(lang).map { |x| "[#{x}]" }.join unless s.answers(lang).nil?
+        b << "\n"
         sect_open = true
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
