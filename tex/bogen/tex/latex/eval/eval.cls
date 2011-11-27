@@ -45,6 +45,8 @@
 % same thing, but for rows. Currently unused, but stays because it might be useful.
 \newcounter{rowCounter}
 
+\setcounter{section}{0}
+
 \newcommand{\resetQuestionCounters}{%
   \setcounter{answerCounter}{0}%
   \setcounter{rowCounter}{2}%
@@ -290,7 +292,8 @@
   \setlength{\sectionHeight}{\the\sectionHeight/2}
   \setlength{\sectionHeight}{\maxof{\the\sectionHeight}{0mm}}
 
-  \sectFullBox{#1}[#2][#3][#4][#5][#6][#7][#8]
+  \stepcounter{section}
+  \sectFullBox{\arabic{section}. #1}[#2][#3][#4][#5][#6][#7][#8]
 
   \vspace*{-2.4mm}
   \vspace*{\the\sectionHeight}
