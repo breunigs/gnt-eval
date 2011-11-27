@@ -284,7 +284,12 @@ end
 #
 class Section
   attr_accessor :title
-  attr_accessor :questions
+
+  attr_writer :questions
+  def questions
+    @questions || []
+  end
+
   def initialize(t ='', q=[])
     @title = t
     @questions = q
