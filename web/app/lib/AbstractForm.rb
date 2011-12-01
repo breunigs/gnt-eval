@@ -64,8 +64,15 @@ class Question
   # into which field to write the result (use a list for multiple choice questions!)
   attr_accessor :db_column
 
-  # postfix when saving file
-  attr_accessor :save_as
+  # postfix when saving file. Will always use the same as db_column.
+  def save_as
+    @db_column
+  end
+  # for compatibility reasons
+  alias :save_as :saveas
+
+  # height of the text field (only used iff type == comment)
+  attr_accessor :height
 
   # boolean that tells if an additional <no answer> field has been added
   attr_accessor :no_answer
@@ -82,15 +89,15 @@ class Question
 
   # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
-                 nochoice=nil, type='square', db_column='', save_as = '')
+                 nochoice=nil, type='square', db_column='')
 
     @boxes = boxes
     @qtext = qtext
     @type = type
     @db_column = db_column
-    @save_as = save_as
     @no_answer = true
     @hide_answers = false
+    @height = nil
   end
 
   # how many choices are there?
@@ -131,11 +138,6 @@ class Question
   # is the question active?
   def active?
     not @active.nil?
-  end
-
-  # for compatibility reasons
-  def saveas
-    @save_as
   end
 
   # leftmost choice in appropriate language
@@ -179,19 +181,20 @@ class Question
   # export a single question to tex (used for creating the forms)
   def to_tex(lang = :en, gender = :both)
     s = ""
+    qq = text(lang, gender)
     case @type
       when "text_wholepage" then
         # don't need to do anything for that
       when "text" then
-        s << "\n\n\\comment{#{text(lang, gender)}}{#{@db_column}}{#{@db_column}}\n\n"
+        s << "\n\n\\comment#{height ? "<#{height}>" : ""}{#{qq}}{#{@db_column}}}\n\n"
 
       when "tutor_table" then
         # automatically prints tutors, if they have been defined
-        s << "\n\\printtutors{#{text(lang, gender)}}\n"
+        s << "\n\\printtutors{#{qq}}\n"
 
       when "variable_width" then
-        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{text(lang, gender)}}"
+        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{qq}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         boxes = []
@@ -204,8 +207,8 @@ class Question
       # WARNING: Support for this type of question will be removed. Do not use.
       # TODO: Remove function once safe.
       when "fixed_width__last_is_rightmost" then
-        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{text(lang, gender)}}"
+        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{qq}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         @boxes.each_with_index do |b,i|
@@ -236,7 +239,7 @@ class Question
         # db column
         s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
         # question
-        s << "{#{text(lang, gender)}}"
+        s << "{#{qq}}"
         # first row of answers (compact removes dummy element, if required)
         s << first.compact.join
         s << "\n\n"

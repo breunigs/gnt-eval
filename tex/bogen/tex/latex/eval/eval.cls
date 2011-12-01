@@ -63,9 +63,12 @@
 \newlength\questionHeight
 % in case one of the answers overflow, calculate the additional width required
 \newlength\sectionHeight
-
+% used for calcing table height
 \newlength\tmpa
 \newlength\tmpb
+% used to store size of comment field
+\newlength\commentSizeA
+\newcounter{commentSizeB}
 
 % shorthand to write information into posout file
 \def\wPosout{\write\posout}
@@ -698,19 +701,22 @@
   }
 }
 
-% comment field
-\newcommand{\comment}[3]{
+% comment field. Usage:
+% \comment<HEIGHT>{QUESTION}{SAVE_AS_POSTFIX_AND_DB_COLUMN}
+\NewDocumentCommand\comment{D<>{278} m m}{%
   \vspace{-1mm}
+  % once with and once without units for the PDF output and posout file
+  \setlength{\commentSizeA}{10000sp*#1}
+  \setcounter{commentSizeB}{10000*#1}
   \preventBreak{
     \wPosout{u - !ruby/object:Question}
     \wPosout{uu choice: }
-    \wPosout{uu save_as: "#3"}
+    \wPosout{uu db_column: "#3"}
     \wPosout{uu type: text}
-    \wPosout{uu db_column: "#2"}
     \wPosout{uu boxes:}%
     \separator{\arrayrulewidth}%
     \vspace{-3.4mm}%
-    #1
+    #2
 %    % measure line next to text
 %    \hspace*{0.5cm}%
 %    \wPosout{uu- !ruby/object:Box}%
@@ -724,11 +730,11 @@
     \wPosout{uu- !ruby/object:Box}%
     \SaveMyYPos%
 
-    \fbox{\vbox to 2780000sp {\vfil
+    \fbox{\vbox to \commentSizeA {\vfil
     \hbox to 189.7mm{}%
     \vfil
     }}
-    \wPosout{uuu height: 2780000}
+    \wPosout\expandafter{uuu height: \arabic{commentSizeB}}
     \wPosout{uuu width: 39020584}
   }
 }
