@@ -186,7 +186,7 @@ class Question
       when "text_wholepage" then
         # don't need to do anything for that
       when "text" then
-        s << "\n\n\\comment#{height ? "<#{height}>" : ""}{#{qq}{#{@db_column}}}\n\n"
+        s << "\n\n\\comment#{height ? "<#{height}>" : ""}{#{qq}}{#{@db_column}}\n\n"
 
       when "tutor_table" then
         # automatically prints tutors, if they have been defined
