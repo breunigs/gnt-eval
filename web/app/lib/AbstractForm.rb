@@ -69,7 +69,7 @@ class Question
     @db_column
   end
   # for compatibility reasons
-  alias :save_as :saveas
+  alias :saveas :save_as
 
   # height of the text field (only used iff type == comment)
   attr_accessor :height
