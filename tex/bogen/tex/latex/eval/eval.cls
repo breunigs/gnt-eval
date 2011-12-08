@@ -225,10 +225,12 @@
 \def\SaveInfo[#1]{%
   % the save commands use space for some reason, therefore the \makebox command
   \ifthenelse{\boolean{single}}{%
-    \makebox[0mm]{\SaveNormalInfo[#1]}%
-  }{%
-    \makebox[0mm]{\SaveMultiInfo[#1][\arabic{answerCounter}]}%
-  }%
+    \makebox[0mm]{\SaveNormalInfo[#1]}
+  }{
+    \makebox[0mm]{\SaveMultiInfo[#1][\arabic{answerCounter}]}
+  }
+  % fix the additional hspace that is introduced by above commands
+  \hspace*{-4.9mm}
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
@@ -775,6 +777,5 @@
   \wPosout{u - !ruby/object:Question}
   \wPosout{uu type: text_wholepage}
   \wPosout{uu db_column: "#1"}
-  \wPosout{uu save_as: "vcomment"}
   \let\lastSectionHeadReal\undefined
 }
