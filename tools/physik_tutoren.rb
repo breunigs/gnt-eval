@@ -3,13 +3,15 @@
 # Dieses Skript liest alle Veranstaltungen und Tutoren die sich im Online
 # System der Physik befinden und speichert es in einer Textdatei/gibt es aus.
 # Autor: Stefan Breunig
-# Letzte Änderung: 2009-05-30
+# Letzte Änderung: 2011-12-07
 
 require 'rubygems'
 require 'date'
 require 'mechanize'
-# Fix crappy charset detections
+# Fix crappy charset detections. We can do this because we know what
+# encoding the page is in.
 WWW::Mechanize::Util::CODE_DIC[:SJIS] = "ISO-8859-1"
+WWW::Mechanize::Util::CODE_DIC[:EUC] = "ISO-8859-1"
 
 
 # CONFIG #########################
@@ -78,17 +80,24 @@ def loadEvent(id)
     end
 end
 
+# returns given text in UTF-8 encoding
+def utf8_enc(text, from = "ISO-8859-1")
+  $ic ||= {}
+  $ic[from] ||= Iconv.new('UTF-8', from)
+  $ic[from].iconv(text + ' ')[0..-2]
+end
+
 # Speichert die Vorlesungen und Tutoren halbwegs hübsch in einer Textdatei
 def printToFile(tree)
     filename = Date.today.strftime + " Tutoren Physik.txt"
     File.open(filename, 'w') do |f|
         tree.each do |v|
             f.puts '#################'
-            f.puts v.title
-            f.puts v.dozent
-            f.puts "Teilnehmer: " + v.teilnehmer
+            f.puts utf8_enc(v.title)
+            f.puts utf8_enc(v.dozent)
+            f.puts "Teilnehmer: " + utf8_enc(v.teilnehmer)
             f.puts '#################'
-            f.puts v.tutors.join($separator)
+            f.puts utf8_enc(v.tutors.join($separator))
             f.puts ''
             f.puts ''
             f.puts ''

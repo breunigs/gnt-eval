@@ -527,9 +527,9 @@ namespace :helper do
 
   desc "Grabs the current list of tutors from uebungen.physik.uni-hd.de and puts them into a human readable file"
   task :tutors_physics do
-    `cd tmp && ./../helfer/physik_tutoren.rb`
+    `cd tmp && ./../tools/physik_tutoren.rb`
     require 'date'
-    Date.today.strftime("Schau mal in tmp/%Y-%m-%d Tutoren Physik.txt")
+    puts Date.today.strftime("Done, have a look at: tmp/%Y-%m-%d Tutoren Physik.txt")
   end
 
   desc "Tries to find suitable files in ./tmp that might contain tutor/lecutre information for the maths fac."
