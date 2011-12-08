@@ -220,15 +220,15 @@
   \wPosout{uu boxes:}
 }
 
-% automatically chooses between SaveNormalInfo and SaveMultiInfo
-% depending on how \boolean{single} is set. First argument needs to be
-% the db_column
-\def\SaveInfo[#1]{
-  \ifthenelse{\boolean{single}}{
-    \SaveNormalInfo[#1]
-  }{
-    \SaveMultiInfo[#1][\arabic{answerCounter}]
-  }
+% automatically chooses between SaveNormalInfo and SaveMultiInfo depending on
+% how \boolean{single} is set. First argument needs to be the db_column.
+\def\SaveInfo[#1]{%
+  % the save commands use space for some reason, therefore the \makebox command
+  \ifthenelse{\boolean{single}}{%
+    \makebox[0mm]{\SaveNormalInfo[#1]}%
+  }{%
+    \makebox[0mm]{\SaveMultiInfo[#1][\arabic{answerCounter}]}%
+  }%
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
@@ -582,8 +582,9 @@
 %
 % {db_table_column_name}      multiple choice question get the names: namea, nameb, namec, and so
 %                             on. If the question also has a noanswer box it will be named namenoansw
-% {first answer}
-% {second answer}
+% {question text}
+% [first answer]
+% [second answer]
 % ...
 \NewDocumentCommand\quest{D<>{} m m o o o o o o}{%
   % set defaults
@@ -620,7 +621,7 @@
   % have a couple of "- !ruby/object:Page" at the start of the posout followed by all questions
   % regardless which page they were on. This writing ensures TeX writes bop-hook, questions,
   % bop-hook, questions and so on. No idea why this is required.
-  \wPosout{U work around TeX's weirdness; see eval.cls}
+  \wPosout{U wtf?-fix (see eval.cls) ||| #3}
 
   % Print the question, depending on how many answers are given
   \ifthenelse{\boolean{noanswer}}{ % "no answer" checkbox is added automatically
