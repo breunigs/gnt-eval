@@ -103,7 +103,7 @@ class FormsController < ApplicationController
     if form
       expire_page :action => "show", :id => form
       expire_page :action => "edit", :id => form
-      $loaded_yaml_sheets[form.id] = nil
+      $loaded_yaml_sheets[form.id] = nil if $loaded_yaml_sheets
     end
 
     # need to expire all edit+new pages, in case a form was added

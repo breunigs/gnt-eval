@@ -82,8 +82,9 @@ To see if this worked open a new shell and type execute "rvm". If the
 command is not found, please refer to the manual at
   http://rvm.beginrescueend.com/rvm/install/
 
-Then we need to install ruby:
-  rvm install 1.8.7-p334 --with-zlib-dir=/usr
+Then we need to install openssl and ruby:
+  rvm pkg install openssl
+  rvm install 1.8.7-p334 --with-zlib-dir=/usr  --with-openssl-dir=$HOME/.rvm/usr
 and create a gemset, which will be seperate from your other system gems:
   rvm 1.8.7-p334
   rvm gemset create 'gnt-eval'
@@ -132,7 +133,7 @@ FINISHING THE INSTALLATION
 ==========================
 
 Change into the newly created directory. RVM will likely ask you to
-confirm that the included .rvmrc is fine. Press enter, then type 'yes'
+confirm that the included .rvmrc is fine. Type 'yes' then press enter
 to trust G'n'T’s .rvmrc.
 
 Run
@@ -143,6 +144,12 @@ other required gems and then
 to actually get them. Finally, there's an incompatibility left to solve
 by installing an older version of RubyGems.
   update_rubygems
+
+If, for some reason, bundle install reports an error with glib2 not being
+built, featuring a “checking for gobject-2.0... no” error message, try
+the following (choose the first for 64 bit systems, latter for 32 bit):
+PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig/" bundle install
+PKG_CONFIG_PATH="/usr/lib/i386-linux-gnu/pkgconfig/" bundle install
 
 To confirm the basic setup worked, type in
   rake
@@ -297,10 +304,11 @@ how the data is organized, here’s a short wrap up:
   and adjust them to your needs. Save often, it will display the form
   as serialized Ruby object if the YAML file is valid. Some parts are
   hard coded into TeX, grep is your friend. Patches welcome. Comments
-  with a saveas attribute ending in “ucomment” will be placed at the
+  with a db column attribute ending in “ucomment” will be placed at the
   tutor’s page if one was selected. All other comments will be put in
-  the course section. The saveas attribute may only contain hyphens,
-  and latin1 alphanumerals (0-9, a-z, A-Z).
+  the course section. The save_as attribute will only contain hyphens,
+  and latin1 alphanumerals (0-9, a-z, A-Z). It is derived from the db
+  column and cannot be entered separately.
 * Next, add some courses and once done,
 * you can add professors and tutors to the course. Profs are “real”
   classes, so you can re-use them, but tutors are just a bunch of names
@@ -340,17 +348,30 @@ size (i.e. no “fit to paper”). The default output is A4, but you might
 be able to change this in lib/FunkyTeXBits.rb. Unless a semester-id is
 specified, it will create forms for the current one.
 
-rake images:sortandalign[directory]
------------------------------------
+rake images:scan
+----------------
+Calls the default scan script, which you can find in tools/scan.sh. If
+the script doesn’t work for you, even after installing “sane”, you likely
+want to point it to your customized version using seee_config (see above,
+the variable is application_paths/scan).
+
+If you change the script ensure that it only outputs two-sided, black/
+white tif images.
+
+rake images:sortandalign
+------------------------
 Before you can use this function, you need to scan the images into two-
 sided tif images. Only black-and-white tifs are supported. 300 DPI is
 usually enough (and what we use), but you can experiment with different
 settings if you like.
 
-“directory” is where to *move* the images from, so make sure “directory”
-is writable before running this. The function will try to recognize the
-bar code and sort them depending on the form type into different folders
-in our tmp directory.
+If you specify a custom “directory”, make sure it is writable before
+running this command. This is required because the images are moved and
+edited in-place rather than copied. If you used images:scan or placed
+them into tmp/scanned you can omit the directory.
+
+The function will try to recognize the bar code and sort them depending
+on the form type into different folders in our tmp directory.
 
 If you get a lot of errors that are zbarimg related, the included exe-
 cutable is probably out of date compared to the libraries on your
@@ -470,18 +491,21 @@ Add this line at the end of .bashrc/.zshrc/etc.:
 
 Open new shell
 
-rvm install 1.8.7-p334 --with-zlib-dir=/usr
+rvm pkg install openssl
+rvm install 1.8.7-p334 --with-zlib-dir=/usr --with-openssl-dir=$HOME/.rvm/usr
 rvm 1.8.7-p334
 rvm gemset create 'gnt-eval'
 
 git clone http://FIXME seee
 cd seee
-[Enter]yes[Enter]
+yes[Enter]
 
 bundle install
 update_rubygems
 
-Leaving the configuration options on their defaults, they should work
+See the detailed documentation above if bundle install fails.
+
+Leave the configuration options on their defaults, they should work
 out of the box.
 
 sudo -u postgres -s
@@ -505,9 +529,13 @@ Add data in WWW-Browser, use forms from doc/example_forms
 rake pdf:howto
 rake pdf:forms
 
-Print forms, evaluate, scan to TIFs, copy to /home/gnt-eval/testimgs
+Print forms and evaluate.
 
-rake images:sortandalign[/home/gnt-eval/testimgs]
+rake images:scan
+      OR
+scan 300 DPI, b/w, two-page TIFs to tmp/scanned
+
+rake images:sortandaligm
 rake pest:omr
 rake pest:correct
 rake images:insertcomments

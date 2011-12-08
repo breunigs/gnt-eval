@@ -27,3 +27,28 @@
     </p>
   </fieldset>
 <% end %>
+
+<fieldset>
+  <legend>js-yaml playground</legend>
+  <script type="text/javascript">
+    var doc = jsyaml.load($("form_content").value);
+    alert(doc);
+  </script>
+</fieldset>
+
+<fieldset>
+  <legend>Some helpful comments</legend>
+  <ul>
+    <li>In questions and their answers use \linebreak to force one and avoid \\ or \newline altogether.</li>
+    <li>If you want to prevent automatic line breaks place the contents inside an \mbox{}. Be aware that this might lead to texts overlapping each other.</li>
+    <li>If TeX fails with error messages that are clearly not related to your code: we are not sure why they appear, but they may usually be resolved by inserting page breaks manually or by fiddling with \vspaces.
+    <li>To group questions correctly in the results they need to be prepended with the correct letters. <b>v</b> refers to questions that belong to the lecture (from German “Vorlesung”); <b>t</b> should be used for questions regarding the tutor; <b>u</b> is for questions that refer to the study groups in general (from German “Übungsgruppen”).<br/><br/>Currently there is no central place where this is controlled, it is hard coded into everywhere.</li>
+    <li>Texts may be translated like this, e.g.
+      <pre>text:
+  :de: Oliver ist doof
+  :en: Oliver is daft</pre>
+    or not at all:
+      <pre>text: Oliver ist doof</pre>
+    In many cases the software will simply choose the right snippet.
+  </ul>
+</fieldset>

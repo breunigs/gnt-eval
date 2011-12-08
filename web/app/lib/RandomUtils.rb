@@ -4,6 +4,14 @@ require 'tmpdir'
 require 'rubygems'
 require 'work_queue'
 
+module Enumerable
+  # finds duplicates in an Enum. As posted by user bshow on
+  # http://snippets.dzone.com/posts/show/3838
+  def get_duplicates
+    inject({}) {|h,v| h[v]=h[v].to_i+1; h}.reject{|k,v| v==1}.keys
+  end
+end
+
 class String
   # keeps only characters that may be used in a table name or column for
   # SQL querys. Adds some hacks to allow for COUNT(*) and DISTINCT blub.

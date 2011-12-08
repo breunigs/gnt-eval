@@ -414,7 +414,7 @@ class PESTOmr < PESTDatabaseTools
     return 0 if c.rows*c.columns < 500*@dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
-    filename << "_" + group.saveas + ".jpg"
+    filename << "_" + group.save_as + ".jpg"
     debug "  Saving Comment Image: " + filename if @verbose
     c.write filename
 
@@ -460,7 +460,7 @@ class PESTOmr < PESTDatabaseTools
     return 0 if bp <= limit
 
     # Save the comment as extra file if possible/required
-    save_text_image(img_id, question.saveas, boxes)
+    save_text_image(img_id, question.save_as, boxes)
     return 1
   end
 
@@ -915,6 +915,10 @@ class PESTOmr < PESTDatabaseTools
   # Checks for existing files and issues a warning if so. Returns a
   # list of non-existing files
   def remove_processed_images_from(files)
+    # don’t do anything in test mode because there is no database access
+    # and we want to test all files anyway
+    return files if @test_mode
+
     debug "Checking for existing files" if @verbose
 
     oldsize = files.size
@@ -1033,8 +1037,8 @@ class PESTOmr < PESTDatabaseTools
     doc.pages.each do |p|
       next if p.questions.nil?
       p.questions.each do |q|
-        if q.saveas && q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
-        debug "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
+        if q.save_as.empty?
+        debug "db_column attribute for #{@omrsheet} question #{q.db_column} contains only invalid characters or is empty. Only a-z, A-Z, 0-9 and hyphens are allowed, please include at least some in the db_column."
           exit 7
         end
         next if q.boxes.nil?
@@ -1080,7 +1084,7 @@ class PESTOmr < PESTDatabaseTools
 
         opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
 
-        opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.", "Automatically activates debug database.") { @debug = true }
+        opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.", "Automatically activates debug database (may be overwritten by test mode)") { @debug = true }
 
         opts.on("-t", "--testmode", "Sets useful values for running tests.", "Disables database access and stops files from being moved to bizarre/.") { @test_mode = true }
 

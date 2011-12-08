@@ -43,3 +43,11 @@ de:
     :female: Dozentin
     :both: Dozent/in
   semester: Semester
+
+  # used to describethe checkbox if the evaluee does not want to or
+  # cannot answer this question
+  no_answer: keine Angabe
+
+  # used if no intro is given for the sheets.
+  default_intro: Kreuze so \checkLikeThis{} bzw. verbessere Dich mit \correctLikeThis{}. Bitte deutlich in Druckbuchstaben und nur in die dafür vorgesehenen Felder schreiben.
+

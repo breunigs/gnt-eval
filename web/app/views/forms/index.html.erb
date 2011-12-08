@@ -19,7 +19,7 @@
     <tr style="background:#<%= cycle('efefef', 'fff')%>">
       <td><%=h form.semester.title %></td>
       <td><%= link_to form.name, form %></td>
-      <td><%= (form.abstract_form_valid? ? form.abstract_form.db_table : "") %></td>
+      <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
 
       <% if form.critical? %>
         <td colspan="2">Semester critical</td>

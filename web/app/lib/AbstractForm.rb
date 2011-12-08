@@ -7,8 +7,20 @@
 # - Question: see class.
 # - Box: see class
 #
+# The boxes are coded as follows:
+# first box = 1, second box = 2, …, no answer box = 99
+# When processing the sheets, the additional values are:
+#  0 = no choice, i.e. the user did no cross anything
+# -1 = multiple checkmarks were detected, not yet confirmed by human
+# -2 = multiple checkmarks are there, confirmed by human
+
+# TODO: Remove "choice" from box if safe. First needs to be removed from
+# Pest and eval.cls
+
 
 require 'prettyprint'
+cdir = File.dirname(__FILE__)
+require cdir + '/RandomUtils.rb'
 
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to
@@ -34,10 +46,9 @@ class Box
 
   # just get any description from the @text field. This should probably
   # be /the/ accessor for @text, similar to the way question#text works.
-  # TODO FIXME
-  def any_text
+  def any_text(lang = :en)
     return @text if @text.is_a? String
-    return @text[:en] || @text.first[1] if @text.is_a? Hash
+    (return @text[lang.to_sym] || @text[:en] || @text.first[1]) if @text.is_a? Hash
     ""
   end
 end
@@ -56,25 +67,42 @@ class Question
   # into which field to write the result (use a list for multiple choice questions!)
   attr_accessor :db_column
 
-  # postfix when saving file
-  attr_accessor :save_as
+  # postfix when saving file. Will always use the same as db_column.
+  def save_as
+    # the join is required in case we hit a multiple choice question.
+    # It’s highly unlikely that this kind of question will ever use the
+    # save_as attribute, but what the heck.
+    # Also, keep only valid chars
+    [@db_column].join.gsub(/[^a-z0-9-]/i, "")
+  end
 
+  # height of the text field (only used iff type == comment)
+  attr_accessor :height
+
+  # boolean that tells if an additional <no answer> field has been added
+  attr_accessor :no_answer
+
+  # boolean that tells if the answers below each question should be hidden
+  attr_accessor :hide_answers
+
+  # FIXME: special care is depricated
   # special care: boolean, true falls extra liebe benoetigt wird
   # (tutoren, studienfach, semesterzahl)
 
   attr_accessor :special_care
   attr_accessor :donotuse
 
-  # FIXME: remove failchoice
+  # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
-                 nochoice=nil, type='square', db_column='', save_as = '')
+                 nochoice=nil, type='square', db_column='')
 
     @boxes = boxes
     @qtext = qtext
-    @nochoice = nochoice
     @type = type
     @db_column = db_column
-    @save_as = save_as
+    @no_answer = true
+    @hide_answers = false
+    @height = nil
   end
 
   # how many choices are there?
@@ -98,43 +126,45 @@ class Question
     end
   end
 
+  # returns false iff no_answer has set been to false. Returns true if
+  # no_answer was either not set or has been explicitly set to true.
+  def no_answer?
+    return true if @no_answer.nil?
+    @no_answer
+  end
+
+  # returns false if hide_answers has set been to false or not been set
+  # up at all. Returns true iff it has been explicitly set.
+  def hide_answers?
+    return false if @hide_answers.nil?
+    @hide_answers
+  end
+
   # is the question active?
   def active?
     not @active.nil?
   end
 
-  # for compatibility reasons
-  def saveas
-    @save_as
-  end
-
   # leftmost choice in appropriate language
   def ltext(language = :en)
-    @boxes.first.text[language]
+    @boxes.first.any_text(language)
   end
 
   # rightmost choice in appropriate language
   def rtext(language = :en)
-    @boxes.last.text[language]
+    @boxes.last.any_text(language)
   end
 
   # collect all possible choices and return as array
-  def get_choices(language = nil)
-    @boxes.collect do |x|
-      if x.text.is_a?(Hash) && x.text[language]
-        x.text[language] || ""
-      elsif x.text.is_a?(Hash)
-        x.text[:en] || x.text.first[1] || ""
-      else
-        x.text || ""
-      end
-    end
+  def get_choices(language = :en)
+    @boxes.collect { |x| x.any_text(language) }
   end
 
   # question itself in appropriate language and gender
   def text(language = :en, gender = :both)
-    q = @qtext[language] || @qtext.first[1]
-    return "" if q.nil?
+    return @qtext if @qtext.is_a? String
+    q = @qtext[language.to_sym] || @qtext.first[1] || ""
+    return q if q.is_a? String
     q.is_a?(String) ? q : q[gender]
   end
 
@@ -156,57 +186,68 @@ class Question
   # export a single question to tex (used for creating the forms)
   def to_tex(lang = :en, gender = :both)
     s = ""
+    qq = text(lang, gender)
     case @type
       when "text_wholepage" then
         # don't need to do anything for that
       when "text" then
-        s << "\n\n\\comment{#{text(lang, gender)}}{#{@db_column}}{#{@db_column}}\n\n"
+        s << "\n\n\\comment#{height ? "<#{height}>" : ""}{#{qq}}{#{@db_column}}\n\n"
 
       when "tutor_table" then
         # automatically prints tutors, if they have been defined
-        s << "\\printtutors{#{text(lang, gender)}}\n\n"
+        s << "\n\\printtutors{#{qq}}\n"
 
       when "variable_width" then
-        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{text(lang, gender)}}"
+        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{qq}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
         boxes = []
-        @boxes.each do |b|
-          boxes << "\\boxvariable{#{b.choice}}{\\hspace{-0.5em}#{b.text[lang]}}"
+        @boxes.each_with_index do |b,i|
+          boxes << "\\boxvariable{#{i+1}}{\\hspace{-0.5em}#{b.text[lang]}}"
         end
         s << boxes.join(" \\hfill ")
         s << "}\n\n"
 
+      # WARNING: Support for this type of question will be removed. Do not use.
+      # TODO: Remove function once safe.
       when "fixed_width__last_is_rightmost" then
-        s << "\\SaveNormalInfo[#{text(lang, gender)}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{text(lang, gender)}}"
+        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
+        s << "\\printspecialheader{#{qq}}"
 
         s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
-        @boxes.each do |b|
+        @boxes.each_with_index do |b,i|
           next if b == @boxes.last
-          s << "\\boxfixed{#{b.choice}}{#{b.text[lang]}} "
+          s << "\\boxfixed{#{i+1}}{#{b.text[lang]}} "
         end
 
         (6-@boxes.size).times { s << "\\boxfixedempty" }
         last = @boxes.last
-        s << "\\boxfixed{#{last.choice}}{#{last.text[lang]}} "
+        s << "\\boxfixed{#{@boxes.count}}{#{last.text[lang]}} "
         s << "}\n\n"
 
       when "square" then
-        s << "\n\n"
-        s << '\quest'
-        s << '<m>' if multi?
+        answers = @boxes.map{ |x| "[#{x.any_text(lang)}]" }
+        # add dummy entry so the no answer checkbox in the first row is taken
+        # into account. it will be removed later.
+        answers.unshift(nil) if no_answer?
+        # split checkboxes into equal parts so there are the same amount of
+        # answers per row. If there are six or less answers, only one row is
+        # required.
+        answers = answers.chunk([1, (@boxes.count/6.0).ceil].max)
+        first = answers.shift
+        # print additional answers
+        answers.each { |x| s << "\\moreAnswers#{x.join}\n" }
+        s << "\\quest"
+        # single/multi and no_answer settings
+        s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")} #{(hide_answers? ? "hideAnswers" : "")}>"
         # db column
-        if multi?
-          s << '{' + @db_column.first[0..-2] + '}'
-        else
-          s << "{#{@db_column}}"
-        end
+        s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
         # question
-        s << "{#{text(lang, gender)}}"
-        # possible answers
-        s << @boxes.sort{ |x,y| x.choice <=> y.choice }.map{ |x| "[#{x.text[lang]}]" }.join
+        s << "{#{qq}}"
+        # first row of answers (compact removes dummy element, if required)
+        s << first.compact.join
+        s << "\n\n"
     end
     s
   end
@@ -251,10 +292,30 @@ end
 #
 class Section
   attr_accessor :title
-  attr_accessor :questions
+
+  attr_writer :questions
+  def questions
+    @questions || []
+  end
+
   def initialize(t ='', q=[])
     @title = t
     @questions = q
+  end
+
+  # tries to get the text in the following order:
+  # 1. given language, 2. in English, 3. whatever comes first
+  def any_title(lang)
+    return @title if @title.is_a? String
+    return (@title[lang] || @title[:en] || @title.first[1] || "") if @title.is_a?(Hash)
+    ""
+  end
+
+  attr_writer :answers
+  def answers(lang)
+    return @answers if @answers.is_a? Array
+    return (@title[lang.to_sym] || @title[:en] || @title.first[1]) if @answers.is_a?(Hash)
+    []
   end
 end
 
@@ -288,13 +349,26 @@ end
 
 class AbstractForm
   # printed headline of the form
-  attr_accessor :title
+  attr_writer :title
+  def title(lang)
+    return (@title || "") if @title.nil? || @title.is_a?(String)
+    return @title[lang.to_sym] || @title[:en] || ""
+  end
 
   # introductory text just below the main headline
-  attr_accessor :intro
+  attr_writer :intro
+  def intro(lang)
+    default = I18n.t(:default_intro)
+    return (@intro || default) if @intro.nil? || @intro.is_a?(String)
+    return @intro[lang.to_sym] || @intro[:en] || default
+  end
 
   # the language class that should be passed to TeX's babel
-  attr_accessor :babelclass
+  attr_writer :babelclass
+  def babelclass(lang)
+    return (@babelclass || "") if @babelclass.nil? || @babelclass.is_a?(String)
+    return @babelclass[lang.to_sym] || @babelclass[:en] || "english"
+  end
 
   # list of pages
   attr_accessor :pages
@@ -331,7 +405,8 @@ class AbstractForm
     q
   end
 
-  # find the question-object belonging to a db_column
+  # find the *first* question-object belonging to a db_column. There
+  # shouldn’t be any duplicate db_columns per form, but it may happen…
   def get_question(db_column)
     questions.find { |q| q.db_column == db_column }
   end
@@ -344,6 +419,24 @@ class AbstractForm
 
     # aber bitte ohne die ids und ohne @
     sio.gsub(/0x[^\s]*/,'').gsub(/@/,'')
+  end
+
+
+  # returns list of db dolumn names that are used more than once and the
+  # offending questions. returns empty hash if there aren’t any
+  # duplicates and something like this, if there are:
+  # { :offending_column => ["Question 1?", "Question 2?"] }
+  def get_duplicate_db_columns
+    h = {}
+    questions.collect { |q| q.db_column }.get_duplicates.each do |d|
+      h[d.to_sym] = questions.find_all { |q| q.db_column == d }.map { |q| q.text }
+    end
+    h
+  end
+
+  # returns true if there are any db columns used more than once
+  def has_duplicate_db_columns?
+    !questions.collect { |q| q.db_column }.get_duplicates.empty?
   end
 
   # returns the complete TeX code required to generate the form. If no
@@ -372,11 +465,12 @@ class AbstractForm
     tex = ""
 
     # form header and preamble
-    tex << "\\documentclass[#{babelclass[lang.to_sym]},kanten]{eval}\n"
+    tex << "\\documentclass[#{babelclass(lang)}]{eval}\n"
     tex << "\\dozent{#{lecturer.escape_for_tex}}\n"
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
     tex << "\\semester{#{semester.escape_for_tex}}\n"
+    tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
 
     # tutors
     tutors.collect! { |t| t.escape_for_tex }
@@ -402,23 +496,24 @@ class AbstractForm
   private
 
   def get_texhead(lang)
-    (texhead.is_a?(String) ? texhead : texhead[lang]) || ""
+    (texhead.is_a?(String) ? texhead : texhead[lang.to_sym]) || ""
   end
 
   def get_texfoot(lang)
-    (texfoot.is_a?(String) ? texfoot : texfoot[lang]) || ""
+    (texfoot.is_a?(String) ? texfoot : texfoot[lang.to_sym]) || ""
   end
 
   # builds the tex header for the form
   def tex_header(lang, gender, barcode)
     # writes yaml header on texing
-    s = "\\head{#{title[lang]}}{#{barcode}}\n\n"
-    s << "#{intro[lang]}\n\n"
-    s << "\\\dataline{#{I18n.t(:title)}}"
-    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n\n"
+    s = "\\head{#{title(lang)}}{#{barcode}}\n\n"
+    s << "#{intro(lang)}\n\n"
+    s << "\\vspace{0.8mm}"
+    s << "\\dataline{#{I18n.t(:title)}}"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
     # print special questions
     special_care_questions.each { |q| s << q.to_tex(lang, gender) }
-    s << "\\vspace{0.1cm}"
+    s << "\\vspace{-2.5mm}"
     s
   end
 
@@ -430,10 +525,18 @@ class AbstractForm
         # skip special care questions. These are legacy ones and ought
         # to be removed. Until this, let’s keep this magic. TODO
         next if s.questions.find_all{|q| q.special_care != 1}.empty?
-        b << "\n\n\\sect{#{s.title[lang]}}"
+        b << ""
+        b << "\\preventBreak{\n\\sect{#{s.any_title(lang)}}"
+        b << s.answers(lang).map { |x| "[#{x}]" }.join unless s.answers(lang).nil?
+        b << "\n"
+        sect_open = true
         s.questions.each do |q|
           next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
-          b << q.to_tex(lang, gender)
+          quest = q.to_tex(lang, gender)
+          # need to remove line breaks at the end to avoid spacing issues
+          b << (sect_open ? quest.strip : quest)
+          b << "\n}\n\n" if sect_open
+          sect_open = false
         end
       end
       b << p.tex_at_bottom.to_s
