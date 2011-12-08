@@ -70,7 +70,11 @@
 \newlength\commentSizeA
 \newcounter{commentSizeB}
 
-% shorthand to write information into posout file
+% shorthand to write information into posout file. If you wonder about the leading 'u's: it's not
+% possible to write leading spaces or #-signs using TeX. The latexfix.rb script replaces those
+% 'u's with two spaces each, i.e. 'uuu' will result in '      ' in the final file. Only u, uu and
+% uuu are supported. In addition, 'U' serves as comment character for the YAML file, i.e. it will
+% be replaced with '#' if and only if it's the first character on that line (including spaces).
 \def\wPosout{\write\posout}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -214,6 +218,17 @@
   \wPosout{uu type: square}
   \wPosout{uu db_column: #1}
   \wPosout{uu boxes:}
+}
+
+% automatically chooses between SaveNormalInfo and SaveMultiInfo
+% depending on how \boolean{single} is set. First argument needs to be
+% the db_column
+\def\SaveInfo[#1]{
+  \ifthenelse{\boolean{single}}{
+    \SaveNormalInfo[#1]
+  }{
+    \SaveMultiInfo[#1][\arabic{answerCounter}]
+  }
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
@@ -408,141 +423,150 @@
 \def\tabHeadSixAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}@{\hspace*{1.57mm}}C{18.84mm}C{18.84mm}C{18.84mm}C{18.84mm}@{\hspace*{1.57mm}}C{15.75mm}p{0mm}}}
 \def\tabHeadSevenAnsw{\begin{tabular}[t]{p{8.2cm}C{15.75mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.7mm}C{15.75mm}p{0mm}}}
 
-
+% very small helper that adds the hline on top of each question and also writes the questions's
+% header to the posout file.
+% Note that the question header info needs to be saved from within the table, otherwise it might
+% be split during a page break, resulting in broken posout files.
+\def\tabSubHeader[#1]{
+  \hline\\[-0.8em]
+  \SaveInfo[#1]
+}
 
 %%%% these questions automatically add the "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% the arguments are the same for all questions, they are:
+% db_column, question text, answer text 1, answer text 2, ...
 
 % 2 answers, is aligned to the 5-answers question
-\newcommand{\tabNoAnswTwo}[3]{
+\newcommand{\tabNoAnswTwo}[4]{
   \def\tbl{\tabHeadThreeAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \divider \bxs[99]     &\\
-                    & \aText{#2}  & \aText{#3}  & \aText{\noAnswTxt}    &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \divider \bxs[99]     &\\
+                    & \aText{#3}  & \aText{#4}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 3 answers + no answer, i.e. 47.1mm more space, thus 15.7mm additional space between boxes
-\newcommand{\tabNoAnswThree}[4]{
+\newcommand{\tabNoAnswThree}[5]{
   \def\tbl{\tabHeadFourAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
-                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{\noAnswTxt}    &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
+                    & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 4 answers + no answer, i.e. 31.4mm more space, thus 7.85mm additional space between boxes
-\newcommand{\tabNoAnswFour}[5]{
+\newcommand{\tabNoAnswFour}[6]{
   \def\tbl{\tabHeadFiveAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
-                    & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{\noAnswTxt}    &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs      & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
+                    & \aText{#3}& \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 5 answers + no answer, i.e. 15.7mm more space, thus 3.14mm additional space between boxes
-\newcommand{\tabNoAnswFive}[6]{
+\newcommand{\tabNoAnswFive}[7]{
   \def\tbl{\tabHeadSixAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
-                    & \aText{#2}& \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{\noAnswTxt}    &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs      & \bxs        & \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
+                    & \aText{#3}& \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{#7}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 6 answers + no answer
-\newcommand{\tabNoAnswSix}[7]{
+\newcommand{\tabNoAnswSix}[8]{
   \def\tbl{\tabHeadSevenAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
-                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{\noAnswTxt}    &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \divider \bxs[99]     &\\
+                    & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}   & \aText{#7}  & \aText{#8}  & \aText{\noAnswTxt}    &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 %%%% these questions do not add a "no answer" box to the end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1 answer
-\newcommand{\tabOne}[2]{
+\newcommand{\tabOne}[3]{
   \def\tbl{\tabHeadOneAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        &      &   \\
-                    & \aText{#2}  &      &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        &      &   \\
+                    & \aText{#3}  &      &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 2 answers, is aligned to the 5-answers question
-\newcommand{\tabTwo}[3]{
+\newcommand{\tabTwo}[4]{
   \def\tbl{\tabHeadTwoAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        &   \\
-                    & \aText{#2}  & \aText{#3}  &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        &   \\
+                    & \aText{#3}  & \aText{#4}  &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 3 answers
-\newcommand{\tabThree}[4]{
+\newcommand{\tabThree}[5]{
   \def\tbl{\tabHeadThreeAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \\
-                    & \aText{#2}  & \aText{#3}  & \aText{#4}  &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \bxs        &  \\
+                    & \aText{#3}  & \aText{#4}  & \aText{#5}  &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 4 answers
-\newcommand{\tabFour}[5]{
+\newcommand{\tabFour}[6]{
   \def\tbl{\tabHeadFourAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                    & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 5 answers
-\newcommand{\tabFive}[6]{
+\newcommand{\tabFive}[7]{
   \def\tbl{\tabHeadFiveAnsw
-    \hline\\[-0.8em]
-    \questText{#1}   & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
-                     & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  &
+    \tabSubHeader[#1]
+    \questText{#2}   & \bxs        & \bxs        & \bxs        & \bxs        & \bxs        & \\
+                     & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}  & \aText{#7}  &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 6 answers
-\newcommand{\tabSix}[7]{
+\newcommand{\tabSix}[8]{
   \def\tbl{\tabHeadSixAnsw
-    \hline\\[-0.8em]
-    \questText{#1}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
-                     & \aText{#2} & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  &  \aText{#7}  &
+    \tabSubHeader[#1]
+    \questText{#2}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
+                     & \aText{#3} & \aText{#4}  & \aText{#5}  & \aText{#6}   & \aText{#7}  &  \aText{#8}  &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 % 7 answers
-\newcommand{\tabSeven}[8]{
+\newcommand{\tabSeven}[9]{
   \def\tbl{\tabHeadSevenAnsw
-    \hline\\[-0.8em]
-    \questText{#1}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
-                    & \aText{#2}  & \aText{#3}  & \aText{#4}  & \aText{#5}   & \aText{#6}  & \aText{#7}  & \aText{#8}     &
+    \tabSubHeader[#1]
+    \questText{#2}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
+                    & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}   & \aText{#7}  & \aText{#8}  & \aText{#9}     &
     \hasMoreAnswers
   \end{tabular}}
-  \printTable{#1}
+  \printTable{#2}
 }
 
 
@@ -574,10 +598,11 @@
   \IfSubStr{#1}{printAnswers}{\setboolean{printAnswers}{true}}{}
   \IfSubStr{#1}{hideAnswers}{\setboolean{printAnswers}{false}}{}
 
+  % move question closer to the previous one
+  %\vspace*{-3.5mm}
+
   %This is to test if we have a Multiple Choice Question
-  \ifthenelse{\boolean{single}}{% single choice question
-    \SaveNormalInfo[#2]
-  }{% multiple choice question
+  \ifthenelse{\boolean{single}}{}{
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
     \IfNoValueTF{#7}{
@@ -589,10 +614,13 @@
     }{\addtocounter{answerCounter}{4}}
     }{\addtocounter{answerCounter}{5}}
     }{\addtocounter{answerCounter}{6}}
-    \SaveMultiInfo[#2][\arabic{answerCounter}]
   }
-  % move question closer to the previous one
-  %\vspace*{-3.5mm}
+
+  % without this the questions will be written out after *all* begin-of-page hooks. I.e. you'd
+  % have a couple of "- !ruby/object:Page" at the start of the posout followed by all questions
+  % regardless which page they were on. This writing ensures TeX writes bop-hook, questions,
+  % bop-hook, questions and so on. No idea why this is required.
+  \wPosout{U work around TeX's weirdness; see eval.cls}
 
   % Print the question, depending on how many answers are given
   \ifthenelse{\boolean{noanswer}}{ % "no answer" checkbox is added automatically
@@ -602,11 +630,11 @@
     \IfNoValueTF{#6}{
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
-    }{\tabNoAnswTwo{#3}{#4}{#5}}
-    }{\tabNoAnswThree{#3}{#4}{#5}{#6}}
-    }{\tabNoAnswFour{#3}{#4}{#5}{#6}{#7}}
-    }{\tabNoAnswFive{#3}{#4}{#5}{#6}{#7}{#8}}
-    }{\tabNoAnswSix{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
+    }{\tabNoAnswTwo{#2}{#3}{#4}{#5}}
+    }{\tabNoAnswThree{#2}{#3}{#4}{#5}{#6}}
+    }{\tabNoAnswFour{#2}{#3}{#4}{#5}{#6}{#7}}
+    }{\tabNoAnswFive{#2}{#3}{#4}{#5}{#6}{#7}{#8}}
+    }{\tabNoAnswSix{#2}{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
   }{ % "no answer" checkbox NOT included
     \IfNoValueTF{#9}{
     \IfNoValueTF{#8}{
@@ -614,11 +642,11 @@
     \IfNoValueTF{#6}{
     \IfNoValueTF{#5}{% 1 answer
       \Huge{Wir sind doch nicht in der DDR hier!}\\
-    }{\tabTwo{#3}{#4}{#5}}
-    }{\tabThree{#3}{#4}{#5}{#6}}
-    }{\tabFour{#3}{#4}{#5}{#6}{#7}}
-    }{\tabFive{#3}{#4}{#5}{#6}{#7}{#8}}
-    }{\tabSix{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
+    }{\tabTwo{#2}{#3}{#4}{#5}}
+    }{\tabThree{#2}{#3}{#4}{#5}{#6}}
+    }{\tabFour{#2}{#3}{#4}{#5}{#6}{#7}}
+    }{\tabFive{#2}{#3}{#4}{#5}{#6}{#7}{#8}}
+    }{\tabSix{#2}{#3}{#4}{#5}{#6}{#7}{#8}{#9}}
   }%
   % end lines with %-signs, because otherwise there will be too much space between questions
   % enable hline for the following questions
