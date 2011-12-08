@@ -69,10 +69,12 @@ class Question
 
   # postfix when saving file. Will always use the same as db_column.
   def save_as
-    @db_column
+    # the join is required in case we hit a multiple choice question.
+    # It’s highly unlikely that this kind of question will ever use the
+    # save_as attribute, but what the heck.
+    # Also, keep only valid chars
+    [@db_column].join.gsub(/[^a-z0-9-]/i, "")
   end
-  # for compatibility reasons
-  alias :saveas :save_as
 
   # height of the text field (only used iff type == comment)
   attr_accessor :height

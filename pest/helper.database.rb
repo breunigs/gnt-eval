@@ -20,7 +20,7 @@ class PESTDatabaseTools
   end
 
   def set_debug_database
-    debug "WARNING: Debug mode is enabled, writing to db.sqlite3 in working directory instead of real database." if @verbose
+    debug "WARNING: Debug mode is enabled, writing to db.sqlite3 in working directory instead of real database." if @verbose && !@test_mode
     Seee::Config.external_database[:dbi_handler] = "SQLite3"
     Seee::Config.external_database[:database] = "#{@path}/db.sqlite3"
   end

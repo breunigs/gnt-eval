@@ -304,10 +304,11 @@ how the data is organized, here’s a short wrap up:
   and adjust them to your needs. Save often, it will display the form
   as serialized Ruby object if the YAML file is valid. Some parts are
   hard coded into TeX, grep is your friend. Patches welcome. Comments
-  with a saveas attribute ending in “ucomment” will be placed at the
+  with a db column attribute ending in “ucomment” will be placed at the
   tutor’s page if one was selected. All other comments will be put in
-  the course section. The saveas attribute may only contain hyphens,
-  and latin1 alphanumerals (0-9, a-z, A-Z).
+  the course section. The save_as attribute will only contain hyphens,
+  and latin1 alphanumerals (0-9, a-z, A-Z). It is derived from the db
+  column and cannot be entered separately.
 * Next, add some courses and once done,
 * you can add professors and tutors to the course. Profs are “real”
   classes, so you can re-use them, but tutors are just a bunch of names

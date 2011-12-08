@@ -22,6 +22,7 @@ CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log',
 
 # load external rakefiles
 require 'rakefiles/export.rb'
+require 'rakefiles/omr-test-helper.rb'
 require 'custom_build/build.rb'
 
 # requires database
@@ -49,6 +50,7 @@ end
 # and language name. Returns the full filepath, but without the file
 # extension. Does not re-create existing files.
 def make_sample_sheet(form, lang)
+  # this is hardcoded throughout the project
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
@@ -57,7 +59,7 @@ def make_sample_sheet(form, lang)
 
   # PDFs are required for result generation and the posouts for OMR
   # parsing. Only skip if both files are present.
-  if File.exists?(filename+'.pdf') && File.exists?(filename+'.posout')
+  if File.exists?(filename+'.pdf') && File.exists?(filename+'.yaml')
     puts "#{filename}.pdf already exists. Skipping."
     return filename
   end
@@ -70,6 +72,7 @@ def make_sample_sheet(form, lang)
 
   puts "Wrote #{filename}.tex"
   Rake::Task[(filename + '.pdf').to_sym].invoke
+  `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
   filename
 end
 

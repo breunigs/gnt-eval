@@ -414,7 +414,7 @@ class PESTOmr < PESTDatabaseTools
     return 0 if c.rows*c.columns < 500*@dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
-    filename << "_" + group.saveas + ".jpg"
+    filename << "_" + group.save_as + ".jpg"
     debug "  Saving Comment Image: " + filename if @verbose
     c.write filename
 
@@ -460,7 +460,7 @@ class PESTOmr < PESTDatabaseTools
     return 0 if bp <= limit
 
     # Save the comment as extra file if possible/required
-    save_text_image(img_id, question.saveas, boxes)
+    save_text_image(img_id, question.save_as, boxes)
     return 1
   end
 
@@ -1037,8 +1037,8 @@ class PESTOmr < PESTDatabaseTools
     doc.pages.each do |p|
       next if p.questions.nil?
       p.questions.each do |q|
-        if q.saveas && q.saveas.scan(/[a-z0-9-]/i).join != q.saveas
-        debug "saveas attribute for #{@omrsheet} question #{q.db_column} contains invalid characters. Only a-z, A-Z, 0-9 and hyphens are allowed."
+        if q.save_as.empty?
+        debug "db_column attribute for #{@omrsheet} question #{q.db_column} contains only invalid characters or is empty. Only a-z, A-Z, 0-9 and hyphens are allowed, please include at least some in the db_column."
           exit 7
         end
         next if q.boxes.nil?
