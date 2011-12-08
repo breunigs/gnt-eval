@@ -915,6 +915,10 @@ class PESTOmr < PESTDatabaseTools
   # Checks for existing files and issues a warning if so. Returns a
   # list of non-existing files
   def remove_processed_images_from(files)
+    # don’t do anything in test mode because there is no database access
+    # and we want to test all files anyway
+    return files if @test_mode
+
     debug "Checking for existing files" if @verbose
 
     oldsize = files.size
@@ -1080,7 +1084,7 @@ class PESTOmr < PESTDatabaseTools
 
         opts.on("-v", "--verbose", "Print more output (sets cores=1)") { @verbose = true }
 
-        opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.", "Automatically activates debug database.") { @debug = true }
+        opts.on("-d", "--debug", "Specify if you want debug output as well.", "Will write a JPG file for each processed sheet to the working directory; marked with black percentage values, thresholds and selected fields.", "Be aware, that this makes processing about four times slower.", "Automatically activates debug database (may be overwritten by test mode)") { @debug = true }
 
         opts.on("-t", "--testmode", "Sets useful values for running tests.", "Disables database access and stops files from being moved to bizarre/.") { @test_mode = true }
 
