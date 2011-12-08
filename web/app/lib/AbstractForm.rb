@@ -18,6 +18,7 @@
 # Pest and eval.cls
 
 require 'prettyprint'
+require 'RandomUtils.rb'
 
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to
@@ -400,7 +401,8 @@ class AbstractForm
     q
   end
 
-  # find the question-object belonging to a db_column
+  # find the *first* question-object belonging to a db_column. There
+  # shouldn’t be any duplicate db_columns per form, but it may happen…
   def get_question(db_column)
     questions.find { |q| q.db_column == db_column }
   end
@@ -413,6 +415,24 @@ class AbstractForm
 
     # aber bitte ohne die ids und ohne @
     sio.gsub(/0x[^\s]*/,'').gsub(/@/,'')
+  end
+
+
+  # returns list of db dolumn names that are used more than once and the
+  # offending questions. returns empty hash if there aren’t any
+  # duplicates and something like this, if there are:
+  # { :offending_column => ["Question 1?", "Question 2?"] }
+  def get_duplicate_db_columns
+    h = {}
+    questions.collect { |q| q.db_column }.get_duplicates.each do |d|
+      h[d.to_sym] = questions.find_all { |q| q.db_column == d }.map { |q| q.text }
+    end
+    h
+  end
+
+  # returns true if there are any db columns used more than once
+  def has_duplicate_db_columns?
+    !questions.collect { |q| q.db_column }.get_duplicates.empty?
   end
 
   # returns the complete TeX code required to generate the form. If no

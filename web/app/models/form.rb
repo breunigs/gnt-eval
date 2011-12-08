@@ -40,8 +40,15 @@ class Form < ActiveRecord::Base
     end
   end
 
+  # returns true iff the form is a valid AbstractForm class. Nothing else is checked.
   def abstract_form_valid?
     abstract_form.is_a? AbstractForm
+  end
+
+  # runs all kinds of checks to see if the form is fine and ready to be used in the wild.
+  # currently checks: AbstractForm is valid; no duplicate db_columns
+  def form_checks_out?
+    abstract_form_valid? && !abstract_form.has_duplicate_db_columns?
   end
 
   # what languages does this form support? If it's a single language form, i.e. if no strings
@@ -53,6 +60,20 @@ class Form < ActiveRecord::Base
 
   def has_language? lang
     languages.include? lang.to_sym
+  end
+
+  # returns list of db dolumn names that are used more than once and the offending questions.
+  # returns empty hash if there aren’t any duplicates and something like this, if there are:
+  # { :offending_column => ["Question 1?", "Question 2?"] }
+  def get_duplicate_db_columns
+    return {} unless abstract_form_valid?
+    abstract_form.get_duplicate_db_columns
+  end
+
+  # returns true if there are any db columns used more than once
+  def has_duplicate_db_columns?
+    return false unless abstract_form_valid?
+    !abstract_form.get_duplicate_db_columns.empty?
   end
 
   # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
