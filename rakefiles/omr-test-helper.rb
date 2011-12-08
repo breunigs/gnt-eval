@@ -9,18 +9,18 @@ namespace :testhelper do
     puts
     Dir.chdir("tmp/sample_sheets") do
       Dir.glob("*.yaml") do |f|
-	f = f.gsub(/\.yaml$/, "")
-	next unless File.exist?("#{f}.pdf")
+        f = f.gsub(/\.yaml$/, "")
+        next unless File.exist?("#{f}.pdf")
 
-	unless File.exist?("#{f}.tif")
-	  puts
-	  puts "Now converting #{f}.pdf to tif"
-	  system("#{Scc[:convert]} -density 300 -colors 2 \"#{f}.pdf\" \"#{f}.tif\"")
-	end
+        unless File.exist?("#{f}.tif")
+          puts
+          puts "Now converting #{f}.pdf to tif"
+          system("#{Scc[:convert]} -compress LZW -density 300 -colors 2 \"#{f}.pdf\" \"#{f}.tif\"")
+        end
 
-	puts
-	puts "Now running OMR on #{f}.tif"
-	system("../../pest/omr2.rb -t -d -v -s \"#{f}.yaml\" -p . #{f}.tif")
+        puts
+        puts "Now running OMR on #{f}.tif"
+        system("../../pest/omr2.rb -t -d -v -s \"#{f}.yaml\" -p . #{f}.tif")
       end
     end
   end
