@@ -17,8 +17,10 @@
 # TODO: Remove "choice" from box if safe. First needs to be removed from
 # Pest and eval.cls
 
+
 require 'prettyprint'
-require 'RandomUtils.rb'
+cdir = File.dirname(__FILE__)
+require cdir + '/RandomUtils.rb'
 
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to
