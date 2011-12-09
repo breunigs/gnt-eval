@@ -67,8 +67,7 @@
 \newlength\tmpa
 \newlength\tmpb
 % used to store size of comment field
-\newlength\commentSizeA
-\newcounter{commentSizeB}
+\newlength\commentSize
 
 % shorthand to write information into posout file. If you wonder about the leading 'u's: it's not
 % possible to write leading spaces or #-signs using TeX. The latexfix.rb script replaces those
@@ -141,10 +140,19 @@
 
 \def\Source{}
 
-\def\SaveMyYPos{
+% saves the current coordinates into the YAML file as x and y variables
+\def\SavePos{
   \pdfsavepos
 	\wPosout{uuu x: \number\pdflastxpos}
 	\wPosout{uuu y: \number\pdflastypos}
+}
+
+% saves the current coordinates into the YAML file as width and height. Note that width and height
+% are confusing since actual coordinates are saved.
+\def\SavePosAsWH{
+  \pdfsavepos
+	\wPosout{uuu width: \number\pdflastxpos}
+	\wPosout{uuu height: \number\pdflastypos}
 }
 
 \def\tutorbox[#1][#2]{%
@@ -153,7 +161,7 @@
   \truncate{3cm}{#2}
 }
 
-\def\bx{\huge{$\Box$}\normalsize\SaveMyYPos}
+\def\bx{\huge{$\Box$}\normalsize\SavePos}
 
 % prints a box and stores its position in the posout file along with the given value. If no value
 % is given the global choiceCounter is incremented and its value is printed into the posout file
@@ -167,7 +175,7 @@
     \wPosout\expandafter{\saveText}
   }{\wPosout{uuu choice: "#1"}}
   \hspace{0.5em}
-  \huge{$\Box$}\normalsize\SaveMyYPos
+  \huge{$\Box$}\normalsize\SavePos
 }
 
 \def\bxss[#1]{%
@@ -175,7 +183,7 @@
   \wPosout{uu- !ruby/object:Box}
   \wPosout{uuu choice: "#1"}
   \hspace{-0.43cm}
-  \huge{$\Box$}\normalsize\SaveMyYPos
+  \huge{$\Box$}\normalsize\SavePos
 }
 
 \newcommand{\boxfixed}[2]{
@@ -737,9 +745,10 @@
 \NewDocumentCommand\comment{D<>{278} m m}{%
   \vspace{-1mm}
   % once with and once without units for the PDF output and posout file
-  \setlength{\commentSizeA}{10000sp*#1}
-  \setcounter{commentSizeB}{10000*#1}
+  \setlength{\commentSize}{10000sp*#1}
   \preventBreak{
+    % print the question text just for the sake of debugging
+    \wPosout{U ||| #2}
     \wPosout{u - !ruby/object:Question}
     \wPosout{uu choice: }
     \wPosout{uu db_column: "#3"}
@@ -748,25 +757,16 @@
     \separator{\arrayrulewidth}%
     \vspace{-3.4mm}%
     #2
-%    % measure line next to text
-%    \hspace*{0.5cm}%
-%    \wPosout{uu- !ruby/object:Box}%
-%    \wPosout{uuu type: start}%
-%    \wPosout{uuu height: 650000}%
-%    \SaveMyYPos\hfill%
-%    \wPosout{uu- !ruby/object:Box}%
-%    \wPosout{uuu type: end}%
-%    \SaveMyYPos\\%
 
     \wPosout{uu- !ruby/object:Box}%
-    \SaveMyYPos%
+    \wPosout{U absolute values; made before the comment box starts}%
+    \SavePos%
 
-    \fbox{\vbox to \commentSizeA {\vfil
+    \fbox{\vbox to \commentSize {\vfil
     \hbox to 189.7mm{}%
-    \vfil
+    \wPosout{U absolute values (yes, this is misleading!); made from within the box}%
+    \vfil\hfill\SavePosAsWH%
     }}
-    \wPosout\expandafter{uuu height: \arabic{commentSizeB}}
-    \wPosout{uuu width: 39020584}
   }
 }
 
