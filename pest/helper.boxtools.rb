@@ -37,24 +37,6 @@ end
 def splitBoxes(box, maxWidth, maxHeight)
   boxes = []
 
-  # Due problems in TeX in regard of getting the width of certain
-  # boxes, it's also possible to define a start box with top left
-  # coordinates and height. A later box will contain the top right
-  # coordinates and thus allows a complete box to be built.
-  if box.width.nil? && box.type == "start"
-    @temporaryBoxX=box.x
-    @temporaryBoxY=box.y
-    @temporaryBoxH=box.height
-    return []
-  end
-
-  if box.width.nil? && box.type == "end"
-    box.width = box.x - @temporaryBoxX
-    box.height = @temporaryBoxH
-    box.x = @temporaryBoxX
-    box.y = @temporaryBoxY
-  end
-
   # Split in width
   while box.width > maxWidth
     box.width -= maxWidth
