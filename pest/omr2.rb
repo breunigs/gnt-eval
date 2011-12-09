@@ -244,9 +244,10 @@ class PESTOmr < PESTDatabaseTools
       x, y = search_square_box(img_id, box)
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
-        debug "Couldn't find box for page=#{img_id} box=#{box.choice}"
-        debug "“#{question.qtext}”"
+        debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
+              " db_column=#{question.db_column}"
         debug "Assuming there is no box and no choice was made."
+        debug
         box.bp = 0
         next
       end
@@ -427,15 +428,39 @@ class PESTOmr < PESTDatabaseTools
   def process_text_box(img_id, question)
     # TWEAK HERE
     limit = 1000 * @dpifix
+    # the x,y coordinate is made before the box, so we need to account
+    # for the box border. It marks the top left corner.
+    addtox, addtoy = 5, 10
+    # the width,height are made inside the box, so we shouldn’t have to
+    # account for the box border. But it’s TeX we’re talking about, so
+    # we do have to take the vertical border into account. Note that
+    # width/height is actually a coordinate until we make it relative
+    # below
+    addtow, addtoh = -10, 0
+
     # TeX puts the boxes very thight to the top. Push them down a
     # a little.
-    movedown = 10
+    movedown = 0
 
     bp = 0
 
-    boxes = []
-    question.boxes.each { |box| boxes << splitBoxes(box, 150, 150) }
-    boxes.flatten!
+    ### FIXME: need to correct values first, then apply correction
+
+    # only take first box into account, multi-rectangle comments are not
+    # supported
+    b = question.boxes.first
+    # apply correction values and make width/height relative
+    b.x += addtox; b.y += addtoy
+    b.width += addtow - b.x; b.height += addtoh - b.y
+    # these dots should now be within the comment box's border
+    draw_dot(img_id, b.top_left, "red")
+    draw_dot(img_id, b.top_right, "red")
+    draw_dot(img_id, b.bottom_left, "red")
+    draw_dot(img_id, b.bottom_right, "red")
+
+    # split into smaller chunks, so we can skip the rest of the comment
+    # box once enough black pixels have been found
+    boxes = splitBoxes(b, 150, 100)
 
     boxes.each do |box|
       # correct skew
@@ -529,26 +554,26 @@ class PESTOmr < PESTDatabaseTools
       # TWEAK HERE
 
       # top right corner
-      x = search(i, [-1-200, 20], [-1, 20+150], :left, 30, true, true)
-      y = search(i, [-20-150, 1], [-20, 1+150], :down, 30, true, true)
+      x = search(i, [-1-200, 35], [-1, 35+150], :left, 30, true, true)
+      y = search(i, [-40-150, 1], [-40, 1+150], :down, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:tr => [x,y]}) unless [x, y].any_nil?
 
       # top left corner
-      x = search(i, [1, 20], [1+110, 20+150], :right, 30, true, true)
-      y = search(i, [20, 1], [20+150, 1+90], :down, 30, true, true)
+      x = search(i, [1, 35], [1+110, 35+150], :right, 30, true, true)
+      y = search(i, [40, 1], [40+150, 1+90], :down, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:tl => [x,y]}) unless [x, y].any_nil?
 
       # bottom left corner
-      x = search(i, [1, -60-150], [1+200, -40], :right, 30, true, true)
-      y = search(i, [20, -1-150], [20+150, -1], :up, 30, true, true)
+      x = search(i, [1, -50-150], [1+200, -30], :right, 30, true, true)
+      y = search(i, [40, -1-150], [40+150, -1], :up, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:bl => [x,y]}) unless [x, y].any_nil?
 
       # bottom right corner
-      x = search(i, [-1-200, -60-150], [-1, -40], :left, 30, true, true)
-      y = search(i, [-20-150, -1-150], [-20, -1], :up, 30, true, true)
+      x = search(i, [-1-200, -50-150], [-1, -30], :left, 30, true, true)
+      y = search(i, [-40-150, -1-150], [-40, -1], :up, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:br => [x,y]}) unless [x, y].any_nil?
 
@@ -728,7 +753,7 @@ class PESTOmr < PESTDatabaseTools
   # determined offset.
   def translate(img_id, coord)
     # TWEAK HERE
-    move_top = 91
+    move_top = 95
     move_left = 110
 
     o = @offset[img_id]
@@ -746,8 +771,8 @@ class PESTOmr < PESTDatabaseTools
     off_left = c[:tl].x * (1-py) + c[:bl].x * py
     off_right = c[:tr].x * (1-py) + c[:br].x * py
 
-    x =  coord.x - move_left + off_left # 0.9995
-    y = 0.997*(coord.y - move_top + off_top)
+    x = coord.x - move_left + off_left # 0.9995
+    y = coord.y - move_top + off_top # 0.997
 
     # draw_text(img_id, [x,y], "blue", asd.round_to(4))
 
