@@ -36,7 +36,7 @@ class Box
   # special value for easier LaTeX sheet generation, e.g. square or comment
   attr_accessor :type
 
-  # if this i a comment field, we need to know its height
+  # if this is a comment field, we need to know its height
   attr_accessor :height
 
   def initialize(c, t)
