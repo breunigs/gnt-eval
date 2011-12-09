@@ -29,9 +29,6 @@ class Box
   # size
   attr_accessor :width, :height
 
-  # what is the _meaning_ of this box
-  attr_accessor :text
-
   def is_checked?
     !is_checked.nil? && is_checked
   end
@@ -60,10 +57,20 @@ class Box
   end
   alias :tl :top_left
 
+  def top_right
+    [@x+@width, @y]
+  end
+  alias :tr :top_right
+
   def bottom_right
     [@x+@width, @y+@height]
   end
   alias :br :bottom_right
+
+  def bottom_left
+    [@x, @y+@height]
+  end
+  alias :bl :bottom_left
 end
 
 class Question
