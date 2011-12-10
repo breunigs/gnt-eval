@@ -13,7 +13,7 @@ module PESTDrawingTools
   end
 
   def draw_boilerplate(img_id, pwd, sheet, file)
-    text1 = "Blue: Search areas\ndark green lines: rotation visualization\ncheckboxes:\n  yellow = orig pos; cyan = pos after correction (might be hard to see, zoom in)\n  green = checked; orange = empty; red = overfull; strange green = barely checked  (box marks searched area, number is black%)\ntext boxes: values are black pixels so far; red = not enough yet; green = now enough; large green area = exported to file\ntext pages: no debug prints"
+    text1 = "Blue: Search areas\ndark green lines: rotation visualization\ncheckboxes:\n  yellow = orig pos; cyan = TeX correction\nscanning skew correction: not drawn\n  green = checked; orange = empty; red = overfull; strange green = barely checked  (box marks searched area, number is black%)\ntext boxes: values are black pixels so far; red = not enough yet; green = now enough; large green area = exported to file\ntext pages: no debug prints"
     text2 = "WDir: #{pwd}\nSheet: #{sheet}\nFile: #{file}"
     draw_text(img_id, [500, 40], "black", text1)
     draw_text(img_id, [1000, 40], "red", text2)
@@ -22,8 +22,7 @@ module PESTDrawingTools
   # draws the text at the given coord, optionally centering it
   def draw_text(img_id, coord, color, text, center = false)
     return if !@debug or coord.any_nil? or text.nil? or text.to_s.empty?
-    @draw[img_id].stroke_opacity(0)
-    @draw[img_id].stroke_width(0)
+    @draw[img_id].stroke('none')
     @draw[img_id].fill(color)
     @draw[img_id].fill_opacity(1)
     if center
@@ -39,8 +38,8 @@ module PESTDrawingTools
   # automatically to hint in which direction was being searched.
   def draw_search_box(img_id, tl, br, color, dir, with_text)
     return if !@debug or tl.any_nil? or br.any_nil?
-    t = { :right => "→ #{br.x}", :left => "← #{tl.x}",
-	  :up => "↑  #{tl.y}", :down => "↓  #{br.y}" }
+    t = { :right => "> #{br.x}", :left => "< #{tl.x}",
+	  :up => "^  #{tl.y}", :down => "v #{br.y}" }
     draw_transparent_box(img_id, tl, br, color, with_text ? t[dir] : "")
     tl.x = br.x if dir == :right
     br.x = tl.x if dir == :left
@@ -63,6 +62,17 @@ module PESTDrawingTools
     xmid = tl.x + (br.x - tl.x)/2.0
     ymid = tl.y + (br.y - tl.y)/2.0
     draw_text(img_id, [xmid, ymid], color, text, true)
+  end
+
+  # draws a colored solid box for the given coordinates to the
+  # image at @ilist[img_id].
+  def draw_solid_box(img_id, tl, br, color)
+    return if !@debug or tl.any_nil? or br.any_nil?
+    @draw[img_id].fill(color)
+    @draw[img_id].stroke(color)
+    @draw[img_id].fill_opacity(1)
+    @draw[img_id].stroke_opacity(1)
+    @draw[img_id].rectangle(tl.x, tl.y, br.x, br.y)
   end
 
   # draws a line from and to the given coordinates on @ilist[img_id].
