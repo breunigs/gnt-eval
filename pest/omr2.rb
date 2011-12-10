@@ -189,14 +189,19 @@ class PESTOmr < PESTDatabaseTools
   def search_square_box(img_id, box)
     # TWEAK HERE
     box.width, box.height = 40, 40
+    # TeX stores the box’s coordinates near its bottom right corner.
+    # This translation is static and thus different to the one introduced
+    # by imperfect scanning. Positive values move the box left/top.
+    moveleft, movetop = 53, 41
 
     # Original position as given by TeX
     draw_transparent_box(img_id, box.tl, box.br, "yellow")
+    # correct values to point to the box’s top left corner and print it
+    box.x -= moveleft; box.y -= movetop
+    draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
+    # still need to address scanning skew
     tl = correct(img_id, [box.x, box.y])
     box.x, box.y = tl.x, tl.y
-
-    # Where the box was put after correction
-    draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
 
     # Find the pre-printed box
     x = search(img_id, [box.tl.x-6, box.tl.y-10],
@@ -436,23 +441,22 @@ class PESTOmr < PESTDatabaseTools
     # we do have to take the vertical border into account. Note that
     # width/height is actually a coordinate until we make it relative
     # below
-    addtow, addtoh = -10, 0
+    addtow, addtoh = -10, 6
 
-    # TeX puts the boxes very thight to the top. Push them down a
-    # a little.
-    movedown = 0
-
+    # init that no black pixels have been found so far
     bp = 0
-
-    ### FIXME: need to correct values first, then apply correction
 
     # only take first box into account, multi-rectangle comments are not
     # supported
     b = question.boxes.first
-    # apply correction values and make width/height relative
-    b.x += addtox; b.y += addtoy
-    b.width += addtow - b.x; b.height += addtoh - b.y
-    # these dots should now be within the comment box's border
+    # apply correction values and make width/height relative. Note that
+    # TeX’s coordinates are from the lower left corner, but we use the
+    # top left corner. This is usually corrected when loading the YAML
+    # file, but since width/height are not supposed to be coordinates we
+    # have to do it by hand.
+    b.x += addtox; b.y += addtoy; b.width += addtow - b.x
+    b.height = PAGE_HEIGHT*@dpifix - b.height - b.y + addtoh
+    # in a perfect scan, the coordinates now mark the inside of the box
     draw_dot(img_id, b.top_left, "red")
     draw_dot(img_id, b.top_right, "red")
     draw_dot(img_id, b.bottom_left, "red")
@@ -466,12 +470,6 @@ class PESTOmr < PESTDatabaseTools
       # correct skew
       tl = correct(img_id, box.tl)
       br = correct(img_id, box.br)
-      tl.y, br.y = tl.y + movedown, br.y + movedown
-      # limit boxes to within the corners (only x direction for now)
-      c = @corners[img_id]
-      left = [c[:tl].x, c[:bl].x].max
-      right = [c[:tr].x, c[:br].x].min
-      tl.x, br.x = tl.x.limit(left, right), br.x.limit(left, right)
       # update box values
       box.x, box.y = tl.x, tl.y
       box.width, box.height =  br.x-tl.x, br.y-(tl.y)
@@ -490,22 +488,28 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # Saves a given area (in form of a boxes array) for the current image.
-  def save_text_image(img_id, save_as, boxes)
+  def save_text_image(img_id, save_as, boxes, use_page_width = true)
     return if save_as.nil? || save_as.empty?
     debug("    Saving Comment Image: #{save_as}", "save_image") if @verbose
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
     x, y, w, h = calculateBounds(boxes)
-    # include even more down the page, in case someone ignored the end
-    # of the text box
-    h += 40
-    @ilist[img_id].crop(x, y, w, h).minify.write filename
+    if use_page_width
+      img = @ilist[img_id].crop(0, y, PAGE_WIDTH, h, true).minify
+    else
+      img = @ilist[img_id].crop(x, y, w, h, true).minify
+    end
+    # add text about where to find the original file
+    @draw[999] = Magick::Draw.new
+    @draw[999].pointsize = 9*@dpifix
+    draw_solid_box(999, [0,0], [PAGE_WIDTH/2, 7], "white")
+    draw_text(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
+    @draw[999].draw(img)
+    # write out file
+    img.write filename
+
     if @debug
-      tl = [PAGE_WIDTH, PAGE_HEIGHT]
-      boxes.each do |b|
-        tl.x = [tl.x, b.x].min; tl.y = [tl.y, b.y].min
-      end
-      draw_text(img_id, tl, "green", "Saved as: #{filename}")
+      draw_text(img_id, [x,y], "green", "Saved as: #{filename}")
       draw_transparent_box(img_id, [x,y], [x+w,y+h], "#DBFFD8", "", true)
     end
     debug("    Saved Comment Image", "save_image") if @verbose
@@ -750,11 +754,13 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # translates (moves) a coordinate to the correct position using the
-  # determined offset.
+  # determined offset. In a perfectly scanned document, these values
+  # should be equal to the printed distances in the top left corner. You
+  # can use rake testhelper:debug_samplesheets to generate those.
   def translate(img_id, coord)
     # TWEAK HERE
-    move_top = 95
-    move_left = 110
+    move_top = 58
+    move_left = 62
 
     o = @offset[img_id]
     c = @corners[img_id]
@@ -771,8 +777,8 @@ class PESTOmr < PESTDatabaseTools
     off_left = c[:tl].x * (1-py) + c[:bl].x * py
     off_right = c[:tr].x * (1-py) + c[:br].x * py
 
-    x = coord.x - move_left + off_left # 0.9995
-    y = coord.y - move_top + off_top # 0.997
+    x = coord.x - move_left + off_left
+    y = coord.y - move_top + off_top
 
     # draw_text(img_id, [x,y], "blue", asd.round_to(4))
 

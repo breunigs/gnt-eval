@@ -161,7 +161,10 @@
   \truncate{3cm}{#2}
 }
 
-\def\bx{\huge{$\Box$}\normalsize\SavePos}
+% draws a checkbox and stores its position into the posout. Note that if you change this, ensure
+% the correction values in seee/pest/omr2.rb's function search_square_box are still valid. The
+% command currently gives the coordinates at the box's lower right corner.
+\def\bx{{\huge$\Box$}\SavePos}
 
 % prints a box and stores its position in the posout file along with the given value. If no value
 % is given the global choiceCounter is incremented and its value is printed into the posout file
@@ -767,6 +770,9 @@
     \wPosout{U absolute values (yes, this is misleading!); made from within the box}%
     \vfil\hfill\SavePosAsWH%
     }}
+    % keep this newline or otherwise the following pdf positions will be moved up for some
+    % reason
+
   }
 }
 
