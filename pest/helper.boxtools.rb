@@ -80,10 +80,11 @@ def calculateBounds(boxes, group = nil, borderLeft = 0)
 
   # FIX component will use the borderLeft to make space for drawing
   # the "no choice" option"
-  xmin -= (50 + borderLeft)
-  ymin -= 50
-  xmax += 50 + width
-  ymax += 50 + height
+  space_around = 20
+  xmin -= (space_around + borderLeft)
+  ymin -= space_around
+  xmax += space_around + width
+  ymax += space_around + height
 
   # Format: x, y, width, height
   return xmin, ymin, xmax-xmin, ymax-ymin
