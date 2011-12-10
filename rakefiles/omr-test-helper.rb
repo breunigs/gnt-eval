@@ -8,11 +8,7 @@ namespace :testhelper do
   end
 
   desc "debugs the sample sheets as if they were scanned so you can see if OMR is working correctly"
-  task :debug_samplesheets, :needs => 'pdf:samplesheets' do |t, a|
-    puts "NOTE: Old sample sheets will not be overwritten. If you updated them,"
-    puts "      remove the sample sheets directory first before running this."
-    puts
-    puts
+  task :debug_samplesheets, :needs => 'pdf:samplesheets' do
     Dir.chdir("tmp/sample_sheets") do
       Dir.glob("*.yaml") do |f|
         f = f.gsub(/\.yaml$/, "")
