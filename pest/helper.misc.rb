@@ -8,6 +8,20 @@
 # PEST components.
 
 cdir = File.dirname(__FILE__)
+
+# This allows loading the custom ImageMagick/RMagick version if it has
+# been built. We avoid starting rails (which is slow) by manually
+# defining RAILS_ROOT because we know where it is relative to this file.
+RAILS_ROOT = "#{cdir}/../web"
+class Rails
+  def self.root
+    RAILS_ROOT
+  end
+end
+require cdir + '/../lib/seee_config.rb'
+require Seee::Config.file_paths[:rmagick]
+
+
 require cdir + '/helper.constants.rb'
 
 class Array

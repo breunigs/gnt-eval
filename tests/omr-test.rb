@@ -21,12 +21,12 @@ Dir.chdir(cdir) do
   # check that OMR works
   (0..2).each do |i|
     $tests << "omr2.rb for test_#{i}"
-    system("cd .. && ./pest/omr2.rb -c 2 -t -d -o -s tests/test-images/test_#{i}.yaml -p tests/test-images/test_#{i}")
+    system("cd .. && ./pest/omr2.rb -c 2 -t -d -o -s tests/omr-test/test_#{i}.yaml -p tests/omr-test/test_#{i}")
     $failed_tests << $tests.last if $?.exitstatus != 0
   end
 
   # comapre the newly generated results to the stored reference files
-  Dir.glob("./test-images/test_*/*_reference.yaml").each do |cmp|
+  Dir.glob("./omr-test/test_*/*_reference.yaml").each do |cmp|
     ref = YAML::load(File.read(cmp))
     new = YAML::load(File.read(cmp.gsub("_reference", "")))
 
@@ -44,7 +44,7 @@ Dir.chdir(cdir) do
   end
 
   #~ $tests << "omr2.rb for test_0 with multicore and debug output"
-  #~ system("cd .. && ./pest/omr2.rb -d -c 2 -o -t -s tests/test-images/test_0.yaml -p tests/test-images/test_0")
+  #~ system("cd .. && ./pest/omr2.rb -d -c 2 -o -t -s tests/omr-test/test_0.yaml -p tests/omr-test/test_0")
   #~ $failed_tests << $tests.last if $?.exitstatus != 0
 end
 
