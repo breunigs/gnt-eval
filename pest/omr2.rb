@@ -320,7 +320,7 @@ class PESTOmr < PESTDatabaseTools
     # TeX’s coordinates are from the lower left corner, but we use the
     # top left corner. This is usually corrected when loading the YAML
     # file, but since width/height are not supposed to be coordinates we
-    # have to do it by hand.
+    # have to do it by hand. Grep this: WIDTH_HEIGHT_AS_COORDINATE
     b.x += addtox; b.y += addtoy; b.width += addtow - b.x
     b.height = PAGE_HEIGHT*@dpifix - b.height - b.y + addtoh
     # in a perfect scan, the coordinates now mark the inside of the box

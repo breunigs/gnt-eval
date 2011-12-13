@@ -21,7 +21,7 @@ end
 class CreateGroundTruths
   include PESTImageTools
 
-  WINTITLE_PREFIX = "Create ground truths | Hotkeys: E =empty; F =checked; V = overfull | lowercase also works"
+  WINTITLE_PREFIX = "Create ground truths | E =empty; F=checked; V=overfull"
 
   # finds all files that still need ground truths to be defined. Files
   # are returned as hash, with the key being the base YAML file and the
@@ -51,7 +51,10 @@ class CreateGroundTruths
       coord = correct(@page_index, [@box.x-40*1.5, @box.y-40]) + [40*2, 40*1.5]
       img = @ilist[@page_index].crop(*coord)
     else
-      pp @box
+      # width and height for comment boxes are actually coordinates, that
+      # need to be fixed. Grep this: WIDTH_HEIGHT_AS_COORDINATE
+      b.width -= b.x
+      b.height = PAGE_HEIGHT*@dpifix - b.height - b.y
       coord = correct(@page_index, [@box.x-50, @box.y-50]) + [@box.width+100, @box.height+100]
       img = @ilist[@page_index].crop(*coord)
     end
@@ -101,15 +104,29 @@ class CreateGroundTruths
     debug "Drew image to screen"
   end
 
-  # finds the next box which has not yet been processed
+  def set_window_title(page_index, boxes)
+    title = WINTITLE_PREFIX
+    # no undo possible on first and last box of image
+    notlast = (page_index+1<page_count || boxes.count > 1)
+    title += "; backspace=undo" if !@previous_box.nil? && notlast
+    title += " | #{File.basename(@img_path)}"
+    title += " | page #{page_index+1}/#{page_count}"
+    title += " | #{boxes.count} boxes left on this page"
+    @window.title = title
+  end
+
+  # finds the next box which has not yet been processed. Falls back to
+  # "process_next_file" if there are no more boxes for the curretnly
+  # loaded image.
   def find_next_box
     debug "Looking for box..."
     @yaml.pages.each_with_index do |page, page_index|
       @page_index = page_index
       boxes = page.questions.map { |q| q.boxes }.flatten.select { |b| b.value.nil? }
-      @window.title = WINTITLE_PREFIX + " | #{File.basename(@img_path)} | page #{page_index+1}/#{page_count} | #{boxes.count} boxes left on this page"
+      set_window_title(page_index, boxes)
       # skip page if boxes empty
       next if boxes.empty?
+      @previous_box = @box
       @box = boxes.first
       debug "Found box"
       draw_box_to_pixbuf
@@ -131,11 +148,15 @@ class CreateGroundTruths
     debug "Saved reference YAML for #{@img_path}"
   end
 
+  # loads the next image and determines standard correctional values
+  # (e.g. rotation) and also creates a new YAML file which may be
+  # filled with the reference values.
   def process_next_file
     return false if @files.empty? && @images.empty?
     if @images.empty?
       @yaml_path, @images = @files.shift
     end
+    @last_box = nil
     @img_path = @images.shift
 
     @yaml = load_yaml_sheet(@yaml_path)
@@ -164,6 +185,7 @@ class CreateGroundTruths
     true
   end
 
+  # create the keyboard shortcuts
   def create_accels
     @window.signal_connect "key_press_event" do |widget, event|
       g = Gdk::Keyval
@@ -172,14 +194,16 @@ class CreateGroundTruths
       debug "Detected Keypress"
       debug "pressed: #{k}     valid: e=#{g::GDK_e} f=#{g::GDK_f} 8=#{g::GDK_v}"
 
-      @box.value = 0 if k == g::GDK_e
-      @box.value = 1 if k == g::GDK_f
-      @box.value = 2 if k == g::GDK_v
+      @box.value = TEST_BOX_EMPTY if k == g::GDK_e
+      @box.value = TEST_BOX_CHECKED if k == g::GDK_f
+      @box.value = TEST_BOX_OVERFULL if k == g::GDK_v
+      @previous_box.value = nil if !@previous_box.nil? && k == g::GDK_BackSpace
 
       find_next_box
     end
   end
 
+  # create the window
   def create_window
     @window = Gtk::Window.new
     @window.resizable = true

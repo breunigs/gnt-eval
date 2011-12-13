@@ -44,3 +44,10 @@ PAGE_DIAG_ANGLE = Math.atan(PAGE_WIDTH/PAGE_HEIGHT)
 DESPERATE_MIN_FILL_GRADE = 2.7
 MIN_FILL_GRADE = 5
 MAX_FILL_GRADE = 80
+
+
+# These are used in the testing area to make it the code more human
+# readable and to unify the values.
+TEST_BOX_EMPTY = 0
+TEST_BOX_CHECKED = 1
+TEST_BOX_OVERFULL = 2
