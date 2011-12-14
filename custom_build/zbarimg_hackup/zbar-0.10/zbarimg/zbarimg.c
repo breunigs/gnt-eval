@@ -140,14 +140,14 @@ static int scan_image (const char *filename)
     }
 
     if(found == 0) {
-        printf("No barcodes found");
+        printf("No barcodes found\n");
         exit_code = 1;
         return -1;
     }
 
     // Turn the image if required
     if(needsTurn) {
-        //printf("    Rotating...");
+        //printf("    Rotating...\n");
         //fflush(stdout);
         for(seq = 0; seq < n; seq++) {
             if(!MagickSetIteratorIndex(images, seq) && dump_error(images))
@@ -161,7 +161,7 @@ static int scan_image (const char *filename)
     }
 
     if(needsFlip) {
-        //printf("    Flipping...");
+        //printf("    Flipping...\n");
         //fflush(stdout);
         // duplicate frames
         MagickAddImage(images, images);
@@ -178,7 +178,8 @@ static int scan_image (const char *filename)
     if(needsTurn || needsFlip) {
         //printf("   Saving...");
         //fflush(stdout);
-        MagickWriteImages(images,  NULL, 1);
+        if(!MagickWriteImages(images, NULL, 1) && dump_error(images))
+          return(-1);
     }
 
     DestroyMagickWand(images);
