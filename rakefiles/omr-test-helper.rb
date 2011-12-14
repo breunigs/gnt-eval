@@ -59,8 +59,9 @@ namespace :testhelper do
         bc = cmd("#{Scc[:zbar]} test_#{f}")
         if $?.exitstatus != 0 || bc.strip != "00000000"
           puts "ERROR:".bold
-          puts "Either zbarimg failed or has detected a wrong barcode."
-          puts "Detected Barcode: #{bc.strip}"
+          puts "Either zbarimg failed or has detected a wrong barcode.".bold
+          puts "Detected Barcode: #{bc.strip}".bold
+          pp `#{Scc[:zbar]} test_#{f}`
           fails += 1
           next
         end
@@ -68,7 +69,7 @@ namespace :testhelper do
         itest = cmd("#{Scc[:identify]} test_#{f}").split("\n").count
         if itest != iorig
           puts "ERROR".bold
-          puts "Processed file has #{itest} pages whereas it should have #{iorig}."
+          puts "Processed file has #{itest} pages whereas it should have #{iorig}.".bold
           fails += 1
           next
         end
