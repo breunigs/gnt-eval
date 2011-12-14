@@ -56,6 +56,7 @@ namespace :testhelper do
         puts
         f = f.gsub("orig_", "")
         system("#{Scc[:cp]} orig_#{f} test_#{f}")
+        system("#{Scc[:chmod]} +w test_#{f}")
         bc = cmd("#{Scc[:zbar]} test_#{f}")
         if $?.exitstatus != 0 || bc.strip != "00000000"
           puts "ERROR:".bold
