@@ -4,7 +4,7 @@ namespace :testhelper do
   # print and execute a command
   def cmd(line)
     puts line
-    system line
+    `#{line}`
   end
 
   desc "helps you create ground truths to test OMR against. Put the sheet into tests/omr-test/1234.yaml and images into tests/omr-test/1234/{images}"
@@ -47,30 +47,36 @@ namespace :testhelper do
     end
   end
 
-  desc "test if ZBar finds all barcodes and correctly alignes the pages"
+  desc "test if ZBar finds all barcodes and correctly aligns the pages"
   task :test_zbar do
     fails = 0
     Dir.chdir("tests/zbar-test") do
       Dir.glob("orig_*.tif") do |f|
+        puts
+        puts
         f = f.gsub("orig_", "")
         system("#{Scc[:cp]} orig_#{f} test_#{f}")
-        cmd("#{Scc[:zbar]} test_#{f}")
-        # if an image exceeds the dissimilarity threshold compare will exit with status 1. If the
-        # images are similar enough, it will return 0 and print the peak signal to noise ratio
-        # (PSNR) on the command line. For our purposes, the fail/doesn’t fail test should be enough.
-        cmd("#{Scc[:compare]} -dissimilarity-threshold 0.05 test_#{f} reference_#{f} diff_#{f}.jpg")
-        if $?.exitstatus == 0
-          puts "the result and reference file are very similar (less than 5% difference). Deleting temporary files."
-          system("rm -f test_#{f} diff_#{f}")
-        else
-          puts "WARNING: The result and reference file are quite different.".bold
-          puts "Please examine the files test_#{f} and reference_#{f}."
+        bc = cmd("#{Scc[:zbar]} test_#{f}")
+        if $?.exitstatus != 0 || bc.strip != "00000000"
+          puts "ERROR:".bold
+          puts "Either zbarimg failed or has detected a wrong barcode."
+          puts "Detected Barcode: #{bc.strip}"
           fails += 1
+          next
         end
-        puts
-        puts
+        iorig = cmd("#{Scc[:identify]} orig_#{f}").split("\n").count
+        itest = cmd("#{Scc[:identify]} test_#{f}").split("\n").count
+        if itest != iorig
+          puts "ERROR".bold
+          puts "Processed file has #{itest} pages whereas it should have #{iorig}."
+          fails += 1
+          next
+        end
+        cmd("rm test_#{f}")
       end
     end
+    puts
+    puts
     puts "#{fails} image(s) have failed the test. Please inspect the files." if fails > 0
   end
 end
