@@ -50,7 +50,7 @@ class Form < ActiveRecord::Base
   def form_checks_out?
     return false unless abstract_form_valid?
     return false if abstract_form.has_duplicate_db_columns?
-    return false if db_table.nil? || db.table_empty?
+    return false if db_table.nil? || db_table.empty?
 
     true
   end
