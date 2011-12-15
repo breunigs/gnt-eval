@@ -136,7 +136,7 @@
 \newcommand{\lecturerFirst}[1]{\def\lectFirst{#1}}
 
 % for simplicity
-\newcommand{\lecturer}{\lectFirst{} \lectLast{}}
+\newcommand{\lect}{\lectFirst{} \lectLast{}}
 
 % set output file
 \newwrite\posout
