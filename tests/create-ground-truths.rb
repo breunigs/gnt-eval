@@ -53,8 +53,8 @@ class CreateGroundTruths
     else
       # width and height for comment boxes are actually coordinates, that
       # need to be fixed. Grep this: WIDTH_HEIGHT_AS_COORDINATE
-      b.width -= b.x
-      b.height = PAGE_HEIGHT*@dpifix - b.height - b.y
+      @box.width -= @box.x
+      @box.height = PAGE_HEIGHT*@dpifix - @box.height - @box.y
       coord = correct(@page_index, [@box.x-50, @box.y-50]) + [@box.width+100, @box.height+100]
       img = @ilist[@page_index].crop(*coord)
     end
@@ -159,8 +159,9 @@ class CreateGroundTruths
     @last_box = nil
     @img_path = @images.shift
 
-    @yaml = load_yaml_sheet(@yaml_path)
     debug
+    debug "Using #{@yaml_path}"
+    @yaml = load_yaml_sheet(@yaml_path)
     debug "Now processing #{@img_path}"
     # load all pages of the image
     @ilist = Magick::ImageList.new(@img_path)
@@ -197,7 +198,10 @@ class CreateGroundTruths
       @box.value = TEST_BOX_EMPTY if k == g::GDK_e
       @box.value = TEST_BOX_CHECKED if k == g::GDK_f
       @box.value = TEST_BOX_OVERFULL if k == g::GDK_v
-      @previous_box.value = nil if !@previous_box.nil? && k == g::GDK_BackSpace
+      if !@previous_box.nil? && k == g::GDK_BackSpace
+        @previous_box.value = nil
+        @previous_box = nil
+      end
 
       find_next_box
     end
