@@ -280,7 +280,7 @@
 
 % prints data that identifies what/who is being evaluated
 \newcommand{\dataline}[3]{
-  \textbf{#1:} \vor \hfill\textbf{#2:} \lecturer \hfill\textbf{#3:} \sem \\[0.2em]
+  \textbf{#1:} \vor \hfill\textbf{#2:} \lect \hfill\textbf{#3:} \sem \\[0.2em]
 }
 
 
