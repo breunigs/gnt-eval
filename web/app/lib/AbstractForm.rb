@@ -85,11 +85,6 @@ class Question
   # boolean that tells if the answers below each question should be hidden
   attr_accessor :hide_answers
 
-  # FIXME: special care is depricated
-  # special care: boolean, true falls extra liebe benoetigt wird
-  # (tutoren, studienfach, semesterzahl)
-
-  attr_accessor :special_care
   attr_accessor :donotuse
 
   # FIXME: remove failchoice and nochoice
@@ -113,7 +108,7 @@ class Question
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
   # FIXME: now questions belong to sections. is there a way we could …
   def section
-    if @db_column.nil? || @special_care == 1
+    if @db_column.nil?
       return 'this is no question in a traditional sense'
     end
     first_letter = (@db_column.to_s)[0].chr
@@ -337,10 +332,6 @@ class Page
       @sections.collect {|s| s.questions}.flatten
     end
   end
-
-  def special_care_questions
-    questions.select { |q| q.special_care && q.special_care.to_i > 0 }
-  end
 end
 
 
@@ -396,13 +387,6 @@ class AbstractForm
   # direct access to questions
   def questions
     @pages.collect { |p| p.questions }.flatten
-  end
-
-  # returns all special care questions for that form
-  def special_care_questions
-    q = []
-    @pages.each { |p| q += p.special_care_questions }
-    q
   end
 
   # find the *first* question-object belonging to a db_column. There
@@ -513,8 +497,6 @@ class AbstractForm
     s << "\\vspace{0.8mm}"
     s << "\\dataline{#{I18n.t(:title)}}"
     s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
-    # print special questions
-    special_care_questions.each { |q| s << q.to_tex(lang, gender) }
     s << "\\vspace{-2.5mm}"
     s
   end
@@ -524,16 +506,13 @@ class AbstractForm
     pages.each_with_index do |p,i|
       b << p.tex_at_top.to_s
       p.sections.each do |s|
-        # skip special care questions. These are legacy ones and ought
-        # to be removed. Until this, let’s keep this magic. TODO
-        next if s.questions.find_all{|q| q.special_care != 1}.empty?
         b << ""
         b << "\\preventBreak{\n\\sect{#{s.any_title(lang)}}"
         b << s.answers(lang).map { |x| "[#{x}]" }.join unless s.answers(lang).nil?
         b << "\n"
         sect_open = true
         s.questions.each do |q|
-          next if (q.special_care == 1 || (not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
+          next if ((not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           quest = q.to_tex(lang, gender)
           # need to remove line breaks at the end to avoid spacing issues
           b << (sect_open ? quest.strip : quest)
