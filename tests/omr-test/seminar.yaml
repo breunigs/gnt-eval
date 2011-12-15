@@ -1,5 +1,5 @@
 --- !ruby/object:AbstractForm
-db_table: evaldaten_winter_11_0_sonja
+db_table: no_database_for_test_seminar_sheets
 pages: 
 - !ruby/object:Page 
   questions: 
@@ -11,31 +11,31 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "2"
       x: 21940173
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "3"
       x: 24867719
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "4"
       x: 27795265
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "5"
       x: 30722811
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "6"
       x: 33650357
-      y: 47449573
+      y: 47570572
     - !ruby/object:Box
       choice: "99"
       x: 36582565
-      y: 47458623
+      y: 47579622
 # wtf?-fix (see eval.cls) ||| Bitte gib Dein Studienfach an, innerhalb dessen Du diese Lehrveranstaltung besuchst:
   - !ruby/object:Question
     type: square
@@ -44,23 +44,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 45728086
+      y: 45879334
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 45728086
+      y: 45879334
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 45728086
+      y: 45879334
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 45728086
+      y: 45879334
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 45737136
+      y: 45888384
 # wtf?-fix (see eval.cls) ||| Bitte gib Dein Fachsemester in \emph  {diesem Studienfach} an:
   - !ruby/object:Question
     type: square
@@ -69,23 +69,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 43923271
+      y: 44104769
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 43923271
+      y: 44104769
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 43923271
+      y: 44104769
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 43923271
+      y: 44104769
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 43932321
+      y: 44113819
 # wtf?-fix (see eval.cls) ||| Ist diese Lehrveranstaltung f\IeC {\"u}r Dich eine \emph  {Pflichtveranstaltung}?
   - !ruby/object:Question
     type: square
@@ -94,15 +94,15 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 42118457
+      y: 42330203
     - !ruby/object:Box
       choice: "2"
       x: 24867720
-      y: 42118457
+      y: 42330203
     - !ruby/object:Box
       choice: "99"
       x: 36582570
-      y: 42127507
+      y: 42339253
 # wtf?-fix (see eval.cls) ||| \emph  {Bevor} Du diese Lehrveranstaltung besucht hast: Wie hoch war Dein Interesse am Thema des Seminars?
   - !ruby/object:Question
     type: square
@@ -111,27 +111,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 39789354
+      y: 40031350
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 39789354
+      y: 40031350
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 39789354
+      y: 40031350
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 39789354
+      y: 40031350
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 39789354
+      y: 40031350
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 39798404
+      y: 40040400
 # wtf?-fix (see eval.cls) ||| Die Lernziele wurden zu Beginn klar definiert.
   - !ruby/object:Question
     type: square
@@ -140,27 +140,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 37011812
+      y: 37284058
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 37011812
+      y: 37284058
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 37011812
+      y: 37284058
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 37011812
+      y: 37284058
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 37011812
+      y: 37284058
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 37020862
+      y: 37293108
 # wtf?-fix (see eval.cls) ||| Die Lehrveranstaltung ist klar strukturiert.
   - !ruby/object:Question
     type: square
@@ -169,27 +169,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 34766037
+      y: 35068532
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 34766037
+      y: 35068532
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 34766037
+      y: 35068532
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 34766037
+      y: 35068532
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 34766037
+      y: 35068532
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 34775087
+      y: 35077582
 # wtf?-fix (see eval.cls) ||| Der Lehrstoff wird in verst\IeC {\"a}ndlicher Weise vermittelt.
   - !ruby/object:Question
     type: square
@@ -198,27 +198,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 32436934
+      y: 32769679
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 32436934
+      y: 32769679
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 32436934
+      y: 32769679
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 32436934
+      y: 32769679
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 32436934
+      y: 32769679
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 32445984
+      y: 32778729
 # wtf?-fix (see eval.cls) ||| Es wird auf Fragen und Belange der Studierenden eingegangen.
   - !ruby/object:Question
     type: square
@@ -227,27 +227,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 30107831
+      y: 30470826
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 30107831
+      y: 30470826
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 30107831
+      y: 30470826
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 30107831
+      y: 30470826
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 30107831
+      y: 30470826
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 30116881
+      y: 30479876
 # wtf?-fix (see eval.cls) ||| Mein Lernzuwachs ist hoch.
   - !ruby/object:Question
     type: square
@@ -256,27 +256,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 27778729
+      y: 28171973
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 27778729
+      y: 28171973
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 27778729
+      y: 28171973
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 27778729
+      y: 28171973
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 27778729
+      y: 28171973
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 27787779
+      y: 28181023
 # wtf?-fix (see eval.cls) ||| Verglichen mit anderen Lehrveranstaltung ist mein Arbeitsaufwand f\IeC {\"u}r diese Lehrveranstaltung:
   - !ruby/object:Question
     type: square
@@ -285,27 +285,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 24476899
+      y: 24900393
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 24476899
+      y: 24900393
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 24476899
+      y: 24900393
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 24476899
+      y: 24900393
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 24476899
+      y: 24900393
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 24485949
+      y: 24909443
 # wtf?-fix (see eval.cls) ||| Falls Leistungspunkte (LP) vergeben werden: Verglichen mit den vergebenen LP ist mein tats\IeC {\"a}chlicher Arbeitsaufwand f\IeC {\"u}r diese Lehrveranstaltung (1 LP = 30 Stunden Arbeitsaufwand):
   - !ruby/object:Question
     type: square
@@ -314,27 +314,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 22755412
+      y: 23209155
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 22755412
+      y: 23209155
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 22755412
+      y: 23209155
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 22755412
+      y: 23209155
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 22755412
+      y: 23209155
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 22764462
+      y: 23218205
 # wtf?-fix (see eval.cls) ||| F\IeC {\"u}r die Vorbereitung investiere/investierte ich:
   - !ruby/object:Question
     type: square
@@ -343,27 +343,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 20429109
+      y: 20913102
     - !ruby/object:Box
       choice: "2"
       x: 22525684
-      y: 20429109
+      y: 20913102
     - !ruby/object:Box
       choice: "3"
       x: 26038740
-      y: 20429109
+      y: 20913102
     - !ruby/object:Box
       choice: "4"
       x: 29551796
-      y: 20429109
+      y: 20913102
     - !ruby/object:Box
       choice: "5"
       x: 33064852
-      y: 20429109
+      y: 20913102
     - !ruby/object:Box
       choice: "99"
       x: 36582571
-      y: 20438159
+      y: 20922152
 # wtf?-fix (see eval.cls) ||| Falls eine Hausarbeit angefertigt wird: F\IeC {\"u}r die Ausarbeitung ben\IeC {\"o}tige/ben\IeC {\"o}tigte ich:
   - !ruby/object:Question
     type: square
@@ -372,31 +372,31 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "2"
       x: 21940173
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "3"
       x: 24867719
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "4"
       x: 27795265
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "5"
       x: 30722811
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "6"
       x: 33650357
-      y: 18624294
+      y: 19138537
     - !ruby/object:Box
       choice: "99"
       x: 36582565
-      y: 18633344
+      y: 19147587
 # wtf?-fix (see eval.cls) ||| Ich wurde bei der Vorbereitung meines Vortrages gut betreut.
   - !ruby/object:Question
     type: square
@@ -405,23 +405,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 15322465
+      y: 15866957
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 15322465
+      y: 15866957
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 15322465
+      y: 15866957
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 15322465
+      y: 15866957
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 15331515
+      y: 15876007
 # wtf?-fix (see eval.cls) ||| Der Stoff ist der in mir zur Verf\IeC {\"u}gung stehenden Zeit gut darstellbar.
   - !ruby/object:Question
     type: square
@@ -430,23 +430,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 13600977
+      y: 14175718
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 13600977
+      y: 14175718
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 13600977
+      y: 14175718
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 13600977
+      y: 14175718
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 13610027
+      y: 14184768
 # wtf?-fix (see eval.cls) ||| Ich habe ausreichend Feedback bekommen.
   - !ruby/object:Question
     type: square
@@ -455,23 +455,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 11796162
+      y: 12401153
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 11796162
+      y: 12401153
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 11796162
+      y: 12401153
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 11796162
+      y: 12401153
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 11805212
+      y: 12410203
 # wtf?-fix (see eval.cls) ||| Welche Probleme gab es bei der Vorbereitung Deines Vortrages?
   - !ruby/object:Question
     type: square
@@ -480,31 +480,27 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 9991348
+      y: 10626588
     - !ruby/object:Box
       choice: "2"
-      x: 21940173
-      y: 9991348
+      x: 22525684
+      y: 10626588
     - !ruby/object:Box
       choice: "3"
-      x: 24867719
-      y: 9991348
+      x: 26038740
+      y: 10626588
     - !ruby/object:Box
       choice: "4"
-      x: 27795265
-      y: 9991348
+      x: 29551796
+      y: 10626588
     - !ruby/object:Box
       choice: "5"
-      x: 30722811
-      y: 9991348
-    - !ruby/object:Box
-      choice: "6"
-      x: 33650357
-      y: 9991348
+      x: 33064852
+      y: 10626588
     - !ruby/object:Box
       choice: "99"
-      x: 36582565
-      y: 10000398
+      x: 36582571
+      y: 10635638
 # wtf?-fix (see eval.cls) ||| Der/die Dozent/in setzt bei der Themenauswahl die richtigen Schwerpunkte.
   - !ruby/object:Question
     type: square
@@ -513,23 +509,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 5640942
+      y: 7355008
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 5640942
+      y: 7355008
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 5640942
+      y: 7355008
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 5640942
+      y: 7355008
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 5649992
+      y: 7364058
 # wtf?-fix (see eval.cls) ||| Die Vortr\IeC {\"a}ge sind inhaltlich gut aufeinander abgestimmt.
   - !ruby/object:Question
     type: square
@@ -538,27 +534,52 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 3919455
+      y: 5663770
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 3919455
+      y: 5663770
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 3919455
+      y: 5663770
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 3919455
+      y: 5663770
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 3928505
+      y: 5672820
 # wtf?-fix (see eval.cls) ||| Die verschiedenen Vortr\IeC {\"a}ge sind in den Anforderungen der (der Ausarbeitung) vergleichbar.
   - !ruby/object:Question
     type: square
     db_column: v25
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      x: 19007965
+      y: 3889205
+    - !ruby/object:Box
+      choice: "2"
+      x: 23403947
+      y: 3889205
+    - !ruby/object:Box
+      choice: "3"
+      x: 27795268
+      y: 3889205
+    - !ruby/object:Box
+      choice: "4"
+      x: 32186589
+      y: 3889205
+    - !ruby/object:Box
+      choice: "99"
+      x: 36582572
+      y: 3898255
+# wtf?-fix (see eval.cls) ||| Der/die Dozent/in war w\IeC {\"a}hrend der Vortr\IeC {\"a}ge ausreichend anwesend und aufmerksam.
+  - !ruby/object:Question
+    type: square
+    db_column: v15
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -580,34 +601,9 @@ pages:
       choice: "99"
       x: 36582572
       y: 2123690
-# wtf?-fix (see eval.cls) ||| Der/die Dozent/in war w\IeC {\"a}hrend der Vortr\IeC {\"a}ge ausreichend anwesend und aufmerksam.
+# wtf?-fix (see eval.cls) ||| Wie h\IeC {\"a}ufig hat der/die Dozent/in fragend und korrigierend in die Vortr\IeC {\"a}ge eingegriffen?
 - !ruby/object:Page
   questions:
-  - !ruby/object:Question
-    type: square
-    db_column: v15
-    boxes:
-    - !ruby/object:Box
-      choice: "1"
-      x: 19007965
-      y: 52881341
-    - !ruby/object:Box
-      choice: "2"
-      x: 23403947
-      y: 52881341
-    - !ruby/object:Box
-      choice: "3"
-      x: 27795268
-      y: 52881341
-    - !ruby/object:Box
-      choice: "4"
-      x: 32186589
-      y: 52881341
-    - !ruby/object:Box
-      choice: "99"
-      x: 36582572
-      y: 52890391
-# wtf?-fix (see eval.cls) ||| Wie h\IeC {\"a}ufig hat der/die Dozent/in fragend und korrigierend in die Vortr\IeC {\"a}ge eingegriffen?
   - !ruby/object:Question
     type: square
     db_column: v19
@@ -615,23 +611,48 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 51123673
+      y: 52881341
     - !ruby/object:Box
       choice: "2"
       x: 24867720
-      y: 51123673
+      y: 52881341
     - !ruby/object:Box
       choice: "3"
       x: 30722813
-      y: 51123673
+      y: 52881341
     - !ruby/object:Box
       choice: "99"
       x: 36582569
-      y: 51132723
+      y: 52890391
 # wtf?-fix (see eval.cls) ||| Ich habe die Vortr\IeC {\"a}ge aktiv verfolgt.
   - !ruby/object:Question
     type: square
     db_column: v17
+    boxes:
+    - !ruby/object:Box
+      choice: "1"
+      x: 19007965
+      y: 51123673
+    - !ruby/object:Box
+      choice: "2"
+      x: 23403947
+      y: 51123673
+    - !ruby/object:Box
+      choice: "3"
+      x: 27795268
+      y: 51123673
+    - !ruby/object:Box
+      choice: "4"
+      x: 32186589
+      y: 51123673
+    - !ruby/object:Box
+      choice: "99"
+      x: 36582572
+      y: 51132723
+# wtf?-fix (see eval.cls) ||| Ich habe im Seminar \IeC {\"u}ber meinen eigenen Vortrag hinaus etwas gelernt.
+  - !ruby/object:Question
+    type: square
+    db_column: v18
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -653,31 +674,6 @@ pages:
       choice: "99"
       x: 36582572
       y: 49375055
-# wtf?-fix (see eval.cls) ||| Ich habe im Seminar \IeC {\"u}ber meinen eigenen Vortrag hinaus etwas gelernt.
-  - !ruby/object:Question
-    type: square
-    db_column: v18
-    boxes:
-    - !ruby/object:Box
-      choice: "1"
-      x: 19007965
-      y: 47608337
-    - !ruby/object:Box
-      choice: "2"
-      x: 23403947
-      y: 47608337
-    - !ruby/object:Box
-      choice: "3"
-      x: 27795268
-      y: 47608337
-    - !ruby/object:Box
-      choice: "4"
-      x: 32186589
-      y: 47608337
-    - !ruby/object:Box
-      choice: "99"
-      x: 36582572
-      y: 47617387
 # wtf?-fix (see eval.cls) ||| Die Anforderungen in diesem Seminar sind:
   - !ruby/object:Question
     type: square
@@ -686,19 +682,19 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 44877942
+      y: 46635610
     - !ruby/object:Box
       choice: "2"
       x: 24867720
-      y: 44877942
+      y: 46635610
     - !ruby/object:Box
       choice: "3"
       x: 30722813
-      y: 44877942
+      y: 46635610
     - !ruby/object:Box
       choice: "99"
       x: 36582569
-      y: 44886992
+      y: 46644660
 # wtf?-fix (see eval.cls) ||| Warum hast du genau dieses Seminar gew\IeC {\"a}hlt?
   - !ruby/object:Question
     type: square
@@ -707,24 +703,24 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 43203601
+      y: 44961269
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 43203601
+      y: 44961269
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 43203601
+      y: 44961269
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 43203601
+      y: 44961269
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 43212651
-# wtf?-fix (see eval.cls) ||| Welche Erwartung hattest Du an die Ausrichtung des Seminars?
+      y: 44970319
+# wtf?-fix (see eval.cls) ||| Welche Erwartung hattest du an das Seminar?
   - !ruby/object:Question
     type: square
     db_column: v2
@@ -732,23 +728,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 40921645
+      y: 42679313
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 40921645
+      y: 42679313
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 40921645
+      y: 42679313
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 40921645
+      y: 42679313
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 40930695
+      y: 42688363
 # wtf?-fix (see eval.cls) ||| Ich w\IeC {\"u}rde ein Seminar mit diesem Thema weiterempfehlen.
   - !ruby/object:Question
     type: square
@@ -757,15 +753,15 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 38639689
+      y: 40921645
     - !ruby/object:Box
       choice: "2"
       x: 24867720
-      y: 38639689
+      y: 40921645
     - !ruby/object:Box
       choice: "99"
       x: 36582570
-      y: 38648739
+      y: 40930695
 # wtf?-fix (see eval.cls) ||| Ich w\IeC {\"u}rde erneut ein Seminar bei diesem/dieser Dozent/in besuchen.
   - !ruby/object:Question
     type: square
@@ -774,15 +770,15 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 36882021
+      y: 39163977
     - !ruby/object:Box
       choice: "2"
       x: 24867720
-      y: 36882021
+      y: 39163977
     - !ruby/object:Box
       choice: "99"
       x: 36582570
-      y: 36891071
+      y: 39173027
 # wtf?-fix (see eval.cls) ||| Der/die Dozent/in verh\IeC {\"a}lt sich den Studierenden gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
@@ -791,23 +787,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 34151626
+      y: 36433582
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 34151626
+      y: 36433582
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 34151626
+      y: 36433582
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 34151626
+      y: 36433582
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 34160676
+      y: 36442632
 # wtf?-fix (see eval.cls) ||| Die Studierenden verhalten sich dem/der Dozent/in gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
@@ -816,23 +812,23 @@ pages:
     - !ruby/object:Box
       choice: "1"
       x: 19007965
-      y: 32477285
+      y: 34759241
     - !ruby/object:Box
       choice: "2"
       x: 23403947
-      y: 32477285
+      y: 34759241
     - !ruby/object:Box
       choice: "3"
       x: 27795268
-      y: 32477285
+      y: 34759241
     - !ruby/object:Box
       choice: "4"
       x: 32186589
-      y: 32477285
+      y: 34759241
     - !ruby/object:Box
       choice: "99"
       x: 36582572
-      y: 32486335
+      y: 34768291
 # ||| Zus\IeC {\"a}tzliche Anmerkungen zum Seminar (falls ja, bitte in Stichworten):
   - !ruby/object:Question
     choice: 
@@ -842,7 +838,7 @@ pages:
     - !ruby/object:Box
 # absolute values; made before the comment box starts
       x: 1678211
-      y: 30814326
+      y: 33096282
 # absolute values (yes, this is misleading!); made from within the box
       width: 37557133
-      height: 27745968
+      height: 30027924

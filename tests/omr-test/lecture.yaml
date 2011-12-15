@@ -1,5 +1,5 @@
 --- !ruby/object:AbstractForm
-db_table: evaldaten_Herbst_11_0_sonja
+db_table: no_database_for_test_lecture_sheets
 pages: 
 - !ruby/object:Page 
   questions: 
