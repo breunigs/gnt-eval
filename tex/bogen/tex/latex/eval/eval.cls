@@ -132,8 +132,8 @@
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 \newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
-\newcommand{\lecturerLast}[1]{\def\lectFirst{#1}}
-\newcommand{\lecturerFirst}[1]{\def\lectLast{#1}}
+\newcommand{\lecturerLast}[1]{\def\lectLast{#1}}
+\newcommand{\lecturerFirst}[1]{\def\lectFirst{#1}}
 
 % for simplicity
 \newcommand{\lecturer}{\lectFirst{} \lectLast{}}
