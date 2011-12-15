@@ -95,7 +95,8 @@ def make_pdf_for(s, cp, dirname)
     h << cp.course.form.abstract_form.to_tex(
       cp.course.language,
       cp.course.title,
-      cp.prof.fullname,
+      cp.prof.firstname,
+      cp.prof.lastname,
       cp.prof.gender,
       cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
       s.title,

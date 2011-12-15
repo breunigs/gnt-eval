@@ -127,12 +127,16 @@
 
 
 % let the user store data using these commands
-\newcommand{\dozent}[1]{\def\doz{#1}}
 \newcommand{\vorlesung}[1]{\def\vor{#1}}
 \newcommand{\semester}[1]{\def\sem{#1}}
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
 \newcommand{\tutoren}[1]{\def\tut{#1}}
 \newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
+\newcommand{\lecturer_last}[1]{\def\lect_first{#1}}
+\newcommand{\lecturer_first}[1]{\def\lect_last{#1}}
+
+% for simplicity
+\newcommand{\lecturer}{\lect_first{} \lect_last{}}
 
 % set output file
 \newwrite\posout
@@ -276,7 +280,7 @@
 
 % prints data that identifies what/who is being evaluated
 \newcommand{\dataline}[3]{
-  \textbf{#1:} \vor \hfill\textbf{#2:} \doz \hfill\textbf{#3:} \sem \\[0.2em]
+  \textbf{#1:} \vor \hfill\textbf{#2:} \lecturer \hfill\textbf{#3:} \sem \\[0.2em]
 }
 
 
