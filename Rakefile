@@ -56,15 +56,17 @@ def make_sample_sheet(form, lang)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
   #hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
+  form_misses_files = !File.exist?(filename+'.pdf') || !File.exist?(filename+'.yaml')
   # see if the form is newer than any of the files
-  form_has_changed = form.updated_at > File.mtime(filename+'.pdf') \
+  form_needs_regen = form_misses_files \
+                      || form.updated_at > File.mtime(filename+'.pdf') \
                       || form.updated_at > File.mtime(filename+'.yaml')
 
 
   # PDFs are required for result generation and the posouts for OMR
   # parsing. Only skip if both files are present and newer than the
   # form itself.
-  if !form_has_changed && File.exists?(filename+'.pdf') && File.exists?(filename+'.yaml')
+  if !form_needs_regen && File.exists?(filename+'.pdf') && File.exists?(filename+'.yaml')
     puts "#{filename}.pdf already exists. Skipping."
     return filename
   end
