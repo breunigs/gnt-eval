@@ -48,7 +48,11 @@ class Form < ActiveRecord::Base
   # runs all kinds of checks to see if the form is fine and ready to be used in the wild.
   # currently checks: AbstractForm is valid; no duplicate db_columns
   def form_checks_out?
-    abstract_form_valid? && !abstract_form.has_duplicate_db_columns?
+    return false unless abstract_form_valid?
+    return false if abstract_form.has_duplicate_db_columns?
+    return false if db_table.nil? || db.table_empty?
+
+    true
   end
 
   # what languages does this form support? If it's a single language form, i.e. if no strings
