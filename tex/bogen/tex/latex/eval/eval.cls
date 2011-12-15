@@ -746,7 +746,7 @@
 % comment field. Usage:
 % \comment<HEIGHT>{QUESTION}{SAVE_AS_POSTFIX_AND_DB_COLUMN}
 \NewDocumentCommand\comment{D<>{278} m m}{%
-  \vspace{-1mm}
+  \vspace{-1.45mm}
   % once with and once without units for the PDF output and posout file
   \setlength{\commentSize}{10000sp*#1}
   \preventBreak{
@@ -757,7 +757,7 @@
     \wPosout{uu db_column: "#3"}
     \wPosout{uu type: text}
     \wPosout{uu boxes:}%
-    \separator{\arrayrulewidth}%
+    \separator{0.9\arrayrulewidth}%
     \vspace{-3.4mm}%
     #2
 
