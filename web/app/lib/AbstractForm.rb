@@ -451,8 +451,8 @@ class AbstractForm
 
     # form header and preamble
     tex << "\\documentclass[#{babelclass(lang)}]{eval}\n"
-    tex << "\\lecturer_first{#{lecturer_first.escape_for_tex}}\n"
-    tex << "\\lecturer_last{#{lecturer_last.escape_for_tex}}\n"
+    tex << "\\lecturerFirst{#{lecturer_first.escape_for_tex}}\n"
+    tex << "\\lecturerLast{#{lecturer_last.escape_for_tex}}\n"
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
     tex << "\\semester{#{semester.escape_for_tex}}\n"
