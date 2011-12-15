@@ -35,6 +35,7 @@ require cdir + '/helper.boxtools.rb'
 require cdir + '/helper.database.rb'
 require cdir + '/helper.drawing.rb'
 require cdir + '/helper.constants.rb'
+require cdir + '/helper.image.rb'
 
 require cdir + '/../lib/AbstractForm.rb'
 require cdir + '/helper.AbstractFormExtended.rb'
@@ -302,13 +303,11 @@ class PESTOmr < PESTDatabaseTools
     limit = 1000 * @dpifix
     # the x,y coordinate is made before the box, so we need to account
     # for the box border. It marks the top left corner.
-    addtox, addtoy = 5, 10
-    # the width,height are made inside the box, so we shouldn’t have to
-    # account for the box border. But it’s TeX we’re talking about, so
-    # we do have to take the vertical border into account. Note that
-    # width/height is actually a coordinate until we make it relative
-    # below
-    addtow, addtoh = -10, 6
+    addtox, addtoy = 15, 15
+    # the width,height are made inside the box, so we don’t have to
+    # account for the box border. Note that width/height is actually a
+    # coordinate until we make it relative below
+    addtow, addtoh = 15, 1
 
     # init that no black pixels have been found so far
     bp = 0

@@ -766,9 +766,9 @@
     \SavePos%
 
     \fbox{\vbox to \commentSize {\vfil
-    \hbox to 189.7mm{}%
     \wPosout{U absolute values(!) (grep this: WIDTH_HEIGHT_AS_COORDINATE); made from within the box}%
-    \vfil\hfill\SavePosAsWH%
+    \vfil
+    \hbox to 189.7mm{\hfill\SavePosAsWH}%
     }}
     % keep this newline or otherwise the following pdf positions will be moved up for some
     % reason
