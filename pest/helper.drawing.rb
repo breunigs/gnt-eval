@@ -19,9 +19,10 @@ module PESTDrawingTools
     draw_text(img_id, [1000, 40], "red", text2)
   end
 
-  # draws the text at the given coord, optionally centering it
-  def draw_text(img_id, coord, color, text, center = false)
-    return if !@debug or coord.any_nil? or text.nil? or text.to_s.empty?
+  # draws the text at the given coord regardless of debug mode.
+  # Optionally centering it.
+  def draw_text!(img_id, coord, color, text, center = false)
+    return if coord.any_nil? or text.nil? or text.to_s.empty?
     @draw[img_id].stroke('none')
     @draw[img_id].fill(color)
     @draw[img_id].fill_opacity(1)
@@ -33,9 +34,16 @@ module PESTDrawingTools
     end
   end
 
+  # draws the text at the given coord only if in debug mode.
+  # Optionally centering it.
+  def draw_text(img_id, coord, color, text, center = false)
+    draw_text!(img_id, coord, color, text, center) if @debug
+  end
+
   # draws a transparent rectangle for the area and highlights one side
   # of the border, depending on search direction. Also inserts an arrow
-  # automatically to hint in which direction was being searched.
+  # automatically to hint in which direction was being searched.  Only
+  # draws when in debug mode.
   def draw_search_box(img_id, tl, br, color, dir, with_text)
     return if !@debug or tl.any_nil? or br.any_nil?
     t = { :right => "> #{br.x}", :left => "< #{tl.x}",
@@ -50,7 +58,7 @@ module PESTDrawingTools
 
   # draws a colored transparent box for the given coordinates to the
   # image at @ilist[img_id]. If text is given, it will be drawn in the
-  # approx. center of the box.
+  # approx. center of the box. Only draws when in debug mode.
   def draw_transparent_box(img_id, tl, br, color, text = nil, border = false)
     return if !@debug or tl.any_nil? or br.any_nil?
     @draw[img_id].fill(color)
@@ -64,10 +72,16 @@ module PESTDrawingTools
     draw_text(img_id, [xmid, ymid], color, text, true)
   end
 
-  # draws a colored solid box for the given coordinates to the
-  # image at @ilist[img_id].
+  # draws a colored solid box for the given coordinates to the image at
+  # @ilist[img_id] only if in debug mode.
   def draw_solid_box(img_id, tl, br, color)
-    return if !@debug or tl.any_nil? or br.any_nil?
+    draw_solid_box!(img_id, tl_br, color) if @debug
+  end
+
+  # draws a colored solid box for the given coordinates to the image at
+  # @ilist[img_id] regardless if in debug mode or not
+  def draw_solid_box!(img_id, tl, br, color)
+    return if tl.any_nil? or br.any_nil?
     @draw[img_id].fill(color)
     @draw[img_id].stroke(color)
     @draw[img_id].fill_opacity(1)
@@ -75,7 +89,8 @@ module PESTDrawingTools
     @draw[img_id].rectangle(tl.x, tl.y, br.x, br.y)
   end
 
-  # draws a line from and to the given coordinates on @ilist[img_id].
+  # draws a line from and to the given coordinates on @ilist[img_id]
+  # only if in debug mode.
   def draw_line(img_id, top_left, bottom_right, color)
     return if !@debug || top_left.any_nil? || bottom_right.any_nil?
     @draw[img_id].stroke(color)
@@ -85,6 +100,7 @@ module PESTDrawingTools
   end
 
   # draws a small dot (actually a circle) at the specified coordinates
+  # only if in debug mode.
   # coord: top, left
   def draw_dot(img_id, coord, color)
     return if !@debug or coord.any_nil?
