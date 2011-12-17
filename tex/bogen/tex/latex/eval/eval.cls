@@ -42,8 +42,9 @@
 
 % choice counter, used to increment each answer box by one. Reset at the start of \quest
 \newcounter{choiceCounter}
-% answer counter, used to count the # of answers. Currently only used to be able to print out the
-% db field for multiple choice questions correctly. Reset at the end of \quest.
+% answer counter, used to count the # of answers. Currently used to be able to print out the
+% db field for multiple choice questions correctly and to be able to identify which of the boxes
+% is the last one. Reset at the end of \quest.
 \newcounter{answerCounter}
 % same thing, but for rows. Currently unused, but stays because it might be useful.
 \newcounter{rowCounter}
@@ -68,6 +69,8 @@
 \newlength\tmpb
 % used to store size of comment field
 \newlength\commentSize
+% used to store the size of the last-checkbox-as-textbox
+\newlength\lastBoxSize
 
 % shorthand to write information into posout file. If you wonder about the leading 'u's: it's not
 % possible to write leading spaces or #-signs using TeX. The latexfix.rb script replaces those
@@ -168,45 +171,47 @@
 % draws a checkbox and stores its position into the posout. Note that if you change this, ensure
 % the correction values in seee/pest/omr2.rb's function search_square_box are still valid. The
 % command currently gives the coordinates at the box's lower right corner.
+% Does not save any choice attribute. Currently only used to print the tutor table.
 \def\bx{{\huge$\Box$}\SavePos}
 
+\newboolean{lastBox}
 % prints a box and stores its position in the posout file along with the given value. If no value
 % is given the global choiceCounter is incremented and its value is printed into the posout file
 %  instead.
 \newcommand{\bxs}[1][]{%
   \vspace{-0.8em}
   \wPosout{uu- !ruby/object:Box}
+  % no argument given, so auto-count
   \IfStrEq{#1}{}{
     \stepcounter{choiceCounter}
     \edef\saveText{uuu choice: "\arabic{choiceCounter}"}
     \wPosout\expandafter{\saveText}
-  }{\wPosout{uuu choice: "#1"}}
+    % is this the last checkbox?
+    \IfStrEq{\arabic{choiceCounter}}{\arabic{answerCounter}}
+      {\setboolean{lastBox}{true}}
+      {\setboolean{lastBox}{false}}
+  }{\wPosout{uuu choice: "#1"}\setboolean{lastBox}{false}}
   \hspace{0.5em}
-  \huge{$\Box$}\normalsize\SavePos
-}
+  \ifthenelse{\boolean{lastIsTextbox}}{% check for last box
+    \ifthenelse{\boolean{lastBox}}{% make it a textbox... sort of
+      \vspace*{-1mm} % don't kill that newline
 
-\def\bxss[#1]{%
-  \vspace{-0.8em}
-  \wPosout{uu- !ruby/object:Box}
-  \wPosout{uuu choice: "#1"}
-  \hspace{-0.43cm}
-  \huge{$\Box$}\normalsize\SavePos
-}
-
-\newcommand{\boxfixed}[2]{
-  \bxss[#2]
-  \makebox[2.31cm][l]{\truncate{2.31cm}{\raisebox{0.4ex}{#2}}}
-  \makebox[0.05cm]{}
-}
-
-\newcommand{\boxfixedempty}{
-  \phantom{\bxss[]}
-  \makebox[2.31cm][l]{}
-  \makebox[0.05cm]{}
-}
-
-\newcommand{\boxvariable}[2]{
-  \bxss[#1]\raisebox{0.4ex}{#2}
+      \wPosout{uuu width: \number\lastBoxSize}
+      % 15mm is the amount of space that fits any column. Ideally the
+      % box would auto-size to the space available, but this is not
+      % possible yet.
+      \begin{minipage}{\lastBoxSize}%
+        \hspace*{\lastBoxSize}%
+        \llap{\smash{\framebox[\lastBoxSize]{\vbox to 1.2mm{}}}}%
+        \SavePos%
+      \end{minipage}
+      \vspace*{-5mm}
+    }{ % not the last checkbox, so simply print a normal box
+      \bx
+    }
+  }{ % all checkboxes are normal, no need for fancy stuff
+    \bx
+  }
 }
 
 % writes the posout information for multiple choice questions give the database prefix
@@ -354,6 +359,7 @@
 \newboolean{single}
 \newboolean{noanswer}
 \newboolean{printAnswers}
+\newboolean{lastIsTextbox}
 
 % shorthand for the multirow command in each table. It only spans one row, which makes it look
 % superflous. However, if removed the question text will expand the first row instead of spreading
@@ -568,7 +574,7 @@
 \newcommand{\tabSix}[8]{
   \def\tbl{\tabHeadSixAnsw
     \tabSubHeader[#1]
-    \questText{#2}   & \bxs       & \bxs        & \bxs        &  \bxs        & \bxs        &  \bxs        & \\
+    \questText{#2}   & \bxs       & \bxs        & \bxs        & \bxs         & \bxs        &  \bxs        & \\
                      & \aText{#3} & \aText{#4}  & \aText{#5}  & \aText{#6}   & \aText{#7}  &  \aText{#8}  &
     \hasMoreAnswers
   \end{tabular}}
@@ -579,7 +585,7 @@
 \newcommand{\tabSeven}[9]{
   \def\tbl{\tabHeadSevenAnsw
     \tabSubHeader[#1]
-    \questText{#2}  & \bxs        & \bxs        & \bxs        &  \bxs        & \bxs        & \bxs        & \bxs           &\\
+    \questText{#2}  & \bxs        & \bxs        & \bxs        & \bxs         & \bxs        & \bxs        & \bxs           &\\
                     & \aText{#3}  & \aText{#4}  & \aText{#5}  & \aText{#6}   & \aText{#7}  & \aText{#8}  & \aText{#9}     &
     \hasMoreAnswers
   \end{tabular}}
@@ -607,6 +613,7 @@
   % set defaults
   \setboolean{single}{true}
   \setboolean{noanswer}{true}
+  \setboolean{lastIsTextbox}{false}
   \setboolean{printAnswers}{true}
   \setcounter{choiceCounter}{0}
 
@@ -615,24 +622,23 @@
   \IfSubStr{#1}{noanswer}{\setboolean{noanswer}{true}}{\setboolean{noanswer}{false}}
   \IfSubStr{#1}{printAnswers}{\setboolean{printAnswers}{true}}{}
   \IfSubStr{#1}{hideAnswers}{\setboolean{printAnswers}{false}}{}
+  \IfSubStr{#1}{lastIsTextbox}{\setboolean{lastIsTextbox}{true}}{}
 
   % move question closer to the previous one
   %\vspace*{-3.5mm}
 
-  %This is to test if we have a Multiple Choice Question
-  \ifthenelse{\boolean{single}}{}{
-    \IfNoValueTF{#9}{
-    \IfNoValueTF{#8}{
-    \IfNoValueTF{#7}{
-    \IfNoValueTF{#6}{
-    \IfNoValueTF{#5}{
-      \addtocounter{answerCounter}{1}
-    }{\addtocounter{answerCounter}{2}}
-    }{\addtocounter{answerCounter}{3}}
-    }{\addtocounter{answerCounter}{4}}
-    }{\addtocounter{answerCounter}{5}}
-    }{\addtocounter{answerCounter}{6}}
-  }
+  % count answers
+  \IfNoValueTF{#9}{
+  \IfNoValueTF{#8}{
+  \IfNoValueTF{#7}{
+  \IfNoValueTF{#6}{
+  \IfNoValueTF{#5}{
+    \addtocounter{answerCounter}{1}
+  }{\addtocounter{answerCounter}{2}}
+  }{\addtocounter{answerCounter}{3}}
+  }{\addtocounter{answerCounter}{4}}
+  }{\addtocounter{answerCounter}{5}}
+  }{\addtocounter{answerCounter}{6}}
 
   % without this the questions will be written out after *all* begin-of-page hooks. I.e. you'd
   % have a couple of "- !ruby/object:Page" at the start of the posout followed by all questions
@@ -723,14 +729,6 @@
       \\      & \small#1 & \small#2 & \small#3 & \small#4 & \small#5 & \small#6 & \small#7}
   }
 }
-
-
-
-% legacy code used to generate question text for special questions
-\newcommand{\printspecialheader}[1]{
-  \makebox[1.0\textwidth][l]{\hspace*{0.0cm}\textbf{#1:}}\vspace{0.1cm}
-}
-
 
 % prints tutors (requires them to have been set before)
 \newcommand{\printtutors}[1]{

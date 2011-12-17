@@ -85,6 +85,13 @@ class Question
   # boolean that tells if the answers below each question should be hidden
   attr_accessor :hide_answers
 
+  # Floating point or integer value that specifies if the last checkbox
+  # should be made a textbox instead. You can use this if you want
+  # common values to be checkable but still allow any value. <nil> or 0
+  # means “off”, i.e. last box is a normal checkbox and any value larger
+  # than 0 means it’s on. Good ones are between 15 and 30 (millimeter)
+  attr_accessor :last_is_textbox
+
   attr_accessor :donotuse
 
   # FIXME: remove failchoice and nochoice
@@ -97,6 +104,7 @@ class Question
     @db_column = db_column
     @no_answer = true
     @hide_answers = false
+    @last_is_textbox = nil
     @height = nil
   end
 
@@ -126,6 +134,10 @@ class Question
   def no_answer?
     return true if @no_answer.nil?
     @no_answer
+  end
+
+  def last_is_textbox?
+    !@last_is_textbox.nil? && @last_is_textbox > 0
   end
 
   # returns false if hide_answers has set been to false or not been set
@@ -233,9 +245,15 @@ class Question
         first = answers.shift
         # print additional answers
         answers.each { |x| s << "\\moreAnswers#{x.join}\n" }
+        s << "\\setlength{\\lastBoxSize}{#{last_is_textbox}mm}\n" if last_is_textbox?
         s << "\\quest"
         # single/multi and no_answer settings
-        s << "<#{multi? ? "multi" : "single"} #{(no_answer? ? "noanswer" : "")} #{(hide_answers? ? "hideAnswers" : "")}>"
+        opt = []
+        opt << (multi? ? "multi" : "single")
+        opt << (no_answer? ? "noanswer" : nil)
+        opt << (hide_answers? ? "hideAnswers" : nil)
+        opt << (last_is_textbox? ? "lastIsTextbox" : nil)
+        s << "<#{opt.compact.join(" ")}>"
         # db column
         s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
         # question

@@ -56,11 +56,18 @@ class PESTOmr < PESTDatabaseTools
   # coordinates themselves (unless the box isn't found)
   def search_square_box(img_id, box)
     # TWEAK HERE
-    box.width, box.height = 40, 40
-    # TeX stores the box’s coordinates near its bottom right corner.
-    # This translation is static and thus different to the one introduced
-    # by imperfect scanning. Positive values move the box left/top.
-    moveleft, movetop = 53, 41
+    if box.width.nil?
+      box.width, box.height = 40, 40
+      # TeX stores the box’s coordinates near its bottom right corner.
+      # This translation is static and thus different to the one introduced
+      # by imperfect scanning. Positive values move the box left/top.
+      moveleft, movetop = 53, 41
+    else
+      # if the last box is a textbox, adjust some values so the textbox
+      # can be checked. For now, only checked/unchecked is supported.
+      moveleft, movetop = 1, 67
+      box.height = 40
+    end
 
     # Original position as given by TeX
     draw_transparent_box(img_id, box.tl, box.br, "yellow")
