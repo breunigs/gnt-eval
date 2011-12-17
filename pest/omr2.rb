@@ -43,6 +43,8 @@ require cdir + '/../lib/RandomUtils.rb'
 
 # Profiler. Uncomment code at the end of this file, too.
 #~ require 'ruby-prof'
+#~ RubyProf.measure_mode = RubyProf::MEMORY
+#~ RubyProf.measure_mode = RubyProf::ALLOCATIONS
 #~ RubyProf.start
 
 
@@ -298,6 +300,7 @@ class PESTOmr < PESTDatabaseTools
     filename << "_" + group.save_as + ".jpg"
     debug "  Saving Comment Image: " + filename if @verbose
     c.write filename
+    c.destroy!
 
     return 1
   end
@@ -380,6 +383,7 @@ class PESTOmr < PESTDatabaseTools
     @draw[999].draw(img)
     # write out file
     img.write filename
+    img.destroy!
 
     if @debug
       draw_text(img_id, [x,y], "green", "Saved as: #{filename}")
@@ -472,13 +476,17 @@ class PESTOmr < PESTDatabaseTools
       end
       debug("  Applied drawing", "debug_print") if @verbose
 
-
       dbgFlnm = gen_new_filename(file, "_DEBUG.jpg")
       debug("  Saving Image: #{dbgFlnm}", "saving_image") if @verbose
       img = @ilist.append(false)
       img.write(dbgFlnm) { self.quality = 90 }
+      img.destroy!
       debug("  Saved Image", "saving_image") if @verbose
     end
+
+    # remove reference to image so GC may kick in
+    @ilist.each { |i| i.destroy! }
+    @ilist = nil
 
     if @cancelProcessing
       debug "  Something went wrong while recognizing this sheet."
