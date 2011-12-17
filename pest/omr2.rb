@@ -378,8 +378,8 @@ class PESTOmr < PESTDatabaseTools
     # add text about where to find the original file
     @draw[999] = Magick::Draw.new
     @draw[999].pointsize = 9*@dpifix
-    draw_solid_box(999, [0,0], [PAGE_WIDTH/2, 7], "white")
-    draw_text(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
+    draw_solid_box!(999, [0,0], [PAGE_WIDTH/2, 7], "white")
+    draw_text!(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
     @draw[999].draw(img)
     # write out file
     img.write filename
@@ -442,10 +442,10 @@ class PESTOmr < PESTDatabaseTools
     # Load image and yaml sheet
     @doc = load_yaml_sheet(@omrsheet)
     @ilist = Magick::ImageList.new(file)
+    @draw = {}
 
     if @debug
       # Create @draw element for each page for debugging
-      @draw = []
       0.upto(page_count-1) do |i|
         create_drawable(i)
         draw_boilerplate(i, Dir.pwd, @omrsheet, file)
