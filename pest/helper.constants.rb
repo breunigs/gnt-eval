@@ -45,9 +45,17 @@ DESPERATE_MIN_FILL_GRADE = 2.7
 MIN_FILL_GRADE = 5
 MAX_FILL_GRADE = 80
 
+# Defines how many black pixels a textbox should have before being
+# considered to be filled. Assume the document has been scanned at 300
+# DPI.
+TEXTBOX_MIN_PIXELS = 1000
+
 
 # These are used in the testing area to make it the code more human
-# readable and to unify the values.
-TEST_BOX_EMPTY = 0
-TEST_BOX_CHECKED = 1
-TEST_BOX_OVERFULL = 2
+# readable and to unify the values. Only used for human input, the
+# normal OMR component works on black percentage and the fill grades
+# defined above.
+BOX_EMPTY = 0
+BOX_BARELY = 3
+BOX_CHECKED = 1
+BOX_OVERFULL = 2

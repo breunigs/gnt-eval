@@ -11,13 +11,6 @@ require '../lib/AbstractForm.rb'
 require '../pest/helper.AbstractFormExtended.rb'
 require '../pest/helper.image.rb'
 
-class Box
-  # used to store if the box was empty, checked or overfull
-  attr_accessor :value
-end
-
-
-
 class CreateGroundTruths
   include PESTImageTools
 
@@ -122,7 +115,7 @@ class CreateGroundTruths
     debug "Looking for box..."
     @yaml.pages.each_with_index do |page, page_index|
       @page_index = page_index
-      boxes = page.questions.map { |q| q.boxes }.flatten.select { |b| b.value.nil? }
+      boxes = page.questions.map { |q| q.boxes }.flatten.select { |b| b.omr_result.nil? }
       set_window_title(page_index, boxes)
       # skip page if boxes empty
       next if boxes.empty?
@@ -195,11 +188,11 @@ class CreateGroundTruths
       debug "Detected Keypress"
       debug "pressed: #{k}     valid: e=#{g::GDK_e} f=#{g::GDK_f} 8=#{g::GDK_v}"
 
-      @box.value = TEST_BOX_EMPTY if k == g::GDK_e
-      @box.value = TEST_BOX_CHECKED if k == g::GDK_f
-      @box.value = TEST_BOX_OVERFULL if k == g::GDK_v
+      @box.omr_result = BOX_EMPTY if k == g::GDK_e
+      @box.omr_result = BOX_CHECKED if k == g::GDK_f
+      @box.omr_result = BOX_OVERFULL if k == g::GDK_v
       if !@previous_box.nil? && k == g::GDK_BackSpace
-        @previous_box.value = nil
+        @previous_box.omr_result = nil
         @previous_box = nil
       end
 

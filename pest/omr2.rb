@@ -75,10 +75,10 @@ class PESTOmr < PESTDatabaseTools
     draw_transparent_box(img_id, box.tl, box.br, "yellow")
     # correct values to point to the box’s top left corner and print it
     box.x -= moveleft; box.y -= movetop
-    draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
     # still need to address scanning skew
     tl = correct(img_id, [box.x, box.y])
     box.x, box.y = tl.x, tl.y
+    draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
 
     # Find the pre-printed box
     x = search(img_id, [box.tl.x-6, box.tl.y-10],
@@ -141,13 +141,10 @@ class PESTOmr < PESTDatabaseTools
       debug_box[i] = [tl, br]
     end
 
-    # reject all boxes with low fill grade to see if there are any
-    # checkmarks. If not, look outside the boxes in case the user has
-    # an odd checking style (e.g. circling the checkboxes)
-    checked = question.boxes.select do |x|
-      x.bp.between?(MIN_FILL_GRADE, MAX_FILL_GRADE)
-    end
-    return debug_box unless checked.empty?
+    # see if there are any good checkmarks. If not, look outside the
+    # boxes in case the user has an odd checking style (e.g. circling
+    # the checkboxes)
+    return debug_box if question.boxes.any? { |x| x.is_checked? }
 
     question.boxes.each_with_index do |box, i|
       ow = box.width+around_large
@@ -184,16 +181,8 @@ class PESTOmr < PESTDatabaseTools
     # calculate blackness for each box
     debug_box = process_square_boxes_blackness(img_id, question)
 
-    # reject all boxes above maximum fill grade and mark them critical
-    c = question.boxes.reject do |box|
-      if box.bp > MAX_FILL_GRADE
-        box.fill_critical = true
-      end
-      box.bp > MAX_FILL_GRADE
-    end
-
-    checked = c.reject { |x| x.bp < MIN_FILL_GRADE }
-    checked.each { |box| box.is_checked = true }
+    # find all properly checked boxes
+    checked = question.boxes.select { |x| x.is_checked? }
 
     # don't do fancy stuff for multiple choice questions
     is_multi = question.db_column.is_a? Array
@@ -204,15 +193,14 @@ class PESTOmr < PESTDatabaseTools
         # only one checkbox remains, so go for it
         when 1: checked.first.choice
         when 0: # no checkboxes. We're officially desperate now.
+          checked = question.boxes.select { |x| x.is_barely_checked? }
           # try again with lower standards
-          checked = c.reject { |x| x.bp < DESPERATE_MIN_FILL_GRADE }
-          checked.each { |box| box.is_checked = true; box.fill_critical = true }
           case checked.size
             when 0: 0 # well, no checkmarks either
             when 1: checked.first.choice
-            else     -1
+            else    -1 # at least two boxes are barely checked, ask user
           end
-        else -1 # at least two boxes are checked, ask the user
+        else -1 # at least two boxes are checked, ask user
       end # case
     end # else
 
@@ -221,10 +209,11 @@ class PESTOmr < PESTDatabaseTools
       # this happens if a box couldn't be found. So don't debug it.
       next if debug_box[i].nil?
 
-      color = "orange" # light orange; i.e. empty
-      color = "red" if box.fill_critical # i.e. overfull
-      color = "green" if box.is_checked # i.e. a nice checkmark
-      color = "#5BF1B2" if box.fill_critical && box.is_checked # i.e. just barely filled
+      color = "magenta" # should never be used
+      color = "orange" if box.is_empty?
+      color = "#5BF1B2" if box.is_barely_checked?
+      color = "green" if box.is_checked? # i.e. a nice checkmark
+      color = "red" if box.is_overfull?
 
       draw_transparent_box(img_id, debug_box[i][0], debug_box[i][1],
         color, box.bp.round_to(1), true)
@@ -333,10 +322,10 @@ class PESTOmr < PESTDatabaseTools
     b.x += addtox; b.y += addtoy; b.width += addtow - b.x
     b.height = PAGE_HEIGHT*@dpifix - b.height - b.y + addtoh
     # in a perfect scan, the coordinates now mark the inside of the box
-    draw_dot(img_id, b.top_left, "red")
-    draw_dot(img_id, b.top_right, "red")
-    draw_dot(img_id, b.bottom_left, "red")
-    draw_dot(img_id, b.bottom_right, "red")
+    draw_dot(img_id, correct(img_id, b.top_left), "red")
+    draw_dot(img_id, correct(img_id, b.top_right), "red")
+    draw_dot(img_id, correct(img_id, b.bottom_left), "red")
+    draw_dot(img_id, correct(img_id, b.bottom_right), "red")
 
     # split into smaller chunks, so we can skip the rest of the comment
     # box once enough black pixels have been found

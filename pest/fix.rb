@@ -508,9 +508,8 @@ class PESTFix < PESTDatabaseTools
     help = "Quick Help:\n"
     help << "ARROW KEYS: select answer\n"
     help << "ENTER: next question\n"
-    help << "TOP LEFT BOX: choose if result ambiguous (i.e. 2 checks)\n"
-    help << "BORDER COLORS: blue = check detected; cyan = fill degree"
-    help << " critical (too low or high)"
+    help << "TOP LEFT BOX: choose if result ambiguous (e.g. 2 checkmarks)\n"
+    help << "BORDER COLORS: cyan = barely checked, blue = nice checkmark, purple = overfull"
     @quickHelp = Gtk::Label.new(help)
     @quickHelp.set_wrap true
 
@@ -673,8 +672,11 @@ class PESTFix < PESTDatabaseTools
 
     # Draw the colored boxes
     q.boxes.each do |b|
-      color = current_db_value == b.choice.to_i ? "green":"red"
-      border = b.is_checked ? (b.fill_critical ? "cyan":"blue"): color
+      border = color = current_db_value == b.choice.to_i ? "green":"red"
+      border = "#0098FF" if b.is_checked? # true for normal and barely
+      border = "cyan" if b.is_barely_checked?
+      border = "#A200FF" if b.is_overfull?
+
       draw.fill(color)
       draw.stroke(border)
       draw.fill_opacity(0.4)

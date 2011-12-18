@@ -6,6 +6,9 @@
 #
 # Add some handy attributes to AbstractForm.rb's classes
 
+cdir = File.dirname(__FILE__)
+require cdir + '/helper.constants.rb'
+
 class Box
   # bp stands for "black percentage" and holds how much pixels in this
   # box are black. mx and my define the inner, top left corner of the
@@ -15,13 +18,23 @@ class Box
   # stores the amount of black pixels in the searched area
   attr_accessor :black
 
-  # set to true by omr2.rb if it believes this box is checked. This is
-  # later picked up by fix.rb and draws a special border around this box
-  attr_accessor :is_checked
+  # used to store if the box was empty, barely checked, checked or
+  # overfull for the reference sheets. Since those are evaluated by
+  # hand, there’s no black percentage available.
+  attr_writer :omr_result
 
-  # set to true, when this box was selected with a low threshold or has
-  # been deselected due to a too high fill dregree
-  attr_accessor :fill_critical
+  # returns the omr_result variable if sheet was evaluated by hand (i.e.
+  # omr_result variable is not nil). If it was evaluated by the computer
+  # returns the corresponding results but derives its information from
+  # the stored black percentage.
+  def omr_result
+    return @omr_result unless @omr_result.nil?
+    return BOX_EMPTY if is_empty?
+    return BOX_BARELY if is_barely_checked?
+    return BOX_CHECKED if is_checked?
+    return BOX_OVERFULL if is_overfull?
+    nil # should only occur if @omr_result and black percentage are nil
+  end
 
   # original coordinates
   attr_accessor :x,:y
@@ -29,12 +42,20 @@ class Box
   # size
   attr_accessor :width, :height
 
-  def is_checked?
-    !is_checked.nil? && is_checked
+  def is_empty?
+    !bp.nil? && bp < DESPERATE_MIN_FILL_GRADE
   end
 
-  def is_fill_critical?
-    !fill_critical.nil? && fill_critical
+  def is_barely_checked?
+    !bp.nil? && bp >= DESPERATE_MIN_FILL_GRADE && bp < MIN_FILL_GRADE
+  end
+
+  def is_checked?
+    !bp.nil? && bp >= MIN_FILL_GRADE && bp <= MAX_FILL_GRADE
+  end
+
+  def is_overfull?
+    !bp.nil? && bp > MAX_FILL_GRADE
   end
 
 
