@@ -150,7 +150,7 @@ module PESTImageTools
 
       # top left corner
       x = search(i, [1, 35], [1+110, 35+150], :right, 30, true, true)
-      y = search(i, [40, 1], [40+150, 1+90], :down, 30, true, true)
+      y = search(i, [40, 1], [40+150, 1+150], :down, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:tl => [x,y]}) unless [x, y].any_nil?
 
@@ -341,7 +341,9 @@ module PESTImageTools
   # translates (moves) a coordinate to the correct position using the
   # determined offset. In a perfectly scanned document, these values
   # should be equal to the printed distances in the top left corner. You
-  # can use rake testhelper:debug_samplesheets to generate those.
+  # can use rake testhelper:debug_samplesheets to generate those. Note
+  # that this also corrects rotation since the edges are subject to
+  # rotation themselves.
   def translate(img_id, coord)
     # TWEAK HERE
     move_top = 58
@@ -373,10 +375,7 @@ module PESTImageTools
   # Translates and rotates a given coordinate (e.g. from TeX) into a
   # real coordinate (i.e. where it is located in the image). Requires
   # rotation and offset to be calculated beforehand.
-  def correct(img_id, coord)
-    #~ rotate(img_id, translate(img_id, coord))
-    translate(img_id, coord)
-  end
+  alias :correct :translate
 
   # Report if a 'unsuitable' ImageMagick version will be used
   def check_magick_version
