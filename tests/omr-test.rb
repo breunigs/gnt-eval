@@ -6,46 +6,65 @@ require 'yaml'
 require 'dbi'
 require '../lib/FunkyDBBits.rb'
 require '../lib/AbstractForm.rb'
+require '../lib/RandomUtils.rb'
 require '../pest/helper.AbstractFormExtended.rb'
-
 
 $tests = []
 $failed_tests = []
 
+def add_test(name)
+  $tests << name
+  #puts name
+end
+
+def add_result(worked_fine)
+  return if worked_fine
+  $failed_tests << $tests.last
+  #puts "Unfortunately, #{$tests.last} failed."
+  #puts
+end
+
+OMR_OPTIONS = "-c #{number_of_processors} -t -d"
+
 cdir = File.dirname(__FILE__)
 Dir.chdir(cdir) do
   # delete old result files
-  `find . -mindepth 3 -regex ".*[0-9]\.yaml" -delete`
-  `find . -mindepth 3 -name "*comment.jpg" -delete`
+  #`find . -mindepth 3 -regex ".*[0-9]\.yaml" -delete`
+  #`find . -mindepth 3 -name "*comment.jpg" -delete`
 
-  # check that OMR works
-  (0..2).each do |i|
-    $tests << "omr2.rb for test_#{i}"
-    system("cd .. && ./pest/omr2.rb -c 2 -t -d -o -s tests/omr-test/test_#{i}.yaml -p tests/omr-test/test_#{i}")
-    $failed_tests << $tests.last if $?.exitstatus != 0
+  # run OMR on the files
+  Dir.glob("./omr-test/*.yaml") do |y|
+    add_test("omr2.rb for #{y}")
+    puts "./../pest/omr2.rb #{OMR_OPTIONS} -s #{y} -p #{y.gsub(/\.yaml/, "")}"
+    system("./../pest/omr2.rb #{OMR_OPTIONS} -s #{y} -p #{y.gsub(/\.yaml/, "")}")
+    add_result($?.exitstatus == 0)
   end
 
-  # comapre the newly generated results to the stored reference files
-  Dir.glob("./omr-test/test_*/*_reference.yaml").each do |cmp|
+  # compare the newly generated results to the stored reference files
+  Dir.glob("./omr-test/*/*_ref.yaml").each do |cmp|
     ref = YAML::load(File.read(cmp))
-    new = YAML::load(File.read(cmp.gsub("_reference", "")))
+    new = YAML::load(File.read(cmp.gsub("_ref", "")))
 
-    ref.questions.each do |rquest|
-      nquest = new.questions.find { |x| x.qtext == rquest.qtext }
-      rquest.boxes.each do |rbox|
-	nbox = nquest.boxes.find { |x| x.choice == rbox.choice }
-	$tests << "#{cmp}: quest #{rquest.db_column} box #{rbox.choice} checked: #{rbox.is_checked?}(ref) vs #{nbox.is_checked?} (now)"
-	$failed_tests << $tests.last if nbox.is_checked? != rbox.is_checked?
-
-      $tests << "#{cmp}: quest #{rquest.db_column} box #{rbox.choice} critical: #{rbox.is_fill_critical?}(ref) vs #{nbox.is_fill_critical?} (now)"
-	$failed_tests << $tests.last if nbox.is_fill_critical? != rbox.is_fill_critical?
+    # get all boxes for each sheet for multi/single choice questions
+    refq = ref.questions.select { |q| q.type == "square" }
+    newq = new.questions.select { |q| q.type == "square" }
+    refq.zip(newq).each do |rq, nq|
+      rq.boxes.zip(nq.boxes).each do |rb, nb|
+        add_test("Compare box on #{cmp}//#{rq.db_column} | ref: #{rb.omr_result}   new: #{nb.omr_result}")
+        add_result(rb.omr_result == nb.omr_result)
       end
     end
-  end
 
-  #~ $tests << "omr2.rb for test_0 with multicore and debug output"
-  #~ system("cd .. && ./pest/omr2.rb -d -c 2 -o -t -s tests/omr-test/test_0.yaml -p tests/omr-test/test_0")
-  #~ $failed_tests << $tests.last if $?.exitstatus != 0
+    # find all text questions
+    refq = ref.questions.select { |q| q.type == "text" || q.type == "text_wholepage" }
+    refq.each do |rq|
+      ref_ex = [BOX_CHECKED, BOX_BARELY].include?(rq.boxes.first.omr_result)
+      new_ex = File.exist?("#{cmp.gsub("_ref.yaml", "")}_#{rq.save_as}.jpg")
+
+      add_test("Check if comment image exists #{cmp}//#{rq.db_column} | ref: #{ref_ex}   new: #{new_ex}")
+      add_result(ref_ex == new_ex)
+    end
+  end
 end
 
 
