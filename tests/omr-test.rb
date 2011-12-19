@@ -29,8 +29,9 @@ OMR_OPTIONS = "-c #{number_of_processors} -t -d"
 cdir = File.dirname(__FILE__)
 Dir.chdir(cdir) do
   # delete old result files
-  #`find . -mindepth 3 -regex ".*[0-9]\.yaml" -delete`
-  #`find . -mindepth 3 -name "*comment.jpg" -delete`
+  `find . -mindepth 3 -regex ".*[0-9]\.yaml" -delete`
+  `find . -mindepth 3 -name "*comment.jpg" -delete`
+  `find . -mindepth 3 -name "*DEBUG.jpg" -delete`
 
   # run OMR on the files
   Dir.glob("./omr-test/*.yaml") do |y|
