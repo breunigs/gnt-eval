@@ -452,7 +452,8 @@ class AbstractForm
       tutors = ["Mustafa Mustermann", "Fred Nurk", "Ashok Kumar",
                 "Juan Pérez", "Jakob Mierscheid", "Iwan Iwanowitsch",
                 "Pierre Dupont", "John Smith", "Eddi Exzellenz",
-                "Joe Bloggs", "John Doe", "Stefan ist doof"],
+                "Joe Bloggs", "John Doe", "Stefan ist doof",
+                "Beccy ist doof"],
       semester = "the same semester as last year",
       barcode = "00000000")
 
