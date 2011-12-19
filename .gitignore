@@ -1,10 +1,24 @@
-helfer/lsf_parser_*.html
-helfer/lsf_parser_*.yaml
-helfer/HiWIS_*.csv
-helfer/HiWIS_*.xls
-helfer/2* Tutoren Physik.txt
-tmp/
-web/log/database.log
-web/log/development.log
+### unsorted
+**/PEST_OMR_ERROR.log
 custom_build/build_*
-PEST_OMR_ERROR.log
+tmp/
+web/log/
+custom_build/
+
+### project root
+Gemfile.lock
+.rvmrc*
+
+### tools directories
+tools/lsf_parser_*.html
+tools/lsf_parser_*.yaml
+tools/HiWIS_*.csv
+tools/HiWIS_*.xls
+tools/2* Tutoren Physik.txt
+
+### test directories
+tests/zbar-test/test_*tif
+tests/omr-test/*/*.jpg
+# only exclude the auto generated files, but not the reference ones
+tests/omr-test/*/*.yaml
+!test/omr-test/*/*_ref.yaml
