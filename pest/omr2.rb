@@ -90,8 +90,13 @@ class PESTOmr < PESTDatabaseTools
     # searches the newly added area.
     x = search(img_id, [box.tl.x-15, box.tl.y-10],
           [box.tl.x-6, box.br.y+10], :right, 30) if x.nil?
-    y = search(img_id, [box.tl.x-10, box.tl.y-15],
-          [box.br.x+10, box.tl.y-6], :down, 30) if y.nil?
+    # in case of y-direction, the line that divides the questions would
+    # be detected. Search bottom up instead.
+    if y.nil?
+      y = search(img_id, [box.tl.x-10, box.tl.y+box.height-6],
+            [box.br.x+10, box.tl.y+box.height+6], :up, 30)
+      y -= box.height unless y.nil?
+    end
 
     box.x = x unless x.nil?
     box.y = y unless y.nil?
@@ -127,7 +132,7 @@ class PESTOmr < PESTDatabaseTools
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
         debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
-              " db_column=#{question.db_column}"
+              " db_column=#{question.db_column} in #{@currentFile}"
         debug "Assuming there is no box and no choice was made."
         debug
         box.bp = 0
@@ -141,25 +146,28 @@ class PESTOmr < PESTDatabaseTools
       debug_box[i] = [tl, br]
     end
 
-    # see if there are any good checkmarks. If not, look outside the
-    # boxes in case the user has an odd checking style (e.g. circling
-    # the checkboxes)
-    return debug_box if question.boxes.any? { |x| x.is_checked? }
+    # see if there is anything inside the boxes. If yes, assume the user
+    # knows how a checkbox works.
+    return debug_box unless question.boxes.all? { |x| x.is_empty? }
 
+    # okay, so all checkboxes are empty. Look outside the checkbox to
+    # see if the user only has an awkward way to check the boxes (e.g.
+    # circling them)
     question.boxes.each_with_index do |box, i|
-      ow = box.width+around_large
-      oh = box.height+around_large
+      ow = box.width+2*around_large
+      oh = box.height+2*around_large
       outer = black_pixels(img_id, box.x-around_large,
                 box.y-around_large, ow, oh)
 
-      # this includes the pre-printed box as well
-      iw = box.width+around_small
-      ih = box.height+around_small
+      # this includes the pre-printed box as well, so it may be
+      # subtracted from the large box above
+      iw = box.width+2*around_small
+      ih = box.height+2*around_small
       inner = black_pixels(img_id, box.x-around_small,
                 box.y-around_small, iw , ih)
 
       # add outer and existing black percentage
-      box.bp = (box.bp + 100*(outer-inner).to_f/(ow*oh-iw*ih).to_f)/2
+      box.bp = (box.bp + 100.0*(outer-inner).to_f/(ow*oh-iw*ih).to_f)/2.0
 
       debug_box[i] = [[box.x-around_large, box.y-around_large],
           [box.x+box.width+around_large, box.y+box.height+around_large]]
@@ -173,10 +181,10 @@ class PESTOmr < PESTDatabaseTools
   # black percentage and which boxes are checked and which are not. All
   # results are stored in the box themselves, but it also returns an
   # integer for single choice questions with the 'choice' attribute of
-  # the selected box. Returns -1 if user intervention is required and 0
-  # if no checkbox was selected. For multiple choice an array with the
-  # choice attributes of the checked boxes is returned. This array may
-  # be empty.
+  # the selected box. Returns ANSW_FAIL if user intervention is required
+  # and ANSW_NONE if no checkbox was selected. For multiple choice an
+  # array with the choice attributes of the checked boxes is returned.
+  # This array may be empty.
   def process_square_boxes(img_id, question)
     # calculate blackness for each box
     debug_box = process_square_boxes_blackness(img_id, question)
@@ -192,15 +200,17 @@ class PESTOmr < PESTDatabaseTools
       case checked.size
         # only one checkbox remains, so go for it
         when 1: checked.first.choice
-        when 0: # no checkboxes. We're officially desperate now.
-          checked = question.boxes.select { |x| x.is_barely_checked? }
-          # try again with lower standards
-          case checked.size
-            when 0: 0 # well, no checkmarks either
-            when 1: checked.first.choice
-            else    -1 # at least two boxes are barely checked, ask user
+        when 0: # no checkboxes. We're officially desperate now. Let’s
+                # try again with lower standards.
+          barely = question.boxes.select { |x| x.is_barely_checked? }
+          case barely.size
+            when 1: barely.first.choice # one barely checked, take it
+            # no barely checked either. If there are any overfull ones,
+            # ask the user; otherwise the question really wasn’t answered
+            when 0: ((question.boxes.any? { |x| x.is_overfull? }) ? ANSW_FAIL : ANSW_NONE)
+            else    ANSW_FAIL # at least two boxes are barely checked, ask user
           end
-        else -1 # at least two boxes are checked, ask user
+        else ANSW_FAIL # at least two boxes are checked, ask user
       end # case
     end # else
 

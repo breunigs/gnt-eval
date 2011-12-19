@@ -39,7 +39,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Bitte gib Dein Studienfach an, innerhalb dessen Du diese Lehrveranstaltung besuchst:
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach1
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -89,7 +89,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Ist diese Lehrveranstaltung f\IeC {\"u}r Dich eine \emph  {Pflichtveranstaltung}?
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach2
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -106,7 +106,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| \emph  {Bevor} Du diese Lehrveranstaltung besucht hast: Wie hoch war Dein Interesse am Thema der Vorlesung?
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach3
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -280,7 +280,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Verglichen mit anderen Lehrveranstaltung ist mein Arbeitsaufwand f\IeC {\"u}r diese Lehrveranstaltung:
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach4
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -338,7 +338,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Der/die Dozent/in verh\IeC {\"a}lt sich den Studierenden gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14a
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -363,7 +363,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Die Studierenden verhalten sich dem/der Dozent/in gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14b
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -388,7 +388,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Der Vorlesungsstil des/der Dozent/in ist motivierend.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14c
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -413,7 +413,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Der/die Dozent/in wirkt, als ob er/sie die Vorlesung gerne h\IeC {\"a}lt.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14d
     boxes:
     - !ruby/object:Box
       choice: "1"

@@ -6,7 +6,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Mit welchem \emph  {Abschlussziel} studierst Du?
   - !ruby/object:Question
     type: square
-    db_column: studienziel
+    db_column: studienziel1
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -39,7 +39,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Bitte gib Dein Studienfach an, innerhalb dessen Du diese Lehrveranstaltung besuchst:
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach1
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -89,7 +89,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Ist diese Lehrveranstaltung f\IeC {\"u}r Dich eine \emph  {Pflichtveranstaltung}?
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach2
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -106,7 +106,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| \emph  {Bevor} Du diese Lehrveranstaltung besucht hast: Wie hoch war Dein Interesse am Thema des Seminars?
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach3
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -280,7 +280,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Verglichen mit anderen Lehrveranstaltung ist mein Arbeitsaufwand f\IeC {\"u}r diese Lehrveranstaltung:
   - !ruby/object:Question
     type: square
-    db_column: hauptfach
+    db_column: hauptfach4
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -338,7 +338,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| F\IeC {\"u}r die Vorbereitung investiere/investierte ich:
   - !ruby/object:Question
     type: square
-    db_column: studienziel
+    db_column: studienziel2
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -367,7 +367,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Falls eine Hausarbeit angefertigt wird: F\IeC {\"u}r die Ausarbeitung ben\IeC {\"o}tige/ben\IeC {\"o}tigte ich:
   - !ruby/object:Question
     type: square
-    db_column: studienziel
+    db_column: studienziel3
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -400,7 +400,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Ich wurde bei der Vorbereitung meines Vortrages gut betreut.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14a
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -425,7 +425,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Der Stoff ist der in mir zur Verf\IeC {\"u}gung stehenden Zeit gut darstellbar.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14b
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -475,7 +475,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Welche Probleme gab es bei der Vorbereitung Deines Vortrages?
   - !ruby/object:Question
     type: square
-    db_column: studienziel
+    db_column: studienziel4
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -782,7 +782,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Der/die Dozent/in verh\IeC {\"a}lt sich den Studierenden gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14c
     boxes:
     - !ruby/object:Box
       choice: "1"
@@ -807,7 +807,7 @@ pages:
 # wtf?-fix (see eval.cls) ||| Die Studierenden verhalten sich dem/der Dozent/in gegen\IeC {\"u}ber respektvoll.
   - !ruby/object:Question
     type: square
-    db_column: v14
+    db_column: v14d
     boxes:
     - !ruby/object:Box
       choice: "1"

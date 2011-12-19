@@ -14,7 +14,7 @@ require '../pest/helper.image.rb'
 class CreateGroundTruths
   include PESTImageTools
 
-  WINTITLE_PREFIX = "Create ground truths | E =empty; F=checked; V=overfull"
+  WINTITLE_PREFIX = "Create ground truths | E=empty; F=checked; B=barely; V=overfull"
 
   # finds all files that still need ground truths to be defined. Files
   # are returned as hash, with the key being the base YAML file and the
@@ -188,9 +188,10 @@ class CreateGroundTruths
       debug "Detected Keypress"
       debug "pressed: #{k}     valid: e=#{g::GDK_e} f=#{g::GDK_f} 8=#{g::GDK_v}"
 
-      @box.omr_result = BOX_EMPTY if k == g::GDK_e
-      @box.omr_result = BOX_CHECKED if k == g::GDK_f
-      @box.omr_result = BOX_OVERFULL if k == g::GDK_v
+      @box.omr_result = BOX_EMPTY if k == g::GDK_e    # most common
+      @box.omr_result = BOX_CHECKED if k == g::GDK_f  # common
+      @box.omr_result = BOX_BARELY if k == g::GDK_b   # uncommon
+      @box.omr_result = BOX_OVERFULL if k == g::GDK_v # very uncommon
       if !@previous_box.nil? && k == g::GDK_BackSpace
         @previous_box.omr_result = nil
         @previous_box = nil

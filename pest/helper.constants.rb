@@ -50,6 +50,12 @@ MAX_FILL_GRADE = 80
 # DPI.
 TEXTBOX_MIN_PIXELS = 1000
 
+# used to unify what the special codes mean. The normal values for boxes
+# start from 1 and count up. 99 may be used to identify special “user
+# did not want to answer question” boxes. However, these are handled the
+# same way the other boxes are in the OMR component.
+ANSW_FAIL = -1
+ANSW_NONE = 0
 
 # These are used in the testing area to make it the code more human
 # readable and to unify the values. Only used for human input, the

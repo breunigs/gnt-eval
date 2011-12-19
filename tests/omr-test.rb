@@ -50,7 +50,9 @@ Dir.chdir(cdir) do
     newq = new.questions.select { |q| q.type == "square" }
     refq.zip(newq).each do |rq, nq|
       rq.boxes.zip(nq.boxes).each do |rb, nb|
-        add_test("Compare box on #{cmp}//#{rq.db_column} | ref: #{rb.omr_result}   new: #{nb.omr_result}")
+        name = "Cmp box on #{cmp}||#{nq.db_column}||#{rb.choice}"
+        name << "  ||ref: #{rb.omr_result}   new: #{nb.omr_result}"
+        add_test(name)
         add_result(rb.omr_result == nb.omr_result)
       end
     end
