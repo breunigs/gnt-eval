@@ -328,7 +328,6 @@ namespace :pest do
         target = File.join(Seee::Config.file_paths[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")
         next if File.exists?(target)
         file = make_sample_sheet(form, lang)
-        `./pest/latexfix.rb "#{file}.posout"`
         `mv -f "#{file}.yaml" "#{target}"`
       end
     end
@@ -425,7 +424,6 @@ namespace :pdf do
         I18n.locale = lang_code.to_sym
       end
       I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-
       Rake::Task["pdf:samplesheets".to_sym].invoke
       evaluate(sem, a.faculty_id, dirname)
       exit
@@ -434,6 +432,7 @@ namespace :pdf do
     # no faculty specified, just find all and process them in parallel.
     Faculty.find(:all).each do |f|
       args = [lang_code, sem, f.id].join(",")
+      puts "Running «rake \"pdf:semester[#{args}]\"»"
       job = fork { exec "rake pdf:semester[#{args}]" }
       # we don't want to wait for the process to finish
       Process.detach(job)
