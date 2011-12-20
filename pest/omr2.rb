@@ -29,7 +29,7 @@ require 'tempfile'
 
 require cdir + '/../lib/FunkyDBBits.rb'
 
-require cdir + '/helper.misc.rb' # also load rmagick
+require cdir + '/helper.misc.rb' # also loads rmagick
 
 require cdir + '/helper.boxtools.rb'
 require cdir + '/helper.database.rb'
@@ -699,7 +699,6 @@ class PESTOmr < PESTDatabaseTools
     @omrsheet,  @path  = nil, nil
     @overwrite, @debug = false, false
     @test_mode = false
-    dpi        = 300.0
     @cores     = 1
 
     # Option Parser
@@ -770,7 +769,7 @@ class PESTOmr < PESTDatabaseTools
 
     # remove files that have already been processed, unless the user
     # wants them to be overwritten
-    files = remove_processed_images_from(files) if !@overwrite
+    files = remove_processed_images_from(files) unless @overwrite
     if files.empty?
       debug "All files have been processed already. Exiting."
       exit
@@ -784,11 +783,12 @@ class PESTOmr < PESTDatabaseTools
     debug "Owning certain software, #{@cores} sheets at a time"
     splitFiles = files.chunk(@cores)
 
-    path  = " -p " + @path.gsub(/(?=\s)/, "\\")
-    sheet = " -s " + @omrsheet.gsub(/(?=\s)/, "\\")
-    d = @debug      ? " -d " : " "
-    db = @test_mode ? " -t " : " "
-    o = @overwrite  ? " -o " : " "
+    cmd = " -p " + @path.gsub(/(?=\s)/, "\\")
+    cmd << (" -s " + @omrsheet.gsub(/(?=\s)/, "\\"))
+    cmd << (@debug     ? " -d " : " ")
+    cmd << (@test_mode ? " -t " : " ")
+    cmd << (@overwrite ? " -o " : " ")
+    cmd << " --dpi #{@dpifix*300.0}"
 
     tmpfiles, threads, exit_codes = [], [], []
 
@@ -801,7 +801,7 @@ class PESTOmr < PESTDatabaseTools
       list = ""
       f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
       threads << Thread.new do
-        `ruby #{File.dirname(__FILE__)}/omr2.rb #{sheet} #{path} #{db} #{d} #{o} #{list} > #{tmp}`
+        `ruby #{File.dirname(__FILE__)}/omr2.rb #{cmd} #{list} > #{tmp}`
         exit_codes[corecount] = $?.exitstatus
       end
     end
