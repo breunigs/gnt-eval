@@ -37,6 +37,7 @@ def find_barcode(filename)
     puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{`uname -m`.strip}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
     exit 1
   end
+  zbar = Seee::Config.commands[:zbar]
 
   r = `#{zbar} "#{filename}"`
   if not r.empty?
@@ -261,10 +262,11 @@ namespace :images do
 
         work_queue.enqueue_b do
           basename = File.basename(f, '.tif')
-          barcode = (find_barcode(f).to_f / 10).floor.to_i
+          zbar_result = find_barcode(f)
+          barcode = (zbar_result.to_f / 10.0).floor.to_i
 
-          if barcode.nil? || (not CourseProf.exists?(barcode))
-            puts "bizarre #{basename}"
+          if zbar_result.nil? || (not CourseProf.exists?(barcode))
+            puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
             File.makedirs(File.join(sort_path, "bizarre"))
             File.move(f, File.join(sort_path, "bizarre"))
           else
