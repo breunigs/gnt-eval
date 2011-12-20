@@ -24,7 +24,8 @@ def add_result(worked_fine)
   #puts
 end
 
-OMR_OPTIONS = "-c #{number_of_processors} -t -d"
+OMR_OPTIONS = "-c #{number_of_processors-1} -t -d"
+TEST_TMP_DIR = "../tmp/tests"
 
 cdir = File.dirname(__FILE__)
 Dir.chdir(cdir) do
@@ -68,18 +69,31 @@ Dir.chdir(cdir) do
       add_result(ref_ex == new_ex)
     end
   end
+
+  puts
+  puts
+  puts
+  puts
+  puts
+  puts "Test summary:"
+  puts "Ran #{$tests.length} tests of which #{$failed_tests.length} failed."
+  puts
+  puts "Failed tests:"
+  $failed_tests.each { |t| puts "* #{t}" }
+
+  # store fails to disk for later comparison
+  `mkdir -p #{TEST_TMP_DIR}/`
+  `cd #{TEST_TMP_DIR} && mv -f omr-test-fails omr-test-fails-last`
+  File.open("#{TEST_TMP_DIR}/omr-test-fails", 'w') do |f|
+    $failed_tests.each { |t| f.write("* #{t}\n") }
+  end
+  if File.exist?("#{TEST_TMP_DIR}/omr-test-fails") and File.exist?("#{TEST_TMP_DIR}/omr-test-fails-last")
+    puts "\n"*4
+    puts "Compared to the last run, the following has changed:"
+    puts `cd #{TEST_TMP_DIR} &&  diff -uw --suppress-common-lines omr-test-fails-last omr-test-fails `
+  end
 end
 
 
 
 
-puts
-puts
-puts
-puts
-puts
-puts "Test summary:"
-puts "Ran #{$tests.length} tests of which #{$failed_tests.length} failed."
-puts
-puts "Failed tests:"
-$failed_tests.each { |t| puts "* #{t}" }
