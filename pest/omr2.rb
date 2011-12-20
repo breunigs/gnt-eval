@@ -139,9 +139,11 @@ class PESTOmr < PESTDatabaseTools
         next
       end
 
-      # inside the box
-      tl = [x+stroke_width, y+stroke_width]
-      br = [x+box.width-stroke_width, y+box.height-stroke_width]
+      # inside the box. Take one further pixel from the width of the box
+      # because the results (omr-test) show that in many cases the boxes
+      # have wider strokes than they should, at least when scanned.
+      tl = [x+stroke_width+1, y+stroke_width]
+      br = [x+box.width-stroke_width-1, y+box.height-stroke_width]
       box.bp = black_percentage(img_id, tl.x, tl.y, br.x-tl.x, br.y-tl.y)
       debug_box[i] = [tl, br]
     end
