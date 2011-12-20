@@ -853,6 +853,17 @@ class PESTOmr < PESTDatabaseTools
     ensure_database_access unless @test_mode
     check_magick_version
 
+    # Unless set manually, grab a sample image and use it to calculate
+    # the DPI
+    if @dpifix.nil?
+      debug("Calculating DPI", "calc_dpi") if @verbose
+      list = Magick::ImageList.new(files[0])
+      @dpifix = list[0].dpifix
+      list.each { |i| i.destroy! }
+      list = nil
+      debug("Calculated DPI", "calc_dpi") if @verbose
+    end
+
     # Let other ruby instances do the hard work for multi core...
     if @cores > 1
       exit_codes = delegate_work(files)
@@ -863,13 +874,6 @@ class PESTOmr < PESTDatabaseTools
       end
     # or do it in this instance for single core processing
     else
-      # Unless set manually, grab a sample image and use it to
-      # calculate the DPI
-      if @dpifix.nil?
-        list = Magick::ImageList.new(files[0])
-        @dpifix = list[0].dpifix
-      end
-
       # All set? Ready, steady, parse!
       parse_omr_sheet
 
