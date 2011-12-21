@@ -16,6 +16,7 @@
 \RequirePackage{geometry}
 \RequirePackage{graphicx}
 \RequirePackage{ifthen}
+\RequirePackage{letterspace}
 \RequirePackage{multirow}
 \RequirePackage{microtype}
 \let\amssymbBox\Box
