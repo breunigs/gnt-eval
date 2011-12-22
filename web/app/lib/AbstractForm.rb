@@ -327,7 +327,7 @@ class Section
   attr_writer :answers
   def answers(lang)
     return @answers if @answers.is_a? Array
-    return (@title[lang.to_sym] || @title[:en] || @title.first[1]) if @answers.is_a?(Hash)
+    return (@answers[lang.to_sym] || @answers[:en] || @answers.first[1]) if @answers.is_a?(Hash)
     []
   end
 end

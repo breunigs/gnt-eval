@@ -49,6 +49,6 @@ en:
 
   # used to describe the checkbox if the evaluee does not want to or
   # cannot answer this question
-  no_answer: no answer
+  no_answer: not specified
   # used if no intro is given for the sheets.
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
