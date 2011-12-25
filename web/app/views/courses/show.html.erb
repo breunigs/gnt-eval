@@ -38,7 +38,7 @@
   <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @course} %></p>
 </fieldset>
 
-<fieldset>
+<fieldset <%=@course.profs.empty? ? "class=\"attention\"" : "" %>>
   <legend>Profs</legend>
   <table>
     <tr>

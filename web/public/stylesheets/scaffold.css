@@ -122,6 +122,14 @@ legend {
   font-weight:bold;
 }
 
+fieldset.attention {
+  border-color: red;
+}
+
+fieldset.attention legend {
+  color: maroon;
+}
+
 .warning {
   color: red;
   background: white;
