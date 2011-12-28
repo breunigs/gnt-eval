@@ -478,31 +478,6 @@ namespace :pdf do
     work_queue.join
     Rake::Task["clean".to_sym].invoke
   end
-
-  desc "Create tutor blacklist for current semester"
-  task :blacklist do
-    include FunkyTeXBits
-    class Float
-      def rtt
-        return ((self*10).round.to_f)/10
-      end
-    end
-    class NilClass
-      def rtt
-        return nil
-      end
-    end
-    f = File.open('./tmp/tutors.tex', 'w') do |f|
-      f.puts blacklist_head(curSem.title)
-      tutors = curSem.courses.collect { |c| c.tutors }.flatten.sort { |x,y| x.abbr_name <=> y.abbr_name }
-      tutors.each do |t|
-        f.puts [t.abbr_name, t.course.title[0,20], t.profit.rtt, t.teacher.rtt, t.competence.rtt, t.preparation.rtt, t.sheet_count].join(' & ') + '\\\\'
-      end
-      f.puts blacklist_foot
-    end
-    Rake::Task['./tmp/tutors.pdf'.to_sym].invoke
-    File.delete './tmp/tutors.tex'
-  end
 end
 
 
