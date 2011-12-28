@@ -49,8 +49,9 @@ class Form < ActiveRecord::Base
   # currently checks: AbstractForm is valid; no duplicate db_columns
   def form_checks_out?
     return false unless abstract_form_valid?
-    return false if abstract_form.has_duplicate_db_columns?
+    return false if has_duplicate_db_columns?
     return false if db_table.nil? || db_table.empty?
+    return false if questions.count { |q| type == "tutor_table" } >= 2
 
     true
   end

@@ -20,6 +20,17 @@
   <%= nav_links %>
 </fieldset>
 
+<% if @form.questions.count { |q| type == "tutor_table" } >= 2 %>
+  <fieldset>
+    <legend>ERROR: more than one tutor_table</legend>
+    <p>You specified a tutor_table question more than once. However, it is
+    currently not possible to evaluate more than one tutor per sheet. The
+    software is not equipped to differentiate to which tutor a question
+    belongs.</p>
+    <p>If you need to evaluate more than one tutor, hand sheets out twice.</p>
+  </fieldset>
+<% end %>
+
 <% if @form.has_duplicate_db_columns? %>
   <fieldset>
     <legend>ERROR: duplicate db columns</legend>
