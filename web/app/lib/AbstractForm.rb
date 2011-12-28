@@ -202,7 +202,7 @@ class Question
 
       when "tutor_table" then
         # automatically prints tutors, if they have been defined
-        s << "\n\\printtutors{#{qq}}\n"
+        s << "\n\\printtutors{#{qq}}{#{@db_column}}\n"
 
       when "variable_width" then
         s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
@@ -411,6 +411,17 @@ class AbstractForm
   # shouldn’t be any duplicate db_columns per form, but it may happen…
   def get_question(db_column)
     questions.find { |q| q.db_column == db_column }
+  end
+
+  # checks if this form contains a question of a certain type.
+  def include_question_type?(type)
+    questions.any? { |q| q.type == type }
+  end
+
+  # returns the question with type == tutor_table if available. If the
+  # form does not support tutors, nil is returned.
+  def get_tutor_question
+    questions.find { |q| q.type == "tutor_table" }
   end
 
   # pretty printing an AbstrctForm is a bit gnaahaha

@@ -730,11 +730,12 @@
   }
 }
 
-% prints tutors (requires them to have been set before)
-\newcommand{\printtutors}[1]{
+% prints tutors (requires them to have been set before). Expects first argument to be the
+% question text and 2nd argument the db_column to store the result to.
+\newcommand{\printtutors}[2]{
   \vspace*{-1.4mm}
   \preventBreak{
-    \SaveNormalInfo[tutnum]%
+    \SaveNormalInfo[#2]%
     \separator{\arrayrulewidth}%
     \vspace{-3.4mm}%
     #1\\[1.1mm]

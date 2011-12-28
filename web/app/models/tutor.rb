@@ -11,6 +11,11 @@ class Tutor < ActiveRecord::Base
     course.critical? || course.returned_sheets > 0
   end
 
+  def eval_block(questions, section)
+    # FIXME
+    ""
+  end
+
   def evaluate
     form = course.form
     @db_table = form.db_table
@@ -44,35 +49,11 @@ class Tutor < ActiveRecord::Base
     course.tutors.sort{ |x,y| x.id <=> y.id }.index(self) + 1
   end
 
-  def competence
-    @db_table = course.form.db_table
-    competence_field = 'AVG(t2)'
-    query(competence_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t2 > 0").to_f
-  end
-
-  def profit
-    @db_table = course.form.db_table
-    profit_field = 'AVG(t10)'
-    query(profit_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t10 > 0").to_f
-
-  end
-
-  def teacher
-    @db_table = course.form.db_table
-    teacher_field = 'AVG(t1)'
-    query(teacher_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t1 > 0").to_f
-
-  end
-  def preparation
-    @db_table = course.form.db_table
-    prep_field = 'AVG(t3)'
-    query(prep_field, { :barcode => course.barcodes, :tutnum => tutnum}, " AND t3 > 0").to_f
-
-  end
   def sheet_count
     # Otherwise the SQL query will not work
     return 0 if course.profs.empty?
     @db_table = course.form.db_table
-    count_forms({:barcode => course.barcodes, :tutnum => tutnum})
+    tutor_db_column = course.form.get_tutor_question.db_column.to_sym
+    count_forms({:barcode => course.barcodes, tutor_db_column => tutnum})
   end
 end

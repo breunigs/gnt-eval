@@ -55,7 +55,6 @@ def make_sample_sheet(form, lang)
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
   filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
-  #hasTutors = form.questions.map {|q| q.db_column}.include?('tutnum')
 
   form_misses_files = !File.exist?(filename+'.pdf') || !File.exist?(filename+'.yaml')
   # see if the form is newer than any of the files
@@ -151,9 +150,10 @@ namespace :images do
     cpics = CPic.find(:all)
     tpics = Pic.find(:all)
 
-    # find all tables, that have a tutnum column
-    forms = curSem.forms.reject { |form| form.get_question("tutnum").nil? }
-    tables = forms.collect { |form| form.db_table }
+    # find all tables that include a tutor chooser
+    forms = curSem.forms.keep_if { |form| form.include_question_type?("tutor_table") }
+    tables = {}
+    forms.each { |form| tables[form.db_table] = form.get_tutor_question.db_column }
 
     allfiles = Dir.glob(File.join(Seee::Config.file_paths[:sorted_pages_dir], '**/*.jpg'))
     allfiles.each_with_index do |f, curr|
@@ -161,13 +161,13 @@ namespace :images do
       barcode = find_barcode_from_path(f)
 
       if barcode == 0
-        $stderr.print "Couldn’t detect barcode for #{bname}, skipping.\n"
+        warn "Couldn’t detect barcode for #{bname}, skipping.\n"
         next
       end
 
       course_prof = CourseProf.find(barcode)
       if course_prof.nil?
-        $stderr.print "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
+        warn "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
         next
       end
 
@@ -178,23 +178,23 @@ namespace :images do
         next if tpics.any? { |x| x.basename == bname }
         # find tutor id
         tut_num = nil
-        tables.each do |t|
+        tables.each do |table, column|
           # remove everything after the last underscore and add .tif to
           # find the original image
           path = f.sub(/_[^_]+$/, "") + ".tif"
-          data = $dbh.execute("SELECT tutnum FROM #{t} WHERE path = ?", path)
+          data = $dbh.execute("SELECT #{column} FROM #{table} WHERE path = ?", path)
           data = data.fetch_array
           tut_num = data[0].to_i if data
           break if tut_num
         end
 
         if tut_num.nil?
-          $stderr.print "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+          warn "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
           next
         end
 
         if tut_num == 0
-          $stderr.print "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+          warn "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
           next
         end
 

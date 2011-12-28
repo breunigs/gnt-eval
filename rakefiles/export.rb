@@ -122,7 +122,8 @@ namespace :helper do
       # note: the NULLIF command is used to exclude 0-valued columns from
       # the average calculation
       cols_stats = cols.collect { |x| "AVG(NULLIF(#{x}, 0)) as #{x}" } + (extracols.collect {|x| "\"\" AS #{x}"})
-      qry << "SELECT barcode, tutnum, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+      # FIXME: Do not hardcode tutor_id as it may change
+      qry << "SELECT barcode, tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
       qry_stats << "SELECT barcode, '#{db}' as tbl, COUNT(*) as returned_sheets, #{cols_stats.join(", ")} FROM #{db} GROUP BY barcode"
     end
     qry = qry.join(" UNION ALL ")
