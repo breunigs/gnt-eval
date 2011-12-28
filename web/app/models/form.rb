@@ -80,21 +80,21 @@ class Form < ActiveRecord::Base
     !abstract_form.get_duplicate_db_columns.empty?
   end
 
-  # FIX: this should be method-missing-magic, but that is a bit complicated for reasons unknown
-  def db_table
-    abstract_form.is_a?(AbstractForm) ? abstract_form.db_table : nil
+  # catches all methods that are not implemented and sees if
+  # AbstractForm has them. If it doesn’t either, a more detailed error
+  # message is thrown.
+  def method_missing(name, *args, &block)
+    return abstract_form.method(name).call if abstract_form.respond_to?(name)
+
+    begin; super; rescue
+      raise "undefined method #{name} for both #{self} and #{abstract_form}."
+    end
   end
-  def questions
-    abstract_form.is_a?(AbstractForm) ? abstract_form.questions : []
-  end
-  def lang
-    abstract_form.is_a?(AbstractForm) ? abstract_form.lang : nil
-  end
-  def pages
-    abstract_form.is_a?(AbstractForm) ? abstract_form.pages : []
-  end
-  def texheadnumber
-    abstract_form.texheadnumber
+
+  # tell everyone that we know about abstract_form’s methods
+  def respond_to?(name)
+    return true if abstract_form.respond_to?(name)
+    super
   end
 
   # return a string like "Introduction to Astrophysics by John Doe"
