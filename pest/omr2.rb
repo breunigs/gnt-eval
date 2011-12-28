@@ -523,13 +523,10 @@ class PESTOmr < PESTDatabaseTools
       next if q.type == "text" || q.type == "text_wholepage"
       next if q.db_column.nil?
 
-      if q.db_column.is_a?(Array)
-        q.db_column.each_with_index do |a, i|
-          # The first answer starts with 1, but i is zero-based.
-          # Therefore add 1 everytime to put the results in the
-          # right columns.
-          vals << (q.value.include?(i+1) ? 1 : 0).to_s
-          keys << a
+      if q.multi?
+        q.boxes.each do |box|
+          vals << (q.value.include?(box.choice) ? box.choice : 0).to_s
+          keys << q.db_column[i]
         end
       else
         vals << (q.value.nil? ? 0 : Integer(q.value)).to_s
