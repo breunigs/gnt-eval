@@ -21,13 +21,6 @@ License: MIT
 …online: http://madrobby.github.com/scriptaculous/license/
 
 
-Name:    js-yaml
-Web:     https://github.com/nodeca/js-yaml
-License: MIT
- …local: doc/licenses/js-yaml
-…online: https://github.com/nodeca/js-yaml/blob/master/LICENSE
-
-
 Name:    Ruby on Rails
 Web:     http://rubyonrails.org/
 License: MIT
