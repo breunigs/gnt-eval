@@ -101,35 +101,4 @@ module FunkyTeXBits
     #~ I18n.locale = I18n.default_locale if I18n.tainted?
     I18n.translate(item.to_sym)
   end
-
-  def preamble(evalname, additional_packages = "")
-    data = IO.read(RAILS_ROOT + "/../tex/results_preamble.tex.erb")
-    ERB.new(data).result(binding)
-  end
-
-  def TeXKopf(evalname, c_courses = 0, c_profs = 0, c_tutors = 0, c_forms = 0)
-    b = preamble(evalname)
-    data = IO.read(RAILS_ROOT + "/../tex/results_header.tex.erb")
-    b << ERB.new(data).result(binding)
-    b
-  end
-
-  def TeXVorwort(facultylong, semestershort, semesterlong)
-    data = IO.read(RAILS_ROOT + "/../tex/results_preface.tex.erb")
-    ERB.new(data).result(binding)
-  end
-
-  def TeXFuss
-    path = File.join(Rails.root, "../tmp/sample_sheets/sample_")
-    files = {}
-
-    $curSem.forms.each do |f|
-      f.languages.each do |l|
-        files["#{path}#{f.id}_#{l}.pdf"] = { :name => f.name, :pages => f.pages.count }
-      end
-    end
-
-    data = IO.read(RAILS_ROOT + "/../tex/results_footer.tex.erb")
-    ERB.new(data).result(binding)
-  end
 end
