@@ -203,7 +203,16 @@ class Question
 
   # collect all possible choices and return as array
   def get_choices(language = :en)
-    @boxes.collect { |x| x.any_text(language) }
+    warn "DEPRECATED: get_choices is misleading, as it does not return the choices but the texts below each box. Use get_answers instead."
+    boxes.collect { |x| x.any_text(language) }
+  end
+
+  # finds the answer text for each checkbox and returns them as an array
+  # in-order. Does NOT include «no answer», use no_answer? and check it
+  # yourself. Returns an empty array if no boxes have been defined.
+  def get_answers(language = :en)
+    return [] if boxes.nil? || boxes.empty?
+    boxes.collect { |x| x.any_text(language) }
   end
 
   # question itself in appropriate language and gender
