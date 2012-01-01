@@ -48,6 +48,25 @@ class String
   def escape_for_tex
     self.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%').gsub(/\\?_/, '\\\_')
   end
+
+  # strips TeX tags that are commonly used when designing a form so the
+  # text actually fits into the sheet. Most likely, these tags are not
+  # required in the results, therefore they may be stripped here. It
+  # does not remove superfluous curly braces because that would be more
+  # effort… also TeX, doesn’t care about them… Currently removes:
+  # \linebreak, \mbox, \textls, \hspace*, \hspace
+  def strip_common_tex
+    s = self.gsub(/\\linebreak(\{\})?/, "")
+    s = s.gsub(/\\mbox/, "")
+    s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
+    s = s.gsub(/\hspace\*?\{[^\}]+\}/, "")
+  end
+
+  # Actually only useful for arrays. This is a convenience feature so
+  # that no checking for Array/String has to be made.
+  def find_common_start
+    self
+  end
 end
 
 # Tries to simplify paths to make them more user-readable. The path will
@@ -78,6 +97,17 @@ class Array
   # implementation that requires an argument.
   def total
     inject( nil ) { |sum,x| sum ? sum+x : x }
+  end
+
+  # returns the substring starting from the first letter that all
+  # entries have in common.
+  def find_common_start
+    return "" if self.length <= 0
+    (0...self.first.length).each do |k|
+        char = self.first[k]
+        return self.first.slice(0, k) if self.any? { |s| char != s[k] }
+    end
+    a.first
   end
 end
 
