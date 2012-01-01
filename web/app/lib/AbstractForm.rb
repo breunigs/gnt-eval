@@ -432,6 +432,11 @@ class AbstractForm
     @db_table = db_table
   end
 
+  # direct access to sections
+  def sections
+    @pages.collect { |p| p.sections }.flatten
+  end
+
   # direct access to questions
   def questions
     @pages.collect { |p| p.questions }.flatten
