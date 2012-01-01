@@ -42,7 +42,8 @@
     <li>In questions and their answers use \linebreak to force one and avoid \\ or \newline altogether.</li>
     <li>If you want to prevent automatic line breaks place the contents inside an \mbox{}. Be aware that this might lead to texts overlapping each other.</li>
     <li>If TeX fails with error messages that are clearly not related to your code: we are not sure why they appear, but they may usually be resolved by inserting page breaks manually or by fiddling with \vspaces.
-    <li>To group questions correctly in the results they need to be prepended with the correct letters. <b>v</b> refers to questions that belong to the lecture (from German “Vorlesung”); <b>t</b> should be used for questions regarding the tutor; <b>u</b> is for questions that refer to the study groups in general (from German “Übungsgruppen”).<br/><br/>Currently there is no central place where this is controlled, it is hard coded into everywhere.</li>
+    <li>Questions may need to be repeated for each lecturer or tutor while others may be valid for the whole course. Think of a course with two lecturers and two tutors. Do you like the course’s title? → course; Do you like «lecturer»? → lecturer; Do you like «tutor»? → tutor.</li>
+    <li>Use \lect to refer to the lecturer’s full name and \lectLast to refer to his/her/its last name. NOTE: Only valid within repeat_for = lecturer</li>
     <li>Texts may be translated like this, e.g.
       <pre>text:
   :de: Oliver ist doof
