@@ -1,7 +1,15 @@
+<%# Supported/Expected variables: %>
+<%# evalname, String, required, should contain name for this evaluation %>
+<%# %>
+<%# Expects locale-related variables to be set, so that the translate %>
+<%# method »t« works. %>
+<%# %>
+<%# Expects that the Seee::Config class is loaded and accessible. %>
+<%# %>
+<%# %>
 \documentclass[pagesize,halfparskip-,headsepline,cleardoubleempty]{scrbook}
 
 \areaset[1cm]{17cm}{26cm}
-<%= additional_packages %>
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[<%=t :tex_babel_lang%>]{babel}
@@ -17,19 +25,24 @@
 \usepackage[pdftex,
   pdftitle={<%= t(:teaching_eval_pdf_title).gsub("$faculty_semester", evalname)%>},
   pdfauthor={<%= Seee::Config.settings[:author_pdf] %>},
-  pdfborder=0 0 1,  bookmarks=true, pdftoolbar=true, pdfmenubar=true, colorlinks=true,  linkcolor=black, citecolor=black, filecolor=black, urlcolor=black]{hyperref}
+  pdfborder=0 0 1, bookmarks=true, pdftoolbar=true, pdfmenubar=true,
+  colorlinks=true, linkcolor=black, citecolor=black, filecolor=black,
+  urlcolor=black]{hyperref}
 \author{<%=Seee::Config.settings[:author_page_headline] %>}
+
 \renewcommand{\labelitemi}{-}
 \newcommand{\spellingerror}[1]{\textcolor{red}{#1}}
 
+% FIXME: these should be in a separate tex.erb
 \newcommand{\kurskopf}[6]{\clearpage\pdfdest name{#4} xyz%
   \chapter{#1 #5 #2}#6: #3}
-
 \newcommand{\profkopf}[1]{\section*{#1}}
 \newcommand{\fragenzudenuebungen}[1]{\section*{#1}}
 \newcommand{\uebersichtuebungsgruppen}[1]{\section*{#1}}
 \newcommand{\commentsprof}[1]{\textbf{#1}}
 \newcommand{\commentstutor}[1]{\textbf{#1}}
+
+
 \title{<%=t(:teaching_eval_headline).gsub("$faculty_semester", evalname)%>}
 \date{\today}
 

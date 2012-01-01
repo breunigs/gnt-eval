@@ -1,3 +1,11 @@
+<%# Supported/Expected variables: %>
+<%# course_count, sheet_count, prof_count, study_group_count %>
+<%# Integer, required. %>
+<%# %>
+<%# Expects locale-related variables to be set, so that the translate %>
+<%# method »t« works. %>
+<%# %>
+<%# %>
 \begin{titlepage}
   \null\vskip 2.5cm
   \begin{center}
@@ -18,10 +26,10 @@
     \textbf{<%=t :scope_of_this_eval %>}\par\medskip
     \begin{tabular}[b]{rl}
       \hline
-      <%=c_courses%> & <%=t :courses %> \\
-      <%=c_profs%> & <%=t :lecturers %> \\
-      <%=c_tutors%> & <%=t :study_groups %>\\
-      <%=c_forms%> & <%=t :processed_questionnaires %>\\
+      <%=course_count%> & <%=t :courses %> \\
+      <%=prof_count%> & <%=t :lecturers %> \\
+      <%=study_group_count%> & <%=t :study_groups %>\\
+      <%=sheet_count%> & <%=t :processed_questionnaires %>\\
       \hline
     \end{tabular}
     \hfill

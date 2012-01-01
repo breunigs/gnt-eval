@@ -1,7 +1,15 @@
+<%# Supported/Expected variables: %>
+<%# sample_sheets, Hash of Hashs. Here’s an example: %>
+<%# sample_sheets["path_to_form.pdf"] = { :name => "Name of Form", :pages => 2 } %>
+<%# %>
+<%# Expects locale-related variables to be set, so that the translate %>
+<%# method »t« works. %>
+<%# %>
+<%# %>
 \chapter{<%=t :the_questionnaires %>}
 
 
-<% files.each do |path, info| %>
+<% sample_sheets.each do |path, info| %>
   \subsection*{<%=info[:name]%>}
   <% 1.upto(info[:pages]) do |i| %>
     \fbox{

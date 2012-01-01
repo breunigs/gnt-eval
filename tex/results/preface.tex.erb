@@ -1,3 +1,16 @@
+<%# Supported/Expected variables: %>
+<%# facultylong, String, required, should contain an unabbreviated name %>
+<%#                                for the evaluated faculty %>
+<%# %>
+<%# sem_title[:long], String, required, should contain an unabbreviated %>
+<%#                                     name for the evaluated semester %>
+<%# %>
+<%# sem_title[:short], String, required, should contain an shortened %>
+<%#                                      name for the evaluated semester %>
+<%# %>
+<%# Expects locale-related variables to be set, so that the translate %>
+<%# method »t« works. %>
+
 \chapter{<%=t :preface%>}
 
 <%
@@ -9,5 +22,6 @@ end
 %>
 
 \newcommand{\facultylong}{<%=facultylong%>}
-\newcommand{\semesterlong}{<%=semesterlong%>}
+\newcommand{\semesterlong}{<%=sem_title[:long]%>}
+\newcommand{\semestershort}{<%=sem_title[:short]%>}
 \input{<%=preface%>}
