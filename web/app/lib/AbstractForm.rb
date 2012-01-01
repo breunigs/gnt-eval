@@ -190,11 +190,6 @@ class Question
     @hide_answers
   end
 
-  # is the question active?
-  def active?
-    not @active.nil?
-  end
-
   # leftmost choice in appropriate language
   def ltext(language = :en)
     @boxes.first.any_text(language)
@@ -258,23 +253,6 @@ class Question
           boxes << "\\boxvariable{#{i+1}}{\\hspace{-0.5em}#{b.text[lang]}}"
         end
         s << boxes.join(" \\hfill ")
-        s << "}\n\n"
-
-      # WARNING: Support for this type of question will be removed. Do not use.
-      # TODO: Remove function once safe.
-      when "fixed_width__last_is_rightmost" then
-        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{qq}}"
-
-        s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
-        @boxes.each_with_index do |b,i|
-          next if b == @boxes.last
-          s << "\\boxfixed{#{i+1}}{#{b.text[lang]}} "
-        end
-
-        (6-@boxes.size).times { s << "\\boxfixedempty" }
-        last = @boxes.last
-        s << "\\boxfixed{#{@boxes.count}}{#{last.text[lang]}} "
         s << "}\n\n"
 
       when "square" then
