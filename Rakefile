@@ -54,14 +54,13 @@ def make_sample_sheet(form, lang)
   # this is hardcoded throughout the project
   dir = "tmp/sample_sheets/"
   File.makedirs(dir)
-  filename = dir + "sample_" + form.id.to_s + (lang == "" ? "" : "_#{lang}")
+  filename = "#{dir}sample_#{form.id}#{lang.to_s.empty? ? "" : "_#{lang}"}"
 
   form_misses_files = !File.exist?(filename+'.pdf') || !File.exist?(filename+'.yaml')
   # see if the form is newer than any of the files
   form_needs_regen = form_misses_files \
                       || form.updated_at > File.mtime(filename+'.pdf') \
                       || form.updated_at > File.mtime(filename+'.yaml')
-
 
   # PDFs are required for result generation and the posouts for OMR
   # parsing. Only skip if both files are present and newer than the
@@ -359,6 +358,7 @@ namespace :pdf do
     sem.forms.each do |f|
       f.languages.each do |l|
         work_queue.enqueue_b { make_sample_sheet(f, l) }
+        #make_sample_sheet(f, l)
       end
     end
     work_queue.join
@@ -383,24 +383,26 @@ namespace :pdf do
   # This is a helper function that will create the result PDF file for a
   # given semester and faculty_id in the specified directory.
   def evaluate(semester_id, faculty_id, directory)
-      f = Faculty.find(faculty_id)
-      s = Semester.find(semester_id)
+    puts "Looking up semester and faculty…"
+    f = Faculty.find(faculty_id)
+    s = Semester.find(semester_id)
 
-      puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
-      puts "Could not find specified semester (id = #{semester_id})" if s.nil?
-      return if f.nil? || s.nil?
+    puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
+    puts "Could not find specified semester (id = #{semester_id})" if s.nil?
+    return if f.nil? || s.nil?
 
-      filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
-      filename << '_' << s.dirFriendlyName
-      filename << '_' << (I18n.tainted? ? "mixed" : I18n.default_locale).to_s
-      filename << '.tex'
+    filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
+    filename << '_' << s.dirFriendlyName
+    filename << '_' << (I18n.tainted? ? "mixed" : I18n.default_locale).to_s
+    filename << '.tex'
 
-      File.open(directory + filename, 'w') do |h|
-        h.puts(s.evaluate(f))
-      end
+    puts "Now evaluating #{filename}"
+    File.open(directory + filename, 'w') do |h|
+      h.puts(s.evaluate(f))
+    end
 
-      puts "Wrote #{directory+filename}"
-      Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
+    puts "Wrote #{directory+filename}"
+    Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
   end
 
   desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
@@ -424,7 +426,7 @@ namespace :pdf do
         I18n.locale = lang_code.to_sym
       end
       I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-      Rake::Task["pdf:samplesheets".to_sym].invoke
+      ####Rake::Task["pdf:samplesheets".to_sym].invoke ### FIXME
       evaluate(sem, a.faculty_id, dirname)
       exit
     end
@@ -745,32 +747,34 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-    filename="\"#{File.basename(t.source)}\""
-    texpath="cd \"#{File.dirname(t.source)}\";"
+  Scc = Seee::Config.commands
+  filename="\"#{File.basename(t.source)}\""
+  texpath="cd \"#{File.dirname(t.source)}\";"
 
-    # run it once fast, to see if there are any syntax errors in the
-    # text and create first-run-toc
-    err = `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
-    if $?.exitstatus != 0
-        puts "="*60
-        puts err
-        puts "\n\n\nERROR WRITING: #{t.name}"
-        puts "EXIT CODE: #{$?}"
-        puts "="*60
-        puts "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
-        exit
-    end
+  # run it once fast, to see if there are any syntax errors in the
+  # text and create first-run-toc
+  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+  if $?.exitstatus != 0
+      puts "="*60
+      puts err
+      puts "\n\n\nERROR WRITING: #{t.name}"
+      puts "EXIT CODE: #{$?}"
+      puts "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
+      puts "="*60
+      puts "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
+      exit
+  end
 
-    # run it fast a second time, to get /all/ references correct
-   `#{texpath} #{Seee::Config.commands[:pdflatex_fast]} #{filename} 2>&1`
-    # now all references should have been resolved. Run it a last time,
-    # but this time also output a pdf
-    `#{texpath} #{Seee::Config.commands[:pdflatex_real]} #{filename} 2>&1`
+  # run it fast a second time, to get /all/ references correct
+  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+  # now all references should have been resolved. Run it a last time,
+  # but this time also output a pdf
+  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
 
-    if $?.exitstatus == 0
-        puts "Wrote #{t.name}"
-    else
-        puts "Some other error occured. It shouldn't be TeX-related, as"
-        puts "it already passed one run. Well, happy debugging."
-    end
+  if $?.exitstatus == 0
+      puts "Wrote #{t.name}"
+  else
+      puts "Some other error occured. It shouldn't be TeX-related, as"
+      puts "it already passed one run. Well, happy debugging."
+  end
 end
