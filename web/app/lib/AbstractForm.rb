@@ -195,7 +195,8 @@ class Question
     @boxes.first.any_text(language)
   end
 
-  # rightmost choice in appropriate language
+  # rightmost choice in appropriate language. Does NOT include «no
+  # answer», use no_answer? and check it yourself.
   def rtext(language = :en)
     @boxes.last.any_text(language)
   end
