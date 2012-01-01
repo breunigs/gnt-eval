@@ -55,7 +55,8 @@ end
 
 # This is a question on a printed form. Nothing more.
 class Question
-  # list of boxes
+  # list of boxes. Does NOT include the «no answer» checkbox, even when
+  # enabled.
   attr_accessor :boxes
 
   # text of the question
@@ -110,7 +111,7 @@ class Question
 
   # how many choices are there?
   def size
-    return @boxes.count
+    @boxes.count
   end
 
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
@@ -204,19 +205,20 @@ class Question
     q.is_a?(String) ? q : q[gender]
   end
 
-  # did the user fail to answer the question?
+  # did the user fail to answer the question? (either too many check-
+  # marks or none)
   def failed?
-    return @value == 0 || @value.to_i < 0
+    @value == 0 || @value.to_i < 0
   end
 
-  # didn't the user make any choice?
+  # didn't the user make any choice? (i.e. no checkmarks at all)
   def nochoice?
-    return @value == 0
+    multi? ? (@value.empty?) : (@value == 0)
   end
 
   # is this a multi-answer question?
   def multi?
-    return @db_column.is_a?(Array)
+    @db_column.is_a?(Array)
   end
 
   # export a single question to tex (used for creating the forms)
@@ -284,7 +286,7 @@ class Question
         opt << (last_is_textbox? ? "lastIsTextbox" : nil)
         s << "<#{opt.compact.join(" ")}>"
         # db column
-        s << "{#{multi? ? @db_column.first[0..-2] : @db_column}}"
+        s << "{#{multi? ? @db_column.find_common_start : @db_column}}"
         # question
         s << "{#{qq}}"
         # first row of answers (compact removes dummy element, if required)
@@ -345,14 +347,14 @@ class Section
 
   # tries to get the text in the following order:
   # 1. given language, 2. in English, 3. whatever comes first
-  def any_title(lang)
+  def any_title(lang = I18n.locale)
     return @title if @title.is_a? String
     return (@title[lang] || @title[:en] || @title.first[1] || "") if @title.is_a?(Hash)
     ""
   end
 
   attr_writer :answers
-  def answers(lang)
+  def answers(lang = I18n.locale)
     return @answers if @answers.is_a? Array
     return (@answers[lang.to_sym] || @answers[:en] || @answers.first[1]) if @answers.is_a?(Hash)
     []
