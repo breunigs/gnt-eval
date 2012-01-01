@@ -427,6 +427,14 @@ class AbstractForm
     @texfoot || ""
   end
 
+  # returns how many pages will be used in the resulting PDF. Warning:
+  # result is not cached, so this method is very slow.
+  def actual_page_count
+    warn "WARNING: actual_page_count is not yet implemented properly."
+    warn "         Please send patches."
+    @pages.count
+  end
+
   def initialize(pages = [], db_table = '')
     @pages = pages
     @db_table = db_table

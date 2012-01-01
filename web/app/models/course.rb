@@ -16,6 +16,11 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
+  # Returns list of tutors sorted by name (instead of adding-order)
+  def tutors_sorted
+    tutors.sort { |x,y| x.abbr_name.casecmp(y.abbr_name) }
+  end
+
   # storing symbols via activerecord is a bit icky
   def language #:nodoc
     return '' if read_attribute(:language).nil?
@@ -26,7 +31,7 @@ class Course < ActiveRecord::Base
     write_attribute(:language, value.to_s)
   end
 
-  # magic translator function
+  # translates a given string or symbol using the globla I18n system
   def t(string)
     I18n.t(string)
   end
@@ -60,31 +65,28 @@ class Course < ActiveRecord::Base
   # evaluators from their name, simply by adding a standand mail
   # domain to it
   def fs_contact_addresses
-    if fscontact.empty?
-      pre_format = evaluator
-    else
-      pre_format = fscontact
-    end
+    pre_format = fscontact.empty? ? evaluator : fscontact
 
-    pre_format.split(',').map{ |a| (a =~ /@/ ) ? a : a + '@' + Seee::Config.settings[:standard_mail_domain]}.join(',')
+    pre_format.split(',').map do |a|
+      (a =~ /@/ ) ? a : a + '@' + Seee::Config.settings[:standard_mail_domain]
+    end.join(',')
   end
 
   def barcodes_with_checksum
     course_profs.map { |cp| cp.barcode_with_checksum }
   end
 
+  # Returns the array of barcodes that belong to this course. It is
+  # actually a list of the id of the course_prof class.
   def barcodes
     course_profs.map{ |cp| cp.barcode.to_i }
   end
 
-  # will count the returned sheets, if all necessary data is
-  # available. In case of an error, -1 will be returned.
+  # will count the returned sheets if all necessary data is available.
+  # In case of an error, -1 will be returned.
   def returned_sheets
-    return -1 if form.nil? || form.db_table.nil?
-    @db_table = form.db_table
-
     return 0 if profs.empty?
-    count_forms({ :barcode => barcodes})
+    rt.count(form.db_table, {:barcode => barcodes})
   end
 
   # the head per course. this adds stuff like title, submitted
@@ -95,72 +97,83 @@ class Course < ActiveRecord::Base
     sheets = returned_sheets
 
     notspecified = t(:not_specified)
-    b << "\\kurskopf{#{title}}{#{profs.map { |p| p.fullname }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
+    b << "\\kurskopf{#{title.escape_for_tex}}{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
     b << "\\begin{multicols}{2}"
 
 
-    data = IO.read(RAILS_ROOT + "/../tex/results_horiz_bars.tex.erb")
-
-    # degree ###########################################################
-    lines = []
-
-    # grab the description text for each checkbox from the form
-    matchn = [notspecified] + form.get_question("hauptfach").get_choices(I18n.locale)
-    matchm = [""] + form.get_question("studienziel").get_choices(I18n.locale)
-    # remove "sonstiges" or "other" from the end of the array because
-    # otherwise we get pretty useless combinations
-    matchn.pop
-    matchm.pop
-
-    all = 0
-    keinang = 0
-    0.upto(matchn.length) do |n|
-      0.upto(matchm.length) do |m|
-        num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
-        # skip all entries with very few votes
-        next if num/sheets.to_f*100 < 2
-        # check for 'other' and skip
-        next if n == matchn.length || m == matchm.length
-
-        all += num
-
-        # check for 'not specified' and group them together
-        if n == 0 || m == 0
-          keinang += num
-          next
-        end
-        lines << {:name => matchn[n] + " " + matchm[m], :count => num }
-      end
-    end
-    lines.sort! { |x,y| y[:count] <=> x[:count] }
-    lines << {:name => t(:other), :count => sheets-all } if sheets-all > 0
-    lines << {:name => notspecified, :count => keinang } if keinang > 0
-
-    title = t(:degree_course)
-    b << ERB.new(data).result(binding)
-    b << "\\columnbreak"
+    #~ data = IO.read(RAILS_ROOT + "/../tex/results_horiz_bars.tex.erb")
+#~
+    #~ # degree ###########################################################
+    #~ lines = []
+#~
+    #~ # grab the description text for each checkbox from the form
+    #~ # FIXME: don't hardcode this, but make it an attribute of the
+    #~ #        question in Abstractform
+    #~ matchn = [notspecified] + form.get_question("v_central_major").get_choices(I18n.locale)
+    #~ matchm = [""] + form.get_question("v_central_degree").get_choices(I18n.locale)
+    #~ # remove "sonstiges" or "other" from the end of the array because
+    #~ # otherwise we get pretty useless combinations
+    #~ matchn.pop
+    #~ matchm.pop
+#~
+    #~ all = 0
+    #~ keinang = 0
+    #~ 0.upto(matchn.length) do |n|
+      #~ 0.upto(matchm.length) do |m|
+        #~ num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
+        #~ # skip all entries with very few votes
+        #~ next if num/sheets.to_f*100 < 2
+        #~ # check for 'other' and skip
+        #~ next if n == matchn.length || m == matchm.length
+#~
+        #~ all += num
+#~
+        #~ # check for 'not specified' and group them together
+        #~ if n == 0 || m == 0
+          #~ keinang += num
+          #~ next
+        #~ end
+        #~ lines << {:name => matchn[n] + " " + matchm[m], :count => num }
+      #~ end
+    #~ end
+    #~ lines.sort! { |x,y| y[:count] <=> x[:count] }
+    #~ lines << {:name => t(:other), :count => sheets-all } if sheets-all > 0
+    #~ lines << {:name => notspecified, :count => keinang } if keinang > 0
+#~
+    #~ title = t(:degree_course)
+    #~ b << ERB.new(data).result(binding)
+    #~ b << "\\columnbreak"
 
     # semesterdistribution #############################################
-    lang_sem = t(:academic_term)
-    sems = get_distinct_values("semester", {:barcode => barcodes}).sort
-
-    lines = []
-    (sems-[0]).each do |i|
-      num = count_forms({:barcode => barcodes, :semester => i})
-      lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
-        :count => num }
-    end
-    num = count_forms({:barcode => barcodes, :semester => 0})
-    lines << {:name => notspecified, :count => num}
-
-    title = t('semester_distribution')
-    b << ERB.new(data).result(binding)
-
+    #~ lang_sem = t(:academic_term)
+    #~ sems = get_distinct_values("semester", {:barcode => barcodes}).sort
+#~
+    #~ lines = []
+    #~ (sems-[0]).each do |i|
+      #~ num = count_forms({:barcode => barcodes, :semester => i})
+      #~ lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
+        #~ :count => num }
+    #~ end
+    #~ num = count_forms({:barcode => barcodes, :semester => 0})
+    #~ lines << {:name => notspecified, :count => num}
+#~
+    #~ title = t('semester_distribution')
+    #~ b << ERB.new(data).result(binding)
+#~
     b << "\\end{multicols}"
     b
   end
 
-  # eval me (baby)
+  # evaluates the given questions in the scope of this course.
+  def eval_block(questions, section)
+    b = rt.small_header(section)
+    questions.each do |q|
+      b << rt.eval_question(form.db_table, q, {:barcode => barcodes}, {})
+    end
+    b
+  end
+
+  # evaluates this whole course against the associated form
   def evaluate
     puts "   #{title}"
 
@@ -178,14 +191,40 @@ class Course < ActiveRecord::Base
     end
 
     I18n.locale = language if I18n.tainted?
-    I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
     b = ''
-
-    # setup for FunkyDBBits
-    @db_table = form.db_table
-
     b << eval_lecture_head
+
+    # walk all questions, one section at a time. May split sections into
+    # smaller groups if they belong to a different entity (i.e. repeat_
+    # for attribute differs)
+    form.sections.each do |section|
+      questions = Array.new(section.questions)
+      # walk all questions in this section
+      while !questions.empty?
+        # find all questions in this sections until repeat_for changes
+        repeat_for = questions.first.repeat_for
+        block = []
+        while !questions.empty? && questions.first.repeat_for == repeat_for
+          block << questions.shift
+        end
+        # now evaluate that block of questions according to it’s
+        # repeat_for/belong_to value
+        s = section.any_title
+        case repeat_for
+          when :course:
+            b << rt.include_form_variables(self)
+            b << eval_block(block, s)
+          when :lecturer:
+            course_profs.each { |cp| b << cp.eval_block(block, s) }
+          when :tutor:
+            tutors_sorted.each { |t| b << t.eval_block(block, s) }
+          else
+            raise "Unimplemented repeat_for type #{repeat_for}"
+        end
+      end
+    end
+
 
     # lecture eval per lecturer
     course_profs.each do |cp|
@@ -247,6 +286,12 @@ class Course < ActiveRecord::Base
     b << cc
 
     return b
+  end
+
+  private
+  # quick access to ResultTools.instance
+  def rt
+    ResultTools.instance
   end
 
 end

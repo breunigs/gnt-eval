@@ -6,19 +6,32 @@ class CourseProf < ActiveRecord::Base
 
   include FunkyDBBits
 
-  # eval and output
-  def evaluate!
-    puts evaluate
+  def eval_block(questions, section)
+    b = ""
+    b << rt.include_form_variables(self)
+    # FIXME
+    ""
   end
+
+  # will count the returned sheets if all necessary data is available.
+  # In case of an error, -1 will be returned.
+  def returned_sheets
+    ResultTools.instance.count(course.form.db_table, {:barcode => id})
+  end
+
 
   # evals sth against some form \o/
   # returns a TeX-string
   def evaluate
     form = course.form
     # setup for FunkyDBBits ...
+    # FIXME DEPRECATED
     @db_table = form.db_table
 
     b = ''
+    # head lecturer info into TeX so the questions may refer to them
+    b << "\\def\\lectLast{#{prof.lastname.escape_for_tex}}"
+    b << "\\def\\lect{#{prof.fullname.escape_for_tex}}"
 
     # only set locale if we want a mixed-lang document
     I18n.locale = course.language if I18n.tainted?
@@ -65,5 +78,11 @@ class CourseProf < ActiveRecord::Base
   # Returns a pretty unique name for this CourseProf
   def get_filename
     [course.form.name, course.language, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+  end
+
+  private
+  # quick access to ResultTools.instance
+  def rt
+    ResultTools.instance
   end
 end
