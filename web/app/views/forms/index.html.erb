@@ -27,7 +27,7 @@
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
       <% end %>
-      <%= (not form.abstract_form_valid?) ? "<td>⚠ Form is invalid</td>" : ""%>
+      <%= (not form.form_checks_out?) ? "<td>⚠ Form is invalid</td>" : ""%>
     </tr>
   <% end %>
   </table>
