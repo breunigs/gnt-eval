@@ -14,32 +14,43 @@ class Semester < ActiveRecord::Base
 
   # evaluate a faculty
   def evaluate(faculty)
-    b = ''
-
-    cs = courses.find_all{ |c| c.faculty_id == faculty.id }.sort{ |x,y| x.title <=> y.title }
+    # Let the database do the selection and sorting work. Also include
+    # tutor and prof models since we are going to count them later on.
+    # Since we need all barcodes, include course_prof as well.
+    puts "Finding associated courses…"
+    #cs = courses.find_all{ |c| c.faculty_id == faculty.id }.sort{ |x,y| x.title <=> y.title }
+    cs = courses.find_all_by_faculty_id(faculty, \
+      :order => "TRIM(LOWER(title))", \
+      :include => [:course_profs, :profs, :tutors])
 
     # now this IS a global variable, and we just set it for performance reasons. it is a
     # list of all barcodes corresponding to faculty and semester.
-    $facultybarcodes = cs.map{ |c| c.course_profs.map { |cp| cp.barcode.to_i }}.flatten
+    $facultybarcodes = cs.map{ |c| c.barcodes }.flatten
+    tables = cs.map { |c| c.form.db_table }
 
-    # FunkyDBBits setup
-    @db_table = cs.map { |c| c.form.db_table }.uniq
+    puts "Counting all kinds of things…"
+    course_count = cs.count
+    sheet_count = rt.count(tables, {:barcode => $facultybarcodes})
+    prof_count = cs.map { |c| c.profs }.flatten.uniq.count
+    study_group_count = cs.inject(0) { |sum, c| sum + c.tutors.count }
 
+    puts "Inserting preface and similar yadda yadda…"
     evalname = faculty.longname + ' ' + title
-    anzahl_boegen = count_forms({})
 
-    b << TeXKopf(evalname, cs.count,
-            cs.inject(0) { |sum, c| sum + c.profs.count },
-            cs.inject(0) { |sum, c| sum + c.tutors.count },
-            anzahl_boegen)
-    b << TeXVorwort(faculty.longname, title, longtitle)
+    b = ""
+    # requires evalname
+    b << ERB.new(rt.load_tex("preamble")).result(binding)
+    # requires the *_count variables
+    b << ERB.new(rt.load_tex("header")).result(binding)
 
-    cs.each do |c|
-      b << c.evaluate.to_s
-    end
+    facultylong = faculty.longname
+    sem_title = { :short => title, :long => longtitle }
+    b << ERB.new(rt.load_tex("preface")).result(binding)
 
-    b << TeXFuss()
+    puts "Evaluating #{cs.count} courses…"
+    cs.each { |c| b << c.evaluate.to_s }
 
+    b << rt.sample_sheets_and_footer(forms)
     return b
   end
 
@@ -59,5 +70,11 @@ class Semester < ActiveRecord::Base
 
   def dirfriendly_title
     dirFriendlyName
+  end
+
+  private
+  # quick access to ResultTools.instance
+  def rt
+    ResultTools.instance
   end
 end
