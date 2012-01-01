@@ -93,6 +93,19 @@ class Question
   # than 0 means it’s on. Good ones are between 15 and 30 (millimeter)
   attr_accessor :last_is_textbox
 
+  # Specify the type of visualizer you want to use to represent this
+  # question in the result PDF. You can specify more than one
+  # visualization by making this an array. For possible values have a
+  # look at tex/results/multi_*.tex.erb for multiple choice questions
+  # and at tex/results/single_*.tex.erb for single choice questions. The
+  # globbing star indicates the name to specify.
+  # By default the _empty visualizer will be used which only prints a
+  # comment into the TeX file.
+  attr_writer :visualizer
+  def visualizer
+    @visualizer || "empty"
+  end
+
   attr_accessor :donotuse
 
   # FIXME: remove failchoice and nochoice
