@@ -115,6 +115,7 @@ class Question
 
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
   # FIXME: now questions belong to sections. is there a way we could …
+  # DEPRECATED
   def section
     if @db_column.nil?
       return 'this is no question in a traditional sense'
@@ -126,6 +127,34 @@ class Question
       return 'tutor'
     elsif first_letter == 'u'
       return 'uebungsgruppenbetrieb'
+    end
+  end
+
+  # Returns for which entities this question should be repeated or where
+  # it belongs to. Returns either of the following:
+  # :course, :lecturer, :tutor
+  # Where :course says this question should only be shown once (default).
+  # :lecturer and :tutor indicate this question should be evaluated
+  # separately for each lecturer/tutor.
+  def repeat_for
+    # if loaded via YAML 2 Ruby this variable will be a string or nil,
+    # thus the .to_sym is required.
+    (@repeat_for || :course).to_sym
+  end
+
+  # Set value for which entities this question should be repeated. If
+  # you specify something other than :course, :lecturer or :tutor it
+  # will fall back to :course and print a warning.
+  def repeat_for=(val)
+    val = val.to_sym
+    valid = [:course, :lecturer, :tutor]
+    if valid.contains?(val)
+      @repeat_for = val
+    else
+      warn "Invalid repeat_for value has been set."
+      warn "Given: #{val}"
+      warn "Allowed: #{valid.join(", ")}"
+      @repeat_for = nil
     end
   end
 
@@ -299,10 +328,8 @@ class Question
 end
 
 
-# this is atm actually just needed for OMR/TeX to distinguish between
-# pages. maybe (future ...) we could differentiate between different
-# types of questions.
-#
+# groups questions of the same type or of the same category together
+# and prints a header into the questionnaire and into the results
 class Section
   attr_accessor :title
 

@@ -51,9 +51,31 @@ class Form < ActiveRecord::Base
     return false unless abstract_form_valid?
     return false if has_duplicate_db_columns?
     return false if db_table.nil? || db_table.empty?
-    return false if questions.count { |q| type == "tutor_table" } >= 2
+    return false if questions.count { |q| q.type == "tutor_table" } >= 2
+    return false unless find_out_of_scope_variables.empty?
 
     true
+  end
+
+  # There are some variables which can be used to design the form, e.g.
+  # \lect to refer to the lecturer’s name. These variables may be valid
+  # for the whole sheet when the questions are used in the form. However
+  # they are actually only valid for certain parts of the form. Consider
+  # \lect: It can only valid for questions that depend on the lecturer
+  # (i.e. repeat_for = :lecturer). Forms should support multiple
+  # lecturers per course, therefore these variables cannot be used out-
+  # side the correct repeat_for-scope.
+  def find_out_of_scope_variables
+    a = []
+    questions.each do |q|
+      next if !q.qtext.to_a.join.include?("\\lect") || q.repeat_for == :lecturer
+      a << "Question #{q.db_column.find_common_start} appears to use \\lect* even though repeat_for is not lecturer."
+    end
+    sections.each do |s|
+      next if !s.title.to_a.join.include?("\\lect") || s.questions.first.repeat_for == :lecturer
+      a << "Section #{s.title} appears to use \\lect* even though repeat_for for the following question is not lecturer."
+    end
+    a
   end
 
   # what languages does this form support? If it's a single language form, i.e. if no strings

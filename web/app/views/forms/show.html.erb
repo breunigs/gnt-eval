@@ -55,6 +55,35 @@
   </fieldset>
 <% end %>
 
+<% oosv = @form.find_out_of_scope_variables
+unless oosv.empty?
+%>
+  <fieldset>
+    <legend>ERROR: Out of scope variables</legend>
+      <p>
+        There are some variables which can be used to design the form, e.g.
+        \lect to refer to the lecturer’s name. These variables may be valid
+        for the whole sheet when the questions are used in the form due to
+        the fact that a form is bound to a lecturer. However they are
+        actually only valid for certain parts of the form. Consider
+        \lect: It can only valid for questions that depend on the lecturer
+        (i.e. repeat_for = lecturer). Forms should support multiple
+        lecturers per course, therefore these variables cannot be used
+        outside the correct repeat_for-scope.
+      </p>
+      <table>
+        <tr style="background: #<%= cycle('efefef', 'fff')%>">
+          <th>message</th>
+        </tr>
+      <% oosv.each do |err| %>
+        <tr style="background: #<%= cycle('efefef', 'fff')%>">
+          <td><%=err%></td>
+        </tr>
+      <% end %>
+      </table>
+  </fieldset>
+<% end %>
+
 <a id="tex-image-preview"></a>
 <%= render :partial => "shared/preview_big" %>
 
