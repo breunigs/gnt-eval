@@ -13,7 +13,16 @@
 \areaset[1cm]{17cm}{26cm}
 
 % load packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\usepackage[<%=t :tex_babel_lang%>]{babel}
+<%
+if I18n.tainted?
+  langs = I18n.available_locales.map do |l|
+    I18n.t :tex_babel_lang, :locale => l
+  end.join(",")
+else
+  langs = I18n.t :tex_babel_lang
+end
+%>
+\usepackage[<%=langs%>]{babel}
 \usepackage{color}
 \usepackage{calc}
 \usepackage{dsfont}                   % additional math font

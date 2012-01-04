@@ -402,13 +402,6 @@ class AbstractForm
     return @intro[lang.to_sym] || @intro[:en] || default
   end
 
-  # the language class that should be passed to TeX's babel
-  attr_writer :babelclass
-  def babelclass(lang)
-    return (@babelclass || "") if @babelclass.nil? || @babelclass.is_a?(String)
-    return @babelclass[lang.to_sym] || @babelclass[:en] || "english"
-  end
-
   # list of pages
   attr_accessor :pages
 
@@ -523,7 +516,7 @@ class AbstractForm
     tex = ""
 
     # form header and preamble
-    tex << "\\documentclass[#{babelclass(lang)}]{eval}\n"
+    tex << "\\documentclass[#{I18n.t(:tex_babel_lang)}]{eval}\n"
     tex << "\\lecturerFirst{#{lecturer_first.escape_for_tex}}\n"
     tex << "\\lecturerLast{#{lecturer_last.escape_for_tex}}\n"
     tex << "\\vorlesung{#{title.escape_for_tex}}\n"
