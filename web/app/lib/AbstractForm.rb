@@ -46,7 +46,7 @@ class Box
 
   # just get any description from the @text field. This should probably
   # be /the/ accessor for @text, similar to the way question#text works.
-  def any_text(lang = :en)
+  def any_text(lang = I18n.locale)
     return @text if @text.is_a? String
     (return @text[lang.to_sym] || @text[:en] || @text.first[1]) if @text.is_a? Hash
     ""
@@ -191,18 +191,20 @@ class Question
   end
 
   # leftmost choice in appropriate language
-  def ltext(language = :en)
+  def ltext(language = I18n.locale)
     @boxes.first.any_text(language)
   end
+  alias :leftmost_pole :ltext
 
   # rightmost choice in appropriate language. Does NOT include «no
   # answer», use no_answer? and check it yourself.
-  def rtext(language = :en)
+  def rtext(language = I18n.locale)
     @boxes.last.any_text(language)
   end
+  alias :rightmost_pole :rtext
 
   # collect all possible choices and return as array
-  def get_choices(language = :en)
+  def get_choices(language = I18n.locale)
     warn "DEPRECATED: get_choices is misleading, as it does not return the choices but the texts below each box. Use get_answers instead."
     boxes.collect { |x| x.any_text(language) }
   end
@@ -210,13 +212,13 @@ class Question
   # finds the answer text for each checkbox and returns them as an array
   # in-order. Does NOT include «no answer», use no_answer? and check it
   # yourself. Returns an empty array if no boxes have been defined.
-  def get_answers(language = :en)
+  def get_answers(language = I18n.locale)
     return [] if boxes.nil? || boxes.empty?
     boxes.collect { |x| x.any_text(language) }
   end
 
   # question itself in appropriate language and gender
-  def text(language = :en, gender = :both)
+  def text(language = I18n.locale, gender = :both)
     return @qtext if @qtext.is_a? String
     q = @qtext[language.to_sym] || @qtext.first[1] || ""
     return q if q.is_a? String
@@ -240,7 +242,7 @@ class Question
   end
 
   # export a single question to tex (used for creating the forms)
-  def to_tex(lang = :en, gender = :both)
+  def to_tex(lang = I18n.locale, gender = :both)
     s = ""
     qq = text(lang, gender)
     case @type
@@ -311,7 +313,7 @@ class Question
   # used in the result pdfs
   # h: hash correspoding to specific (!) where clause
   # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table, lang = :en, gender = :both)
+  def eval_to_tex(h, g, db_table, lang = I18n.locale, gender = :both)
     @db_table = db_table
 
     b = ''
@@ -491,7 +493,7 @@ class AbstractForm
   # returns the complete TeX code required to generate the form. If no
   # specific data is provided it will be filled with some default values
   def to_tex(
-      lang = :en,
+      lang = I18n.locale,
       title = "Jasper ist doof 3",
       lecturer_first = "Oliver",
       lecturer_last = "Istdoof",
