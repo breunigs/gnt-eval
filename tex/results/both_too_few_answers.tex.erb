@@ -1,0 +1,13 @@
+
+\begin{tikzpicture}
+\globalQuestion{
+  <%= q.text.strip_common_tex %>\\
+  {\globalNumberStyle
+    <%=t :answers%>: <%=sc%>,
+    <%=t :abstentions%>: <%=answ[:abstentions]%>}
+}
+
+\draw node[right=2mm of question text.east, text width=9.85cm,
+	    text centered, inner sep=0]
+  {<%=t :technical_too_few_answers %>};
+\end{tikzpicture}

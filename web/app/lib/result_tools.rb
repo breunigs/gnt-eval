@@ -195,11 +195,20 @@ class ResultTools
 
   # See eval_question; handles single choice questions only
   def eval_question_single(table, q, special_where, compare_where)
-    # collect aggregated data
-    sc, sa, ss = count_avg_stddev(table, q.db_column, special_where)
-    cc, ca, cs = count_avg_stddev(table, q.db_column, compare_where)
-
+    # collect data for this question
     answ = get_answer_counts(table, q, special_where)
+    sc, sa, ss = count_avg_stddev(table, q.db_column, special_where)
+    # exit early if there is not enough data. Note that this is
+    # different from the minimum required sheets: If enough sheets have
+    # been handed in, but everyone checked “not specified” you still
+    # would want to include that question. Privacy protection is handled
+    # in each model’s eval_block.
+    if sc.nil? || sc <= 0
+      return ERB.new(load_tex("both_too_few_answers")).result(binding)
+    end
+
+    # load comparison data
+    cc, ca, cs = count_avg_stddev(table, q.db_column, compare_where)
 
     b = ''
     [q.visualizer].flatten.each do |vis|
@@ -211,6 +220,11 @@ class ResultTools
   # See eval_question; handles multiple choice questions only
   def eval_question_multi(table, q, special_where, compare_where)
     answ = get_answer_counts(table, q, special_where)
+    sc = answ.values_at(*(1..q.size)).total
+    # see comment in eval_question_single
+    if sc.nil? || sc <= 0
+      return ERB.new(load_tex("both_too_few_answers")).result(binding)
+    end
 
     b = ''
     [q.visualizer].flatten.each do |vis|
