@@ -21,28 +21,28 @@ namespace :magick do
 
     # all-in-one magic
     desc "Does 'just what you want' in a single step"
-    task :all, :needs => ["magick:build", "magick:clean"] do
+    task :all => ["magick:build", "magick:clean"] do
         # run in extra shell so the config-variables get updated
         system("rake magick:version")
     end
 
     # combined operation
     desc "build custom ImageMagick, RMagick, ZBar"
-    task :build, :needs => ["magick:buildImageMagick", "magick:buildRMagick", "magick:buildZBar"] do
+    task :build => ["magick:buildImageMagick", "magick:buildRMagick", "magick:buildZBar"] do
         puts
         puts "Built process finished successfully.".bold
     end
 
     desc "run clean && distclean for custom ImageMagick, RMagick, ZBar"
-    task :clean, :needs => ["magick:cleanImageMagick", "magick:cleanRMagick", "magick:cleanZBar"]
+    task :clean => ["magick:cleanImageMagick", "magick:cleanRMagick", "magick:cleanZBar"]
 
     desc "remove (uninstall) custom ImageMagick, RMagick, ZBar"
-    task :remove, :needs =>  ["magick:removeImageMagick", "magick:removeRMagick", "magick:removeZBar"]
+    task :remove =>  ["magick:removeImageMagick", "magick:removeRMagick", "magick:removeZBar"]
 
 
     # imagemagick stuff
     desc "build custom ImageMagick (using quantum-depth=8)"
-    task :buildImageMagick, :needs => ["magick:removeImageMagick", "magick:sourceImageMagick"] do
+    task :buildImageMagick => ["magick:removeImageMagick", "magick:sourceImageMagick"] do
         cdir = "cd #{Dir.glob(srcImgMagick, File::FNM_DOTMATCH).sort.last}"
         puts "#### Building ImageMagick".bold
 
@@ -76,7 +76,7 @@ namespace :magick do
     end
 
     desc "remove (uninstall) custom ImageMagick"
-    task :removeImageMagick, :needs => ["magick:removeRMagick", "magick:removeZBar"] do
+    task :removeImageMagick => ["magick:removeRMagick", "magick:removeZBar"] do
         puts
         puts "Removing custom ImageMagick".bold
         system("rm -rf #{bldImgMagick}")
@@ -85,7 +85,7 @@ namespace :magick do
 
     # rmagick stuff
     desc "build custom RMagick (using the custom built ImageMagick)"
-    task :buildRMagick, :needs => ["magick:removeRMagick", "magick:sourceRMagick"] do
+    task :buildRMagick => ["magick:removeRMagick", "magick:sourceRMagick"] do
         exec = "export PATH=#{bldImgMagick}/bin:$PATH"
         # so compiling works
         exec << " && export LD_LIBRARY_PATH=#{bldImgMagick}/lib"
@@ -147,7 +147,7 @@ namespace :magick do
 
     # zbar stuff
     desc "build custom ZBar (using custom imagemagick)"
-    task :buildZBar, :needs => "magick:removeZBar" do
+    task :buildZBar => "magick:removeZBar" do
         exec = "cd #{srcZBar}"
         exec << " && export PKG_CONFIG_PATH=#{bldImgMagick}/lib/pkgconfig"
         exec << " && export LDFLAGS=\" -Wl,-z,defs\""

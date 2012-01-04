@@ -135,7 +135,7 @@ namespace :images do
   end
 
   desc "(4) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
-  task :insertcomments, :needs => ['db:connect'] do |t, d|
+  task :insertcomments => ['db:connect'] do |t, d|
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
@@ -333,7 +333,7 @@ namespace :pest do
   end
 
   desc "(2) Evaluates all sheets in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])}"
-  task :omr, :needs => 'pest:getyamls' do
+  task :omr => 'pest:getyamls' do
     # OMR needs the YAML files as TeX also outputs position information
     p = Seee::Config.file_paths[:sorted_pages_dir]
     Dir.glob(File.join(p, "[0-9]*.yaml")).each do |f|
@@ -442,7 +442,7 @@ namespace :pdf do
   end
 
   desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
-  task :forms, :semester_id, :needs => 'db:connect' do |t, a|
+  task :forms, [:semester_id] => 'db:connect' do |t, a|
     dirname = './tmp/forms/'
     FileUtils.mkdir_p(dirname)
 
@@ -458,7 +458,7 @@ namespace :pdf do
   end
 
   desc "Create How Tos"
-  task :howto, :needs => 'db:connect' do
+  task :howto => 'db:connect' do
     saveto = './tmp/howtos/'
     FileUtils.mkdir_p(saveto)
     form_path = File.expand_path(File.join(RAILS_ROOT, "../tmp/forms")).escape_for_tex
@@ -747,7 +747,7 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-  Scc = Seee::Config.commands
+  Scc = Seee::Config.commands unless Scc
   filename="\"#{File.basename(t.source)}\""
   texpath="cd \"#{File.dirname(t.source)}\";"
 

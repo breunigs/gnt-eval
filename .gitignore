@@ -3,7 +3,6 @@
 custom_build/build_*
 tmp/
 web/log/
-custom_build/
 
 ### project root
 Gemfile.lock

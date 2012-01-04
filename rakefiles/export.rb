@@ -1,6 +1,6 @@
 namespace :helper do
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
-  task :export, :base64_data, :needs => 'db:connect' do |t, a|
+  task :export, [:base64_data] => 'db:connect' do |t, a|
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
     require 'helfer/faster_csv.rb'
