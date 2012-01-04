@@ -4,6 +4,7 @@ en:
   # first studied maths for 10 semesters and then matriculate for
   # physics, you'll be in the 1st “academic semester” in physics, but in
   # the 11th in maths.
+  # FIXME: check deprecation
   academic_term: Academic term
   degree_course: degree course
   other: other
@@ -16,6 +17,10 @@ en:
     :null: No questionnaires have been submitted.
     :singular: Only one questionnaire has been submitted. In order to retain the participant's anonymity the results have been excluded.
     :plural: "Only #1 questionnaires have been submitted. In order to retain the participants' anonymity, the results have been excluded."
+  # in contrast to the one above, this is not about privacy protection
+  # but rather that there are not enough valid answers to produce output
+  technical_too_few_answers: not enough answers
+
   none: none
   study_groups_overview_header: Tutor & Questionnaires & Page
   study_groups_header: Questions concerning the study groups
@@ -50,5 +55,11 @@ en:
   # used to describe the checkbox if the evaluee does not want to or
   # cannot answer this question
   no_answer: not specified
+  # same thing, but to be used in the result.pdfs to describe how many
+  # people did not answer
+  abstentions: abstentions
+  # and in contrast, how many people did answer:
+  answers: answers
+
   # used if no intro is given for the sheets.
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
