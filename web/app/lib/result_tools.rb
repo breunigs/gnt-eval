@@ -244,7 +244,7 @@ class ResultTools
       # find common answers
       q.boxes.each_with_index do |box, i|
         where_hash[q.db_column[i]] = i+1
-        answ[(i+1).to_sym] = answ[(i+1)] = count(table, where_hash)
+        answ[(i+1)] = count(table, where_hash)
         c = box.any_text.strip_common_tex unless box.any_text.nil?
         answ[c] = answ[(i+1)] unless c.nil? || c.empty?
         where_hash.delete(q.db_column[i])
@@ -268,7 +268,7 @@ class ResultTools
       # name if available
       q.get_answers.each_with_index do |txt, i|
         where_hash[q.db_column] = i+1
-        answ[(i+1).to_sym] = answ[(i+1)] = count(table, where_hash)
+        answ[(i+1)] = count(table, where_hash)
         t = txt.strip_common_tex unless txt.nil?
         answ[t] = answ[(i+1)] unless t.nil? || t.empty?
       end
