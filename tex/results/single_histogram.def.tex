@@ -112,7 +112,7 @@
 % question text is already present in the TikZ picture. Usage:
 % \singleHistogramPoleLeft{pole text}
 \newcommand{\singleHistogramPoleLeft}[1]{
-  \draw node[right=2mm of question text.east, fill=red, text width=2cm,
+  \draw node[right=2mm of question text.east, text width=2cm,
               text ragged left, inner sep=0] (leftmost pole)
     {\footnotesize #1};
 }
@@ -121,7 +121,7 @@
 % histogram is already present in the TikZ picture. Usage:
 % \singleHistogramPoleRight{pole text}
 \newcommand{\singleHistogramPoleRight}[1]{
-  \draw node[right={2mm of histogram.east}, fill=red, text width=2cm,
+  \draw node[right={2mm of histogram.east}, text width=2cm,
               text ragged, inner sep=0] (rightmost pole)
     {\footnotesize #1};
 }

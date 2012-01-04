@@ -27,7 +27,6 @@ end
 \usepackage{calc}
 \usepackage{dsfont}                   % additional math font
 \usepackage[T1]{fontenc}
-\usepackage{fp}                       % floating point arithmetic
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}                  % tug.dk/FontCatalogue/lmodern
@@ -39,6 +38,7 @@ end
 \usepackage{pgffor}                   % for each loops
 \usepackage{pgfplots}                 % histograms, error bars, …
 \usetikzlibrary{patterns,positioning} % some fancy stuff
+\usepackage{xparse}                   % nicer than newcommand
 \usepackage{xstring}                  % common string functions for TeX
 
 \usepackage[pdftex,
@@ -68,8 +68,8 @@ end
 % Defines how the question will be typeset in TikZ. Usage within TikZ:
 % \globalQuestionStyle{some question}
 \newcommand{\globalQuestion}[1]{
-  \draw (0,0) node[fill=green, text width=6.95cm, text justified,
-                    inner sep=0] (question text){#1};
+  \draw (0,0) node[text width=6.95cm, text justified, inner sep=0]
+                (question text){#1};
 }
 
 % Defines in plain (La)TeX how number values should be typeset (i.e. the
@@ -93,10 +93,5 @@ end
 \newcommand{\commentsprof}[1]{\textbf{#1}}
 \newcommand{\commentstutor}[1]{\textbf{#1}}
 
-
-
-
-% height of the bars for the semester and degree distributions
-\newcommand{\thebarwidth}{35}
 
 \begin{document}
