@@ -221,11 +221,12 @@ class ResultTools
 
   # gets the amount of checks each answer received. Returns a hash with
   # choice (i.e. index+1) and the boxes’ text mapped to the count. The
-  # latter is only available for boxes that actually have text. The
-  # index based ones are available as symbols as well. Invalid answers
-  # (i.e. not enough or too few checkmarks) are counted in the :invalid
-  # entry. Regardless if enabled, the count of special «no answer» box
-  # is available via :not_specified.
+  # latter is only available for boxes that actually have text. Invalid
+  # answers (i.e. not enough or too few checkmarks) are counted in the
+  # :invalid entry. Regardless if enabled, the count of special «no
+  # answer» box is available via :abstentions. The amount of answers
+  # than can be used to evaluate (i.e. non-invalid and non-abstentions)
+  # are available in the statistics
   def get_answer_counts(table, q, where_hash)
     answ = {}
     if q.multi? # multiple choice questions ############################
@@ -233,10 +234,10 @@ class ResultTools
       noansw_col = q.db_column.find_common_start+"noansw"
       if q.no_answer?
         where_hash[noansw_col] = 99
-        answ[:not_specified] = count(table, where_hash)
+        answ[:abstentions] = count(table, where_hash)
         where_hash.delete(noansw_col)
       else
-        answ[:not_specified] = 0
+        answ[:abstentions] = 0
       end
 
       # find common answers
@@ -261,7 +262,7 @@ class ResultTools
       # don’t skip this, even if there cannot be any rows with that
       # value (i.e. the question doesn’t offer an «no answer» field)
       where_hash[q.db_column] = 99
-      answ[:not_specified] = count(table, where_hash)
+      answ[:abstentions] = count(table, where_hash)
       # find normal values, store them with their index as well as their
       # name if available
       q.get_answers.each_with_index do |txt, i|
