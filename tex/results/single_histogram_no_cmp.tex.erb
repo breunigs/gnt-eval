@@ -1,0 +1,12 @@
+\begin{tikzpicture}
+\globalQuestion{
+  <%= q.text.strip_common_tex %>\\
+  {\globalNumberStyle
+    <%=t :answers%>: <%=sc%>,
+    <%=t :abstentions%>: <%=answ[:abstentions]%>}
+}
+\singleHistogramPoleLeft{<%= q.leftmost_pole.strip_common_tex %>}
+\singleHistogramHist{<%=answ.values_at(*(1..q.size)).join(",")%>}
+\singleHistogramErr{<%=sa%>}{<%=ss%>}
+\singleHistogramPoleRight{<%= q.rightmost_pole.strip_common_tex %>}
+\end{tikzpicture}

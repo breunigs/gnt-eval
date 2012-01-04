@@ -65,7 +65,7 @@
 % Defines the error bars for single_histogram.tex.erb. Assumes the
 % histogram is already present in the TikZ picture. Usage:
 % \singleHistogramErr{data avg}{data stddev}{comparison avg}{cmp stddev}
-\newcommand{\singleHistogramErr}[4]{
+\NewDocumentCommand\singleHistogramErr{m m O{-1} O{0}}{
   % Define position where to place the avg/stddev plot. It’s currently
   % below the histogram, but moved up slightly.
   \path (histogram.below south west) ++(0,0.1cm)
