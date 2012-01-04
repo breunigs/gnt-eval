@@ -59,7 +59,7 @@ class String
   # effort… also TeX, doesn’t care about them… Currently removes:
   # \linebreak, \mbox, \textls, \hspace*, \hspace
   def strip_common_tex
-    s = self.gsub(/\\linebreak(\{\})?/, "")
+    s = self.gsub(/\\linebreak(\{\})?/, " ")
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
     s = s.gsub(/\hspace\*?\{[^\}]+\}/, "")
