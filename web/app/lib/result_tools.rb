@@ -26,12 +26,11 @@ class ResultTools
   def include_form_variables(course_prof)
     b = ""
     if course_prof.is_a?(CourseProf)
-      b << "\\def\\lect{#{course_prof.prof.fullname}"
-      b << "\\def\\lectLAst{#{course_prof.prof.lastname}"
+      b << "\\def\\lect{#{course_prof.prof.fullname}\n"
+      b << "\\def\\lectLAst{#{course_prof.prof.lastname}\n"
     else
-      err = "\\PackageError{NO-PACKAGE}{Your form is broken. You are trying to use variables outside their scope. E.g., if you want to access lect or lectLast they must only be used from within repeat_for: :lecturer}"
-      b << "\\def\\lect{#{err}}"
-      b << "\\def\\lectLast{#{err}}"
+      b << "\\def\\lect{\\variablesOutOfScopeErr}\n"
+      b << "\\def\\lectLast{\\variablesOutOfScopeErr}\n"
     end
     b
   end

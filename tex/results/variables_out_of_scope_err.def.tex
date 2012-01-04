@@ -1,0 +1,9 @@
+% Defines an error message that may be used later in the document. For
+% documentation on this error please see lib/result_tools.rb method
+% include_form_variables or refer to the online documentation when
+% editing your forms.
+
+\def\variablesOutOfScopeErr{\PackageError{NO-PACKAGE}{Your form is
+roken. You are trying to use variables outside their scope. E.g., if you
+want to access lect or lectLast they must only be used from within
+repeat_for: :lecturer}}
