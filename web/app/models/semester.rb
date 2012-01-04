@@ -40,6 +40,7 @@ class Semester < ActiveRecord::Base
     b = ""
     # requires evalname
     b << ERB.new(rt.load_tex("preamble")).result(binding)
+    b << rt.load_tex_definitions
     # requires the *_count variables
     b << ERB.new(rt.load_tex("header")).result(binding)
 

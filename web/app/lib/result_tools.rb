@@ -181,6 +181,17 @@ class ResultTools
     @tex[name]
   end
 
+  # Loads all .def.tex files located in the tex/results folder. These
+  # files contain commands that do not change and therefore only need to
+  # be included once. ERB is not supported.
+  def load_tex_definitions
+    b = ""
+    Dir.glob(RAILS_ROOT + "/../tex/results/*.def.tex") do |file|
+      b << IO.read(file)
+    end
+    b
+  end
+
   private ##############################################################
 
   # See eval_question; handles single choice questions only
