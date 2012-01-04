@@ -1,45 +1,13 @@
-%
-%
-% This question either shall not be included in the final output or has
-% no visualizer specified. Here’s the data that has been passed to the
-% empty_visualizer:
-%
-% Question:
-% <%= q.text %>
-%
-%
-% Answer counts:
-% <%= PP.pp(answ, "").gsub("\n", "\n%") %>
-%
-%
-% Statistical data:
-% special_where:
-% COUNT = <%=sc%>      AVG = <%=sa%>       STDDEV = <%=ss%>
-% comparison where:
-% COUNT = <%=cc%>      AVG = <%=ca%>       STDDEV = <%=cs%>
-%
-%
 
 \begin{tikzpicture}
 \globalQuestion{
-  Der Vortrag ist akustisch und sprachlich gut zu verstehen.\\
-  {\globalNumberStyle Antworten: 30, Enthaltungen: 999}
+  <%= q.text.strip_common_tex %>\\
+  {\globalNumberStyle
+    <%=t :answers%>: <%=sc%>,
+    <%=t :abstentions%>: <%=answ[:abstentions]%>}
 }
-\singleHistogramPoleLeft{stimme voll zu}
-\singleHistogramHist{30,40,5,10,5}
-\singleHistogramErr{2.12}{1.1}{1.123}{0.5}
-\singleHistogramPoleRight{stimme gar nicht zu}
+\singleHistogramPoleLeft{<%= q.leftmost_pole.strip_common_tex %>}
+\singleHistogramHist{<%=answ.values_at(*(1..q.size)).join(",")%>}
+\singleHistogramErr{<%=sa%>}{<%=ss%>}[<%=ca%>][<%=cs%>]
+\singleHistogramPoleRight{<%= q.rightmost_pole.strip_common_tex %>}
 \end{tikzpicture}
-
-
-\begin{tikzpicture}
-\globalQuestion{
-  Der Vortrag ist akustisch und sprachlich gut zu verstehen. und überhaupt wieso ist Jasper eigentlich so doof? Insbesondere muss alles verkompliziert werden damit alles auch schön lang ist.\\
-  {\globalNumberStyle Antworten: 30, Enthaltungen: 999}
-}
-\singleHistogramPoleLeft{stimme voll zu und bin ewig lang weil von der zuv}
-\singleHistogramHist{25,40,5,10,15}
-\singleHistogramErr{2.12}{1.1}{1.123}{0.5}
-\singleHistogramPoleRight{stimme gar nicht zu}
-\end{tikzpicture}
-
