@@ -192,7 +192,7 @@ class Course < ActiveRecord::Base
 
     I18n.locale = language if I18n.tainted?
 
-    b = "\n\n\n% #{title}"
+    b = "\n\n\n% #{title}\n"
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
 
