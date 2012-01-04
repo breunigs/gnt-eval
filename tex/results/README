@@ -1,3 +1,6 @@
+Order of inclusion
+==================
+
 These files are loaded when evaluating a semester (i.e. rake pdf:semester).
 Some handling is done in lib/result_tools.rb. The order of inclusion is
 determined by each of the models’ evaluate method, starting with
@@ -10,3 +13,22 @@ preface
 For each course:
   
 FIXME
+
+
+Naming scheme
+=============
+
+Files named single_*.tex.erb define a visualization for single choice
+questions. Similarily, multi_*.tex.erb provide visualizations for
+multiple choice questions.
+
+Files named *.def.tex include definitions (e.g. \newcommand) that do
+not change, but do not fit in the preamble for one reason or another.
+If a .def.tex provides special commands for a specific file it
+should be named accordingly and all commands should be prepended with
+the file name to avoid collisions. Since the underscore has a special
+meaning in TeX, use CamelCase instead.
+For example: single_histogram.tex.erb is included and executed for
+each question with that visualizer. The corresponding definitions file is
+called single_histogram.def.tex and all commands defined in it start
+with \singleHistogram (e.g. \singleHistogramHist).

@@ -1,0 +1,126 @@
+% Includes definitions for single_histogram.tex.erb and only needs
+% to be included once. 
+
+% Defines the histogram for single_histogram.tex.erb. Assumes “leftmost
+% pole” is already present in the TikZ picture. The values should be in
+% pgfplot compatible coordinates format. x-value defines the position,
+% y-value the percentage of that answer. Usage:
+% \singleHistogramHistStyle{#answers}{values; style: (1,15) (2,50), …}
+\newcommand{\singleHistogramHist}[1]{
+  % add a little space to the right of the leftmoste pole. For some
+  % reason the right= syntax does not work properly on the pfgplots.
+  \path (leftmost pole.east) ++(0.2cm,0) coordinate (leftmost pole end);
+
+  \StrCount{#1,}{,}[\argumentCount]
+  % pgfplots doesn’t support expressions in xmax, therefore calculate
+  % the width of the diagram here.
+  \FPadd{\calcxmax}{\argumentCount}{0.5}
+
+  % generate the coordinates which will later be parsed. The x-value
+  % is simply counted up while the y-value is taken from #1.
+  \gdef\coordString{}
+  \foreach \x in {1,...,\argumentCount}
+    \findNthArgument{#1}{\numexpr\x-1}
+    \xdef\coordString{\coordString (\x, \lastFindNthArgument) };
+
+  \begin{axis}[
+    name=histogram,
+    % place left of leftmost node
+    at={(leftmost pole end)},
+    anchor=west,
+    % set style to bar plot, set ranges and width
+    ybar, ymin=0, ymax=100,
+    xmin=0.5, xmax={\calcxmax},
+    width=7cm, height=2.5cm,
+    % 1.6cm are used for… space, divide the rest between each plot
+    bar width = (7cm-1.6cm)/\argumentCount,
+    % show tick (and label) for each data point
+    xtick=data,
+    % disable y-ticks and labels, the axis should be clear
+    ytick=\empty,
+    % don’t know how to write y-data as label automatically :(
+    xticklabel={\findNthArgument{#1}{\ticknum}\%},
+    % put these labels above the plot and move them closer
+    xticklabel pos=right,
+    every x tick label/.style={yshift=-0.2cm},
+    % make them a little bit smaller
+    tick label style={font=\footnotesize},
+    % no magic with the borders, use x/y-min/max values
+    enlargelimits=false,
+    % this draws the lines between the major ticks
+    xminorgrids, minor x tick num=1,
+    every minor grid/.append style={color=black},
+    % disable little grey markers on top or below the actual plot
+    major x tick style={draw=none},
+    minor x tick style={draw=none},
+  ]
+  % addplot is rather picky about its coordinate input. Therefore expand
+  % them without addplot knowing and then execute.
+  \edef\temp{\noexpand\addplot[black,fill=black] coordinates {\coordString};}
+  \temp
+  \end{axis}
+}
+
+% Defines the error bars for single_histogram.tex.erb. Assumes the
+% histogram is already present in the TikZ picture. Usage:
+% \singleHistogramErr{data avg}{data stddev}{comparison avg}{cmp stddev}
+\newcommand{\singleHistogramErr}[4]{
+  % Define position where to place the avg/stddev plot. It’s currently
+  % below the histogram, but moved up slightly.
+  \path (histogram.below south west) ++(0,0.1cm)
+          coordinate (just below histogram);
+
+  \begin{axis}[
+    % make this a scatter plot, but only two points will be used. “this”
+    % describes the style for avg/stddev for this data, “comp” for the
+    % comparison value used.
+    scatter/classes={
+      this={mark=*,draw=black},
+      comp={mark=*,draw=black,fill=white}},
+    % position it correctly
+    at={(just below histogram)},
+    anchor=north west,
+    % same width as for the histogram.
+    width=7cm, height=2.1cm,
+    % match the width of histogram. I.e. 0.5 to (#of answers)+0.5. We
+    % assumed the histogram has been printed, therefore \calcxmax should
+    % contain the correct value.
+    xmin=0.5, xmax=\calcxmax,
+    % disable axis ticks and labels
+    xtick=\empty, ytick=\empty,
+    axis x line = none, axis y line = none,
+    % chosen so that the vertical bars at the end of each error bar fit
+    % in the diagram.
+    ymin=0, ymax=3]
+    % make it a scatter plot, because the coordinates are not related.
+    % x value is the average, y value is fixed and only provides order
+    % and space between bars.
+    \addplot[scatter, only marks]
+      % style error bars using classes above
+      plot[scatter src=explicit symbolic,error bars/.cd,x dir=both,
+            x explicit]
+      coordinates {
+        %AVG POS  STDDEV   STYLE
+        (#1, 2) +- (#2, 0) [this]
+        (#3, 1) +- (#4, 0) [comp]
+      };
+  \end{axis}
+}
+
+% Defines the left pole for single_histogram.tex.erb. Assumes the
+% question text is already present in the TikZ picture. Usage:
+% \singleHistogramPoleLeft{pole text}
+\newcommand{\singleHistogramPoleLeft}[1]{
+  \draw node[right=2mm of question text.east, fill=red, text width=2cm,
+              text ragged left, inner sep=0] (leftmost pole)
+    {\footnotesize #1};
+}
+
+% Defines the right pole for single_histogram.tex.erb. Assumes the
+% histogram is already present in the TikZ picture. Usage:
+% \singleHistogramPoleRight{pole text}
+\newcommand{\singleHistogramPoleRight}[1]{
+  \draw node[right={2mm of histogram.east}, fill=red, text width=2cm,
+              text ragged, inner sep=0] (rightmost pole)
+    {\footnotesize #1};
+}
