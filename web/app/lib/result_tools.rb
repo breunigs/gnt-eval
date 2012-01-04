@@ -228,6 +228,7 @@ class ResultTools
   # than can be used to evaluate (i.e. non-invalid and non-abstentions)
   # are available in the statistics
   def get_answer_counts(table, q, where_hash)
+    where_hash = where_hash.clone
     answ = {}
     if q.multi? # multiple choice questions ############################
       # find special no_answer field
