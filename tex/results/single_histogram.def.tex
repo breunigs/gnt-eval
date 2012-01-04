@@ -1,5 +1,5 @@
 % Includes definitions for single_histogram.tex.erb and only needs
-% to be included once. 
+% to be included once.
 
 % Defines the histogram for single_histogram.tex.erb. Assumes “leftmost
 % pole” is already present in the TikZ picture. The values should be in
@@ -14,7 +14,8 @@
   \StrCount{#1,}{,}[\argumentCount]
   % pgfplots doesn’t support expressions in xmax, therefore calculate
   % the width of the diagram here.
-  \FPadd{\calcxmax}{\argumentCount}{0.5}
+  \pgfmathparse{\argumentCount+0.5}
+  \let\calcxmax\pgfmathresult
 
   % generate the coordinates which will later be parsed. The x-value
   % is simply counted up while the y-value is taken from #1.
