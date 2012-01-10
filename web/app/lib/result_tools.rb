@@ -24,7 +24,7 @@ class ResultTools
   # the commands will be mis-formed so TeX fails instead of producing
   # broken results.
   def include_form_variables(course_prof)
-    b = ""
+    b = "\n"
     if course_prof.is_a?(CourseProf)
       b << "\\def\\lect{#{course_prof.prof.fullname}\n"
       b << "\\def\\lectLAst{#{course_prof.prof.lastname}\n"
@@ -48,7 +48,7 @@ class ResultTools
 
     forms.each do |f|
       f.languages.each do |l|
-        sample_sheets["#{path}#{f.id}_#{l}.pdf"] = { :name => f.name, :pages => f.actual_page_count }
+        sample_sheets["#{path}#{f.id}_#{l}.pdf"] = { :name => f.name, :lang => I18n.t(l) }
       end
     end
 
