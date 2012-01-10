@@ -7,6 +7,7 @@ gem "rmagick"
 gem "gtk2"
 gem "work_queue"
 gem "open4"
+gem "RubyInline"
 
 gem "mysql"
 gem "dbd-mysql"
