@@ -149,11 +149,12 @@ class ResultTools
   # single and multiple choice questions. The answers for compare_where
   # are not counted until they are really required (send patches).
   def eval_question(table, question, special_where, compare_where)
-    if question.multi?
+    b = if question.multi?
       eval_question_multi(table, question, special_where, compare_where)
     else
       eval_question_single(table, question, special_where, compare_where)
     end
+    (b + "\n\n")
   end
 
   # Loads a tex.erb file from disk and then stores it in memory. If
@@ -186,7 +187,7 @@ class ResultTools
   def load_tex_definitions
     b = ""
     Dir.glob(RAILS_ROOT + "/../tex/results/*.def.tex") do |file|
-      b << IO.read(file)
+      b << IO.read(file) << "\n\n"
     end
     b
   end
