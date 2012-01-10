@@ -6,8 +6,11 @@
     <%=t :answers%>: <%=sc%>,
     <%=t :abstentions%>: <%=answ[:abstentions]%>}
 }
-
-\draw node[right=2mm of question text.east, text width=9.85cm,
-	    text centered, inner sep=0]
-  {<%=t :technical_too_few_answers %>};
+<%# the \hfils{} centers the text without underfull warnings like %>
+<%# 'text centered' does. %>
+\draw node[right=2mm of question text.east, text width=9.83cm,
+  inner sep=0]
+  {\hfil{}<%=t :technical_too_few_answers %>\hfil{}};
 \end{tikzpicture}
+
+
