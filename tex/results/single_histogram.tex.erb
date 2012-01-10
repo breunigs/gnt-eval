@@ -7,7 +7,7 @@
     <%=t :abstentions%>: <%=answ[:abstentions]%>}
 }
 \singleHistogramPoleLeft{<%= q.leftmost_pole.strip_common_tex %>}
-\singleHistogramHist{<%=answ.values_at(*(1..q.size)).join(",")%>}
+\singleHistogramHist{<%=answ.values_at(*(1..q.size)).to_percentage.join(",")%>}
 \singleHistogramErr{<%=sa%>}{<%=ss%>}[<%=ca%>][<%=cs%>]
 \singleHistogramPoleRight{<%= q.rightmost_pole.strip_common_tex %>}
 \end{tikzpicture}

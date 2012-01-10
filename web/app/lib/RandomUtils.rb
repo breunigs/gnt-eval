@@ -96,6 +96,16 @@ class Array
     (0..pieces).map { |i| i * q + [r, i].min }.enum_cons(2).map { |a, b| slice(a...b) }
   end
 
+  # converts the values in the array to their value in % with 100% being
+  # the sum of the array. If no argument is given, rounds to natural
+  # numbers. Does not check if the contents of the array make sense,
+  # e.g. negative values will not be detected.
+  def to_percentage(round_to = 0)
+    t = self.total.to_f
+    rf = 10**round_to
+    self.map { |x| ((x.to_f/t)*rf*100).round/rf }
+  end
+
   # don’t name this "sum", it is blocked by Rails with a different
   # implementation that requires an argument.
   def total
