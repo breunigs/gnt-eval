@@ -3,7 +3,7 @@ class Tutor < ActiveRecord::Base
   belongs_to :course
   has_many :pics
   validates_presence_of :abbr_name
-  validates_uniqness_of :abbr_name, :scope => :course_id, \
+  validates_uniqueness_of :abbr_name, :scope => :course_id, \
     :message => "Tutor already exists for this course."
 
   include FunkyDBBits
