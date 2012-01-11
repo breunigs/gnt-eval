@@ -137,6 +137,8 @@ class Question
   # FIXME: now questions belong to sections. is there a way we could …
   # DEPRECATED
   def section
+    warn "DEPRECATED: Question#section is not used any longer. Use Question#repeat_for instead."
+
     if @db_column.nil?
       return 'this is no question in a traditional sense'
     end
