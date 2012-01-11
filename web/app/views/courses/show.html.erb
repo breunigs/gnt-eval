@@ -51,7 +51,7 @@
       <td><%= link_to prof.fullname, {:controller => "profs", :action => "edit", :id => prof } %></td>
       <td><%=h prof.email %></td>
       <td><%=h @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s %></td>
-      <% unless @course.semester.critical? %>
+      <% unless @course.critical? %>
         <td style="padding-left:4em"><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof},
           :confirm => "Really remove #{prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
       <% end %>
@@ -89,7 +89,7 @@
           :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
           :method => :delete %></td>
       <% else %>
-        <!--<td>Tutor is critical because the course is critical OR the course has returned sheets</td>-->
+        <td title="Tutor is critical because the course is critical OR the course has returned sheets">⚠</td>
       <% end %>
     </tr>
     <% end %>

@@ -40,7 +40,7 @@ class Course < ActiveRecord::Base
   # be disabled (e.g. deletion). A course is critical, when the semester
   # it belongs to is.
   def critical?
-    semester.critical?
+    semester.critical? || returned_sheets > 0
   end
 
   # Tries to parse the description field for eval times and returns them
