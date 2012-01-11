@@ -129,7 +129,8 @@ class Question
 
   # how many choices are there?
   def size
-    @boxes.count
+    return TUTOR_BOX_COUNT if type == "tutor_table"
+    @boxes.nil? ? 0 : @boxes.count
   end
 
   # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
