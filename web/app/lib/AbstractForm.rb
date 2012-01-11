@@ -22,6 +22,11 @@ require 'prettyprint'
 cdir = File.dirname(__FILE__)
 require cdir + '/RandomUtils.rb'
 
+# Defines how many checkboxes are available for tutors. The last one is
+# used for 'none'. The boxes are laid out five per row, so the number
+# should be divisible by five.
+TUTOR_BOX_COUNT = 30
+
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to
 # this class elsewhere.
@@ -529,11 +534,11 @@ class AbstractForm
     # tutors
     tutors.collect! { |t| t.escape_for_tex }
     tex << "\\tutoren{\n  "
-    (0..28).each do |i|
+    (0..(TUTOR_BOX_COUNT-2)).each do |i|
       tex << "\\tutorbox[#{i+1}][#{tutors[i] || "\\\\ "}]".ljust(35)
       tex << ((i%5 == 4) ? '\\\\'+"\n  " : ' & ')
     end
-    tex << "\\tutorbox[30][\\ #{I18n.t(:none)}] \n"
+    tex << "\\tutorbox[#{TUTOR_BOX_COUNT}][\\ #{I18n.t(:none)}] \n"
     tex << "}\n\n"
 
     tex << get_texhead(lang) + "\n"
