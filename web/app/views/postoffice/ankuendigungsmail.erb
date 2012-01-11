@@ -10,7 +10,7 @@ werden Vertreter_innen der Fachschaft MathPhys Ihre Veranstaltung
 
 evaluieren. Nach der momentanen Planung werden wir mit
 
-     <%= @course.students %> Bögen auf <%= @sprache %>
+     <%= @course.students %> <%= @course.form.name.gsub("bogen", "bögen") %> auf <%= @sprache %>
 
 vorbeikommen. Sollte diese Zahl viel zu hoch sein, die Sprache
 unangemessen sein oder Ihnen der Termin nicht passen, bitten wir Sie,
