@@ -68,7 +68,7 @@ class Course < ActiveRecord::Base
     pre_format = fscontact.empty? ? evaluator : fscontact
 
     pre_format.split(',').map do |a|
-      (a =~ /@/ ) ? a : a + '@' + Seee::Config.settings[:standard_mail_domain]
+      (a =~ /@/ ) ? a : a + '@' + SCs[:standard_mail_domain]
     end.join(',')
   end
 
@@ -86,7 +86,7 @@ class Course < ActiveRecord::Base
   # In case of an error, -1 will be returned.
   def returned_sheets
     return 0 if profs.empty?
-    rt.count(form.db_table, {:barcode => barcodes})
+    RT.count(form.db_table, {:barcode => barcodes})
   end
 
   # the head per course. this adds stuff like title, submitted
@@ -166,9 +166,13 @@ class Course < ActiveRecord::Base
 
   # evaluates the given questions in the scope of this course.
   def eval_block(questions, section)
-    b = rt.small_header(section)
+    b = RT.include_form_variables(self)
+    b << RT.small_header(section)
     questions.each do |q|
-      b << rt.eval_question(form.db_table, q, {:barcode => barcodes}, {})
+      b << RT.eval_question(form.db_table, q,
+            {:barcode => barcodes},
+            {:barcode => faculty.barcodes},
+            self)
     end
     b
   end
@@ -214,7 +218,6 @@ class Course < ActiveRecord::Base
         s = section.any_title
         case repeat_for
           when :course:
-            b << rt.include_form_variables(self)
             b << eval_block(block, s)
           when :lecturer:
             course_profs.each { |cp| b << cp.eval_block(block, s) }
@@ -235,7 +238,7 @@ class Course < ActiveRecord::Base
     # Do not print a "too few sheets" message here because if there are
     # too few sheets, it will have been printed for at least one lecturer
     # above already.
-    if returned_sheets >= Seee::Config.settings[:minimum_sheets_required]
+    if returned_sheets >= SCs[:minimum_sheets_required]
       unless summary.to_s.strip.empty?
         b << "\\commentsprof{#{t(:comments)}}\n\n"
         b << t(:notice_for_comments)
@@ -290,9 +293,7 @@ class Course < ActiveRecord::Base
   end
 
   private
-  # quick access to ResultTools.instance
-  def rt
-    ResultTools.instance
-  end
-
+  # quick access to some variables and classes
+  RT = ResultTools.instance
+  SCs = Seee::Config.settings
 end
