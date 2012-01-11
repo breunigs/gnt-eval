@@ -3,6 +3,11 @@ class CourseProf < ActiveRecord::Base
   belongs_to :course
   belongs_to :prof
   has_many :c_pics
+  # shortcuts
+  has_one :form, :through => :course
+  has_one :faculty, :through => :course
+  # import some features from other classes
+  delegate :gender, :gender=, :to => :prof
 
   include FunkyDBBits
 
