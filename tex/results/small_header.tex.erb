@@ -1,1 +1,8 @@
-\subsection*{<%= title.escape_for_tex %>}
+<%# Omits header if previous header is the same. Note this is solved %>
+<%# in TeX and not Ruby. %>
+
+\IfStrEq{<%= title.escape_for_tex %>}{\lastSubsectionHeader}{}{
+  \subsection*{<%= title.escape_for_tex %>}
+}
+
+\def\lastSubsectionHeader{<%= title.escape_for_tex %>}
