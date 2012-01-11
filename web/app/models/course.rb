@@ -76,10 +76,10 @@ class Course < ActiveRecord::Base
     course_profs.map { |cp| cp.barcode_with_checksum }
   end
 
-  # Returns the array of barcodes that belong to this course. It is
-  # actually a list of the id of the course_prof class.
+  # Returns array of integer-barcodes that belong to this course. It is
+  # actually an array of the id of the course_prof class.
   def barcodes
-    course_profs.map{ |cp| cp.barcode.to_i }
+    course_profs.map { |cp| cp.id }
   end
 
   # will count the returned sheets if all necessary data is available.
