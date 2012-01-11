@@ -14,7 +14,11 @@ module CoursesHelper
   end
 
   def courseDestroyLink
-    link_to('Destroy course', @course, :confirm => "Really destroy course '#{@course.title}'?", :method => :delete)
+    link_to_unless(@course.critical?, 'Destroy course', @course, \
+      :confirm => "Really destroy course '#{@course.title}'?", \
+      :method => :delete) do
+      "⚠ Course is critical"
+    end
   end
 
   def courseLinksForShowPage

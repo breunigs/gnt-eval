@@ -11,20 +11,20 @@
   <table>
     <% for item in
       [
-        ["Semester",      @course.semester.title],
-        ["Title",         @course.title],
-        ["Students",      "#{@course.students} (returned sheets: #{@course.returned_sheets})"],
-        ["Form",          "#{@course.form.name} (language: #{@course.language}, ID: #{@course.form.id})"],
-        ["Evaluated by",  @course.evaluator],
-        ["FS Account",    @course.fscontact],
-        ["Email",         @course.fs_contact_addresses],
-        ["Description",   @course.description],
-        ["Faculty",       @course.faculty.longname]
+        ["Semester",      h(@course.semester.title)],
+        ["Title",         h(@course.title)],
+        ["Students",      h("#{@course.students} (returned sheets: #{@course.returned_sheets})")],
+        ["Form",          link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
+        ["Evaluated by",  h(@course.evaluator)],
+        ["FS Account",    h(@course.fscontact)],
+        ["Email",         mail_to(@course.fs_contact_addresses)],
+        ["Description",   h(@course.description)],
+        ["Faculty",       h(@course.faculty.longname)]
       ]
     %>
       <tr style="background: #<%= cycle('efefef', 'fff') %>">
         <th><%=h item.shift %></th>
-        <% for data in item do %> <td><%=h data %></td> <% end %>
+        <% for data in item do %> <td><%=data %></td> <% end %>
       </tr>
     <% end %>
   </table>
