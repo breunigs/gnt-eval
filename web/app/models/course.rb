@@ -229,12 +229,6 @@ class Course < ActiveRecord::Base
       end
     end
 
-
-    # lecture eval per lecturer
-    course_profs.each do |cp|
-      b << cp.evaluate.to_s
-    end
-
     # Do not print a "too few sheets" message here because if there are
     # too few sheets, it will have been printed for at least one lecturer
     # above already.
