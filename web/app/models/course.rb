@@ -185,12 +185,7 @@ class Course < ActiveRecord::Base
     # evaluated, since the sheets are coded with the course_prof id
     # Return early to avoid problems.
     if profs.empty?
-      puts "     no profs -- skipping"
-      return ""
-    end
-
-    unless table_exists?(form.db_table)
-      puts "     table #{form.db_table} does not exit yet -- skipping"
+      warn "  #{title}: no profs -- skipping"
       return ""
     end
 
@@ -199,6 +194,11 @@ class Course < ActiveRecord::Base
     b = "\n\n\n% #{title}\n"
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
+
+    if returned_sheets <= SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+      return b
+    end
 
     # walk all questions, one section at a time. May split sections into
     # smaller groups if they belong to a different entity (i.e. repeat_
