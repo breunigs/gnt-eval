@@ -38,10 +38,12 @@ class Tutor < ActiveRecord::Base
     end
 
     b << I18n.t(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
+    tutor_db_column = course.form.get_tutor_question.db_column.to_sym
 
-    specific = { :barcode => course.barcodes, :tutnum => tutnum }
+    specific = { :barcode => course.barcodes, tutor_db_column => tutnum }
     general = { :barcode => course.barcodes }
     form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
+      next if q.type == "tutor_table"
       b << q.eval_to_tex(specific, general, form.db_table, I18n.locale)
     end
     unless comment.to_s.strip.empty?
@@ -56,10 +58,25 @@ class Tutor < ActiveRecord::Base
   end
 
   def sheet_count
+    warn "DEPRECATED: tutor#sheet_count is deprecated. Please use returned_sheets instead."
     # Otherwise the SQL query will not work
     return 0 if course.profs.empty?
     @db_table = course.form.db_table
     tutor_db_column = course.form.get_tutor_question.db_column.to_sym
     count_forms({:barcode => course.barcodes, tutor_db_column => tutnum})
   end
+
+  # will count the returned sheets if all necessary data is available.
+  # In case of an error, -1 will be returned.
+  def returned_sheets
+    return 0 if course.profs.empty?
+    tutor_db_column = form.get_tutor_question.db_column.to_sym
+    RT.count(form.db_table, {:barcode => course.barcodes, \
+      tutor_db_column => tutnum})
+  end
+
+  private
+  # quick access to some variables and classes
+  RT = ResultTools.instance
+  SCs = Seee::Config.settings
 end
