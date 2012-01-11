@@ -42,7 +42,10 @@ class ResultTools
     b
   end
 
-  # returns a TeX-string for a small headline
+  # returns a TeX-string for a small headline. Note that if two adjacent
+  # headers are the same, the second header will be omitted. In other
+  # words, categories with the same title are joined if they follow each
+  # other. This is solved in TeX, not in Ruby/Rails.
   def small_header(title)
     ERB.new(load_tex("small_header")).result(binding)
   end
