@@ -1,6 +1,6 @@
 \begin{tikzpicture}
 \globalQuestion{
-  <%= q.text.strip_common_tex %>\\
+  <%= question_text %>\\
   {\globalNumberStyle
     <%=t :answers%>: <%=sc%>,
     <%=t :abstentions%>: <%=answ[:abstentions]%>}

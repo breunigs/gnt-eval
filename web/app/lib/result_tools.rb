@@ -158,11 +158,14 @@ class ResultTools
   # The answer count is calculated for the special_where for both
   # single and multiple choice questions. The answers for compare_where
   # are not counted until they are really required (send patches).
-  def eval_question(table, question, special_where, compare_where)
-    b = if question.multi?
-      eval_question_multi(table, question, special_where, compare_where)
+  # repeat_for_class expects the class to be given in which scope this
+  # question is rendered. E.g. repeat_for=course; then give the course.
+  # Usually passing «self» should be sufficient.
+  def eval_question(table, q, special_where, compare_where, repeat_for_class)
+    b = if q.multi?
+      eval_question_multi(table, q, special_where, compare_where, repeat_for_class)
     else
-      eval_question_single(table, question, special_where, compare_where)
+      eval_question_single(table, q, special_where, compare_where, repeat_for_class)
     end
     (b + "\n\n")
   end
@@ -205,7 +208,9 @@ class ResultTools
   private ##############################################################
 
   # See eval_question; handles single choice questions only
-  def eval_question_single(table, q, special_where, compare_where)
+  def eval_question_single(table, q, special_where, compare_where, repeat_for_class)
+    question_text = get_question_text(q, repeat_for_class)
+
     # collect data for this question
     answ = get_answer_counts(table, q, special_where)
     sc, sa, ss = count_avg_stddev(table, q.db_column, special_where)
@@ -229,7 +234,9 @@ class ResultTools
   end
 
   # See eval_question; handles multiple choice questions only
-  def eval_question_multi(table, q, special_where, compare_where)
+  def eval_question_multi(table, q, special_where, compare_where, repeat_for_class)
+    question_text = get_question_text(q, repeat_for_class)
+
     answ = get_answer_counts(table, q, special_where)
     sc = answ.values_at(*(1..q.size)).total
     # see comment in eval_question_single
@@ -237,11 +244,20 @@ class ResultTools
       return ERB.new(load_tex("both_too_few_answers")).result(binding)
     end
 
+
     b = ''
     [q.visualizer].flatten.each do |vis|
       b << ERB.new(load_tex("multi_#{vis}")).result(binding)
     end
     b
+  end
+
+  # helper to generate the correct question text for a given question
+  # and corresponding class. The class is currently used to derive
+  # gender information. The language is derived from I18n.locale.
+  def get_question_text(q, rfc)
+    gender = rfc.respond_to?(:gender) ? rfc.gender : :both
+    q.text(I18n.locale, gender).strip_common_tex
   end
 
   # gets the amount of checks each answer received. Returns a hash with

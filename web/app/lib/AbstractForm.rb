@@ -230,7 +230,7 @@ class Question
     return @qtext if @qtext.is_a? String
     q = @qtext[language.to_sym] || @qtext.first[1] || ""
     return q if q.is_a? String
-    q.is_a?(String) ? q : q[gender]
+    q.is_a?(String) ? q : q[gender.to_sym]
   end
 
   # did the user fail to answer the question? (either too many check-
