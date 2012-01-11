@@ -52,7 +52,7 @@ class Tutor < ActiveRecord::Base
   end
 
   def tutnum
-    course.tutors.sort{ |x,y| x.id <=> y.id }.index(self) + 1
+    course.tutors.index(self) + 1
   end
 
   def sheet_count
