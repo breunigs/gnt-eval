@@ -19,19 +19,26 @@ class ResultTools
   # By default, only the form does have these variables, however since
   # questions may refer to them (e.g. \lect{} to get the lecturer’s
   # name) they should be included in the results as well.
-  # Currently only the lecturer’s name is supported; therefore it only
-  # makes sense to define it if a CourseProf class is given. Otherwise
-  # the commands will be mis-formed so TeX fails instead of producing
-  # broken results.
-  def include_form_variables(course_prof)
-    b = "\n"
-    if course_prof.is_a?(CourseProf)
-      b << "\\def\\lect{#{course_prof.prof.fullname}\n"
-      b << "\\def\\lectLAst{#{course_prof.prof.lastname}\n"
+  # Currently supported: course_prof, tutor
+  def include_form_variables(klass)
+    not_avail = []
+    defined = {}
+    if klass.is_a?(CourseProf)
+      defined[:lect] = klass.prof.fullname
+      defined[:lectLast] = klass.prof.lastname
     else
-      b << "\\def\\lect{\\variablesOutOfScopeErr}\n"
-      b << "\\def\\lectLast{\\variablesOutOfScopeErr}\n"
+      not_avail += [:lect, :lectLast]
     end
+
+    if klass.is_a?(Tutor)
+      defined[:tutor] = klass.abbr_name
+    else
+      not_avail += [:tutor]
+    end
+
+    b = "\n"
+    not_avail.each { |na| b << "\\def\\#{na}{\\variablesOutOfScopeErr}\n" }
+    defined.each { |k,v| b << "\\def\\#{k}{#{v}}\n" }
     b
   end
 
