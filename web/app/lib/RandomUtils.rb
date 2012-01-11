@@ -137,10 +137,10 @@ end
 # val: currently processed item
 # max: amount of items to process
 def print_progress(val, max)
-      percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
-      current = val.to_s.rjust(max.to_s.size)
-      print "\r#{percentage}% (#{current}/#{max})"
-      STDOUT.flush
+  percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
+  current = val.to_s.rjust(max.to_s.size)
+  print "\r#{percentage}% (#{current}/#{max})"
+  STDOUT.flush
 end
 
 # Generates a pdf file with the barcode in the specified location
