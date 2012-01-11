@@ -11,19 +11,29 @@ class CourseProf < ActiveRecord::Base
 
   include FunkyDBBits
 
-  def eval_block(questions, section)
-    b = ""
-    b << rt.include_form_variables(self)
-    # FIXME
-    ""
-  end
-
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
-    ResultTools.instance.count(course.form.db_table, {:barcode => id})
+    RT.count(form.db_table, {:barcode => id})
   end
 
+
+  # evaluates the given questions in the scope of this course and prof.
+  def eval_block(questions, section)
+    b = RT.include_form_variables(self)
+    b << RT.small_header(section)
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+    end
+
+    questions.each do |q|
+      b << RT.eval_question(form.db_table, q,
+            {:barcode => id},
+            {:barcode => faculty.barcodes},
+            self)
+    end
+    b
+  end
 
   # evals sth against some form \o/
   # returns a TeX-string
@@ -45,7 +55,7 @@ class CourseProf < ActiveRecord::Base
     vorlhead = form.lecturer_header(prof.fullname, prof.gender, I18n.locale, sheet_count)
     b << "\\profkopf{#{vorlhead}}\n\n"
 
-    if sheet_count < Seee::Config.settings[:minimum_sheets_required]
+    if sheet_count < SCs[:minimum_sheets_required]
       return b + form.too_few_questionnaires(I18n.locale, sheet_count) + "\n\n"
     end
 
@@ -86,8 +96,7 @@ class CourseProf < ActiveRecord::Base
   end
 
   private
-  # quick access to ResultTools.instance
-  def rt
-    ResultTools.instance
-  end
+  # quick access to some variables or classes
+  RT = ResultTools.instance
+  SCs = Seee::Config.settings
 end
