@@ -130,12 +130,20 @@ class Form < ActiveRecord::Base
     h.gsub(/#1/, fullname).gsub(/#2/, sheets.to_s)
   end
 
-  def get_question(search)
-    abstract_form.get_question(search)
+  # returns a translated string about too few sheets being available to
+  # evaluate (anonymity protection). Supports special strings for 0, 1
+  # and more than 1 situations.
+  def too_few_sheets(count)
+    case count
+      when 0: I18n.t(:too_few_questionnaires)[:null]
+      when 1: I18n.t(:too_few_questionnaires)[:singular]
+      else    I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, sheets.to_s)
+    end
   end
 
   # if too few questionnaires have been submitted, we return a lovely statement about anonymity etc.
   def too_few_questionnaires(language, sheets)
+    warn "DEPRECATED: too_few_questionnaires is deprecated. Please use too_few_sheets(count) instead."
     # only set locale if we want a mixed-lang document
     I18n.locale = language if I18n.tainted?
 
