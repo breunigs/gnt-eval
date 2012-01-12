@@ -30,7 +30,7 @@ class Semester < ActiveRecord::Base
 
     puts "Counting all kinds of things…"
     course_count = cs.count
-    sheet_count = rt.count(tables, {:barcode => $facultybarcodes})
+    sheet_count = RT.count(tables, {:barcode => $facultybarcodes})
     prof_count = cs.map { |c| c.profs }.flatten.uniq.count
     study_group_count = cs.inject(0) { |sum, c| sum + c.tutors.count }
 
@@ -39,19 +39,19 @@ class Semester < ActiveRecord::Base
 
     b = ""
     # requires evalname
-    b << ERB.new(rt.load_tex("preamble")).result(binding)
-    b << rt.load_tex_definitions
+    b << ERB.new(RT.load_tex("preamble")).result(binding)
+    b << RT.load_tex_definitions
     # requires the *_count variables
-    b << ERB.new(rt.load_tex("header")).result(binding)
+    b << ERB.new(RT.load_tex("header")).result(binding)
 
     facultylong = faculty.longname
     sem_title = { :short => title, :long => longtitle }
-    b << ERB.new(rt.load_tex("preface")).result(binding)
+    b << ERB.new(RT.load_tex("preface")).result(binding)
 
     puts "Evaluating #{cs.count} courses…"
     cs.each { |c| b << c.evaluate.to_s }
 
-    b << rt.sample_sheets_and_footer(forms)
+    b << RT.sample_sheets_and_footer(forms)
     return b
   end
 
@@ -75,7 +75,5 @@ class Semester < ActiveRecord::Base
 
   private
   # quick access to ResultTools.instance
-  def rt
-    ResultTools.instance
-  end
+  RT = ResultTools.instance
 end
