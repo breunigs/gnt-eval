@@ -246,7 +246,19 @@ class Question
 
   # is this a multi-answer question?
   def multi?
-    @db_column.is_a?(Array)
+    @db_column.is_a?(Array) && !comment?
+  end
+
+  # is this a single-answer question? Note that comment fields are also
+  # handled that way, since they
+  def single?
+    !multi?
+  end
+
+  # true if this question contains hand-written data (or images) rather
+  # than statistical data
+  def comment?
+    ["text", "text_wholepage"].include?(@type)
   end
 
   # export a single question to tex (used for creating the forms)
