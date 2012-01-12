@@ -162,7 +162,10 @@ class ResultTools
   # question is rendered. E.g. repeat_for=course; then give the course.
   # Usually passing «self» should be sufficient.
   def eval_question(table, q, special_where, compare_where, repeat_for_class)
-    b = if q.multi?
+
+    b = if q.comment?
+      eval_question_comment(table, q, special_where, repeat_for_class)
+    elsif q.multi?
       eval_question_multi(table, q, special_where, compare_where, repeat_for_class)
     else
       eval_question_single(table, q, special_where, compare_where, repeat_for_class)
@@ -206,6 +209,26 @@ class ResultTools
   end
 
   private ##############################################################
+
+  # See eval_question; handles questions with user input text only.
+  # Currently only supports one comment per class, i.e. one for the
+  # course/lecture, one for each lecturer and one for each tutor. FIXME:
+  # Needs to support an arbitrary amount of text questions per group.
+  def eval_question_comment(table, q, special_where, repeat_for_class)
+    question_text = get_question_text(q, repeat_for_class)
+
+    b = ''
+    if repeat_for_class.respond_to?(:comment)
+      comment = repeat_for_class.comment || ""
+      [q.visualizer].flatten.each do |vis|
+        b << ERB.new(load_tex("comment_#{vis}")).result(binding)
+      end
+    else
+      b << "WARNING: Given class #{repeat_for_class.class} does not have a comment method. Cannot display comment."
+    end
+
+    b
+  end
 
   # See eval_question; handles single choice questions only
   def eval_question_single(table, q, special_where, compare_where, repeat_for_class)

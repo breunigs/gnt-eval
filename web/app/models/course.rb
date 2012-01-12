@@ -16,8 +16,8 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
-  attr_accessor :summary
-  alias :comment :summary
+  # Create an alias for this rails variable
+  def comment; summary; end
 
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted
@@ -236,14 +236,6 @@ class Course < ActiveRecord::Base
     # too few sheets, it will have been printed for at least one lecturer
     # above already.
     if returned_sheets >= SCs[:minimum_sheets_required]
-      unless summary.to_s.strip.empty?
-        b << "\\commentsprof{#{t(:comments)}}\n\n"
-        b << t(:notice_for_comments)
-        b << "\n\n"
-        b << summary.to_s
-        b << "\n\\medskip\n\n"
-      end
-
       # uebungen allgemein, immer alles relativ zur fakultät!
       ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
       return b if ugquest.empty?

@@ -47,7 +47,7 @@ class Tutor < ActiveRecord::Base
       b << q.eval_to_tex(specific, general, form.db_table, I18n.locale)
     end
     unless comment.to_s.strip.empty?
-      b << "\\commentstutor{#{I18n.t(:comments)}}\n\n"
+      b << "\\textbf{#{I18n.t(:comments)}}\n\n"
       b << comment.to_s
     end
     return b, sheet_count

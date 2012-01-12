@@ -1,0 +1,12 @@
+
+<% unless comment.strip.empty? %>
+
+% <%= question_text %>
+
+\textbf{<%=I18n.t(:comments)%>}
+
+<%=I18n.t(:notice_for_comments)%>
+
+<%=comment.strip%>
+
+<% end %>
