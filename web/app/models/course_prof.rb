@@ -62,7 +62,7 @@ class CourseProf < ActiveRecord::Base
     # b << "\\fragenzurvorlesung\n\n"
 
     specific = { :barcode => barcode.to_i }
-    general = { :barcode => $facultybarcodes }
+    general = { :barcode => faculty.barcodes }
     form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
       b << q.eval_to_tex(specific, general, form.db_table, I18n.locale, prof.gender)
     end
