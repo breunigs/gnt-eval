@@ -107,10 +107,9 @@ class Form < ActiveRecord::Base
   # AbstractForm has them. If it doesn’t either, a more detailed error
   # message is thrown.
   def method_missing(name, *args, &block)
-    return abstract_form.method(name).call if abstract_form.respond_to?(name)
-
     begin; super; rescue
-      raise "undefined method #{name} for both #{self} and #{abstract_form}."
+      return abstract_form.method(name).call if abstract_form.respond_to?(name)
+      raise "undefined method #{name} for both web/app/models/form.rb and lib/AbstractForm.rb"
     end
   end
 
