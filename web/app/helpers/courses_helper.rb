@@ -74,7 +74,7 @@ module CoursesHelper
     courses = courses.sort_by do |a|
       order.map do |o|
         dat = eval("a.#{o}")
-        dat.downcase! if dat.is_a?(String)
+        data = dat.downcase if dat.is_a?(String)
         dat
       end
     end
