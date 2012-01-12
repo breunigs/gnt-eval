@@ -1,0 +1,760 @@
+--- !ruby/object:AbstractForm
+db_table: evaldata_term1112_seminars
+texfoot: ""
+texhead:
+  :de: ""
+  :en: ""
+babelclass:
+  :de: ngerman
+  :en: british
+title:
+  :de: Umfrage zur Qualität der Lehre
+  :en: Survey Regarding the Quality of Teaching
+intro:
+  :de: Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachschaft MathPhys durchgeführt. Dieser Bogen soll helfen, die Lehre zu verbessern bzw. Lehrveranstaltung guter Qualität zu erhalten. Auch in eurem Interesse bitten wir euch, den Bogen sorgfältig und deutlich lesbar auszufüllen. Kreuze so \checkLikeThis{} an und verbessere Dich ggf. so \correctLikeThis{}.
+  :en: This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly. Mark like \checkLikeThis{} and correct yourself using \correctLikeThis{}.
+lecturer_header:
+  :de:
+    :male: "Fragen zum Seminar (Dozent: #1, B\xC3\xB6gen: #2)"
+    :female: "Fragen zum Seminar (Dozentin: #1, B\xC3\xB6gen: #2)"
+  :en:
+    :male: "Questions concerning the seminar (Lecturer: #1, Sheets: #2)"
+    :female: "Questions concerning the seminar (Lecturer: #1, Sheets: #2)"
+pages:
+- !ruby/object:Page
+  sections:
+  - !ruby/object:Section
+    title:
+      :de: Allgemeine Fragen
+      :en: General Questions
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text: Bachelor
+      - !ruby/object:Box
+        text:
+          :de: "Staatsexamen\\linebreak(Lehramt)"
+          :en: "Staatsexamen\\linebreak\\emph{including Lehramt} (State Examination \\emph{including Civil \\textls[-15]{Service Examination)}}"
+      - !ruby/object:Box
+        text:
+          :de: "Staatsexamen\\linebreak\\textbf{(ohne Lehramt)}"
+          :en: "Staatsexamen\\linebreak\\emph{excluding Lehramt} (State Examination \\emph{excluding Civil \\textls[-15]{Service Examination)}}"
+      - !ruby/object:Box
+        text:
+          :de: "Kirchlicher Abschluss"
+          :en: "Kirchlicher Abschluss\\linebreak\\mbox{(Ecclesiastical Degree)}"
+      - !ruby/object:Box
+        text: Master
+#      - !ruby/object:Box
+#        text: Lehramt
+      - !ruby/object:Box
+        text:
+          :de: Diplom
+          :en: Diplom (Diploma)
+      - !ruby/object:Box
+        text: Magister
+      - !ruby/object:Box
+        text:
+          :de: Promotion
+          :en: "Ph.D."
+      - !ruby/object:Box
+        text:
+          :de: "Sonstiges"
+          :en: "others"
+      db_column: v_central_degree
+#      qtext: Mit welchem \emph{Abschlussziel} studierst Du?
+      qtext:
+        :de: Mit welchem \emph{Abschlussziel} studieren Sie?
+        :en: Which \emph{degree} will you receive at the end of your studies?
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: Mathematik
+          :en: Mathematics
+      - !ruby/object:Box
+        text:
+          :de: Physik
+          :en: Physics
+      - !ruby/object:Box
+        text:
+          :de: Informatik
+          :en: Computer Science
+      - !ruby/object:Box
+        text:
+          :de: Sonstiges
+          :en: others
+      db_column: v_central_major
+#      qtext: "Bitte gib Dein Studienfach an, innerhalb dessen Du diese Lehrveranstaltung besuchst:"
+      qtext:
+        :de: "Bitte geben Sie Ihr Studienfach an, innerhalb dessen Sie diese Lehrveranstaltung besuchen:"
+        :en: "Please indicate the \\emph{field of study} in which you are attending this course:"
+      last_is_textbox: 25
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text: 1-3
+      - !ruby/object:Box
+        text: 4-6
+      - !ruby/object:Box
+        text: 7-10
+      - !ruby/object:Box
+        text: "> 10"
+      db_column: v_central_semester
+#      qtext: "Bitte gib Dein Fachsemester in \\emph{diesem Studienfach} an:"
+      qtext:
+        :de: "Bitte geben Sie Ihr Fachsemester in \\emph{diesem Studienfach} an:"
+        :en: "In which \\emph{subject-related semester of this field of study} are you currently studying?"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{ja, ich muss \\emph{genau}}\\linebreak\\mbox{\\emph{diese} besuchen}"
+          :en: "\\mbox{yes, I have to attend}\\linebreak\\mbox{\\emph{exactly this one}}"
+      - !ruby/object:Box
+        text:
+          :de: "nein, ich könnte auch eine andere besuchen"
+          :en: "no, I could attend\\linebreak another one"
+      db_column: v_central_required_course
+#      qtext: "Ist diese Lehrveranstaltung für Dich eine \\emph{Pflichtveranstaltung}?"
+      qtext:
+        :de: "Ist diese Lehrveranstaltung für Sie eine \\emph{Pflichtveranstaltung}?"
+        :en: "Is this an obligatory course for you?"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: sehr hoch
+          :en: very much
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: sehr gering
+          :en: very little
+      db_column: v_central_interest
+      qtext:
+        :de: "\\emph{Bevor} Sie diese Lehrveranstaltung besucht haben: Wie hoch war Ihr Interesse am Thema der Lehrveranstaltung?"
+        :en: "How much were you \\emph{interested} in the topic of the course \\emph{before} attending it?"
+      type: square
+  - !ruby/object:Section
+    title:
+      :de: Bewertung des Seminars
+      :en: Evaluation of the seminar
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: stimme voll zu
+          :en: completely agree
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
+          :en: "do not agree at all"
+      db_column: v_central_edu_objective
+      qtext:
+        :de: "Die Lernziele wurden zu Beginn klar definiert."
+        :en: "The aims of the course were clearly defined at the beginning."
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: stimme voll zu
+          :en: completely agree
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
+          :en: "do not agree at all"
+      db_column: v_central_structured
+      qtext:
+        :de: Die Lehrveranstaltung ist klar strukturiert.
+        :en: "The course is clearly structured."
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: stimme voll zu
+          :en: completely agree
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
+          :en: "do not agree at all"
+      db_column: v_central_convey
+      qtext:
+        :de: "Der Lehrstoff wird in verständlicher Weise vermittelt."
+        :en: "The subjects taught are conveyed in an understandable way."
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: stimme voll zu
+          :en: completely agree
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
+          :en: "do not agree at all"
+      db_column: v_central_students_needs
+      qtext:
+        :de: "Es wird auf Fragen und Belange der Studierenden eingegangen."
+        :en: "\\mbox{\\textls[-15]{The students' questions and concerns are taken into consideration.}}"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: stimme voll zu
+          :en: completely agree
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
+          :en: "do not agree at all"
+      db_column: v_central_learning_gains
+      qtext:
+        :de: "Mein Lernzuwachs ist hoch."
+        :en: "My learning gains are high."
+      type: square
+  - !ruby/object:Section
+    title:
+      :de: Arbeitsaufwand des Seminars
+      :en: Workload of the seminar
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: sehr hoch
+          :en: very high
+      - !ruby/object:Box
+        text:
+          :de: hoch
+          :en: high
+      - !ruby/object:Box
+        text:
+          :de: angemessen
+          :en: appropriate
+      - !ruby/object:Box
+        text:
+          :de: gering
+          :en: low
+      - !ruby/object:Box
+        text:
+          :de: sehr gering
+          :en: very low
+      db_column: v_central_workload
+      qtext:
+        :de: "Verglichen mit anderen Lehrveranstaltungen ist mein Arbeitsaufwand für diese Lehrveranstaltung:"
+        :en: "\\textls[-3]{In comparison to other courses, my workload for this course is:}"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: sehr hoch
+          :en: very high
+      - !ruby/object:Box
+        text:
+          :de: hoch
+          :en: high
+      - !ruby/object:Box
+        text:
+          :de: angemessen
+          :en: appropriate
+      - !ruby/object:Box
+        text:
+          :de: gering
+          :en: low
+      - !ruby/object:Box
+        text:
+          :de: sehr gering
+          :en: very low
+      db_column: v_central_credits
+      qtext:
+        :de: "\\mbox{Falls Leistungspunkte (LP) vergeben werden: Verglichen mit den} \\mbox{\\textls[-15]{vergebenen Leistungspunkten ist mein tatsächlicher Arbeitsaufwand}} \\mbox{für diese Lehrveranstaltung (1 LP = 30 Stunden Arbeitsaufwand):}"
+        :en: "If credit points (CP) are given for this course: Compared to the credit points given for this course, my actual workload for it is: (1 CP = 30 hours workload)"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text: "< 10h"
+      - !ruby/object:Box
+        text: "10--20h"
+      - !ruby/object:Box
+        text: "20--30h"
+      - !ruby/object:Box
+        text: "30--40h"
+      - !ruby/object:Box
+        text: "> 40h"
+      db_column: v_preptime
+      qtext:
+        :de: "Für die Vorbereitung investiere/investierte ich:"
+        :en: "I spent this much time preparing the talk:"
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "keine Hausarbeit"
+          :en: "no term paper"
+      - !ruby/object:Box
+        text: "< 5h"
+      - !ruby/object:Box
+        text: "5--10h"
+      - !ruby/object:Box
+        text: "10--15h"
+      - !ruby/object:Box
+        text: "15--20h"
+      - !ruby/object:Box
+        text: "> 20h"
+      db_column: v_termpaper
+      qtext:
+        :de: "Falls eine Hausarbeit angefertigt wird: Für die Ausarbeitung benötige/benötigte ich:"
+        :en: "In case a seminar paper was required, I spent this much time writing it:"
+      type: square
+  - !ruby/object:Section
+    title:
+      :de: "Mein Vortrag"
+      :en: "My talk"
+
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_supervision
+      qtext:
+        :de: "Ich wurde bei der Vorbereitung meines Vortrages gut betreut."
+        :en: "I was supported quite well during the preparation of my talk."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_presentation_time
+      qtext:
+        :de: "Der Stoff ist in der mir zur Verfügung stehenden Zeit gut darstellbar."
+        :en: "My topic is presentable in sufficient detail in the time available."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_feedback
+      qtext:
+        :de: "Ich habe ausreichend Feedback bekommen."
+        :en: "I received sufficient feedback."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "keine"
+          :en: "none"
+      - !ruby/object:Box
+        text:
+          :de: "zu wenig Literatur"
+          :en: "too littile literature"
+      - !ruby/object:Box
+        text:
+          :de: "zu wenig Zeit"
+          :en: "too little time"
+      - !ruby/object:Box
+        text:
+          :de: "Thema zu vage"
+          :en: "subject to vague"
+      - !ruby/object:Box
+        text:
+          :de: "\\mbox{sonstige (bitte im}\\linebreak\\mbox{Freitext angeben)}"
+          :en: "\\mbox{others (pleas use}\\linebreak\\mbox{freetext)}"
+      db_column: v_problems
+      qtext:
+        :de: "Welche Probleme gab es bei der Vorbereitung Deines Vortrages?"
+        :en: "What kind of problems did occur during the preparation of your talk?"
+      type: square
+
+  - !ruby/object:Section
+    title:
+      :de: "Alle Vorträge zusammen"
+      :en: "Regarding all talks"
+    questions:
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_topicrange
+      repeat_for: lecturer
+      qtext:
+        :de:
+          :both: "Der/die Dozent/in setzt bei der Themenauswahl die richtigen Schwerpunkte."
+          :male: "Herr \\lectLast{} setzt bei der Themenauswahl die richtigen Schwerpunkte."
+          :female: "Frau \\lectLast{} setzt bei der Themenauswahl die richtigen Schwerpunkte."
+        :en:
+          :both: "The lecturer set the right priorities in her/his choice of topics."
+          :male: "Mr \\lectLast{} set the right priorities in her/his choice of topics."
+          :female: "Mrs \\lectLast{} set the right priorities in her/his choice of topics."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_compatible
+      qtext:
+        :de: "Die Vorträge sind inhaltlich gut aufeinander abgestimmt."
+        :en: "The talks complement each other well with regard to their content."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_demands_termpaper
+      repeat_for: lecturer
+      qtext:
+        :de: "Die verschiedenen Vorträge sind in den Anforderungen (der Ausarbeitung) vergleichbar."
+        :en: "The different talks are equally challenging with regard to preparation."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_attention_lecturer
+      repeat_for: lecturer
+      qtext:
+        :de:
+          :both: "Der/die Dozent/in war während der Vorträge ausreichend anwesend und aufmerksam."
+          :male: "Herr \\lectLast{} war während der Vorträge ausreichend anwesend und aufmerksam."
+          :female: "Frau \\lectLast{} war während der Vorträge ausreichend anwesend und aufmerksam."
+        :en:
+          :both: "The lecturer was sufficiently present during the talks."
+          :male: "Mr \\lectLast{} was sufficiently present during the talks."
+          :female: "Mrs \\lectLast{} was sufficiently present during the talks."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "zu häufig"
+          :en: "too often"
+      - !ruby/object:Box
+        text:
+          :de: "angemessen"
+          :en: "adequate"
+      - !ruby/object:Box
+        text:
+          :de: "zu wenig"
+          :en: "too rare"
+      db_column: v_interruptions
+      repeat_for: lecturer
+      qtext:
+        :de:
+          :both: "Wie häufig hat der/die Dozent/in fragend und korrigierend in die Vorträge eingegriffen?"
+          :male: "Wie häufig hat Herr \\lectLast{} fragend und korrigierend in die Vorträge eingegriffen?"
+          :female: "Wie häufig hat Frau \\lectLast{} fragend und korrigierend in die Vorträge eingegriffen?"
+        :en:
+          :both: "How often did the lecturer intervene during talks to ask questions and correct mistakes."
+          :male: "How often did Mr \\lectLast{} lecturer intervene during talks to ask questions and correct mistakes."
+          :female: "How often did the \\lectLast{} intervene during talks to ask questions and correct mistakes."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_my_attention
+      qtext:
+        :de: "Ich habe die Vorträge aktiv verfolgt."
+        :en: "I followed the talks actively."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_learned_smth
+      qtext:
+        :de: "Ich habe im Seminar über meinen eigenen Vortrag hinaus etwas gelernt."
+        :en: "I learned something beyond the scope of my own talk in this seminar."
+      type: square
+
+  - !ruby/object:Section
+    title:
+      :de: "Zum Seminar"
+      :en: "Regarding the seminar"
+    questions:
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "zu hoch"
+          :en: "to high"
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "zu niedrig"
+          :en: "to low"
+      db_column: v_demands_seminar
+      qtext:
+        :de: "Die Anforderungen in diesem Seminar sind:"
+        :en: "The level requirements for the seminar are:"
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: Abschluss\-thema
+          :en: "examination topic"
+      - !ruby/object:Box
+        text:
+          :de: sonstiges Interesse
+          :en: "other interests"
+      - !ruby/object:Box
+        text:
+          :de: "ben\xC3\xB6tigter Schein"
+          :en: "required course"
+      - !ruby/object:Box
+        text:
+          :de: leichter Schein
+          :en: "easy course"
+      db_column: v_why_this_seminar
+      qtext:
+        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt?"
+        :en: "Why did you choose to attend exactly to this seminar?"
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "Einf\xC3\xBChrung"
+          :en: "introduction"
+      - !ruby/object:Box
+        text:
+          :de: Vertiefung
+          :en: "specialization"
+      - !ruby/object:Box
+        text:
+          :de: Forschungsbezug
+          :en: "research connection"
+      - !ruby/object:Box
+        text:
+          :de: Spezialthema
+          :en: "special topic"
+      db_column: v_expectations
+      qtext:
+        :de: "Welche Erwartung hattest Du an das Seminar?"
+        :en: "What did you expect from the seminar?"
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "ja"
+          :en: "yes"
+      - !ruby/object:Box
+        text:
+          :de: "nein"
+          :en: "no"
+      db_column: v_recommendations
+      qtext:
+        :de: "Ich würde ein Seminar mit diesem Thema weiterempfehlen."
+        :en: "I would recommend a seminar on this topic to my fellow students."
+      type: square
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "ja"
+          :en: "yes"
+      - !ruby/object:Box
+        text:
+          :de: "nein"
+          :en: "no"
+      db_column: v_attend_again
+      qtext:
+        :de:
+          :both: "Ich würde dieses Seminar bei diesem Dozenten/dieser Dozentin weiterempfehlen:"
+          :male: "Ich würde dieses Seminar bei Herrn \\lectLast{} weiterempfehlen:"
+          :female: "Ich würde dieses Seminar bei Frau \\lectLast{} weiterempfehlen:"
+        :en:
+          :both: "I would recommend a seminar with this lecturer to my fellow students."
+          :male: "I would recommend a seminar with Mr \\lectLast{} to my fellow students."
+          :female: "I would recommend a seminar with Mrs \\lectLast{} to my fellow students."
+      type: square
+      repeat_for: lecturer
+  - !ruby/object:Section
+    title:
+      :de: "Umgang"
+      :en: "Company"
+    questions:
+
+
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_manner_lecturer_to_students
+      repeat_for: lecturer
+      qtext:
+        :de:
+          :both: "Der/die Dozent/in verhält sich den Studierenden gegenüber respektvoll."
+          :male: "Herr \\lectLast{} verhält sich den Studierenden gegenüber respektvoll."
+          :female: "Frau \\lectLast{} verhält sich den Studierenden gegenüber respektvoll."
+        :en:
+          :both: "The lecturer treated the students with respect."
+          :male: "Mr \\lectLast{} treated the students with respect."
+          :female: "Mrs \\lectLast{}treated the students with respect."
+      type: square
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "stimme voll zu"
+          :en: "completely agree"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "stimme gar nicht zu"
+          :en: "do not agree at all"
+      db_column: v_manner_students_to_lecturer
+      repeat_for: lecturer
+      qtext:
+        :de:
+          :both: "Die Studierenden verhalten sich dem/der Dozent/in gegenüber respektvoll."
+          :male: "Die Studierenden verhalten sich Herrn \\lectLast{} gegenüber respektvoll."
+          :female: "Die Studierenden verhalten sich Frau \\lectLast{} gegenüber respektvoll."
+        :en:
+          :both: "The students treated the lecturer with respect."
+          :male: "The students treated Mr \\lectLast{} with respect."
+          :female: "The students treated Mrs \\lectLast{} with respect."
+      type: square
+
+  - !ruby/object:Section
+    title:
+      :de: "Sonstiges"
+      :en: "Others"
+    questions:
+    - !ruby/object:Question
+      boxes: []
+      db_column: v_comment
+      donotuse: 1
+      qtext:
+        :de: "Zusätzliche Anmerkungen zum Seminar (bitte in Stichworten):"
+        :en: "Additional comments regarding the seminar and \\lect{} (please give keywords):"
+      height: 800
+      type: text
+      visualizer: list
