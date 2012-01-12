@@ -16,6 +16,9 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
+  attr_accessor :summary
+  alias :comment :summary
+
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted
     tutors.sort { |x,y| x.abbr_name.casecmp(y.abbr_name) }
