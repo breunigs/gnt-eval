@@ -69,7 +69,7 @@ class Tutor < ActiveRecord::Base
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
-    return 0 if course.profs.empty?
+    return 0 if course.profs.empty? || form.get_tutor_question.nil?
     tutor_db_column = form.get_tutor_question.db_column.to_sym
     RT.count(form.db_table, {:barcode => course.barcodes, \
       tutor_db_column => tutnum})
