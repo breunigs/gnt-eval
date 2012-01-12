@@ -50,7 +50,7 @@ module CoursesHelper
     sortby = []
     case params[:sort].gsub(/_rev$/, "")
       when "title" then
-        sortby << "title.downcase"
+        sortby << "title"
       when "students" then
         sortby << "students"
         sortby << "title"
@@ -72,7 +72,7 @@ module CoursesHelper
   def sort(courses, order, rev)
     return courses if order.empty?
     courses = courses.sort_by do |a|
-      order.collect { |o| eval("a.#{o}") }
+      order.collect { |o| eval("a.#{o}.downcase") }
     end
     courses.reverse! if rev
     courses
