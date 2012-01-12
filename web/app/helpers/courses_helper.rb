@@ -72,7 +72,11 @@ module CoursesHelper
   def sort(courses, order, rev)
     return courses if order.empty?
     courses = courses.sort_by do |a|
-      order.collect { |o| eval("a.#{o}.to_s.downcase") }
+      order.map do |o|
+        dat = eval("a.#{o}")
+        dat.downcase! if dat.is_a?(String)
+        dat
+      end
     end
     courses.reverse! if rev
     courses
