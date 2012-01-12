@@ -101,69 +101,6 @@ class Course < ActiveRecord::Base
 
     notspecified = t(:not_specified)
     b << "\\kurskopf{#{title.escape_for_tex}}{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
-    b << "\\begin{multicols}{2}"
-
-
-    #~ data = IO.read(RAILS_ROOT + "/../tex/results_horiz_bars.tex.erb")
-#~
-    #~ # degree ###########################################################
-    #~ lines = []
-#~
-    #~ # grab the description text for each checkbox from the form
-    #~ # FIXME: don't hardcode this, but make it an attribute of the
-    #~ #        question in Abstractform
-    #~ matchn = [notspecified] + form.get_question("v_central_major").get_choices(I18n.locale)
-    #~ matchm = [""] + form.get_question("v_central_degree").get_choices(I18n.locale)
-    #~ # remove "sonstiges" or "other" from the end of the array because
-    #~ # otherwise we get pretty useless combinations
-    #~ matchn.pop
-    #~ matchm.pop
-#~
-    #~ all = 0
-    #~ keinang = 0
-    #~ 0.upto(matchn.length) do |n|
-      #~ 0.upto(matchm.length) do |m|
-        #~ num = count_forms({:barcode => barcodes, :hauptfach => n, :studienziel => m})
-        #~ # skip all entries with very few votes
-        #~ next if num/sheets.to_f*100 < 2
-        #~ # check for 'other' and skip
-        #~ next if n == matchn.length || m == matchm.length
-#~
-        #~ all += num
-#~
-        #~ # check for 'not specified' and group them together
-        #~ if n == 0 || m == 0
-          #~ keinang += num
-          #~ next
-        #~ end
-        #~ lines << {:name => matchn[n] + " " + matchm[m], :count => num }
-      #~ end
-    #~ end
-    #~ lines.sort! { |x,y| y[:count] <=> x[:count] }
-    #~ lines << {:name => t(:other), :count => sheets-all } if sheets-all > 0
-    #~ lines << {:name => notspecified, :count => keinang } if keinang > 0
-#~
-    #~ title = t(:degree_course)
-    #~ b << ERB.new(data).result(binding)
-    #~ b << "\\columnbreak"
-
-    # semesterdistribution #############################################
-    #~ lang_sem = t(:academic_term)
-    #~ sems = get_distinct_values("semester", {:barcode => barcodes}).sort
-#~
-    #~ lines = []
-    #~ (sems-[0]).each do |i|
-      #~ num = count_forms({:barcode => barcodes, :semester => i})
-      #~ lines << {:name => "#{i == 16 ? "> 15" : i}. #{lang_sem}",
-        #~ :count => num }
-    #~ end
-    #~ num = count_forms({:barcode => barcodes, :semester => 0})
-    #~ lines << {:name => notspecified, :count => num}
-#~
-    #~ title = t('semester_distribution')
-    #~ b << ERB.new(data).result(binding)
-#~
-    b << "\\end{multicols}"
     b
   end
 
