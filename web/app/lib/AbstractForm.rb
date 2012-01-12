@@ -275,18 +275,6 @@ class Question
         # automatically prints tutors, if they have been defined
         s << "\n\\printtutors{#{qq}}{#{@db_column}}\n"
 
-      when "variable_width" then
-        s << "\\SaveNormalInfo[#{qq}][#{@db_column}]\n"
-        s << "\\printspecialheader{#{qq}}"
-
-        s << "\\hspace*{-0.14cm}\\makebox[1.0\\textwidth][l]{"
-        boxes = []
-        @boxes.each_with_index do |b,i|
-          boxes << "\\boxvariable{#{i+1}}{\\hspace{-0.5em}#{b.text[lang]}}"
-        end
-        s << boxes.join(" \\hfill ")
-        s << "}\n\n"
-
       when "square" then
         answers = @boxes.map{ |x| "[#{x.any_text(lang)}]" }
         # add dummy entry so the no answer checkbox in the first row is taken
