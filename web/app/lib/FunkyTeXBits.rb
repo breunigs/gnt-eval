@@ -5,6 +5,7 @@ require 'rubygems'
 require 'erb'
 require 'work_queue'
 require 'lib/RandomUtils.rb'
+require 'lib/result_tools.rb'
 require 'digest'
 
 module FunkyTeXBits
@@ -60,8 +61,10 @@ module FunkyTeXBits
     exitcodes = []
     error = ""
 
-    preview = '\usepackage[active,displaymath,floats,textmath,graphics,sections,tightpage]{preview}'
-    head = preamble("Blaming Someone For Bad LaTeX", preview)
+    evalname = "Blaming Someone For Bad LaTeX"
+    additional_packages = "\\usepackage[active,displaymath,floats,textmath,graphics,sections,tightpage]{preview}\n"
+
+    head = ERB.new(RT.load_tex("preamble")).result(binding)
     head << "\\pagestyle{empty}\n\\begin{preview}\n"
     foot = "\n\\end{preview}\n\\end{document}"
 
@@ -101,4 +104,8 @@ module FunkyTeXBits
     #~ I18n.locale = I18n.default_locale if I18n.tainted?
     I18n.translate(item.to_sym)
   end
+
+  private
+  # quick access to ResultTools.instance
+  RT = ResultTools.instance
 end
