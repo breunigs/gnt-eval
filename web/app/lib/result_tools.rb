@@ -139,13 +139,10 @@ class ResultTools
   # instance.
   def initialize
     sced = Seee::Config.external_database
-    start = Time.now
-    print "Connecting to result database took "
     @dbh = DBI.connect(
       "DBI:#{sced[:dbi_handler]}:#{sced[:database]}:#{sced[:host]}",
       sced[:username],
       sced[:password])
-    puts "#{Time.now - start} seconds"
 
     @tex = {}
   end
