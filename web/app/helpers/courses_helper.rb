@@ -50,21 +50,21 @@ module CoursesHelper
     sortby = []
     case params[:sort].gsub(/_rev$/, "")
       when "title" then
-        sortby << "title"
+        sortby << "title.downcase"
       when "students" then
         sortby << "students"
-        sortby << "title"
+        sortby << "title.downcas"
       when "evaluated_by" then
-        sortby << "evaluator"
+        sortby << "evaluator.downcase"
         sortby << "eval_date"
       when "profs" then
-        sortby << "nl_separated_prof_fullname_list"
+        sortby << "nl_separated_prof_fullname_list.downcase"
       when "description" then
         sortby << "eval_date"
-        sortby << "description"
+        sortby << "description.downcase"
       when "faculty" then
-        sortby << "faculty.shortname"
-        sortby << "title"
+        sortby << "faculty.shortname.downcase"
+        sortby << "title.downcase"
     end
     sort(courses, sortby, params[:sort].match(/_rev$/))
   end
@@ -72,11 +72,7 @@ module CoursesHelper
   def sort(courses, order, rev)
     return courses if order.empty?
     courses = courses.sort_by do |a|
-      order.map do |o|
-        dat = eval("a.#{o}")
-        data = dat.downcase if dat.is_a?(String)
-        dat
-      end
+      order.map { |o| eval("a.#{o}") }
     end
     courses.reverse! if rev
     courses
