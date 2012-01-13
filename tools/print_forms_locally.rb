@@ -86,9 +86,9 @@ forms.each do |file, data|
   # actually print
   print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/#{file}\""
   banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/tmp/bannerpage.txt\""
-  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/tmp/howto_#{h}.pdf\"" }
-  system(print)
+  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/tmp/howtos/howto_#{h}.pdf\"" }
   howtos.each { |h| system(h) }
+  system(print)
   system(banner)
   puts "The sheets will be put in the #{BIN_DESC[bin]}"
   puts
