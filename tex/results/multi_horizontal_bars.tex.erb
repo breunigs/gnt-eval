@@ -1,0 +1,13 @@
+\begin{tikzpicture}
+\globalQuestion{
+  <%= question_text %>\\
+  {\globalNumberStyle
+    <%=t :answers%>: <%=sc%>,
+    <%=t :abstentions%>: <%=answ[:abstentions]%>}
+}
+<%
+  a = q.get_answers.strip_common_tex#.delete_if { |x| answ[x] <= 0 }
+  a.sort! { |x,y| answ[x] <=> answ[y] }
+%>
+\multiHorizontalBars{<%=a.join(",")%>}{<%=answ.values_at(*a).join(",")%>}{<%=sc%>}
+\end{tikzpicture}

@@ -1,0 +1,83 @@
+% Draws horizontal bars for the given items. 100%, or a filled bar, are
+% given in #3 argument. Expects a comma separated list of descriptions
+% in #1 and the absolute occurrences for that items in #2. The last item
+% given will be printed on top. Example usage:
+% \singleHorizontalBars{first item, second item}{20,150}{150}
+\newcommand{\multiHorizontalBars}[3]{
+  % calculate amount of arguments as well as ymax and height. These
+  % cannot directly be calculated in the axis environment, therefore it
+  % is done here.
+  \StrCount{#2,}{,}[\argumentCount]
+  \pgfmathparse{\argumentCount+1}
+  \let\calcymax\pgfmathresult
+  % the "2" is fixed space that is used regardless of how many answers
+  % there are. The 0.5 is the amount of space a single answer takes up.
+  \pgfmathparse{\argumentCount*0.5+2}
+  \let\calcheight\pgfmathresult
+
+  % generate the coordinates which will later be parsed. The y-value
+  % is simply counted up while the x-value is taken from #1. Also
+  % generates the extra y ticks string.
+  \gdef\coordAString{}
+  \gdef\extraYTicksString{}
+  \foreach \y in {1,...,\argumentCount}
+    \findNthArgument{#2}{\numexpr\y-1}
+    \xdef\coordAString{\coordAString (\lastFindNthArgument, \y)}
+    \xdef\extraYTicksString{\extraYTicksString,\y}
+  ;
+  % remove superfluous comma at the start
+  \StrBehind{\extraYTicksString}{,}[\extraYTicksString]
+  % calculate the "not checked" side of the plot to simulate an x%
+  % filled bar, which is not possible out of the box with pgfplots.
+  \gdef\coordBString{}
+  \foreach \y in {1,...,\argumentCount}
+    \findNthArgument{#2}{\numexpr\y-1}
+    \pgfmathparse{#3-\lastFindNthArgument}
+    \xdef\coordBString{\coordBString (\pgfmathresult, \y)}
+  ;
+
+  % move much further to the right. The right side of the question is
+  % used as starting point, and the diagram will be placed at the
+  % coordinates below with the left end of the top bar. In other words:
+  % the description of each bar is not taken into account and might
+  % overflow into the question text.
+  \path (question text.north east) ++(4cm,0) coordinate (question text end);
+
+  \begin{axis}[
+    name=horizontalBars,
+    at={(question text end)},
+    anchor=north west,
+    % make it xbar so that we get horizontal bars and stacked, so that
+    % we can easily draw a partly filled bar.
+    xbar stacked,
+    % set the limits so each bar appears nicely
+    xmin=0, xmax=#3, ymin = 0, ymax = \calcymax,
+    height = {\calcheight cm},
+    bar width = 0.4cm,
+    width=7cm,
+    % hide the box around the plot
+    axis x line=none,
+    every outer y axis line/.append style={white},
+    % hide x labels
+    xtick=\empty,
+    % hide little grey markers on top or below the actual plot
+    major y tick style={draw=none},
+    minor y tick style={draw=none},
+    % define where to place ticks. Normal ticks are placed to the left
+    % and contain each item’s description. Extra ticks contain the
+    % absolute occurence of that item and are placed to the right.
+    ytick=data,
+    yticklabels={#1},
+    extra y ticks={\extraYTicksString},
+    extra y tick labels={#2},
+    extra y tick style={ytick pos=right, yticklabel pos=right},
+    ]
+    % draw the filled part. Since \addplot doesn’t expand variables, we
+    % need to do it manually so that \coordAString may be read correctly.
+    \edef\temp{\noexpand\addplot[black,fill=black] coordinates {\coordAString};}
+    \temp
+    % draw the empty part
+    \edef\temp{\noexpand\addplot[black,fill=white] coordinates {\coordBString};}
+    \temp
+  \end{axis}
+}
