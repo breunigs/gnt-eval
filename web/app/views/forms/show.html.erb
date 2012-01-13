@@ -34,24 +34,40 @@
 <% if @form.has_duplicate_db_columns? %>
   <fieldset>
     <legend>ERROR: duplicate db columns</legend>
-      Some of the questions have the same db column. This doesn’t make
-      any sense and G'n'T Eval will break if you do not fix this.
-      <table>
-        <tr style="background: #<%= cycle('efefef', 'fff')%>">
-          <th>db column</th><th>offending questions</th>
-        </tr>
-      <%
-      @form.get_duplicate_db_columns.each do |col, quests|
-        quests.each do |q|
-      %>
-        <tr style="background: #<%= cycle('efefef', 'fff')%>">
-          <td><%=col%></td><td><%=q%></td>
-        </tr>
-      <%
-        end
+    Some of the questions have the same db column. This doesn’t make
+    any sense and G'n'T Eval will break if you do not fix this.
+    <table>
+      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+        <th>db column</th><th>offending questions</th>
+      </tr>
+    <%
+    @form.get_duplicate_db_columns.each do |col, quests|
+      quests.each do |q|
+    %>
+      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+        <td><%=col%></td><td><%=q.strip_common_tex%></td>
+      </tr>
+    <%
       end
-      %>
-      </table>
+    end
+    %>
+    </table>
+  </fieldset>
+<% end %>
+
+<% if @form.has_questions_without_visualizer? %>
+  <fieldset>
+    <legend>WARNING: questions without visualizer (defaults to empty)</legend>
+    <table>
+      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+        <th>offending questions</th>
+      </tr>
+    <% @form.get_questions_without_visualizer.each do |q| %>
+      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+        <td><%=q.text.strip_common_tex%></td>
+      </tr>
+    <% end %>
+    </table>
   </fieldset>
 <% end %>
 

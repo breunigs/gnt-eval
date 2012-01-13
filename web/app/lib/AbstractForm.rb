@@ -108,7 +108,14 @@ class Question
   # comment into the TeX file.
   attr_writer :visualizer
   def visualizer
+    warn "WARNING: No visualizer set for #{text}" if @visualizer.nil?
     @visualizer || "empty"
+  end
+
+  # returns if the visualizer has been set or false, if the variable is
+  # not defined.
+  def visualizer_set?
+    !@visualizer.nil?
   end
 
   attr_accessor :donotuse
@@ -497,6 +504,17 @@ class AbstractForm
   def has_duplicate_db_columns?
     !questions.collect { |q| q.db_column }.get_duplicates.empty?
   end
+
+  # returns true if there is a question without explicitly set visualizer
+  def has_questions_without_visualizer?
+    questions.any? { |q| !q.visualizer_set? }
+  end
+
+  # returns the questions which do not have an visualizer explicitly set
+  def get_questions_without_visualizer
+    questions.reject { |q| q.visualizer_set? }
+  end
+
 
   # returns the complete TeX code required to generate the form. If no
   # specific data is provided it will be filled with some default values
