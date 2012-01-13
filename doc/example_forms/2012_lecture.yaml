@@ -659,6 +659,7 @@ pages:
         :de: "Welche Probleme gibt es mit der Präsentation? (Mehrfachnennung möglich)"
         :en: "Which problems does the presentation have? (Multiple entries possible)"
       type: square
+      visualizer: horizontal_bars
       repeat_for: lecturer
     - !ruby/object:Question
       boxes:
@@ -699,6 +700,7 @@ pages:
           :female: "Which problems does Mrs \\lectLast{}'s oral presentation have? (Multiple entries possible)"
       type: square
       repeat_for: lecturer
+      visualizer: horizontal_bars
   - !ruby/object:Section
     title: "Vorlesung"
     answers:
@@ -1055,6 +1057,7 @@ pages:
         :de: "Welche Probleme gibt es mit der Organisation der Übungsgruppen? (Mehrfachnennung möglich)"
         :en: "Which problems are there regarding the organization of the study groups? (multiple entries possible)"
       type: square
+      visualizer: horizontal_bars
     - !ruby/object:Question
       db_column: tutor_id
       qtext:
