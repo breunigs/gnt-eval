@@ -57,9 +57,12 @@ class String
   # required in the results, therefore they may be stripped here. It
   # does not remove superfluous curly braces because that would be more
   # effort… also TeX, doesn’t care about them… Currently removes:
-  # \linebreak, \mbox, \textls, \hspace*, \hspace
+  # \linebreak, \mbox, \textls, \hspace*, \hspace.
+  # In case a line ends with an hyphen like this: long-\linebreak{}word
+  # the hypen will be removed as well.
   def strip_common_tex
-    s = self.gsub(/\\linebreak(\{\})?/, " ")
+    s = self.gsub(/-\\linebreak(\{\})?/, "") # no space due to hyphen
+    s = s.gsub(/\\linebreak(\{\})?/, " ")    # no hypen, so add space
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
     s = s.gsub(/\hspace\*?\{[^\}]+\}/, "")
