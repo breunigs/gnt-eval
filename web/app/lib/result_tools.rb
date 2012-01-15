@@ -159,7 +159,6 @@ class ResultTools
   # question is rendered. E.g. repeat_for=course; then give the course.
   # Usually passing «self» should be sufficient.
   def eval_question(table, q, special_where, compare_where, repeat_for_class)
-
     b = if q.comment?
       eval_question_comment(table, q, special_where, repeat_for_class)
     elsif q.multi?
@@ -187,7 +186,8 @@ class ResultTools
         warn "There is no result-TeX-snippet called #{name}."
         warn "Are you sure the file exists at #{path}?"
         warn "Returning warning string instead."
-        @tex[name] = "\n\nERROR: No TeX code found for results/#{name}.tex.erb\n\n"
+        @tex[name] = "\n\nERROR: No TeX code found for results/" \
+                      + "#{name.escape_for_tex}.tex.erb\n\n"
       end
     end
 
@@ -221,7 +221,8 @@ class ResultTools
         b << ERB.new(load_tex("comment_#{vis}")).result(binding)
       end
     else
-      b << "WARNING: Given class #{repeat_for_class.class} does not have a comment method. Cannot display comment."
+      b << "WARNING: Given class #{repeat_for_class.class} does not " \
+            + "have a comment method. Cannot display comment."
     end
 
     b
