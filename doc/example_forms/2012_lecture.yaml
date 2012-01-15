@@ -812,6 +812,9 @@ pages:
         :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
         :en: "The materials provided for the lecture are:"
       type: square
+      # FIXME: This visualizer does not take the special meaning of the
+      # last field into account and is therefore unsuited.
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -969,6 +972,7 @@ pages:
         :de: "Die Aufgaben sind gut auf die Vorlesung abgestimmt."
         :en: "The exercises match the lecture well."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -987,6 +991,7 @@ pages:
         :de: "Die Aufgaben sind fehlerfrei und unmissverständlich gestellt."
         :en: "The exercises are error-free and unambiguous."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1008,6 +1013,7 @@ pages:
         :de: "Der Schwierigkeitsgrad der Aufgaben ist:"
         :en: "The difficulty level of the exercises is:"
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1025,6 +1031,7 @@ pages:
         :de: "Für die Bearbeitung der Aufgaben benötige ich:"
         :en: "I spend this much time working on the exercises:"
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1064,6 +1071,7 @@ pages:
         :de: "Ich bin in der Übungsgruppe von:"
         :en: "I attend the study group by:"
       type: tutor_table
+      visualizer: tutor_overview
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1083,6 +1091,7 @@ pages:
         :de: "Ich besuche die Übungen:"
         :en: "I attend the study group:"
       type: square
+      visualizer: histogram
   - !ruby/object:Section
     title:
       :de: "Tutor/in"
@@ -1120,6 +1129,7 @@ pages:
         :de: "Mein/e Tutor/in ist ein/e gute/r Lehrer/in."
         :en: "My tutor is a good teacher."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1139,6 +1149,7 @@ pages:
         :de: "Mein/e Tutor/in ist akustisch und sprachlich gut zu verstehen."
         :en: "My tutor is easy to understand acoustically and language-wise."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1158,6 +1169,7 @@ pages:
         :de: "Mein/e Tutor/in ist fachlich kompetent."
         :en: "My tutor is competent in the subject matter."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1177,6 +1189,7 @@ pages:
         :de: "Mein/e Tutor/in ist stets gut vorbereitet."
         :en: "My tutor is always well prepared."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1196,6 +1209,7 @@ pages:
         :de: "Mein/e Tutor/in geht gut auf Fragen zur Vorlesung ein."
         :en: "My tutor responds well to questions concerning the lecture."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1215,6 +1229,7 @@ pages:
         :de: "Mein/e Tutor/in erklärt Sachverhalte verständlich."
         :en: "My tutor explains matters well."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1234,6 +1249,7 @@ pages:
         :de: "Mein/e Tutor/in korrigiert die abgegebenen Lösungen sorgfältig."
         :en: "My tutor grades the handed-in solutions thoroughly."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1253,6 +1269,7 @@ pages:
         :de: "Mein/e Tutor/in motiviert mich."
         :en: "My tutor motivates me."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -1268,6 +1285,7 @@ pages:
       db_column: t_profit
       hide_answers: true
       repeat_for: tutor
+      visualizer: histogram
       qtext:
         :de: "Der Nutzen, den ich aus dieser Übungsgruppe ziehe, ist hoch."
         :en: "The benefit I draw from this study group is high."
@@ -1308,6 +1326,7 @@ pages:
         :de: "Nutzt dein/e Tutor/in die Zeit sinnvoll? Wenn nicht, was möchtest Du lieber mehr machen?"
         :en: "Does your tutor use the time efficiently? If not, what would you like to do more?"
       type: square
+      visualizer: horizontal_bars
       repeat_for: tutor
     - !ruby/object:Question
       boxes: []
