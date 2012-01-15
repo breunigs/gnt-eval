@@ -271,7 +271,7 @@ class Question
   # export a single question to tex (used for creating the forms)
   def to_tex(lang = I18n.locale, gender = :both)
     s = ""
-    qq = text(lang, gender)
+    qq = text(lang, :both) # FIXME, lecturer’s name is currently broken
     case @type
       when "text_wholepage" then
         # don't need to do anything for that
