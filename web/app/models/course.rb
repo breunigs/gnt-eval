@@ -169,51 +169,30 @@ class Course < ActiveRecord::Base
       end
     end
 
-    # Do not print a "too few sheets" message here because if there are
-    # too few sheets, it will have been printed for at least one lecturer
-    # above already.
-    if returned_sheets >= SCs[:minimum_sheets_required]
-      # uebungen allgemein, immer alles relativ zur fakultät!
-      ugquest = form.questions.find_all{ |q| q.section == 'uebungsgruppenbetrieb'}
-      return b if ugquest.empty?
-
-      c = ""
-      specific = { :barcode => barcodes }
-      general = { :barcode => $facultybarcodes }
-      ugquest.each do |q|
-        c << q.eval_to_tex(specific, general, form.db_table, I18n.locale).to_s
-      end
-
-      return b if c.strip.empty? && tutors.empty?
-
-      b << "\\fragenzudenuebungen{"+ I18n.t(:study_groups_header) +"}\n"
-      b << c
-    end
-
-    return b if tutors.empty?
-
-    c = ''
-    c << "\\uebersichtuebungsgruppen{"+I18n.t(:study_groups_overview)+"}\n"
-    c << "\\begin{longtable}[l]{lrr}\n"
-    c << "\\hline\n"
-    c << I18n.t(:study_groups_overview_header) + " \\\\ \n"
-    c << "\\hline\n"
-    c << "\\endhead\n"
-    cc = ''
-    found = false
-    tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
-      text, anz = t.evaluate
-      next if anz.nil?
-      c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
-      cc << text.to_s
-      found = true
-    end
-    return b unless found
-    c << "\\hline\n"
-    c << "\\end{longtable}"
-    # only print table if there are at least two tutors
-    b << c if tutors.size > 1
-    b << cc
+    #~ return b if tutors.empty?
+#~
+    #~ c = ''
+    #~ c << "\\uebersichtuebungsgruppen{"+I18n.t(:study_groups_overview)+"}\n"
+    #~ c << "\\begin{longtable}[l]{lrr}\n"
+    #~ c << "\\hline\n"
+    #~ c << I18n.t(:study_groups_overview_header) + " \\\\ \n"
+    #~ c << "\\hline\n"
+    #~ c << "\\endhead\n"
+    #~ cc = ''
+    #~ found = false
+    #~ tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
+      #~ text, anz = t.evaluate
+      #~ next if anz.nil?
+      #~ c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
+      #~ cc << text.to_s
+      #~ found = true
+    #~ end
+    #~ return b unless found
+    #~ c << "\\hline\n"
+    #~ c << "\\end{longtable}"
+    #~ # only print table if there are at least two tutors
+    #~ b << c if tutors.size > 1
+    #~ b << cc
 
     return b
   end

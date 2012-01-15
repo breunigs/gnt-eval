@@ -3,6 +3,7 @@ class Tutor < ActiveRecord::Base
   belongs_to :course
   has_many :pics
   has_one :form, :through => :course
+  has_one :faculty, :through => :course
 
   validates_presence_of :abbr_name
   validates_uniqueness_of :abbr_name, :scope => :course_id, \
@@ -18,8 +19,23 @@ class Tutor < ActiveRecord::Base
   end
 
   def eval_block(questions, section)
-    # FIXME
-    ""
+    b = RT.include_form_variables(self)
+    b << RT.small_header(section)
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+    end
+
+    tut_db_col = form.get_tutor_question.db_column.to_sym
+
+    questions.each do |q|
+      b << RT.eval_question(form.db_table, q,
+            # this tutor only
+            {:barcode => course.barcodes, tut_db_col => tutnum},
+            # all tutors available
+            {:barcode => faculty.barcodes},
+            self)
+    end
+    b
   end
 
   def evaluate
