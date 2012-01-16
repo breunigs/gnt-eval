@@ -5,6 +5,9 @@ require 'erb'
 # A course has many professors, belongs to a semester and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
+  # by default, only work on courses in currently active semesters
+  default_scope(:conditions => {:semester_id => Semester.currently_active})
+
   belongs_to :semester
   belongs_to :faculty
   belongs_to :form
