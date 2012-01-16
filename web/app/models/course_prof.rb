@@ -44,9 +44,6 @@ class CourseProf < ActiveRecord::Base
     @db_table = form.db_table
 
     b = ''
-    # head lecturer info into TeX so the questions may refer to them
-    b << "\\def\\lectLast{#{prof.lastname.escape_for_tex}}"
-    b << "\\def\\lect{#{prof.fullname.escape_for_tex}}"
 
     # only set locale if we want a mixed-lang document
     I18n.locale = course.language if I18n.tainted?
