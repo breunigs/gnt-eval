@@ -293,6 +293,14 @@ class PESTFix < PESTDatabaseTools
           SUPPORTED_TYPES.include?(q.type) ? q.db_column : nil
         end
         valid_fields.compact!
+        # HACK HACK HACK! Remove after current eval. FIXME FIXME FIXME
+        if valid_fields.include?("tutnum")
+          valid_fields.delete("tutnum")
+          valid_fields << "tutor_id"
+        end
+
+
+
         @tables[t] = valid_fields.flatten unless valid_fields.empty?
       rescue => e
         debug "Table #{t} doesn't appear to be valid. Error message:"
@@ -523,6 +531,7 @@ class PESTFix < PESTDatabaseTools
 
     # All done. Let's display it.
     @window.show_all
+
     while (Gtk.events_pending?)
       Gtk.main_iteration
     end
