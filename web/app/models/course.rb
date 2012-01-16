@@ -19,6 +19,17 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
+  # finds all courses that contain all given keywords in their title.
+  # The keywords must not appear in order. Only the first 10 keywords
+  # are considered, Only alpha numerical characters and hyphens are
+  # valid, all other characters are discarded.
+  def self.search(term)
+    return Course.all if term.nil?
+    c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
+    return Course.all if c.nil? || c.empty?
+    Course.find(:all, :conditions => [(["title LIKE ?"]*c.size).join(" AND "), *c])
+  end
+
   # Create an alias for this rails variable
   def comment; summary; end
 

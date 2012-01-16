@@ -116,6 +116,7 @@ td {
 
 fieldset {
   margin-top:1em;
+  clear: both;
 }
 
 legend {
@@ -140,7 +141,7 @@ fieldset.attention legend {
   float: right;
 }
 
-input[type=text] {
+input[type=text], input[type=search] {
   min-width: 25em;
 }
 

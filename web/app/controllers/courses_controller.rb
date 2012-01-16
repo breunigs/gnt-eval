@@ -7,17 +7,38 @@ class CoursesController < ApplicationController
   # GET /courses
   # GET /courses.xml
   def index
-    @courses = Course.find(:all)
-    @curr_sem ||= Semester.all.find { |s| s.now? }
-    if @curr_sem.nil?
+    @curr_sem ||= Semester.currently_active
+    if @curr_sem.empty?
       flash[:error] = "Cannot list courses for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
-    else
-      respond_to do |format|
-        format.html # index.html.erb
-        format.xml  { render :xml => @courses }
-      end
+      return
     end
+    # don’t allow URLs that have the search parameter without value
+    if params[:search] && params[:search].empty?
+      redirect_to :controller => "courses", :action => "index"
+      return
+    end
+
+    # filter by search term. If none given, search will return all
+    # courses.
+    @courses = Course.search(params[:search])
+
+    # if a search was performed and there is exactly one result go to it
+    # directly instead of listing it
+    if params[:search] && @courses.size == 1
+      redirect_to(@courses.first)
+      return
+    end
+
+    # otherwise, render list of courses
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @courses }
+    end
+  end
+
+  def search
+    @courses = Course.search params[:search]
   end
 
   # GET /courses/1
@@ -35,8 +56,8 @@ class CoursesController < ApplicationController
   # GET /courses/new.xml
   def new
     @course = Course.new
-    @curr_sem ||= Semester.all.find { |s| s.now? }
-    if @curr_sem.nil?
+    @curr_sem ||= Semester.currently_active
+    if @curr_sem.empty?
       flash[:error] = "Cannot create a new course for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
     else

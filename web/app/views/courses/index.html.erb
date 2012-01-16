@@ -1,10 +1,16 @@
 <%= render "shared/main_menu" %>
 
 <fieldset>
-  <h1>Listing courses of <%=h @curr_sem.title %></h1>
-  <p>
+  <h1>Listing courses of <%=h @curr_sem.map { |c| c.title }.join(", ") %></h1>
+
+  <div style="float:left">
     <%= link_to 'New course', new_course_path %>
-  </p>
+  </div>
+
+  <% form_tag courses_path, :method => 'get', :style=>"float:right" do %>
+    <%= text_field_tag :search, params[:search], :placeholder => "Filter by title…", :type => "search" %>
+    <%= submit_tag "Search", :name => nil %>
+  <% end %>
 </fieldset>
 
 <!-- didn't put the table in a fieldset because the horizontal space is too valuable -->
@@ -18,7 +24,7 @@
   </tr>
 
 <%
-courses = sort_helper(@courses.find_all{|c| c.semester.now? })
+courses = sort_helper(@courses)
 
 for course in courses %>
   <tr style="background: #<%= cycle('efefef', 'fff') %>">
