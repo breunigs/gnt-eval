@@ -41,37 +41,6 @@ class Tutor < ActiveRecord::Base
     b
   end
 
-  def evaluate
-    form = course.form
-    @db_table = form.db_table
-
-    b = "\\section{#{abbr_name}}\n\\label{#{id}}\n"
-
-    # only set locale if we want a mixed-lang document
-    I18n.locale = course.language if I18n.tainted?
-
-    if sheet_count < Seee::Config.settings[:minimum_sheets_required]
-      b << form.too_few_questionnaires(I18n.locale, sheet_count)
-      b << "\n\n"
-      return b, sheet_count
-    end
-
-    b << I18n.t(:submitted_questionnaires) + ': ' + sheet_count.to_s + "\n\n"
-    tutor_db_column = course.form.get_tutor_question.db_column.to_sym
-
-    specific = { :barcode => course.barcodes, tutor_db_column => tutnum }
-    general = { :barcode => course.barcodes }
-    form.questions.find_all{ |q| q.section == 'tutor' }.each do |q|
-      next if q.type == "tutor_table"
-      b << q.eval_to_tex(specific, general, form.db_table, I18n.locale)
-    end
-    unless comment.to_s.strip.empty?
-      b << "\\textbf{#{I18n.t(:comments)}}\n\n"
-      b << comment.to_s
-    end
-    return b, sheet_count
-  end
-
   def tutnum
     course.tutors.index(self) + 1
   end
