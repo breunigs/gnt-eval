@@ -20,6 +20,9 @@ class Tutor < ActiveRecord::Base
 
   def eval_block(questions, section)
     b = RT.include_form_variables(self)
+    # may be used to reference a specific tutor. For example, the tutor_
+    # overview visualizer does this.
+    b << "\\label{tutor#{self.id}}\n"
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
