@@ -1,0 +1,25 @@
+<%
+
+tutors = repeat_for_class.tutors.sort do |x,y|
+  x.abbr_name.casecmp(y.abbr_name)
+end
+
+if tutors.size > 0
+
+%>
+  <%=small_header(I18n.t(:study_groups_overview)) %>
+  \begin{longtable}[l]{lrr}
+    \hline
+    <%=I18n.t(:study_groups_overview_header)%> \\
+    \hline
+    \endhead
+
+  <% tutors.each do |t| %>
+    \hyperref[tutor<%=t.id%>]{<%=t.abbr_name%>}
+	& <%=t.returned_sheets%>
+	& \pageref{tutor<%=t.id%>} \\
+  <% end %>
+
+  \end{longtable}
+
+<% end %>
