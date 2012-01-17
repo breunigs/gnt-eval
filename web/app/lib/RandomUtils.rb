@@ -65,7 +65,7 @@ class String
     s = s.gsub(/\\linebreak(\{\})?/, " ")    # no hypen, so add space
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
-    s = s.gsub(/\hspace\*?\{[^\}]+\}/, "")
+    s = s.gsub(/\\hspace\*?\{[^\}]+\}/, "")
   end
 
   # Actually only useful for arrays. This is a convenience feature so

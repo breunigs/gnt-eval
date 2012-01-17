@@ -4,5 +4,4 @@
 \IfStrEq{<%= title.escape_for_tex %>}{\lastSubsectionHeader}{}{
   \subsection*{<%= title.escape_for_tex %>}
 }
-
-\def\lastSubsectionHeader{<%= title.escape_for_tex %>}
+\edef\lastSubsectionHeader{<%= title.escape_for_tex %>}
