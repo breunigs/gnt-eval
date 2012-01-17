@@ -208,17 +208,26 @@ class CoursesController < ApplicationController
     false
   end
 
-  # checks if the chosen form and language actually exist and report
-  # if iff the combo is invalid
+  # Checks if the semester actually has the form and if that form
+  # actually offers the language selected. Will report any errors.
   def form_lang_combo_valid?
     # if the semester is critical, these fields will not be submitted.
     # supply them from the database instead.
     params[:course][:form_id] ||= @course.form.id
     params[:course][:language] ||= @course.language
+
+    # check semester has form
+    s = Semester.find(params[:course][:semester_id])
     f = Form.find(params[:course][:form_id])
+    unless s.forms.map { |f| f.id }.include?(params[:course][:form_id].to_i)
+      flash[:error] = "Form “#{f.name}” (id=#{f.id}) is not " \
+                        + "available for semester “#{s.title}”"
+      return false
+    end
+
+    # check form has language
     l = params[:course][:language]
-    x = f.has_language?(l)
-    return true if x
+    return true if f.has_language?(l)
     flash[:error] = "There’s no language “#{l}” for form “#{f.name}”"
     false
   end
