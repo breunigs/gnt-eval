@@ -62,11 +62,16 @@ require File.join(cdir, 'helper.AbstractFormExtended.rb')
 
 class PESTFix < PESTDatabaseTools
   def initialize(win)
-    # this array will hold all failed question, even after they have
+    # this array will hold all failed questions, even after they have
     # been corrected. It is an array of arrays, similar to a hash but
     # ordered. The first element of each contained array acts as an
     # identifier, the 2nd contains the actual question.
     @all_failed_questions = []
+
+    # for performance reasons, we store the paths of all files that
+    # have already been processed. This allows us to skip loading of
+    # the abstract form each time.
+    @all_processed_paths = []
 
     # stores the identifiers of each question as they were changed in
     # the past
@@ -210,16 +215,16 @@ class PESTFix < PESTDatabaseTools
       q = "SELECT path, abstract_form, #{f.join(", ")} FROM #{t} WHERE #{f.join("=-1 OR ")}=-1"
       res = dbh.execute(q)
       res.each do |q|
+        # skip all files that have already been processed
+        next if @all_processed_paths.include?(q[0])
+        @all_processed_paths << q[0]
         form = Marshal.load(Base64.decode64(q[1]))
         # use the database result to check if a question is failed.
-        # AbstractForm is never changed, so already fixes questions need
+        # AbstractForm is never changed, so already fixed questions need
         # to be excluded.
         form.questions.select { |qq| q[qq.db_column] == -1 }.each do |qq|
           ident = "#{q[0]}_#{qq.db_column}"
-          # Don’t overwrite existing entries because it might have been
-          # updated, but the result is not yet stored in the DB. This
-          # could lead to race conditions, as this function is called
-          # from a background thred
+          # skip existing entries
           next unless @all_failed_questions.assoc(ident).nil?
           data = {}
           data["path"] = q[0]
