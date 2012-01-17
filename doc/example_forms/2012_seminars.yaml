@@ -63,6 +63,7 @@ pages:
           :de: "Sonstiges"
           :en: "others"
       db_column: v_central_degree
+      visualizer: horizontal_bars
 #      qtext: Mit welchem \emph{Abschlussziel} studierst Du?
       qtext:
         :de: Mit welchem \emph{Abschlussziel} studieren Sie?
@@ -92,6 +93,7 @@ pages:
         :de: "Bitte geben Sie Ihr Studienfach an, innerhalb dessen Sie diese Lehrveranstaltung besuchen:"
         :en: "Please indicate the \\emph{field of study} in which you are attending this course:"
       last_is_textbox: 25
+      visualizer: horizontal_bars
       type: square
     - !ruby/object:Question
       boxes:
@@ -109,6 +111,7 @@ pages:
         :de: "Bitte geben Sie Ihr Fachsemester in \\emph{diesem Studienfach} an:"
         :en: "In which \\emph{subject-related semester of this field of study} are you currently studying?"
       type: square
+      visualizer: horizontal_bars
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -125,6 +128,7 @@ pages:
         :de: "Ist diese Lehrveranstaltung für Sie eine \\emph{Pflichtveranstaltung}?"
         :en: "Is this an obligatory course for you?"
       type: square
+      visualizer: histogram_no_cmp
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -143,6 +147,7 @@ pages:
         :de: "\\emph{Bevor} Sie diese Lehrveranstaltung besucht haben: Wie hoch war Ihr Interesse am Thema der Lehrveranstaltung?"
         :en: "How much were you \\emph{interested} in the topic of the course \\emph{before} attending it?"
       type: square
+      visualizer: histogram
   - !ruby/object:Section
     title:
       :de: Bewertung des Seminars
@@ -166,6 +171,7 @@ pages:
         :de: "Die Lernziele wurden zu Beginn klar definiert."
         :en: "The aims of the course were clearly defined at the beginning."
       type: square
+      visualizer: histogram
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -180,6 +186,7 @@ pages:
           :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
           :en: "do not agree at all"
       db_column: v_central_structured
+      visualizer: histogram
       qtext:
         :de: Die Lehrveranstaltung ist klar strukturiert.
         :en: "The course is clearly structured."
@@ -198,6 +205,7 @@ pages:
           :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
           :en: "do not agree at all"
       db_column: v_central_convey
+      visualizer: histogram
       qtext:
         :de: "Der Lehrstoff wird in verständlicher Weise vermittelt."
         :en: "The subjects taught are conveyed in an understandable way."
@@ -216,6 +224,7 @@ pages:
           :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
           :en: "do not agree at all"
       db_column: v_central_students_needs
+      visualizer: histogram
       qtext:
         :de: "Es wird auf Fragen und Belange der Studierenden eingegangen."
         :en: "\\mbox{\\textls[-15]{The students' questions and concerns are taken into consideration.}}"
@@ -234,6 +243,7 @@ pages:
           :de: "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
           :en: "do not agree at all"
       db_column: v_central_learning_gains
+      visualizer: histogram
       qtext:
         :de: "Mein Lernzuwachs ist hoch."
         :en: "My learning gains are high."
@@ -266,6 +276,7 @@ pages:
           :de: sehr gering
           :en: very low
       db_column: v_central_workload
+      visualizer: histogram
       qtext:
         :de: "Verglichen mit anderen Lehrveranstaltungen ist mein Arbeitsaufwand für diese Lehrveranstaltung:"
         :en: "\\textls[-3]{In comparison to other courses, my workload for this course is:}"
@@ -293,6 +304,7 @@ pages:
           :de: sehr gering
           :en: very low
       db_column: v_central_credits
+      visualizer: histogram
       qtext:
         :de: "\\mbox{Falls Leistungspunkte (LP) vergeben werden: Verglichen mit den} \\mbox{\\textls[-15]{vergebenen Leistungspunkten ist mein tatsächlicher Arbeitsaufwand}} \\mbox{für diese Lehrveranstaltung (1 LP = 30 Stunden Arbeitsaufwand):}"
         :en: "If credit points (CP) are given for this course: Compared to the credit points given for this course, my actual workload for it is: (1 CP = 30 hours workload)"
@@ -310,6 +322,7 @@ pages:
       - !ruby/object:Box
         text: "> 40h"
       db_column: v_preptime
+      visualizer: histogram
       qtext:
         :de: "Für die Vorbereitung investiere/investierte ich:"
         :en: "I spent this much time preparing the talk:"
@@ -331,6 +344,7 @@ pages:
       - !ruby/object:Box
         text: "> 20h"
       db_column: v_termpaper
+      visualizer: histogram
       qtext:
         :de: "Falls eine Hausarbeit angefertigt wird: Für die Ausarbeitung benötige/benötigte ich:"
         :en: "In case a seminar paper was required, I spent this much time writing it:"
@@ -354,6 +368,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_supervision
+      visualizer: histogram
       qtext:
         :de: "Ich wurde bei der Vorbereitung meines Vortrages gut betreut."
         :en: "I was supported quite well during the preparation of my talk."
@@ -372,6 +387,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_presentation_time
+      visualizer: histogram
       qtext:
         :de: "Der Stoff ist in der mir zur Verfügung stehenden Zeit gut darstellbar."
         :en: "My topic is presentable in sufficient detail in the time available."
@@ -390,6 +406,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_feedback
+      visualizer: histogram
       qtext:
         :de: "Ich habe ausreichend Feedback bekommen."
         :en: "I received sufficient feedback."
@@ -417,10 +434,16 @@ pages:
         text:
           :de: "\\mbox{sonstige (bitte im}\\linebreak\\mbox{Freitext angeben)}"
           :en: "\\mbox{others (pleas use}\\linebreak\\mbox{freetext)}"
-      db_column: v_problems
+      db_column:
+      - v_problems_a
+      - v_problems_b
+      - v_problems_c
+      - v_problems_d
+      - v_problems_e
+      visualizer: horizontal_bars
       qtext:
-        :de: "Welche Probleme gab es bei der Vorbereitung Deines Vortrages?"
-        :en: "What kind of problems did occur during the preparation of your talk?"
+        :de: "Welche Probleme gab es bei der Vorbereitung Deines Vortrages?  (Mehrfachnennung möglich)"
+        :en: "What kind of problems did occur during the preparation of your talk? (Multiple entries possible)"
       type: square
 
   - !ruby/object:Section
@@ -442,6 +465,7 @@ pages:
           :en: "do not agree at all"
       db_column: v_topicrange
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de:
           :both: "Der/die Dozent/in setzt bei der Themenauswahl die richtigen Schwerpunkte."
@@ -466,6 +490,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_compatible
+      visualizer: histogram
       qtext:
         :de: "Die Vorträge sind inhaltlich gut aufeinander abgestimmt."
         :en: "The talks complement each other well with regard to their content."
@@ -485,6 +510,7 @@ pages:
           :en: "do not agree at all"
       db_column: v_demands_termpaper
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de: "Die verschiedenen Vorträge sind in den Anforderungen (der Ausarbeitung) vergleichbar."
         :en: "The different talks are equally challenging with regard to preparation."
@@ -504,6 +530,7 @@ pages:
           :en: "do not agree at all"
       db_column: v_attention_lecturer
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de:
           :both: "Der/die Dozent/in war während der Vorträge ausreichend anwesend und aufmerksam."
@@ -531,6 +558,7 @@ pages:
           :en: "too rare"
       db_column: v_interruptions
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de:
           :both: "Wie häufig hat der/die Dozent/in fragend und korrigierend in die Vorträge eingegriffen?"
@@ -555,6 +583,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_my_attention
+      visualizer: histogram
       qtext:
         :de: "Ich habe die Vorträge aktiv verfolgt."
         :en: "I followed the talks actively."
@@ -573,6 +602,7 @@ pages:
           :de: "stimme gar nicht zu"
           :en: "do not agree at all"
       db_column: v_learned_smth
+      visualizer: histogram
       qtext:
         :de: "Ich habe im Seminar über meinen eigenen Vortrag hinaus etwas gelernt."
         :en: "I learned something beyond the scope of my own talk in this seminar."
@@ -596,6 +626,7 @@ pages:
           :de: "zu niedrig"
           :en: "to low"
       db_column: v_demands_seminar
+      visualizer: histogram
       qtext:
         :de: "Die Anforderungen in diesem Seminar sind:"
         :en: "The level requirements for the seminar are:"
@@ -620,6 +651,7 @@ pages:
           :de: leichter Schein
           :en: "easy course"
       db_column: v_why_this_seminar
+      visualizer: histogram
       qtext:
         :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt?"
         :en: "Why did you choose to attend exactly to this seminar?"
@@ -644,6 +676,7 @@ pages:
           :de: Spezialthema
           :en: "special topic"
       db_column: v_expectations
+      visualizer: histogram
       qtext:
         :de: "Welche Erwartung hattest Du an das Seminar?"
         :en: "What did you expect from the seminar?"
@@ -660,6 +693,7 @@ pages:
           :de: "nein"
           :en: "no"
       db_column: v_recommendations
+      visualizer: histogram
       qtext:
         :de: "Ich würde ein Seminar mit diesem Thema weiterempfehlen."
         :en: "I would recommend a seminar on this topic to my fellow students."
@@ -676,6 +710,7 @@ pages:
           :de: "nein"
           :en: "no"
       db_column: v_attend_again
+      visualizer: histogram
       qtext:
         :de:
           :both: "Ich würde dieses Seminar bei diesem Dozenten/dieser Dozentin weiterempfehlen:"
@@ -708,6 +743,7 @@ pages:
           :en: "do not agree at all"
       db_column: v_manner_lecturer_to_students
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de:
           :both: "Der/die Dozent/in verhält sich den Studierenden gegenüber respektvoll."
@@ -732,6 +768,7 @@ pages:
           :en: "do not agree at all"
       db_column: v_manner_students_to_lecturer
       repeat_for: lecturer
+      visualizer: histogram
       qtext:
         :de:
           :both: "Die Studierenden verhalten sich dem/der Dozent/in gegenüber respektvoll."
@@ -751,7 +788,6 @@ pages:
     - !ruby/object:Question
       boxes: []
       db_column: v_comment
-      donotuse: 1
       qtext:
         :de: "Zusätzliche Anmerkungen zum Seminar (bitte in Stichworten):"
         :en: "Additional comments regarding the seminar and \\lect{} (please give keywords):"
