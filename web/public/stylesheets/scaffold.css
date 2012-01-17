@@ -141,8 +141,12 @@ fieldset.attention legend {
   float: right;
 }
 
-input[type=text], input[type=search] {
+input[type=text] {
   min-width: 25em;
+}
+
+input[type=search] {
+  min-width: 15em;
 }
 
 select {
