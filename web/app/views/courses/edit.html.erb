@@ -1,6 +1,5 @@
 <%= render "shared/main_menu" %>
-<% forms = Form.find(:all).find_all{|x| x.semester_id == @course.semester.id} %>
-<%= render :partial => "courses/form_lang_select", :locals => { :forms => forms } %>
+<%= render :partial => "courses/form_lang_select" %>
 
 <% form_for(@course) do |f| %>
   <fieldset>
@@ -18,21 +17,26 @@
     <table>
       <% for item in
         [
-          [f.label(:semester_id),                       collection_select(:course, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}), "required"],
+          [f.label(:semester_id),
+              if @course.critical?
+                "#{@course.semester.title} (can't change this while critical)"
+              else
+                collection_select(:course, :semester_id, Semester.all.reverse, :id, :title, {:prompt => true})
+              end, "required"],
           [f.label(:title),                             f.text_field(:title), "required"],
           [f.label(:students),                          f.text_field(:students), "required, numeric. If you absolutely must, use 999 for “don't know”"],
           [f.label(:form_id),
               if @course.critical?
                 "#{@course.form.name} (can't change this while critical)"
               else
-                collection_select(:course, :form_id, forms, :id, :name, {:prompt => true}, {:onchange => "updateLanguages(this);" })
-              end],
+                collection_select(:course, :form_id, Form.all, :id, :name, {:prompt => true}, {:onchange => "updateLanguages(this);" })
+              end, "required"],
           [f.label(:language),
               if @course.critical?
                 "#{@course.language} (can't change this while critical)"
               else
-                collection_select(:course, :language, forms.collect { |x| x.languages }.flatten.uniq, :to_sym, :to_s)
-              end],
+                collection_select(:course, :language, all_langs, :to_sym, :to_s)
+              end, "required"],
           [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
           [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
           [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],

@@ -1,22 +1,42 @@
 <script type="text/javascript">
-  var languages = new Array();
-  <% forms.each do |f| %>
-    <%= "languages.push(new Array(\"#{f.languages.join("\", \"")}\"));" %>
-  <% end %>
+  var sfl = <%= json_map_sfl %>;
 
-  function updateLanguages(form) {
-    var langs = languages[form.selectedIndex];
-    var select = document.getElementById("course_language");
-    var old = select.options[select.selectedIndex].value;
+  function updateSelectors() {
+    // gather data derivable from "semester"
+    var semSelect = document.getElementById("course_semester_id");
+    var semId = semSelect.options[semSelect.selectedIndex].value;
+    var sem = sfl[semId];
+    var availForms = sem["forms"];
 
-    select.options.length=0;
-    for(var i=0; i<langs.length; i++) {
-      select.options[i]=new Option(langs[i], langs[i], old == langs[i], old == langs[i]);
+    // find current settings of "form"
+    var formSelect = document.getElementById("course_form_id");
+    var formOldId = formSelect.options[formSelect.selectedIndex].value;
+
+    // rebuild forms drop down
+    formSelect.options.length = 0
+    for(var fid in availForms) {
+      var i = formSelect.options.length;
+      var name = availForms[fid]["name"];
+      formSelect.options[i]=new Option(name, fid, fid == formOldId);
+    }
+
+    // gather data derivable from "form"
+    var formId = formSelect.options[formSelect.selectedIndex].value;
+    var form = availForms[formId];
+    var availLangs = form["langs"];
+
+    // find current settings of "lang"
+    var langSelect = document.getElementById("course_language");
+    var langOld = langSelect.options[langSelect.selectedIndex].value;
+
+    // rebuild langs drop down
+    langSelect.options.length = 0
+    for(var lid in availLangs) {
+      var i = langSelect.options.length;
+      var l = availLangs[lid];
+      langSelect.options[i]=new Option(l, l, l == langOld);
     }
   }
 
-  function init() {
-    updateLanguages(document.getElementById('course_form_id'));
-  }
-  window.onload=init;
+  window.onload=updateSelectors;
 </script>
