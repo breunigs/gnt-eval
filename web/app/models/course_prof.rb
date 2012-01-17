@@ -35,38 +35,6 @@ class CourseProf < ActiveRecord::Base
     b
   end
 
-  # evals sth against some form \o/
-  # returns a TeX-string
-  def evaluate
-    form = course.form
-    # setup for FunkyDBBits ...
-    # FIXME DEPRECATED
-    @db_table = form.db_table
-
-    b = ''
-
-    # only set locale if we want a mixed-lang document
-    I18n.locale = course.language if I18n.tainted?
-
-    sheet_count = count_forms({:barcode => barcode.to_i})
-    vorlhead = form.lecturer_header(prof.fullname, prof.gender, I18n.locale, sheet_count)
-    b << "\\profkopf{#{vorlhead}}\n\n"
-
-    if sheet_count < SCs[:minimum_sheets_required]
-      return b + form.too_few_questionnaires(I18n.locale, sheet_count) + "\n\n"
-    end
-
-    # b << "\\fragenzurvorlesung\n\n"
-
-    specific = { :barcode => barcode.to_i }
-    general = { :barcode => faculty.barcodes }
-    form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, I18n.locale, prof.gender)
-    end
-
-    return b
-  end
-
   def barcode
     return "%07d" % id
   end
