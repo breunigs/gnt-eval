@@ -24,7 +24,7 @@ class CoursesController < ApplicationController
 
     # filter by search term. If none given, search will return all
     # courses that match the additional filter criteria.
-    @courses = Course.search(params[:search], [:profs], [cond], [vals])
+    @courses = Course.search(params[:search], [:profs, :faculty], [cond], [vals])
 
     # if a search was performed and there is exactly one result go to it
     # directly instead of listing it
