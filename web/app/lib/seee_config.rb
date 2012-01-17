@@ -109,7 +109,7 @@ module Seee
       # defines how many sheets need to be handed in before a course or
       # tutor gets an evaluation. Otherwise a sheet might be matched to
       # the person who filled it in, destroying anonymity.
-      :minimum_sheets_required => 3,
+      :minimum_sheets_required => 5,
 
       # Set the default locale that will be used for the result PDFs. If
       # no locale is given on the command line, courses will be printed
