@@ -62,11 +62,19 @@ require File.join(cdir, 'helper.AbstractFormExtended.rb')
 
 class PESTFix < PESTDatabaseTools
   def initialize(win)
-    # this array will hold all failed question, even after they have
+    # this array will hold all failed questions, even after they have
     # been corrected. It is an array of arrays, similar to a hash but
     # ordered. The first element of each contained array acts as an
     # identifier, the 2nd contains the actual question.
     @all_failed_questions = []
+
+    # for performance reasons, we store the paths of all files that
+    # have already been processed. This allows us to skip loading of
+    # the abstract form each time.
+    @all_processed_paths = []
+
+    # used as status indicator
+    @corrected = []
 
     # stores the identifiers of each question as they were changed in
     # the past
@@ -98,7 +106,7 @@ class PESTFix < PESTDatabaseTools
     debug "Setting new question"
     @current_question = new_question
     @current_db_value = nil
-    render_image
+    render_image # also force draws image to screen
     update_window_title_and_progressbar
     update_toolbar
     debug "Fill degrees: #{current_boxes.collect{|b| b.bp}.join(", ")}"
@@ -147,14 +155,22 @@ class PESTFix < PESTDatabaseTools
     end
     t2 = Thread.new { render_image }
 
+    ci = current_ident
     # remove any occurences of this question in the undo buffer and
-    # append it to the end.
-    @undo.delete(current_ident)
-    @undo << current_ident
+    # append it to the end. If it is present, it means the question
+    # has been corrected before, so decrease count.
+    @undo.delete(ci)
+    @undo << ci
+
+    # increase count for fixed questions
+    if value >= 0
+      @corrected << ci unless @corrected.include?(ci)
+    else
+      @corrected.delete(ci)
+    end
 
     update_toolbar
-
-    [t1, t2].each { |t| t.join }
+    t1.join; t2.join
   end
 
   # data related utils #################################################
@@ -162,20 +178,6 @@ class PESTFix < PESTDatabaseTools
   # loads the value stored in the DB for the given question
   def db_value_for_question(q)
     dbh.execute("SELECT #{q["question"].db_column} FROM #{q["table"]} WHERE path = ?", q["path"]).fetch_array[0].to_i
-  end
-
-  # sets up a thread that will look for new failed questions once every
-  # five second to give the user a reasonable status info if there’s
-  # background processing.
-  def setup_failed_background_search
-    return if @setup_failed_background_search
-    @setup_failed_background_search = Gtk.timeout_add(1*5000) do
-      find_all_failed_questions
-      find_failed_question if current_question.nil?
-      update_window_title_and_progressbar
-      process_events
-      true
-    end
   end
 
   # Undo will first view the question without making any changes if it
@@ -188,7 +190,9 @@ class PESTFix < PESTDatabaseTools
       @undo.pop
       update_toolbar
     else
-      self.current_question = @all_failed_questions.assoc(@undo.last)[1]
+      old = @all_failed_questions.assoc(@undo.last)
+      return unless old
+      self.current_question = old[1]
     end
   end
 
@@ -210,16 +214,16 @@ class PESTFix < PESTDatabaseTools
       q = "SELECT path, abstract_form, #{f.join(", ")} FROM #{t} WHERE #{f.join("=-1 OR ")}=-1"
       res = dbh.execute(q)
       res.each do |q|
+        # skip all files that have already been processed
+        next if @all_processed_paths.include?(q[0])
+        @all_processed_paths << q[0]
         form = Marshal.load(Base64.decode64(q[1]))
         # use the database result to check if a question is failed.
-        # AbstractForm is never changed, so already fixes questions need
+        # AbstractForm is never changed, so already fixed questions need
         # to be excluded.
         form.questions.select { |qq| q[qq.db_column] == -1 }.each do |qq|
           ident = "#{q[0]}_#{qq.db_column}"
-          # Don’t overwrite existing entries because it might have been
-          # updated, but the result is not yet stored in the DB. This
-          # could lead to race conditions, as this function is called
-          # from a background thred
+          # skip existing entries
           next unless @all_failed_questions.assoc(ident).nil?
           data = {}
           data["path"] = q[0]
@@ -235,8 +239,6 @@ class PESTFix < PESTDatabaseTools
     end
     debug "Found #{new_questions} new question(s)"
     @find_all_failed_questions = false
-    # enable background search once the first round is done
-    setup_failed_background_search
   end
 
   # Searches through @all_failed_questions and finds all questions that
@@ -263,7 +265,7 @@ class PESTFix < PESTDatabaseTools
 
     @find_fail.set_sensitive(true)
     @statusbar.pop 99
-    @statusbar.push 3, "No more failed questions! If there’s no background processing, you’re done."
+    @statusbar.push 3, "No more failed questions!"
     update_window_title_and_progressbar
     unless @all_done_popup_shown
       @all_done_popup_shown = true
@@ -293,6 +295,14 @@ class PESTFix < PESTDatabaseTools
           SUPPORTED_TYPES.include?(q.type) ? q.db_column : nil
         end
         valid_fields.compact!
+        # HACK HACK HACK! Remove after current eval. FIXME FIXME FIXME
+        if valid_fields.include?("tutnum")
+          valid_fields.delete("tutnum")
+          valid_fields << "tutor_id"
+        end
+
+
+
         @tables[t] = valid_fields.flatten unless valid_fields.empty?
       rescue => e
         debug "Table #{t} doesn't appear to be valid. Error message:"
@@ -523,6 +533,7 @@ class PESTFix < PESTDatabaseTools
 
     # All done. Let's display it.
     @window.show_all
+
     while (Gtk.events_pending?)
       Gtk.main_iteration
     end
@@ -541,7 +552,6 @@ class PESTFix < PESTDatabaseTools
 
   # Quits application gracefully
   def quit_application
-    Gtk.timeout_remove(@setup_failed_background_search) if @setup_failed_background_search
     # This may assert in case there's a background thread running,
     # but for now I don't care
     Gtk.main_quit
@@ -549,23 +559,24 @@ class PESTFix < PESTDatabaseTools
 
   # Updates the window title
   def update_window_title_and_progressbar
+    debug "start other crap", "crap"
     all = @all_failed_questions.size
-    # find amount of corrected questions and index of current one
-    corrected = 0
-    current = 0
-    @all_failed_questions.each_with_index do |q,i|
-      corrected+=1 unless db_value_for_question(q[1]) == -1
-      current = i+1 if q[1] == current_question
-    end
+
+    # find index of current question, set to 0 if not found
+    current = @all_failed_questions.index { |q| q[1] == current_question}
+    current ||= -1
+    current += 1
+
+    corr = @corrected.size
 
     if @prog
-      count = "Fixed: #{corrected} / #{all}"
+      count = "Fixed: #{corr} / #{all}"
       if all == count || all == 0 && count == 0
         @prog.text = "All done!"
         @prog.fraction = 1
       else
         @prog.text = count
-        @prog.fraction = corrected.to_f / all.to_f
+        @prog.fraction = corr.to_f / all.to_f
       end
     end
 
@@ -578,10 +589,10 @@ class PESTFix < PESTDatabaseTools
       title << current_path
     end
     @window.set_title title.join(" | ")
+    debug "stop other crap", "crap"
   end
 
   def update_toolbar
-    debug "Updating toolbar"
     p = n = true
     p = n = false if current_question.nil?
     p = n = true if current_db_value == -1
@@ -648,11 +659,9 @@ class PESTFix < PESTDatabaseTools
   def render_image
     return if current_question.nil?
     q = current_question["question"]
-
-    load_image_from_disk(current_path)
-
     debug nil, "render_image"
 
+    load_image_from_disk(current_path)
     x, y, width, height = calculateBounds(q.boxes, q, @noChoiceDrawWidth)
 
     imgid = Math::min(@orig.length-1, current_question["page"])

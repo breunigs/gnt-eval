@@ -81,6 +81,7 @@ class Form < ActiveRecord::Base
   # what languages does this form support? If it's a single language form, i.e. if no strings
   # are translated :en is assumed
   def languages
+    return [:en] unless abstract_form_valid?
     l = questions.collect { |q| (q.qtext.is_a?(Hash) ? q.qtext.keys : nil) }.flatten.compact.uniq
     (l.nil? || l.empty?) ? [:en] : l
   end
@@ -108,7 +109,7 @@ class Form < ActiveRecord::Base
   # message is thrown.
   def method_missing(name, *args, &block)
     begin; super; rescue
-      return abstract_form.method(name).call if abstract_form.respond_to?(name)
+      return abstract_form.method(name).call(*args) if abstract_form.respond_to?(name)
       raise "undefined method #{name} for both web/app/models/form.rb and lib/AbstractForm.rb"
     end
   end

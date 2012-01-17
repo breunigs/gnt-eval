@@ -524,7 +524,7 @@ class PESTOmr < PESTDatabaseTools
       next if q.db_column.nil?
 
       if q.multi?
-        q.boxes.each do |box|
+        q.boxes.each_with_index do |box,i|
           vals << (q.value.include?(box.choice) ? box.choice : 0).to_s
           keys << q.db_column[i]
         end

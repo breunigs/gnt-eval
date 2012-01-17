@@ -2,7 +2,6 @@ de:
   de: Deutsch
   en: Englisch
 
-  semester_distribution: Semesterverteilung
   # Note: semester and “academic semester” differ. For example, if you
   # first studied maths for 10 semesters and then matriculate for
   # physics, you'll be in the 1st “academic semester” in physics, but in
@@ -25,7 +24,7 @@ de:
   technical_too_few_answers: nicht genug Antworten
 
   none: keine
-  study_groups_overview_header: "Tutor & Bögen & Seite"
+  study_groups_overview_header: "Tutor/in & Bögen & Seite"
   study_groups_header: Fragen zum Übungsbetrieb
   study_groups_overview: "Übersicht der Übungsgruppen"
 
@@ -51,6 +50,12 @@ de:
     :female: Dozentin
     :both: Dozent/in
   semester: Semester
+
+  # these serve as placeholders for the forms when the name of the
+  # tutor is not yet available. In result.pdf, these variables will
+  # contain the real name.
+  tutor: Tutor/in
+  my_tutor: Mein/e Tutor/in
 
   # used to describe the checkbox if the evaluee does not want to or
   # cannot answer this question

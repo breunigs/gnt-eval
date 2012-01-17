@@ -16,6 +16,37 @@ class Course < ActiveRecord::Base
 
   include FunkyDBBits
 
+  # finds all courses that contain all given keywords in their title.
+  # The keywords must not appear in order. Only the first 10 keywords
+  # are considered, Only alpha numerical characters and hyphens are
+  # valid, all other characters are discarded. You can specify which
+  # additional classes to include in order to speed things up using
+  # the inc variable. An array is expected. Use cond and vals to specify
+  # additional search criteria. For example, to limit to certain
+  # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
+  def self.search(term, inc = [], cond = [], vals = [])
+    return Course.filter(inc, cond, vals) if term.nil?
+    c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
+    return Course.filter(inc, cond, vals) if c.nil? || c.empty?
+    cols = ["evaluator", "title", "description", "profs.surname", "profs.firstname"]
+    qry = case ActiveRecord::Base.configurations[Rails.env]['adapter']
+      when "mysql": "CONCAT_WS(' ', #{cols*","}) LIKE ?"
+      when "postgresql": "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
+      # SQL standard as implemented by… nobody
+      else "(#{cols.join(" || ' ' || ")}) LIKE ?"
+    end
+    cond += [qry]*c.size
+    vals += c
+    Course.filter(inc, cond, vals)
+  end
+
+  # filters the courses by the given SQL-statement in cond and the
+  # values corresponding to the ? in vals. Specify an array of classes
+  # to load as well in inc.
+  def self.filter(inc, cond, vals)
+    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals])
+  end
+
   # Create an alias for this rails variable
   def comment; summary; end
 
@@ -168,31 +199,6 @@ class Course < ActiveRecord::Base
         end
       end
     end
-
-    #~ return b if tutors.empty?
-#~
-    #~ c = ''
-    #~ c << "\\uebersichtuebungsgruppen{"+I18n.t(:study_groups_overview)+"}\n"
-    #~ c << "\\begin{longtable}[l]{lrr}\n"
-    #~ c << "\\hline\n"
-    #~ c << I18n.t(:study_groups_overview_header) + " \\\\ \n"
-    #~ c << "\\hline\n"
-    #~ c << "\\endhead\n"
-    #~ cc = ''
-    #~ found = false
-    #~ tutors.sort{|x,y| x.abbr_name.casecmp(y.abbr_name) }.each do |t|
-      #~ text, anz = t.evaluate
-      #~ next if anz.nil?
-      #~ c << "\\hyperref[#{t.id}]{#{t.abbr_name}} & #{anz} & \\pageref{#{t.id}}\\\\ \n"
-      #~ cc << text.to_s
-      #~ found = true
-    #~ end
-    #~ return b unless found
-    #~ c << "\\hline\n"
-    #~ c << "\\end{longtable}"
-    #~ # only print table if there are at least two tutors
-    #~ b << c if tutors.size > 1
-    #~ b << cc
 
     return b
   end

@@ -2,7 +2,6 @@ en:
   en: English
   de: German
 
-  semester_distribution: semester distribution
   # Note: semester and “academic semester” differ. For example, if you
   # first studied maths for 10 semesters and then matriculate for
   # physics, you'll be in the 1st “academic semester” in physics, but in
@@ -54,6 +53,12 @@ en:
     :female: Lecturer
     :both: Lecturer
   semester: Term
+
+  # these serve as placeholders for the forms when the name of the
+  # tutor is not yet available. In result.pdf, these variables will
+  # contain the real name.
+  tutor: Tutor
+  my_tutor: My tutor
 
   # used to describe the checkbox if the evaluee does not want to or
   # cannot answer this question

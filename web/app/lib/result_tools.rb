@@ -32,8 +32,10 @@ class ResultTools
 
     if klass.is_a?(Tutor)
       defined[:tutor] = klass.abbr_name
+      defined[:myTutor] = klass.abbr_name
     else
       not_avail += [:tutor]
+      not_avail += [:myTutor]
     end
 
     b = "\n"

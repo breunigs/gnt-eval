@@ -11,6 +11,13 @@ class Semester < ActiveRecord::Base
   include FunkyTeXBits
   include FunkyDBBits
 
+  # Returns array of all semesters that are currently active. I.e., a
+  # more efficient way of Semester.find(:all).find_all { |s| s.now? }.
+  def self.currently_active
+    d = Date.today
+    find(:all, :conditions => ["firstday <= ? AND lastday >= ?", d, d])
+  end
+
   # evaluate a faculty
   def evaluate(faculty)
     puts "Finding possible db tables…"
@@ -53,7 +60,7 @@ class Semester < ActiveRecord::Base
 
   # is it currently this semester?
   def now?
-    (firstday <= Time.now.to_date && Time.now.to_date <= lastday)
+    (firstday <= Date.today && Date.today <= lastday)
   end
 
   # are we currently in the critical phase alias

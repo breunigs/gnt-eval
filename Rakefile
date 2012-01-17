@@ -150,7 +150,7 @@ namespace :images do
     tpics = Pic.find(:all)
 
     # find all tables that include a tutor chooser
-    forms = curSem.forms.keep_if { |form| form.include_question_type?("tutor_table") }
+    forms = curSem.forms.find_all { |form| form.include_question_type?("tutor_table") }
     tables = {}
     forms.each { |form| tables[form.db_table] = form.get_tutor_question.db_column }
 
@@ -238,7 +238,6 @@ namespace :images do
       puts "No directory given, using default one: #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
       d[:directory] = Seee::Config.file_paths[:scanned_pages_dir]
       File.makedirs(d[:directory])
-      puts d
     end
 
     # abort if the directory of choice does not exist for some reason

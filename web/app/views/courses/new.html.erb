@@ -1,6 +1,5 @@
 <%= render "shared/main_menu" %>
-<% forms = Form.all.find_all{|x| x.semester_id == @curr_sem.id } %>
-<%= render :partial => "courses/form_lang_select", :locals => { :forms => forms } %>
+<%= render :partial => "courses/form_lang_select" %>
 
 <% form_for(@course) do |f| %>
   <fieldset>
@@ -11,11 +10,11 @@
     <table>
       <% for item in
         [
-          [f.label(:semester_id),                       f.collection_select(:semester_id, Semester.find(:all, :order => "id").reverse, :id, :title), "required"],
+          [f.label(:semester_id),                       f.collection_select(:semester_id, Semester.all.reverse, :id, :title, {}, {:onchange => "updateSelectors();" }), "required"],
           [f.label(:title),                             f.text_field(:title), "required"],
           [f.label(:students),                          f.text_field(:students), "required, numeric. If you absolutely must, use 999 for “don't know”"],
-          [f.label(:form_id),                           f.collection_select(:form_id, forms, :id, :name, {}, {:onchange => "updateLanguages(this);" }), "required"],
-          [f.label(:language),                          f.collection_select(:language, forms.collect { |x| x.languages }.flatten.uniq, :to_sym, :to_s), "required"],
+          [f.label(:form_id),                           f.collection_select(:form_id, Form.all, :id, :name, {}, {:onchange => "updateSelectors();" }), "required"],
+          [f.label(:language),                          f.collection_select(:language, all_langs, :to_sym, :to_s), "required"],
           [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
           [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
           [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],

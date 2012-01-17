@@ -551,6 +551,11 @@ class AbstractForm
     tex << "\\dbtable{#{db_table}}\n"
     tex << "\\semester{#{semester.escape_for_tex}}\n"
     tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
+    # note: these cannot be customized per tutor, as the tutor is not
+    # known yet. They will be filled in result.pdf, so give placeholders
+    # instead.
+    tex << "\\setTutor{#{I18n.t(:tutor)}}\n"
+    tex << "\\setMyTutor{#{I18n.t(:my_tutor)}}\n"
 
     # tutors
     tutors.collect! { |t| t.escape_for_tex }

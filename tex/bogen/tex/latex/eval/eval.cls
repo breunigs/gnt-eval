@@ -137,9 +137,15 @@
 \newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
 \newcommand{\lecturerLast}[1]{\def\lectLast{#1}}
 \newcommand{\lecturerFirst}[1]{\def\lectFirst{#1}}
-
 % for simplicity
 \newcommand{\lect}{\lectFirst{} \lectLast{}}
+% The name of the tutor is not available when printing the forms. However, it is in result.pdf
+% Therefore you can use these placeholders in the form to later fill in the real name in
+% result.pdf. Note that gender is never available for tutors. If the name is not available \tutor
+% contains e.g. "tutor" or "Tutor/in" and \myTutor "My Tutor" or "Meine Tutor/in". If the name is
+% available, both contain the name and only the name (i.e. tutor.abbrv_name).
+\newcommand{\setTutor}[1]{\def\tutor{#1}}
+\newcommand{\setMyTutor}[1]{\def\myTutor{#1}}
 
 % set output file
 \newwrite\posout

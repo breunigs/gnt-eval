@@ -7,17 +7,41 @@ class CoursesController < ApplicationController
   # GET /courses
   # GET /courses.xml
   def index
-    @courses = Course.find(:all)
-    @curr_sem ||= Semester.all.find { |s| s.now? }
-    if @curr_sem.nil?
+    @curr_sem ||= Semester.currently_active
+    if @curr_sem.empty?
       flash[:error] = "Cannot list courses for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
-    else
-      respond_to do |format|
-        format.html # index.html.erb
-        format.xml  { render :xml => @courses }
-      end
+      return
     end
+    # don’t allow URLs that have the search parameter without value
+    if params[:search] && params[:search].empty?
+      redirect_to :controller => "courses", :action => "index"
+      return
+    end
+
+    cond = "semester_id IN (?)"
+    vals = Semester.currently_active
+
+    # filter by search term. If none given, search will return all
+    # courses that match the additional filter criteria.
+    @courses = Course.search(params[:search], [:profs, :faculty], [cond], [vals])
+
+    # if a search was performed and there is exactly one result go to it
+    # directly instead of listing it
+    if params[:search] && @courses.size == 1
+      redirect_to(@courses.first)
+      return
+    end
+
+    # otherwise, render list of courses
+    respond_to do |format|
+      format.html # index.html.erb
+      format.xml  { render :xml => @courses }
+    end
+  end
+
+  def search
+    @courses = Course.search params[:search]
   end
 
   # GET /courses/1
@@ -35,8 +59,8 @@ class CoursesController < ApplicationController
   # GET /courses/new.xml
   def new
     @course = Course.new
-    @curr_sem ||= Semester.all.find { |s| s.now? }
-    if @curr_sem.nil?
+    @curr_sem ||= Semester.currently_active
+    if @curr_sem.empty?
       flash[:error] = "Cannot create a new course for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
     else
@@ -184,17 +208,26 @@ class CoursesController < ApplicationController
     false
   end
 
-  # checks if the chosen form and language actually exist and report
-  # if iff the combo is invalid
+  # Checks if the semester actually has the form and if that form
+  # actually offers the language selected. Will report any errors.
   def form_lang_combo_valid?
     # if the semester is critical, these fields will not be submitted.
     # supply them from the database instead.
     params[:course][:form_id] ||= @course.form.id
     params[:course][:language] ||= @course.language
+
+    # check semester has form
+    s = Semester.find(params[:course][:semester_id])
     f = Form.find(params[:course][:form_id])
+    unless s.forms.map { |f| f.id }.include?(params[:course][:form_id].to_i)
+      flash[:error] = "Form “#{f.name}” (id=#{f.id}) is not " \
+                        + "available for semester “#{s.title}”"
+      return false
+    end
+
+    # check form has language
     l = params[:course][:language]
-    x = f.has_language?(l)
-    return true if x
+    return true if f.has_language?(l)
     flash[:error] = "There’s no language “#{l}” for form “#{f.name}”"
     false
   end

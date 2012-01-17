@@ -116,6 +116,7 @@ td {
 
 fieldset {
   margin-top:1em;
+  clear: both;
 }
 
 legend {
@@ -142,6 +143,10 @@ fieldset.attention legend {
 
 input[type=text] {
   min-width: 25em;
+}
+
+input[type=search] {
+  min-width: 15em;
 }
 
 select {
