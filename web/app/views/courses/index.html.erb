@@ -1,5 +1,7 @@
 <%= render "shared/main_menu" %>
 
+<% content_for :script, javascript_include_tag("table_filter") %>
+
 <fieldset>
   <h1>Listing courses of <%=h @curr_sem.map { |c| c.title }.join(", ") %></h1>
 
@@ -7,20 +9,22 @@
     <%= link_to 'New course', new_course_path %>
   </div>
 
-<% if params[:search] %>
   <div style="float:right;margin-left:1em;">
+<% if params[:search] %>
     <%= link_to 'Show all', courses_path %>
-  </div>
+<% else %>
+    <%= link_to 'Show all', courses_path, :onclick => "table_filter_clear('search', 'courses_table'); return false;" %>
 <% end %>
+  </div>
 
   <% form_tag courses_path, :method => 'get', :style=>"float:right" do %>
-    <%= text_field_tag :search, params[:search], :placeholder => "Filter by title…", :type => "search" %>
+    <%= text_field_tag :search, params[:search], :placeholder => "Filter…", :type => "search", :onkeyup => "table_filter(this.value, 'courses_table')" %>
     <%= submit_tag "Filter", :name => nil %>
   <% end %>
 </fieldset>
 
 <!-- didn't put the table in a fieldset because the horizontal space is too valuable -->
-<table style="margin-top:1em;">
+<table style="margin-top:1em;" id="courses_table">
   <tr>
     <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
     <th <%= sort_class(x) %>>
@@ -33,7 +37,7 @@
 courses = sort_helper(@courses)
 
 for course in courses %>
-  <tr style="background: #<%= cycle('efefef', 'fff') %>">
+  <tr class="<%= cycle('odd', 'even') %>">
     <td><%= link_to course.title, course %></td>
     <td style="color: <%= course.students == 999 ? "red" : "black" %>"><%=h course.students %></td>
     <td><%=h course.evaluator %></td>

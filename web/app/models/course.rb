@@ -28,7 +28,14 @@ class Course < ActiveRecord::Base
     return Course.filter(inc, cond, vals) if term.nil?
     c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
     return Course.filter(inc, cond, vals) if c.nil? || c.empty?
-    cond += ["title LIKE ?"]*c.size
+    cols = ["evaluator", "title", "description", "profs.surname", "profs.firstname"]
+    qry = case ActiveRecord::Base.configurations[Rails.env]['adapter']
+      when "mysql": "CONCAT_WS(' ', #{cols*","}) LIKE ?"
+      when "postgresql": "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
+      # SQL standard as implemented by… nobody
+      else "(#{cols.join(" || ' ' || ")}) LIKE ?"
+    end
+    cond += [qry]*c.size
     vals += c
     Course.filter(inc, cond, vals)
   end
