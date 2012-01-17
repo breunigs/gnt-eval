@@ -5,9 +5,6 @@ require 'erb'
 # A course has many professors, belongs to a semester and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
-  # by default, only work on courses in currently active semesters
-  default_scope(:conditions => {:semester_id => Semester.currently_active})
-
   belongs_to :semester
   belongs_to :faculty
   belongs_to :form
@@ -23,11 +20,19 @@ class Course < ActiveRecord::Base
   # The keywords must not appear in order. Only the first 10 keywords
   # are considered, Only alpha numerical characters and hyphens are
   # valid, all other characters are discarded.
-  def self.search(term)
-    return Course.all if term.nil?
+  def self.search(term, cond = [], vals = [])
+    return Course.filter(cond, vals) if term.nil?
     c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
-    return Course.all if c.nil? || c.empty?
-    Course.find(:all, :conditions => [(["title LIKE ?"]*c.size).join(" AND "), *c])
+    return Course.filter(cond, vals) if c.nil? || c.empty?
+    cond += ["title LIKE ?"]*c.size
+    vals += c
+    Course.filter(cond, vals)
+  end
+
+  # filters the courses by the given SQL-statement in cond and the
+  # values corresponding to the ? in vals
+  def self.filter(cond, vals)
+    Course.find(:all, :conditions => [cond.join(" AND "), *vals])
   end
 
   # Create an alias for this rails variable
