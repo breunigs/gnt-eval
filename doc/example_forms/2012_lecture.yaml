@@ -1093,9 +1093,7 @@ pages:
       type: square
       visualizer: histogram
   - !ruby/object:Section
-    title:
-      :de: "Tutor/in"
-      :en: "Tutor"
+    title: "\\tutor"
     answers:
       :de:
         - stimme voll zu
@@ -1126,8 +1124,8 @@ pages:
       repeat_for: tutor
       hide_answers: true
       qtext:
-        :de: "Mein/e Tutor/in ist ein/e gute/r Lehrer/in."
-        :en: "My tutor is a good teacher."
+        :de: "\\myTutor{} ist ein/e gute/r Lehrer/in."
+        :en: "\\myTutor{} is a good teacher."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1146,8 +1144,8 @@ pages:
       repeat_for: tutor
       hide_answers: true
       qtext:
-        :de: "Mein/e Tutor/in ist akustisch und sprachlich gut zu verstehen."
-        :en: "My tutor is easy to understand acoustically and language-wise."
+        :de: "\\myTutor{} ist akustisch und sprachlich gut zu verstehen."
+        :en: "\\myTutor{} is easy to understand acoustically and language-wise."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1166,8 +1164,8 @@ pages:
       repeat_for: tutor
       hide_answers: true
       qtext:
-        :de: "Mein/e Tutor/in ist fachlich kompetent."
-        :en: "My tutor is competent in the subject matter."
+        :de: "\\myTutor{} ist fachlich kompetent."
+        :en: "\\myTutor{} is competent in the subject matter."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1186,8 +1184,8 @@ pages:
       repeat_for: tutor
       hide_answers: true
       qtext:
-        :de: "Mein/e Tutor/in ist stets gut vorbereitet."
-        :en: "My tutor is always well prepared."
+        :de: "\\myTutor{} ist stets gut vorbereitet."
+        :en: "\\myTutor{} is always well prepared."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1206,8 +1204,8 @@ pages:
       repeat_for: tutor
       hide_answers: true
       qtext:
-        :de: "Mein/e Tutor/in geht gut auf Fragen zur Vorlesung ein."
-        :en: "My tutor responds well to questions concerning the lecture."
+        :de: "\\myTutor{} geht gut auf Fragen zur Vorlesung ein."
+        :en: "\\myTutor{} responds well to questions concerning the lecture."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1226,8 +1224,8 @@ pages:
       hide_answers: true
       repeat_for: tutor
       qtext:
-        :de: "Mein/e Tutor/in erklärt Sachverhalte verständlich."
-        :en: "My tutor explains matters well."
+        :de: "\\myTutor{} erklärt Sachverhalte verständlich."
+        :en: "\\myTutor{} explains matters well."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1246,8 +1244,8 @@ pages:
       hide_answers: true
       repeat_for: tutor
       qtext:
-        :de: "Mein/e Tutor/in korrigiert die abgegebenen Lösungen sorgfältig."
-        :en: "My tutor grades the handed-in solutions thoroughly."
+        :de: "\\myTutor{} korrigiert die abgegebenen Lösungen sorgfältig."
+        :en: "\\myTutor{} grades the handed-in solutions thoroughly."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1266,8 +1264,8 @@ pages:
       hide_answers: true
       repeat_for: tutor
       qtext:
-        :de: "Mein/e Tutor/in motiviert mich."
-        :en: "My tutor motivates me."
+        :de: "\\myTutor{} motiviert mich."
+        :en: "\\myTutor{} motivates me."
       type: square
       visualizer: histogram
     - !ruby/object:Question
@@ -1305,7 +1303,7 @@ pages:
 #      - t_time_usage_b
 #      - t_time_usage_c
 #      - t_time_usage_d
-#      qtext: "Mein/e Tutor/in verbringt viel Zeit mit (Mehrfachnennungen möglich):"
+#      qtext: "\\myTutor{} verbringt viel Zeit mit (Mehrfachnennungen möglich):"
 #      type: square
     - !ruby/object:Question
       boxes:
