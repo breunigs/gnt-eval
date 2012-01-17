@@ -238,7 +238,6 @@ namespace :images do
       puts "No directory given, using default one: #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
       d[:directory] = Seee::Config.file_paths[:scanned_pages_dir]
       File.makedirs(d[:directory])
-      puts d
     end
 
     # abort if the directory of choice does not exist for some reason
