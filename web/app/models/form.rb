@@ -137,7 +137,7 @@ class Form < ActiveRecord::Base
     case count
       when 0: I18n.t(:too_few_questionnaires)[:null]
       when 1: I18n.t(:too_few_questionnaires)[:singular]
-      else    I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, sheets.to_s)
+      else    I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, count.to_s)
     end
   end
 
