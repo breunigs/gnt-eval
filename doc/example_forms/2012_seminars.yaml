@@ -4,9 +4,6 @@ texfoot: ""
 texhead:
   :de: ""
   :en: ""
-babelclass:
-  :de: ngerman
-  :en: british
 title:
   :de: Umfrage zur Qualität der Lehre
   :en: Survey Regarding the Quality of Teaching
