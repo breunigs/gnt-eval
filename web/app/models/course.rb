@@ -19,20 +19,25 @@ class Course < ActiveRecord::Base
   # finds all courses that contain all given keywords in their title.
   # The keywords must not appear in order. Only the first 10 keywords
   # are considered, Only alpha numerical characters and hyphens are
-  # valid, all other characters are discarded.
-  def self.search(term, cond = [], vals = [])
-    return Course.filter(cond, vals) if term.nil?
+  # valid, all other characters are discarded. You can specify which
+  # additional classes to include in order to speed things up using
+  # the inc variable. An array is expected. Use cond and vals to specify
+  # additional search criteria. For example, to limit to certain
+  # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
+  def self.search(term, inc = [], cond = [], vals = [])
+    return Course.filter(inc, cond, vals) if term.nil?
     c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
-    return Course.filter(cond, vals) if c.nil? || c.empty?
+    return Course.filter(inc, cond, vals) if c.nil? || c.empty?
     cond += ["title LIKE ?"]*c.size
     vals += c
-    Course.filter(cond, vals)
+    Course.filter(inc, cond, vals)
   end
 
   # filters the courses by the given SQL-statement in cond and the
-  # values corresponding to the ? in vals
-  def self.filter(cond, vals)
-    Course.find(:all, :conditions => [cond.join(" AND "), *vals])
+  # values corresponding to the ? in vals. Specify an array of classes
+  # to load as well in inc.
+  def self.filter(inc, cond, vals)
+    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals])
   end
 
   # Create an alias for this rails variable
