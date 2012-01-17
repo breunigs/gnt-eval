@@ -18,7 +18,9 @@
   </div>
 
   <% form_tag courses_path, :method => 'get', :style=>"float:right" do %>
-    <%= text_field_tag :search, params[:search], :placeholder => "Filter…", :type => "search", :onkeyup => "table_filter(this.value, 'courses_table')" %>
+    <%= text_field_tag :search, params[:search],
+        :placeholder => "Filter…", :type => "search",
+        :onkeyup => params[:search] ? "" : "table_filter(this.value, 'courses_table')" %>
     <%= submit_tag "Filter", :name => nil %>
   <% end %>
 </fieldset>
