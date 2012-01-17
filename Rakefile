@@ -150,7 +150,7 @@ namespace :images do
     tpics = Pic.find(:all)
 
     # find all tables that include a tutor chooser
-    forms = curSem.forms.keep_if { |form| form.include_question_type?("tutor_table") }
+    forms = curSem.forms.find_all { |form| form.include_question_type?("tutor_table") }
     tables = {}
     forms.each { |form| tables[form.db_table] = form.get_tutor_question.db_column }
 
