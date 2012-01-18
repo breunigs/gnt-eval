@@ -127,11 +127,12 @@ class Course < ActiveRecord::Base
   # questionnaires, what kind of people submitted questionnaires etc
   def eval_lecture_head
     b = ""
-
-    sheets = returned_sheets
-
-    notspecified = t(:not_specified)
-    b << "\\kurskopf{#{title.escape_for_tex}}{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
+    b << "\\kurskopf{#{title.escape_for_tex}}"
+    b << "{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}"
+    b << "{#{returned_sheets}}"
+    b << "{#{id}}"
+    b << "{#{t(:by)}}"
+    b << "{#{t(:submitted_questionnaires)}}\n\n"
     b
   end
 
