@@ -346,7 +346,7 @@ module PESTImageTools
   # rotation themselves.
   def translate(img_id, coord)
     # TWEAK HERE
-    move_top = 58
+    move_top = 60
     move_left = 62
 
     o = @offset[img_id]
