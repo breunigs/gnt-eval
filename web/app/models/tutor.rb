@@ -26,6 +26,7 @@ class Tutor < ActiveRecord::Base
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      return b
     end
 
     tut_db_col = form.get_tutor_question.db_column.to_sym

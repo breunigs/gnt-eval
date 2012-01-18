@@ -24,6 +24,7 @@ class CourseProf < ActiveRecord::Base
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      return b
     end
 
     questions.each do |q|
