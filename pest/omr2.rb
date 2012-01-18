@@ -457,8 +457,6 @@ class PESTOmr < PESTDatabaseTools
 
     # do the hard work
     locate_corners
-    determine_rotation
-    determine_offset
     supplement_missing_corners unless @cancelProcessing
     process_questions unless @cancelProcessing
 

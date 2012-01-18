@@ -165,8 +165,6 @@ class CreateGroundTruths
     end
 
     locate_corners
-    determine_rotation
-    determine_offset
     if @cancelProcessing
       debug "OMR failed while trying to detect the rotation and offset."
       debug "Please have OMR create a debug print for this sheet; skipping"
