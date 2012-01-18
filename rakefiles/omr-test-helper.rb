@@ -42,7 +42,7 @@ namespace :testhelper do
   desc "test OMR against reference files in tests/omr-test"
   task :test_omr do
     Dir.chdir("tests") do
-      cmd("./omr-test.rb")
+      system("./omr-test.rb")
       puts
     end
   end
