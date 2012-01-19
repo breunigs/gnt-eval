@@ -182,7 +182,7 @@ namespace :helper do
 
     # WHOLE DATA #######################################################
     puts "Running query: " + qry
-    data = $dbh.execute(qry)
+    data = RT.custom_query(qry)
     lines = []
 
     # add metadata
@@ -229,7 +229,7 @@ namespace :helper do
 
     puts
     puts "Running stats query: " + qry_stats
-    data = $dbh.execute(qry_stats)
+    data = RT.custom_query(qry_stats)
     lines = []
 
     # add metadata to stats (predefined)
