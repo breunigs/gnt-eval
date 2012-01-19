@@ -119,7 +119,7 @@ class ResultTools
   # runs a custom query against the result-database. Returns the all
   # results as an array of DBI::Row and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values.
-  def custom_query(query, values, first_row = false)
+  def custom_query(query, values = [], first_row = false)
     check_query(query, values)
     q = @dbh.prepare(query)
     begin
