@@ -9,6 +9,9 @@ RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
 require File.join(File.dirname(__FILE__), 'boot')
 require File.join(File.dirname(__FILE__), '../app/lib', 'rails_requirements.rb')
 
+# Define a global constant for easy access to ResultTools
+RT = ResultTools.instance
+
 
 Rails::Initializer.run do |config|
   # Settings in config/environments/* take precedence over those specified here.

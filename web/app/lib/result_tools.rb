@@ -403,6 +403,3 @@ class ResultTools
     I18n.translate(name.to_sym)
   end
 end
-
-# Define a global constant for easy access to ResultTools
-RT = ResultTools.instance
