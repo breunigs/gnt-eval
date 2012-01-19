@@ -74,8 +74,4 @@ class Semester < ActiveRecord::Base
   def dirfriendly_title
     dirFriendlyName
   end
-
-  private
-  # quick access to ResultTools.instance
-  RT = ResultTools.instance
 end

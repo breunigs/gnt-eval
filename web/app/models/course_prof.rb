@@ -61,6 +61,5 @@ class CourseProf < ActiveRecord::Base
 
   private
   # quick access to some variables or classes
-  RT = ResultTools.instance
   SCs = Seee::Config.settings
 end

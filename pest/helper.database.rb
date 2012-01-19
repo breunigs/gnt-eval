@@ -5,8 +5,6 @@ cdir = File.dirname(__FILE__)
 require cdir + '/helper.misc.rb'
 require cdir + '/../lib/result_tools.rb'
 
-RT = ResultTools.instance
-
 class PESTDatabaseTools
   def set_debug_database
     debug "WARNING: Debug mode is enabled, writing to db.sqlite3 in working directory instead of real database." if @verbose && !@test_mode

@@ -204,6 +204,5 @@ class Course < ActiveRecord::Base
 
   private
   # quick access to some variables and classes
-  RT = ResultTools.instance
   SCs = Seee::Config.settings
 end
