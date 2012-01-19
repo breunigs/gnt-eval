@@ -14,8 +14,6 @@ class Course < ActiveRecord::Base
   validates_presence_of :semester_id, :title, :faculty, :language, :form
   validates_numericality_of :students
 
-  include FunkyDBBits
-
   # finds all courses that contain all given keywords in their title.
   # The keywords must not appear in order. Only the first 10 keywords
   # are considered, Only alpha numerical characters and hyphens are

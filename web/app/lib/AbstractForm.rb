@@ -322,29 +322,6 @@ class Question
       @db_column
     end
   end
-
-  include FunkyDBBits
-
-  # used in the result pdfs
-  # h: hash correspoding to specific (!) where clause
-  # g: hash corresponding to general (!) where clause
-  def eval_to_tex(h, g, db_table, lang = I18n.locale, gender = :both)
-    @db_table = db_table
-
-    b = ''
-    if @db_column.is_a?(Array) # multi-q
-
-      answers = multi_q(h, self, lang)
-      b << TeXMultiQuestion.new(text(lang, gender), answers).to_tex
-
-    else # single-q
-      antw, anz, m, m_a, s, s_a = single_q(h, g, self)
-      b << TeXSingleQuestion.new(text(lang, gender), ltext(lang),
-             rtext(lang), antw, anz, m, m_a, s, s_a).to_tex if anz > 0
-    end
-    return b
-  end
-
 end
 
 

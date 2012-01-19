@@ -4,7 +4,6 @@ require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'web/lib/ext_requirements.rb'
-require 'web/lib/FunkyDBBits.rb'
 require 'web/lib/RandomUtils.rb'
 
 require 'pp'
@@ -25,9 +24,10 @@ require 'rakefiles/export.rb'
 require 'rakefiles/omr-test-helper.rb'
 require 'custom_build/build.rb'
 
-# requires database
+# requires rails database connection.
 def curSem
-  $curSem ||= Semester.find(:all).find { |s| s.now? }
+  warn "DEPRECATED: curSem is deprecated and only returns one current semester. Please use Semester.currently_active instead, which returns an array of all current semesters."
+  $curSem ||= Semester.currently_active.first
   $curSem
 end
 
@@ -119,12 +119,6 @@ task :default do
   system("rake -sT")
 end
 
-namespace :db do
-  task :connect do
-    $dbh = FunkyDBBits.dbh
-  end
-end
-
 namespace :images do
   desc "(0) Run the scan script to import pages to #{simplify_path(Seee::Config.file_paths[:scanned_pages_dir])}"
   task :scan do
@@ -135,7 +129,7 @@ namespace :images do
   end
 
   desc "(4) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
-  task :insertcomments => ['db:connect'] do |t, d|
+  task :insertcomments do |t, d|
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
@@ -181,7 +175,7 @@ namespace :images do
           # remove everything after the last underscore and add .tif to
           # find the original image
           path = f.sub(/_[^_]+$/, "") + ".tif"
-          data = $dbh.execute("SELECT #{column} FROM #{table} WHERE path = ?", path)
+          data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", path)
           data = data.fetch_array
           tut_num = data[0].to_i if data
           break if tut_num
@@ -441,7 +435,7 @@ namespace :pdf do
   end
 
   desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
-  task :forms, [:semester_id] => 'db:connect' do |t, a|
+  task :forms, [:semester_id] do |t, a|
     dirname = './tmp/forms/'
     FileUtils.mkdir_p(dirname)
 
@@ -457,7 +451,7 @@ namespace :pdf do
   end
 
   desc "Create How Tos"
-  task :howto => 'db:connect' do
+  task :howto do
     saveto = './tmp/howtos/'
     FileUtils.mkdir_p(saveto)
     form_path = File.expand_path(File.join(RAILS_ROOT, "../tmp/forms")).escape_for_tex
@@ -641,7 +635,7 @@ end
 
 namespace :summary do
   def fixCommonTeXErrors(code)
-    # _ -> \_, '" -> "', `" -> "`
+    # _ → \_, '" → "', `" → "`
     code = code.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
     # correct common typos
     code = code.gsub("\\textit", "\\emph")

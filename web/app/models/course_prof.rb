@@ -9,8 +9,6 @@ class CourseProf < ActiveRecord::Base
   # import some features from other classes
   delegate :gender, :gender=, :to => :prof
 
-  include FunkyDBBits
-
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets

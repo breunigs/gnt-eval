@@ -9,7 +9,6 @@ class Semester < ActiveRecord::Base
   validates_presence_of :longtitle
 
   include FunkyTeXBits
-  include FunkyDBBits
 
   # Returns array of all semesters that are currently active. I.e., a
   # more efficient way of Semester.find(:all).find_all { |s| s.now? }.
