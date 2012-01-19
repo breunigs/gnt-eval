@@ -9,10 +9,29 @@ web/app/models/semester.rb. It currently looks something like this:
 preamble
 header
 preface
+  questions for each course (repeat_for = course)
+    questions for each lecturer (repeat_for = lecturer)
+    questions for each tutor (repeat_for = tutor)
+
+Where questions:
+  single_*, multi_*, comment_*, both_too_few_answers
+
+All of them may use small_header.tex.erb to add headlines.
+
 
 For each course:
-  
-FIXME
+It groups questions by sections as defined in the form, but may insert
+additional headlines in case the “repeat_for” value switches between
+those sections.
+Depending on repeat_for’s value, it will either evaluate a block of
+questions for the course, course_prof or tutor. The “course“ blocks are
+only printed once, for the course; “course_prof” and “tutor” blocks will
+be included once for each lecturer or tutor.
+
+Each question may have an arbitrary number of visualizers. If none is
+defined, it will default to “*_empty”, but a warning will be given in
+the web interface. See “naming scheme“ to see how visualizers should be
+named.
 
 
 Naming scheme
@@ -20,7 +39,7 @@ Naming scheme
 
 Files named single_*.tex.erb define a visualization for single choice
 questions. Similarily, multi_*.tex.erb provide visualizations for
-multiple choice questions.
+multiple choice questions and comment_* will print the comments.
 
 Files named *.def.tex include definitions (e.g. \newcommand) that do
 not change, but do not fit in the preamble for one reason or another.
@@ -29,6 +48,34 @@ should be named accordingly and all commands should be prepended with
 the file name to avoid collisions. Since the underscore has a special
 meaning in TeX, use CamelCase instead.
 For example: single_histogram.tex.erb is included and executed for
-each question with that visualizer. The corresponding definitions file is
-called single_histogram.def.tex and all commands defined in it start
+each question with that visualizer. The corresponding definitions file
+is called single_histogram.def.tex and all commands defined in it start
 with \singleHistogram (e.g. \singleHistogramHist).
+
+„Special“ files
+===============
+
+Some files may require further explanation:
+
+both_too_few_answers.tex.erb:
+  This file will be included whenever there are not enough sheets to
+  include them without sacrificing the participant’s anonymity. The
+  normal visualizations are skipped.
+
+single_tutor_overview.tex.erb:
+  Special view, that only works iff the question type is tutor_table.
+  Will print an overview table that states how many sheets for a given
+  tutor have been returned and on which page to find his or her results.
+  The required TeX-labels are included in web/app/models/tutor.rb,
+  regardless if you actually use this visualizer.
+
+small_header.tex.erb:
+  Adds a sub heading into the document, which may be used to separate
+  sections, tutors, lecturers and the like. If the same headline is
+  included more than once in a row, the 2nd and following headline will
+  automatically be skipped. In other words, groups with the same
+  headline will be merged.
+
+variables_out_of_scope_err.def.tex
+  Please see the documentation in lib/result_tools.rb, method
+  include_form_variables.
