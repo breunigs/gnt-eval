@@ -27,8 +27,6 @@ require 'pp'
 require 'ftools'
 require 'tempfile'
 
-require cdir + '/../lib/FunkyDBBits.rb'
-
 require cdir + '/helper.misc.rb' # also loads rmagick
 
 require cdir + '/helper.boxtools.rb'
@@ -551,8 +549,8 @@ class PESTOmr < PESTDatabaseTools
     # don't write to DB in test mode
     return if @test_mode
     begin
-      dbh.do("DELETE FROM #{yaml.db_table} WHERE path = ?", filename)
-      dbh.do(q, *vals)
+      RT.custom_query("DELETE FROM #{yaml.db_table} WHERE path = ?", filename)
+      RT.custom_query(q, vals)
     rescue DBI::DatabaseError => e
       debug "Failed to insert #{File.basename(filename)} into database."
       debug q
@@ -584,7 +582,7 @@ class PESTOmr < PESTDatabaseTools
     debug "Checking for existing files" if @verbose
 
     oldsize = files.size
-    dbh.execute("SELECT path FROM #{db_table}").each do |row|
+    RT.custom_query("SELECT path FROM #{db_table}").each do |row|
       files -= row
     end
     if oldsize != files.size
@@ -845,7 +843,6 @@ class PESTOmr < PESTDatabaseTools
     # not be written to the tempfiles before the sub-process exits.
     STDOUT.sync = true
     files = parse_commandline
-    ensure_database_access unless @test_mode
     check_magick_version
 
     # Unless set manually, grab a sample image and use it to calculate

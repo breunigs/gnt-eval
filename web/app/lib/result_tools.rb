@@ -140,13 +140,26 @@ class ResultTools
   # singleton mixin, only one connection will be opened per Ruby
   # instance.
   def initialize
+    reconnect_to_database
+    @tex = {}
+  end
+
+  # Closes the old connection, if it exists and opens a new one to the
+  # one defined in Seee:Config.external_database. Use this if the
+  # settings have changed, and you want to switch the database.
+  def reconnect_to_database
+    @dbh.disconnect if @dbh && @dbh.connected?
     sced = Seee::Config.external_database
     @dbh = DBI.connect(
       "DBI:#{sced[:dbi_handler]}:#{sced[:database]}:#{sced[:host]}",
       sced[:username],
       sced[:password])
 
-    @tex = {}
+    if @dbh.nil? || !@dbh.connected?
+      debug "ERROR: Couldn’t open a results database connection."
+      debug "Have a look at lib/seee_config.rb to correct the settings."
+      exit 1
+    end
   end
 
   # evaluates a given question with the sheets matching special_where.
