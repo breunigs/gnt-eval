@@ -136,16 +136,6 @@ module FunkyDBBits
     return res.to_i
   end
 
-  # gets the distinct values for the given field and where clause
-  def get_distinct_values(column, h, additional = '')
-    ts = @db_table.to_a
-    arr = []
-    ts.each do |t|
-        arr << query_single_table('DISTINCT '+ column, h, t, additional)
-    end
-    arr.flatten.uniq
-  end
-
   # (where-clause-)hash h, question q, language l
   def multi_q(h, q, l)
     anzahl = count_forms(h, " AND (#{q.db_column.join('+')} > 0)")
