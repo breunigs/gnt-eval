@@ -549,7 +549,7 @@ class PESTOmr < PESTDatabaseTools
     # don't write to DB in test mode
     return if @test_mode
     begin
-      RT.custom_query("DELETE FROM #{yaml.db_table} WHERE path = ?", filename)
+      RT.custom_query("DELETE FROM #{yaml.db_table} WHERE path = ?", [filename])
       RT.custom_query(q, vals)
     rescue DBI::DatabaseError => e
       debug "Failed to insert #{File.basename(filename)} into database."
@@ -559,11 +559,13 @@ class PESTOmr < PESTDatabaseTools
       debug "Error SQLSTATE: #{e.state}"
       debug
       debug "Aborting due to database error."
-      exit 4
+      # still raise, so its printed into PEST_ERROR_LOG
+      raise
     rescue
       debug "Failed to insert #{File.basename(filename)} into database."
       debug "Aborting due to random error."
-      exit 5
+      # still raise, so its printed into PEST_ERROR_LOG
+      raise
     end
   end
 
