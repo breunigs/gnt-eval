@@ -15,6 +15,8 @@ class ResultTools
   # only allow one instance of this class
   include Singleton
 
+  SCed = Seee::Config.external_database
+
   # adds the variables that are available when designing the form.
   # By default, only the form does have these variables, however since
   # questions may refer to them (e.g. \lect{} to get the lecturer’s
@@ -70,7 +72,12 @@ class ResultTools
   # returns true if the given table exists, false otherwise
   def table_exists?(table)
     report_valid_name?(table)
-    sth = @dbh.prepare("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?")
+    qry = case SCed[:dbi_handler].downcase
+      when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+      # SQL standard as implemented by… nobody
+      else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
+    end
+    sth = @dbh.prepare(qry)
     sth.execute(table)
     r = sth.fetch
     sth.finish
@@ -152,11 +159,10 @@ class ResultTools
   # settings have changed, and you want to switch the database.
   def reconnect_to_database
     @dbh.disconnect if @dbh && @dbh.connected?
-    sced = Seee::Config.external_database
     @dbh = DBI.connect(
-      "DBI:#{sced[:dbi_handler]}:#{sced[:database]}:#{sced[:host]}",
-      sced[:username],
-      sced[:password])
+      "DBI:#{SCed[:dbi_handler]}:#{SCed[:database]}:#{SCed[:host]}",
+      SCed[:username],
+      SCed[:password])
 
     if @dbh.nil? || !@dbh.connected?
       debug "ERROR: Couldn’t open a results database connection."
