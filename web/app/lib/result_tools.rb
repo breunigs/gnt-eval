@@ -120,6 +120,7 @@ class ResultTools
   # results as an array of DBI::Row and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values.
   def custom_query(query, values = [], first_row = false)
+    raise "values parameter must be an array." unless values.is_a?(Array)
     check_query(query, values)
     q = @dbh.prepare(query)
     begin
