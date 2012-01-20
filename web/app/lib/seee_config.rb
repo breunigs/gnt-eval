@@ -37,6 +37,10 @@ user_config =  "~/.gnt-eval-seee.rb"
 require 'active_support'
 require 'pathname'
 
+if not defined?(RAILS_ROOT)
+  RAILS_ROOT = File.join(File.dirname(__FILE__), "..", "..")
+end
+
 module Seee
   module Config
     mattr_accessor :application_paths, :file_paths, :commands, :external_database, :settings, :custom_builds
@@ -136,7 +140,7 @@ module Seee
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(Rails.root, "app", "lib", "persdic.dic"),
+      :hunspell_personal_dic => File.join(RAILS_ROOT, "app", "lib", "persdic.dic"),
 
       :scanned_pages_dir => File.join(RAILS_ROOT, "..", "tmp", "scanned"),
 
