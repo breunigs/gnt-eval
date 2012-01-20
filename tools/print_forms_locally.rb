@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
 require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
+require File.dirname(__FILE__) + "/../lib/seee_config.rb"
+
+interactive = true
 
 # Define which tray contains which type of sheet
 TRAY_NORMAL="1Tray,2Tray,3Tray"
@@ -25,30 +28,37 @@ DEFAULT_HOWTOS=["de"]
 SHEET_WARNING=1000
 
 
-mypath=File.dirname(__FILE__)
-# change into seee root directory
-Dir.chdir(File.join(mypath, ".."))
+GNT_ROOT=File.join(File.dirname(__FILE__), "..") unless defined?(GNT_ROOT)
+# change into tmp directory
+Dir.chdir(Seee::Config.file_paths[:cache_tmp_dir])
 
 sheets = 0
 forms = {}
 
-puts
-puts "Please run rm -r tmp/forms && rake pdf:forms && rake pdf:howto"
-puts "before running this script. Otherwise forms might be missing"
-puts "or outdated ones will be printed."
-puts
-puts "Type 'yes' to continue."
-input = gets.strip.downcase
-exit 1 unless input == "yes"
-puts
-puts
-puts
-
 # look in default location, if no paths are given via CMD line.
 if ARGV.nil? || ARGV.empty?
-  poss = Dir.glob("tmp/forms/*pcs.pdf")
+  poss = Dir.glob("#{GNT_ROOT}/../forms/*pcs.pdf")
 else
   poss = ARGV
+  if poss.include?("--non-interactive")
+    interactive = false
+    poss.delete("--non-interactive")
+  end
+end
+
+
+if interactive
+  puts
+  puts "Please run rm -r tmp/forms && rake pdf:forms && rake pdf:howto"
+  puts "before running this script. Otherwise forms might be missing"
+  puts "or outdated ones will be printed."
+  puts
+  puts "Type 'yes' to continue."
+  input = gets.strip.downcase
+  exit 1 unless input == "yes"
+  puts
+  puts
+  puts
 end
 
 # now check the given files if they are suitable
@@ -76,7 +86,7 @@ puts "has been refilled."
 puts "Waiting once in a while also allows to give a time estimate."
 
 # create empty file to print banner pages with. No need to waste paper…
-system("echo '   ' > tmp/bannerpage.txt")
+system("echo '   ' > bannerpage.txt")
 
 bin = BIN_SMALL
 warningcounter = 0
@@ -98,11 +108,13 @@ forms.sort { |a,b| b[1][:count] <=> a[1][:count] }.each do |file, data|
   # printer to finish. Doesn’t handle answer “no”, simply won’t print
   # estimate then.
   decision_time = Time.now
-  input = gets.strip.downcase
-  unless input.empty? || input == "y"
-    puts "Skipping"
-    puts
-    next
+  if interactive
+    input = gets.strip.downcase
+    unless input.empty? || input == "y"
+      puts "Skipping"
+      puts
+      next
+    end
   end
 
   # cycle bins
@@ -113,19 +125,19 @@ forms.sort { |a,b| b[1][:count] <=> a[1][:count] }.each do |file, data|
   end
 
   # issue print commands / submit to queue
-  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/#{file}\""
-  banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/tmp/bannerpage.txt\""
-  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/tmp/howtos/howto_#{h}.pdf\"" }
-  #howtos.each { |h| system(h) }
-  #system(print)
-  #system(banner)
+  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
+  banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
+  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/howtos/howto_#{h}.pdf\"" }
+  howtos.each { |h| system(h) }
+  system(print)
+  system(banner)
   puts "The sheets will be put in the #{BIN_DESC[bin].bold}"
   puts
 
   # give time estimate if we can assume we waited for the printer. Also
   # don’t break the program if the estimate calculation goes awry.
   begin
-    if (Time.now-decision_time) > 3
+    if (Time.now-decision_time) > 30
       left = sheets - totalcounter
       time_taken = Time.now-start_time
       time_per_sheet = time_taken / totalcounter.to_f
