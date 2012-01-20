@@ -41,19 +41,28 @@
 <fieldset <%=@course.profs.empty? ? "class=\"attention\"" : "" %>>
   <legend>Profs</legend>
   <table>
-    <tr>
+    <tr class="<%= cycle('even', 'odd') %>">
       <th>Name</th>
       <th>Email</th>
       <th>Barcode</th>
+      <th>manual print</th>
     </tr>
-    <% @course.profs.uniq.each do |prof| %>
-    <tr style="background: #<%= cycle('efefef', 'fff') %>">
-      <td><%= link_to prof.fullname, {:controller => "profs", :action => "edit", :id => prof } %></td>
-      <td><%=h prof.email %></td>
-      <td><%=h @course.course_profs.find(:first, :conditions => { :prof_id => prof.id }).id.to_s %></td>
+    <% @course.course_profs.each do |cp| %>
+    <tr class="<%= cycle('even', 'odd') %>">
+      <td><%= link_to cp.prof.fullname, {:controller => "profs", :action => "edit", :id => cp.prof } %></td>
+      <td><%=h cp.prof.email %></td>
+      <td><%=h cp.id %></td>
+      <td>
+        <% if @course.returned_sheets? %>
+          <%="Can’t print, has returned sheets."%>
+        <% else %>
+          <% url = url_for({ :controller => "course_profs", :action => 'print', :id => cp }) %>
+          <%= render :partial => 'shared/hold_button', :locals => {:url => url, :name => "print (evil)", :id => "print#{cp.id}"} %>
+        <% end %>
+      </td>
       <% unless @course.critical? %>
-        <td style="padding-left:4em"><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => prof},
-          :confirm => "Really remove #{prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
+        <td style="padding-left:4em"><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => cp.prof},
+          :confirm => "Really remove #{cp.prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
       <% end %>
     </tr>
     <% end %>
