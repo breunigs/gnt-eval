@@ -82,37 +82,6 @@ def make_sample_sheet(form, lang)
   filename
 end
 
-# Creates form PDF file for given semester and CourseProf
-def make_pdf_for(s, cp, dirname)
-  # first: the barcode
-  generate_barcode(cp.barcode, dirname + "barcode#{cp.barcode}.pdf")
-
-  # second: the form
-  filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
-
-  File.open(filename + '.tex', 'w') do |h|
-    h << cp.course.form.abstract_form.to_tex(
-      cp.course.language,
-      cp.course.title,
-      cp.prof.firstname,
-      cp.prof.lastname,
-      cp.prof.gender,
-      cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
-      s.title,
-      cp.barcode)
-  end
-  puts "Wrote #{filename}.tex"
-
-  # generate PDF
-  Rake::Task[(filename + '.pdf').to_sym].invoke
-
-  # it may be useful for debugging to have a YAML for each course.
-  # however, it is not needed by gnt-eval itself, so remove it immediately
-  # before it causes any confusion.
-  `rm "#{filename}.posout"`
-  #`./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
-end
-
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
