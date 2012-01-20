@@ -6,6 +6,8 @@ require cdir + '/helper.misc.rb'
 require cdir + '/../lib/result_tools.rb'
 
 class PESTDatabaseTools
+  RT = ResultTools.instance
+
   def set_debug_database
     debug "WARNING: Debug mode is enabled, writing to db.sqlite3 in working directory instead of real database." if @verbose && !@test_mode
     Seee::Config.external_database[:dbi_handler] = "SQLite3"
@@ -31,6 +33,7 @@ class PESTDatabaseTools
 
   # creates the database table as defined by the given YAML document.
   def create_table_if_required(f)
+    return if RT.table_exists?(f.db_table)
     # Note that the barcode is only unique for each CourseProf, but
     # not for each sheet. That's why path is used as unique key.
     q = "CREATE TABLE #{f.db_table} ("
