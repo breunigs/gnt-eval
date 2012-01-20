@@ -12,7 +12,7 @@ cdir = File.dirname(__FILE__)
 # This allows loading the custom ImageMagick/RMagick version if it has
 # been built. We avoid starting rails (which is slow) by manually
 # defining RAILS_ROOT because we know where it is relative to this file.
-RAILS_ROOT = "#{cdir}/../web"
+RAILS_ROOT = "#{cdir}/../web" unless defined?(RAILS_ROOT)
 class Rails
   def self.root
     RAILS_ROOT
