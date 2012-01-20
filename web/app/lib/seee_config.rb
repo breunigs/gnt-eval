@@ -77,7 +77,13 @@ module Seee
       # point this to the script you use to import pages as 2-sided tif
       # images. Either name them ".tif" (NOT tif_f_) if you want them to
       # be recognized or send patches :)
-      :scan => File.join(RAILS_ROOT, '..', 'helfer', "scan.sh"),
+      :scan => File.join(RAILS_ROOT, '..', 'tools', "scan.sh"),
+      # point this to the script that can be used to print forms. It
+      # should accept file paths to PDF files to print and be non-
+      # interactive if --non-interactive is given on the command line.
+      # If no arguments are given, have it print files in tmp/forms/*pdf
+      # that do not start with " multiple" (note the leading space).
+      :print => File.join(RAILS_ROOT, '..', 'tools', 'print_forms_locally.rb'),
       # this is the old zbar, which uses the default ImageMagick
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
