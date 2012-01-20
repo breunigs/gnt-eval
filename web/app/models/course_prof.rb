@@ -6,6 +6,7 @@ class CourseProf < ActiveRecord::Base
   # shortcuts
   has_one :form, :through => :course
   has_one :faculty, :through => :course
+  has_one :semester, :through => :course
   # import some features from other classes
   delegate :gender, :gender=, :to => :prof
 
@@ -13,6 +14,24 @@ class CourseProf < ActiveRecord::Base
   # In case of an error, -1 will be returned.
   def returned_sheets
     RT.count(form.db_table, {:barcode => id})
+  end
+
+  # returns true if sheets have been returned.
+  def returned_sheets?
+    returned_sheets > 0
+  end
+
+  # returns true if currently rendering/printing. This only applies to
+  # jobs started from the web interface. Will return false once the job
+  # has been submitted via lpr.
+  def print_in_progress?
+    !@print_in_progress.nil? && @print_in_progress
+  end
+
+  # set to true before starting a print job to prevent collisions. Reset
+  # afterwards.
+  def print_in_progress=(val)
+    @print_in_progress = val ? true : false
   end
 
 
@@ -56,7 +75,9 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form.name, course.language, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+    [course.form.name, course.language, course.title, prof.fullname, \
+      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' '). \
+      gsub(/^\s|\s$/, "")
   end
 
   private

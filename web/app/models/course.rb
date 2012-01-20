@@ -121,6 +121,11 @@ class Course < ActiveRecord::Base
     RT.count(form.db_table, {:barcode => barcodes})
   end
 
+  # returns true if there have been sheets returned.
+  def returned_sheets?
+    returned_sheets > 0
+  end
+
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
   def eval_lecture_head
