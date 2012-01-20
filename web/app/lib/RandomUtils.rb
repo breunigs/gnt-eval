@@ -4,6 +4,10 @@ require 'tmpdir'
 require 'rubygems'
 require 'work_queue'
 
+require File.join(File.dirname(__FILE__), "seee_config.rb")
+
+Scc = Seee::Config.commands unless defined?(Scc)
+
 module Enumerable
   # finds duplicates in an Enum. As posted by user bshow on
   # http://snippets.dzone.com/posts/show/3838
@@ -336,4 +340,38 @@ def get_or_fake_user_input(valid, fake)
   end
   puts "> #{fake.is_a?(Array) ? fake.join(" ") : fake}"
   fake
+end
+
+# Takes path to tex file as input and will run pdflatex on it. Will exit
+# the program in case of en error. Returns nothing.
+def tex_to_pdf(file)
+  filename="\"#{File.basename(file)}\""
+  texpath="cd \"#{File.dirname(file)}\" && "
+
+  # run it once fast, to see if there are any syntax errors in the
+  # text and create first-run-toc
+  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+  if $?.exitstatus != 0
+      warn "="*60
+      warn err
+      warn "\n\n\nERROR WRITING: #{t.name}"
+      warn "EXIT CODE: #{$?}"
+      warn "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
+      warn "="*60
+      warn "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
+      exit 1
+  end
+
+  # run it fast a second time, to get /all/ references correct
+  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+  # now all references should have been resolved. Run it a last time,
+  # but this time also output a pdf
+  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
+
+  if $?.exitstatus == 0
+      puts "Wrote #{t.name}"
+  else
+      warn "Some other error occured. It shouldn’t be TeX-related, as"
+      warn "it already passed one run. Well, happy debugging."
+  end
 end

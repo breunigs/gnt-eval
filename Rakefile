@@ -421,21 +421,19 @@ namespace :pdf do
 
   desc "Create How Tos"
   task :howto do
-    saveto = './tmp/howtos/'
+    saveto = File.join(GNT_ROOT, "tmp", "howtos")
     FileUtils.mkdir_p(saveto)
-    form_path = File.expand_path(File.join(RAILS_ROOT, "../tmp/forms")).escape_for_tex
+    form_path = Seee::Config.file_paths[:forms_howto_dir]
+    form_path = File.expand_path(form_path).escape_for_tex
 
-    dirname = Seee::Config.file_paths[:forms_howto_dir]
-    # Escape for TeX
-    dirname << Semester.find(:last).dirFriendlyName.gsub('_', '\_')
     threads = []
-    Dir.glob("./doc/howto_*.tex").each do |f|
+    Dir.glob(GNT_ROOT + "/doc/howto_*.tex").each do |f|
       work_queue.enqueue_b do
 
         data = File.read(f).gsub(/§§§/, form_path)
-        file = saveto + File.basename(f)
+        file = File.join(saveto, File.basename(f))
         File.open(file, "w") { |x| x.write data }
-        Rake::Task[(file.gsub(/\.tex$/, ".pdf")).to_sym].invoke
+        tex_to_pdf(file)
         File.delete(file)
       end
     end
@@ -709,34 +707,6 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-  Scc = Seee::Config.commands unless Scc
-  filename="\"#{File.basename(t.source)}\""
-  texpath="cd \"#{File.dirname(t.source)}\";"
-
-  # run it once fast, to see if there are any syntax errors in the
-  # text and create first-run-toc
-  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  if $?.exitstatus != 0
-      puts "="*60
-      puts err
-      puts "\n\n\nERROR WRITING: #{t.name}"
-      puts "EXIT CODE: #{$?}"
-      puts "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
-      puts "="*60
-      puts "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
-      exit
-  end
-
-  # run it fast a second time, to get /all/ references correct
-  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  # now all references should have been resolved. Run it a last time,
-  # but this time also output a pdf
-  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
-
-  if $?.exitstatus == 0
-      puts "Wrote #{t.name}"
-  else
-      puts "Some other error occured. It shouldn't be TeX-related, as"
-      puts "it already passed one run. Well, happy debugging."
-  end
+  warn "Rakefile pdf→tex rule is deprecated. Use tex_to_pdf(filename) directly."
+  tex_to_pdf(t.source)
 end
