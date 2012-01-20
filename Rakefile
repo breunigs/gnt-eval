@@ -414,7 +414,7 @@ namespace :pdf do
     s = Semester.find(sem)
 
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
-      work_queue.enqueue_b { make_pdf_for(s, cp, dirname) }
+      work_queue.enqueue_b { make_pdf_for(cp, dirname) }
     end
     work_queue.join
 

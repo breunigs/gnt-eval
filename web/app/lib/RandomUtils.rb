@@ -156,7 +156,8 @@ def print_progress(val, max)
   STDOUT.flush
 end
 
-# Generates a pdf file with the barcode in the specified location
+# Generates a pdf file with the barcode in the specified location. Won’t
+# regenerate the barcode, if a file in the target location exists.
 def generate_barcode(barcode, path)
   # skip if the barcode already exists
   path = File.expand_path(path)
@@ -176,14 +177,16 @@ def generate_barcode(barcode, path)
   true
 end
 
-# Creates form PDF file for given semester and CourseProf
-def make_pdf_for(s, cp, dirname)
+# Creates form PDF file for given and CourseProf
+def make_pdf_for(cp, dirname)
   # first: the barcode
-  generate_barcode(cp.barcode, dirname + "barcode#{cp.barcode}.pdf")
+  bc_path = File.join(dirname, "barcode#{cp.barcode}.pdf")
+  if !generate_barcode(cp.barcode, bc_path)
+    raise "could not generate barcode #{cp.barcode} in #{dirname}"
+  end
 
   # second: the form
-  filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
-
+  filename = File.join(dirname, cp.get_filename)
   File.open(filename + '.tex', 'w') do |h|
     h << cp.course.form.abstract_form.to_tex(
       cp.course.language,
@@ -192,13 +195,13 @@ def make_pdf_for(s, cp, dirname)
       cp.prof.lastname,
       cp.prof.gender,
       cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
-      s.title,
+      cp.semester.title,
       cp.barcode)
   end
   puts "Wrote #{filename}.tex"
 
   # generate PDF
-  Rake::Task[(filename + '.pdf').to_sym].invoke
+  tex_to_pdf("#{filename}.tex")
 
   # it may be useful for debugging to have a YAML for each course.
   # however, it is not needed by gnt-eval itself, so remove it immediately
@@ -280,8 +283,11 @@ def pdf_crop_tex(pdffile, dir = "./", give_error = false)
   return true
 end
 
-def temp_dir
-  tmp = Seee::Config.file_paths[:cache_tmp_dir]
+# Returns path to global cache/temporary directory. Ensures it is
+# writable by everyone. If a subdir is given, will create and return
+# that path.
+def temp_dir(subdir = "")
+  tmp = File.join(Seee::Config.file_paths[:cache_tmp_dir], subdir)
   require 'ftools'
   File.makedirs(tmp)
   `chmod 0777 -R #{tmp}  2> /dev/null`
@@ -343,7 +349,8 @@ def get_or_fake_user_input(valid, fake)
 end
 
 # Takes path to tex file as input and will run pdflatex on it. Will exit
-# the program in case of en error. Returns nothing.
+# the program in case of en error. Returns nothing. Will overwrite
+# existing files.
 def tex_to_pdf(file)
   filename="\"#{File.basename(file)}\""
   texpath="cd \"#{File.dirname(file)}\" && "
@@ -354,12 +361,12 @@ def tex_to_pdf(file)
   if $?.exitstatus != 0
       warn "="*60
       warn err
-      warn "\n\n\nERROR WRITING: #{t.name}"
+      warn "\n\n\nERROR WRITING: #{file}"
       warn "EXIT CODE: #{$?}"
       warn "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
       warn "="*60
       warn "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
-      exit 1
+      raise
   end
 
   # run it fast a second time, to get /all/ references correct
@@ -369,7 +376,7 @@ def tex_to_pdf(file)
   `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
 
   if $?.exitstatus == 0
-      puts "Wrote #{t.name}"
+      puts "Wrote #{file}"
   else
       warn "Some other error occured. It shouldn’t be TeX-related, as"
       warn "it already passed one run. Well, happy debugging."
@@ -377,10 +384,11 @@ def tex_to_pdf(file)
 end
 
 # Creates howtos for all available languages in the given directory, iff
-# they do not exist already.
-def create_howtos(saveto)
+# they do not exist already. If no specific path is given, will assume
+# the forms are in the default path (usually tmp/forms)
+def create_howtos(saveto, form_path = nil)
   FileUtils.mkdir_p(saveto)
-  form_path = Seee::Config.file_paths[:forms_howto_dir]
+  form_path ||= Seee::Config.file_paths[:forms_howto_dir]
   form_path = File.expand_path(form_path).escape_for_tex
 
   Dir.glob(GNT_ROOT + "/doc/howto_*.tex").each do |f|
