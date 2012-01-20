@@ -44,14 +44,22 @@ puts
 puts
 puts
 
-Dir.glob("tmp/forms/*pcs.pdf") do |f|
-  # skip forms that include their copies in the file.
-  next if File.basename(f).start_with?("multiple")
-  data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
-  next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
-  count = data[2].to_i
-  sheets += count
-  forms[f] = { :count => count, :lang => data[1] }
+# look in default location, if no paths are given via CMD line.
+if ARGV.nil? || ARGV.empty?
+  poss = Dir.glob("tmp/forms/*pcs.pdf")
+else
+  poss = ARGV
+end
+
+# now check the given files if they are suitable
+poss.each do |f|
+    next unless File.exist?(f)
+    next if File.basename(f).start_with?(" multiple")
+    data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
+    next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
+    count = data[2].to_i
+    sheets += count
+    forms[f] = { :count => count, :lang => data[1] }
 end
 
 if forms.empty?

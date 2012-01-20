@@ -31,7 +31,7 @@ files.each do |x|
 
 	# Will likely break for non-latin1 characters, although
 	# it should be fixed. Ignore that for the moment.
-	`pdftk A="#{x}" cat #{"A "*num} output "multiple #{x}"`
+	`pdftk A="#{x}" cat #{"A "*num} output " multiple #{x}"`
 	err << x if $?.exitstatus != 0
 end
 
