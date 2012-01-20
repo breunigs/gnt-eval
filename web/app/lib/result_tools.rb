@@ -15,7 +15,7 @@ class ResultTools
   # only allow one instance of this class
   include Singleton
 
-  SCed = Seee::Config.external_database
+  SCed = Seee::Config.external_database unless defined?(SCed)
 
   # adds the variables that are available when designing the form.
   # By default, only the form does have these variables, however since
