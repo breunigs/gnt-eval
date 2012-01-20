@@ -243,6 +243,8 @@ namespace :images do
         end
       end
       work_queue.join
+      puts
+      puts "Done!"
     end # else
   end
 end
