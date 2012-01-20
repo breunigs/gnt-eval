@@ -422,22 +422,7 @@ namespace :pdf do
   desc "Create How Tos"
   task :howto do
     saveto = File.join(GNT_ROOT, "tmp", "howtos")
-    FileUtils.mkdir_p(saveto)
-    form_path = Seee::Config.file_paths[:forms_howto_dir]
-    form_path = File.expand_path(form_path).escape_for_tex
-
-    threads = []
-    Dir.glob(GNT_ROOT + "/doc/howto_*.tex").each do |f|
-      work_queue.enqueue_b do
-
-        data = File.read(f).gsub(/§§§/, form_path)
-        file = File.join(saveto, File.basename(f))
-        File.open(file, "w") { |x| x.write data }
-        tex_to_pdf(file)
-        File.delete(file)
-      end
-    end
-    work_queue.join
+    create_howtos(saveto)
     Rake::Task["clean".to_sym].invoke
   end
 end

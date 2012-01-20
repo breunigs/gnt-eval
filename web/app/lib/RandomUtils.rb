@@ -375,3 +375,24 @@ def tex_to_pdf(file)
       warn "it already passed one run. Well, happy debugging."
   end
 end
+
+# Creates howtos for all available languages in the given directory, iff
+# they do not exist already.
+def create_howtos(saveto)
+  FileUtils.mkdir_p(saveto)
+  form_path = Seee::Config.file_paths[:forms_howto_dir]
+  form_path = File.expand_path(form_path).escape_for_tex
+
+  Dir.glob(GNT_ROOT + "/doc/howto_*.tex").each do |f|
+    file = File.join(saveto, File.basename(f))
+    # skip if the PDF file already exists
+    next if File.exist?(file.gsub(/\.tex$/, ".pdf"))
+    work_queue.enqueue_b do
+      data = File.read(f).gsub(/§§§/, form_path)
+      File.open(file, "w") { |x| x.write data }
+      tex_to_pdf(file)
+      File.delete(file)
+    end
+  end
+  work_queue.join
+end
