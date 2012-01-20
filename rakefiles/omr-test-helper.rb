@@ -1,5 +1,5 @@
 namespace :testhelper do
-  Scc = Seee::Config.commands
+  Scc = Seee::Config.commands unless defined?(Scc)
 
   # print and execute a command
   def cmd(line)
