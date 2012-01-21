@@ -26,7 +26,8 @@ require 'custom_build/build.rb'
 
 # requires rails database connection.
 def curSem
-  warn "DEPRECATED: curSem is deprecated and only returns one current semester. Please use Semester.currently_active instead, which returns an array of all current semesters."
+  warn "DEPRECATED: curSem is deprecated and only returns one current semester. Please use Semester.currently_active instead, which returns an array of all current semesters." unless $curSumWarningGiven
+  $curSumWarningGiven = true
   $curSem ||= Semester.currently_active.first
   $curSem
 end
@@ -46,6 +47,8 @@ def find_barcode(filename)
     return nil
   end
 end
+
+RT = ResultTools.instance unless defined?(RT)
 
 # Creates a sample sheet in tmp/sample_sheets for the given form (object)
 # and language name. Returns the full filepath, but without the file
@@ -144,8 +147,7 @@ namespace :images do
           # remove everything after the last underscore and add .tif to
           # find the original image
           path = f.sub(/_[^_]+$/, "") + ".tif"
-          data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", path)
-          data = data.fetch_array
+          data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
           tut_num = data[0].to_i if data
           break if tut_num
         end
@@ -657,7 +659,8 @@ namespace :summary do
 
     I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
-    head = preamble("Blaming Someone For Bad LaTeX")
+    evalname = "Blame someone for bad LaTeX"
+    head = ERB.new(RT.load_tex("preamble")).result(binding)
     foot = "\\end{document}"
 
     File.open("./tmp/blame.tex", 'w') do |f|
