@@ -661,7 +661,7 @@ namespace :summary do
 
     evalname = "Blame someone for bad LaTeX"
     head = ERB.new(RT.load_tex("preamble")).result(binding)
-    foot = "\\end{document}"
+    foot = "\n\\end{document}"
 
     File.open("./tmp/blame.tex", 'w') do |f|
         f.write(head)
