@@ -215,6 +215,7 @@ class CoursesController < ApplicationController
     # supply them from the database instead.
     params[:course][:form_id] ||= @course.form.id
     params[:course][:language] ||= @course.language
+    params[:course][:semester_id] ||= @course.semester.id
 
     # check semester has form
     s = Semester.find(params[:course][:semester_id])
