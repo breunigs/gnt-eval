@@ -117,6 +117,13 @@ namespace :magick do
         system("sed -i \"s:require 'RMagick2.so':require '#{so}':\" #{rb}")
         # make the newly build library known to the system (otherwise
         # we’ll get a file not found error)
+        puts "\n\n"
+        puts "The following command requires root-access. If you don’t"
+        puts "have root, please ask your administrator to run it for you."
+        puts "Otherwise, RMagick will not find the new ImageMagick."
+        puts
+        puts("#{exec} && sudo ldconfig #{bldImgMagick}/lib")
+        puts
         system("#{exec} && sudo ldconfig #{bldImgMagick}/lib")
 
         puts
@@ -212,7 +219,7 @@ namespace :magick do
         puts `#{bldImgMagick}/bin/convert -version #{nob}`.strip
         puts
         puts "RMagick:".bold
-        puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
+        puts `/usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Version" #{nob}`.strip
         puts
         puts "RMagick uses:".bold
         puts ` /usr/bin/env ruby -r "#{rmagickrb}" -e"puts Magick::Magick_version" #{nob}`.strip
