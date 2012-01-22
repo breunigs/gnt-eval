@@ -1,7 +1,8 @@
 <% content_for :script, javascript_include_tag("hold_button") %>
 
-<form class="hold_button" action="<%=url%>" method="post">
+<form class="hold_button" method="post">
   <input type="submit" id="<%=id%>" value="<%=name%>" disabled="disabled"/>
-  <script> hold_button(document.getElementById("<%=id%>"), 5, true); </script>
+  <script> hold_button(document.getElementById("<%=id%>"), 5, true, "<%=url%>"); </script>
   <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token%>" />
+  <noscript>needs JS</noscript>
 </form>

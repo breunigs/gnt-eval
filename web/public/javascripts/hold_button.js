@@ -1,4 +1,4 @@
-function hold_button(elem, seconds, only_once) {
+function hold_button(elem, seconds, only_once, url) {
   var t;
 
   var exe = function() {
@@ -6,6 +6,9 @@ function hold_button(elem, seconds, only_once) {
       elem.mousedown = function () { return false; }
       elem.setAttribute("disabled", "disabled");
     }
+    // set URL here to avoid non-javascript browsers from submitting
+    // the button too easily
+    elem.form.setAttribute("action", url);
     elem.form.submit();
   }
 
