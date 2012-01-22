@@ -95,7 +95,9 @@ class Question
   # should be made a textbox instead. You can use this if you want
   # common values to be checkable but still allow any value. <nil> or 0
   # means “off”, i.e. last box is a normal checkbox and any value larger
-  # than 0 means it’s on. Good ones are between 15 and 30 (millimeter)
+  # than 0 means it’s on. Good ones are between 15 and 30 (millimeter).
+  # Will create an additional DB column which appends _text to the name
+  # given in db_column. Manual retrieval is usually not required.
   attr_accessor :last_is_textbox
 
   # Specify the type of visualizer you want to use to represent this
@@ -221,6 +223,8 @@ class Question
   # finds the answer text for each checkbox and returns them as an array
   # in-order. Does NOT include «no answer», use no_answer? and check it
   # yourself. Returns an empty array if no boxes have been defined.
+  # Does NOT include the additional answers if last_is_textbox is set to
+  # true.
   def get_answers(language = I18n.locale)
     return [] if boxes.nil? || boxes.empty?
     boxes.collect { |x| x.any_text(language) }
@@ -465,15 +469,16 @@ class AbstractForm
   # { :offending_column => ["Question 1?", "Question 2?"] }
   def get_duplicate_db_columns
     h = {}
-    questions.collect { |q| q.db_column }.get_duplicates.each do |d|
-      h[d.to_sym] = questions.find_all { |q| q.db_column == d }.map { |q| q.text }
+    c = get_all_db_columns
+    c.get_duplicates.each do |d|
+      h[d.to_sym] = c.find_all { |q| q.db_column == d }.map { |q| q.text }
     end
     h
   end
 
   # returns true if there are any db columns used more than once
   def has_duplicate_db_columns?
-    !questions.collect { |q| q.db_column }.get_duplicates.empty?
+    !get_all_db_columns.get_duplicates.empty?
   end
 
   # returns true if there is a question without explicitly set visualizer
@@ -550,6 +555,13 @@ class AbstractForm
 
   # small helper functions follow that are only used internally
   private
+  # returns array of db columns used in this form
+  def get_all_db_columns
+    q = questions.collect { |q| q.db_column }
+    litf = questions.reject { |q| !q.last_is_textbox? } .map { |q| \
+              (q.multi? ? q.db_column.last : q.db_column) + "_text" }
+    (q+litf)
+  end
 
   def get_texhead(lang)
     (texhead.is_a?(String) ? texhead : texhead[lang.to_sym]) || ""

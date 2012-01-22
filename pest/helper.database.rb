@@ -46,6 +46,8 @@ class PESTDatabaseTools
         end
       else
         q << "#{quest.db_column} INTEGER, "
+        txt_col = quest.multi? ? quest.db_column.last : quest.db_column
+        q << "#{txt_col}_text VARCHAR(250), " if quest.last_is_textbox?
       end
     end
 

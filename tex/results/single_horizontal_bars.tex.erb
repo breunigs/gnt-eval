@@ -6,7 +6,7 @@
     <%=t :abstentions%>: <%=answ[:abstentions]%>}
 }
 <%
-  a = q.get_answers.strip_common_tex.delete_if { |x| answ[x] <= 0 }
+  a = answ.delete_if { |k,v| v <= 0 || !k.is_a?(String) }.keys
   a.sort! { |x,y| answ[x] <=> answ[y] }
 %>
 \singleHorizontalBars{<%=a.join(",")%>}{<%=answ.values_at(*a).join(",")%>}

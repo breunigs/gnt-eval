@@ -370,6 +370,27 @@ class ResultTools
         answ[t] = answ[(i+1)] unless t.nil? || t.empty?
       end
     end
+
+    # handle additional answers written into the textbox
+    if q.last_is_textbox?
+      # load data and ignore empty text fields
+      col = (q.multi? ? q.db_column.last : q.db_column) + "_text"
+      cc = count(table, where_hash, col)
+      cc.delete("")
+      # make additional answers available via index as well
+      ind = q.boxes.count
+      all = 0
+      cc.each do |v,c|
+        ind += 1
+        answ[v] = answ[ind] = c
+        all += c
+      end
+      # correct the “last textbox” count from above
+      answ[q.boxes.count] -= all
+      t = q.get_answers.last
+      answ[t] = answ[q.boxes.count] unless t.nil? || t.empty?
+    end
+
     answ
   end
 
