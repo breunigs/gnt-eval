@@ -16,6 +16,13 @@ module Enumerable
   end
 end
 
+class Hash
+  # abbreviation for self.fetch(key, 0)
+  def foz(k)
+    self.fetch(k, 0)
+  end
+end
+
 class String
   # DEPRECATED
   # keeps only characters that may be used in a table name or column for
