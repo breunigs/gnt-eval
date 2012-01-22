@@ -46,6 +46,13 @@ TEXTBOX_MIN_PIXELS = 1000
 ANSW_FAIL = -1
 ANSW_NONE = 0
 
+# Used to convert radians to degrees
+RAD2DEG  = 360.0/(2.0 * Math::PI)
+DEG2RAD  = (2.0 * Math::PI)/360.0
+
+# Angle between diagonal and page top
+PAGE_DIAG_ANGLE = Math.atan(PAGE_WIDTH/PAGE_HEIGHT)
+
 # These are used in the testing area to make it the code more human
 # readable and to unify the values. Only used for human input, the
 # normal OMR component works on black percentage and the fill grades

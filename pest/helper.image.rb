@@ -176,7 +176,94 @@ module PESTImageTools
     debug("  Located corners", "locate_corners") if @verbose
   end
 
+  # Calculate the rotation from the corners. To do so, we calc the
+  # angle between the diagonal of the page and the diagonal between
+  # the detected corners. If possible, we do so for both diagonals to
+  # reduce the measuring error.
+  def determine_rotation
+    debug "  Determining rotation" if @verbose
+    @rotation = []
+    0.upto(page_count-1) do |i|
+      @rotation[i] = []
+      e = @corners[i]
+
+      if !e[:tl].any_nil? and !e[:br].any_nil?
+        # it appears the top left to bottom right diagonal is fine
+        adja = (e[:br].x - e[:tl].x).to_f
+        oppo = (e[:br].y - e[:tl].y).to_f
+        @rotation[i] << (Math.atan(adja/oppo) - PAGE_DIAG_ANGLE)
+      end
+
+      if !e[:tr].any_nil? and !e[:bl].any_nil?
+        # it appears the top right to bottom left diagonal is fine
+        adja = (e[:bl].x - e[:tr].x).to_f
+        oppo = (e[:bl].y - e[:tr].y).to_f
+        @rotation[i] << (PAGE_DIAG_ANGLE + Math.atan(adja/oppo))
+      end
+
+      if !e[:tl].any_nil? and !e[:bl].any_nil?
+        # it appears the top left to bottom left side is fine
+        adja = (e[:bl].y - e[:tl].y).to_f#.abs
+        oppo = (e[:bl].x - e[:tl].x).to_f#.abs
+        @rotation[i] << Math.atan(oppo/adja)
+      end
+
+      if !e[:tr].any_nil? and !e[:br].any_nil?
+        # it appears the top right to bottom right side is fine
+        adja = (e[:br].y - e[:tr].y).to_f
+        oppo = (e[:br].x - e[:tr].x).to_f
+        @rotation[i] << Math.atan(oppo/adja)
+      end
+
+      if @rotation[i].empty?
+        debug "    Couldn't determine rotation for current sheet on page #{i+1}."
+        debug "    This means that less than two corners could be detected."
+        debug "    Marking #{File.basename(@currentFile)} as bizarre."
+        @cancelProcessing = true
+        next
+      end
+
+      debug("    #{i}: #{@rotation[i].join(", ")}") if @verbose
+      @rotation[i] = @rotation[i].compact.sum / @rotation[i].size
+
+      # We actually need to rotate in the other direction, but I am too
+      # lazy to fix the code above. Feel free to FIXME
+      @rotation[i] = (2*Math::PI - @rotation[i])
+
+
+
+      # Draw a line near the top to be able to see in which direction
+      # the rotation was detected. Draw a box around the main area to be
+      # able to judge the rotation in comparison to the scanned sheet.
+      draw_text(i, [200, 40], "green", "Rotation: #{(@rotation[i]*RAD2DEG)%360}°")
+      draw_line(i, rotate(i, [10, 15]), rotate(i, [2470, 15]), "green")
+      # top line
+      draw_line(i, rotate(i, [120, 270]), rotate(i, [2420, 270]), "green")
+      # left line
+      draw_line(i, rotate(i, [120, 270]), rotate(i, [120, 3300]), "green")
+      # bottom line
+      draw_line(i, rotate(i, [120, 3300]), rotate(i, [2420, 3300]), "green")
+      # right line
+      draw_line(i, rotate(i, [2420, 3300]), rotate(i, [2420, 270]), "green")
+    end
+  end
+
+  # corrects the rotation for a given point using the determined rotation
+  def rotate(img_id, coord)
+    return [nil, nil] if coord.any_nil?
+
+    ox = PAGE_WIDTH/2.0
+    oy = PAGE_HEIGHT/2.0
+    rad = @rotation[img_id]
+
+    newx = ox + (Math.cos(rad)*(coord.x-ox) - Math.sin(rad) * (coord.y-oy))
+    newy = oy + (Math.sin(rad)*(coord.x-ox) + Math.cos(rad) * (coord.y-oy))
+
+    [newx, newy]
+  end
+
   def supplement_missing_corners
+    determine_rotation
     0.upto(page_count-1) do |i|
       c = @corners[i]
       # top left corner
