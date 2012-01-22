@@ -368,7 +368,7 @@ namespace :pdf do
     end
 
     puts "Wrote #{directory+filename}"
-    Rake::Task[(directory+filename.gsub(/tex$/, 'pdf')).to_sym].invoke
+    tex_to_pdf(directory+filename)
   end
 
   desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
@@ -398,7 +398,7 @@ namespace :pdf do
     end
 
     # no faculty specified, just find all and process them in parallel.
-    Faculty.find(:all).each do |f|
+    Faculty.all.each do |f|
       args = [lang_code, sem, f.id].join(",")
       puts "Running «rake \"pdf:semester[#{args}]\"»"
       job = fork { exec "rake pdf:semester[#{args}]" }
