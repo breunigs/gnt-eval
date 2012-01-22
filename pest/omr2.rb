@@ -79,21 +79,25 @@ class PESTOmr < PESTDatabaseTools
     draw_transparent_box(img_id, box.tl, box.br, "cyan", "", true)
 
     # Find the pre-printed box
+    # search left → right
     x = search(img_id, [box.tl.x-6, box.tl.y-10],
           [box.br.x - box.width/3*2, box.br.y+10], :right, 30, true)
-    y = search(img_id, [box.tl.x-10, box.tl.y-6],
-          [box.br.x+10, box.br.y - box.height/3*2], :down, 30, true)
+    # search bottom → top
+    y = search(img_id, [box.tl.x-4, box.tl.y+box.height-6],
+          [box.br.x+4, box.tl.y+box.height+9], :up, 40, true)
+    y -= box.height unless y.nil?
 
     # If any coordinate couldn't be found, try again further away. Only
     # searches the newly added area.
     x = search(img_id, [box.tl.x-15, box.tl.y-10],
           [box.tl.x-6, box.br.y+10], :right, 30) if x.nil?
     # in case of y-direction, the line that divides the questions would
-    # be detected. Search bottom up instead.
+    # be detected. Search top down instead. Since bottom up failed, we
+    # can be pretty sure the initial box was placed too high, therefore
+    # we don’t need to add anything to the y-variable.
     if y.nil?
-      y = search(img_id, [box.tl.x-10, box.tl.y+box.height-6],
-            [box.br.x+10, box.tl.y+box.height+6], :up, 30)
-      y -= box.height unless y.nil?
+      y = search(img_id, [box.tl.x-4, box.tl.y],
+            [box.br.x+4, box.br.y - box.height/3*2], :down, 40)
     end
 
     box.x = x unless x.nil?
