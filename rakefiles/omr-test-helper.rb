@@ -10,7 +10,7 @@ namespace :testhelper do
   desc "helps you create ground truths to test OMR against. Put the sheet into tests/omr-test/1234.yaml and images into tests/omr-test/1234/{images}"
   task :create_ground_truths do
    Dir.chdir("tests") do
-      cmd("./create-ground-truths.rb")
+      system("./create-ground-truths.rb")
       puts
     end
   end
