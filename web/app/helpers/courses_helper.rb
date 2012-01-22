@@ -87,7 +87,7 @@ module CoursesHelper
         sortby << "title.downcase"
       when "students" then
         sortby << "students"
-        sortby << "title.downcas"
+        sortby << "title.downcase"
       when "evaluated_by" then
         sortby << "evaluator.downcase"
         sortby << "eval_date"

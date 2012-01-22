@@ -9,7 +9,6 @@ class Semester < ActiveRecord::Base
   validates_presence_of :longtitle
 
   include FunkyTeXBits
-  include FunkyDBBits
 
   # Returns array of all semesters that are currently active. I.e., a
   # more efficient way of Semester.find(:all).find_all { |s| s.now? }.
@@ -75,8 +74,4 @@ class Semester < ActiveRecord::Base
   def dirfriendly_title
     dirFriendlyName
   end
-
-  private
-  # quick access to ResultTools.instance
-  RT = ResultTools.instance
 end

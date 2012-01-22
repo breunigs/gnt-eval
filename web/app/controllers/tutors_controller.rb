@@ -9,8 +9,10 @@ class TutorsController < ApplicationController
   # GET /tutors
   # GET /tutors.xml
   def index
-    @tutors = Tutor.all.reject { |x| x.course.nil? }
-    @tutors.sort! { |x,y| x.abbr_name <=> y.abbr_name }
+    # (inner) join prevents us from loading tutors whose course does
+    # not exist anymore
+    @tutors = Tutor.all(:joins => :course, :include => [:semester],
+                :order => :abbr_name)
 
     respond_to do |format|
       format.html # index.html.erb

@@ -27,7 +27,7 @@ forms = {}
 
 puts "The following forms will be printed:"
 Dir.glob(mypath + "/../tmp/forms/*pcs.pdf") do |f|
-  next if File.basename(f).start_with?("multiple")
+  next if File.basename(f).start_with?(" multiple")
   count = f.match(/.*\s([0-9]+)pcs.pdf/)
   next if count.nil? || count[1].nil? || count[1].to_i <= 0
   count = count[1].to_i

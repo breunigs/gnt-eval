@@ -4,12 +4,12 @@ class Tutor < ActiveRecord::Base
   has_many :pics
   has_one :form, :through => :course
   has_one :faculty, :through => :course
+  has_one :semester, :through => :course
 
   validates_presence_of :abbr_name
   validates_uniqueness_of :abbr_name, :scope => :course_id, \
     :message => "Tutor already exists for this course."
 
-  include FunkyDBBits
   include FunkyTeXBits
 
   # returns if the tutor is critical. This is the case when either the
@@ -22,10 +22,11 @@ class Tutor < ActiveRecord::Base
     b = RT.include_form_variables(self)
     # may be used to reference a specific tutor. For example, the tutor_
     # overview visualizer does this.
-    b << "\\label{tutor#{self.id}}\n"
     b << RT.small_header(section)
+    b << "\\label{tutor#{self.id}}\n"
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      return b
     end
 
     tut_db_col = form.get_tutor_question.db_column.to_sym
@@ -45,15 +46,6 @@ class Tutor < ActiveRecord::Base
     course.tutors.index(self) + 1
   end
 
-  def sheet_count
-    warn "DEPRECATED: tutor#sheet_count is deprecated. Please use returned_sheets instead."
-    # Otherwise the SQL query will not work
-    return 0 if course.profs.empty?
-    @db_table = course.form.db_table
-    tutor_db_column = course.form.get_tutor_question.db_column.to_sym
-    count_forms({:barcode => course.barcodes, tutor_db_column => tutnum})
-  end
-
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
@@ -65,6 +57,5 @@ class Tutor < ActiveRecord::Base
 
   private
   # quick access to some variables and classes
-  RT = ResultTools.instance
   SCs = Seee::Config.settings
 end

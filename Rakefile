@@ -4,7 +4,6 @@ require 'rubygems'
 require 'action_mailer'
 require 'web/config/boot'
 require 'web/lib/ext_requirements.rb'
-require 'web/lib/FunkyDBBits.rb'
 require 'web/lib/RandomUtils.rb'
 
 require 'pp'
@@ -25,9 +24,11 @@ require 'rakefiles/export.rb'
 require 'rakefiles/omr-test-helper.rb'
 require 'custom_build/build.rb'
 
-# requires database
+# requires rails database connection.
 def curSem
-  $curSem ||= Semester.find(:all).find { |s| s.now? }
+  warn "DEPRECATED: curSem is deprecated and only returns one current semester. Please use Semester.currently_active instead, which returns an array of all current semesters." unless $curSumWarningGiven
+  $curSumWarningGiven = true
+  $curSem ||= Semester.currently_active.first
   $curSem
 end
 
@@ -46,6 +47,8 @@ def find_barcode(filename)
     return nil
   end
 end
+
+RT = ResultTools.instance unless defined?(RT)
 
 # Creates a sample sheet in tmp/sample_sheets for the given form (object)
 # and language name. Returns the full filepath, but without the file
@@ -82,47 +85,10 @@ def make_sample_sheet(form, lang)
   filename
 end
 
-# Creates form PDF file for given semester and CourseProf
-def make_pdf_for(s, cp, dirname)
-  # first: the barcode
-  generate_barcode(cp.barcode, dirname + "barcode#{cp.barcode}.pdf")
-
-  # second: the form
-  filename = dirname + cp.get_filename.gsub(/\s+/,' ').gsub(/^\s|\s$/, "")
-
-  File.open(filename + '.tex', 'w') do |h|
-    h << cp.course.form.abstract_form.to_tex(
-      cp.course.language,
-      cp.course.title,
-      cp.prof.firstname,
-      cp.prof.lastname,
-      cp.prof.gender,
-      cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
-      s.title,
-      cp.barcode)
-  end
-  puts "Wrote #{filename}.tex"
-
-  # generate PDF
-  Rake::Task[(filename + '.pdf').to_sym].invoke
-
-  # it may be useful for debugging to have a YAML for each course.
-  # however, it is not needed by gnt-eval itself, so remove it immediately
-  # before it causes any confusion.
-  `rm "#{filename}.posout"`
-  #`./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
-end
-
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
   system("rake -sT")
-end
-
-namespace :db do
-  task :connect do
-    $dbh = FunkyDBBits.dbh
-  end
 end
 
 namespace :images do
@@ -135,7 +101,7 @@ namespace :images do
   end
 
   desc "(4) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
-  task :insertcomments => ['db:connect'] do |t, d|
+  task :insertcomments do |t, d|
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
 
@@ -181,8 +147,7 @@ namespace :images do
           # remove everything after the last underscore and add .tif to
           # find the original image
           path = f.sub(/_[^_]+$/, "") + ".tif"
-          data = $dbh.execute("SELECT #{column} FROM #{table} WHERE path = ?", path)
-          data = data.fetch_array
+          data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
           tut_num = data[0].to_i if data
           break if tut_num
         end
@@ -280,6 +245,8 @@ namespace :images do
         end
       end
       work_queue.join
+      puts
+      puts "Done!"
     end # else
   end
 end
@@ -441,7 +408,7 @@ namespace :pdf do
   end
 
   desc "create pdf-form-files corresponding to each course and prof (leave empty for current semester)"
-  task :forms, [:semester_id] => 'db:connect' do |t, a|
+  task :forms, [:semester_id] do |t, a|
     dirname = './tmp/forms/'
     FileUtils.mkdir_p(dirname)
 
@@ -449,7 +416,7 @@ namespace :pdf do
     s = Semester.find(sem)
 
     CourseProf.find(:all).find_all { |x| x.course.semester == s }.each do |cp|
-      work_queue.enqueue_b { make_pdf_for(s, cp, dirname) }
+      work_queue.enqueue_b { make_pdf_for(cp, dirname) }
     end
     work_queue.join
 
@@ -457,26 +424,9 @@ namespace :pdf do
   end
 
   desc "Create How Tos"
-  task :howto => 'db:connect' do
-    saveto = './tmp/howtos/'
-    FileUtils.mkdir_p(saveto)
-    form_path = File.expand_path(File.join(RAILS_ROOT, "../tmp/forms")).escape_for_tex
-
-    dirname = Seee::Config.file_paths[:forms_howto_dir]
-    # Escape for TeX
-    dirname << Semester.find(:last).dirFriendlyName.gsub('_', '\_')
-    threads = []
-    Dir.glob("./doc/howto_*.tex").each do |f|
-      work_queue.enqueue_b do
-
-        data = File.read(f).gsub(/§§§/, form_path)
-        file = saveto + File.basename(f)
-        File.open(file, "w") { |x| x.write data }
-        Rake::Task[(file.gsub(/\.tex$/, ".pdf")).to_sym].invoke
-        File.delete(file)
-      end
-    end
-    work_queue.join
+  task :howto do
+    saveto = File.join(GNT_ROOT, "tmp", "howtos")
+    create_howtos(saveto)
     Rake::Task["clean".to_sym].invoke
   end
 end
@@ -641,7 +591,7 @@ end
 
 namespace :summary do
   def fixCommonTeXErrors(code)
-    # _ -> \_, '" -> "', `" -> "`
+    # _ → \_, '" → "', `" → "`
     code = code.gsub(/([^\\])_/, '\1\\_').gsub(/`"/,'"`').gsub(/'"/, '"\'')
     # correct common typos
     code = code.gsub("\\textit", "\\emph")
@@ -709,8 +659,9 @@ namespace :summary do
 
     I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
 
-    head = preamble("Blaming Someone For Bad LaTeX")
-    foot = "\\end{document}"
+    evalname = "Blame someone for bad LaTeX"
+    head = ERB.new(RT.load_tex("preamble")).result(binding)
+    foot = "\n\\end{document}"
 
     File.open("./tmp/blame.tex", 'w') do |f|
         f.write(head)
@@ -746,34 +697,6 @@ namespace :summary do
 end
 
 rule '.pdf' => '.tex' do |t|
-  Scc = Seee::Config.commands unless Scc
-  filename="\"#{File.basename(t.source)}\""
-  texpath="cd \"#{File.dirname(t.source)}\";"
-
-  # run it once fast, to see if there are any syntax errors in the
-  # text and create first-run-toc
-  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  if $?.exitstatus != 0
-      puts "="*60
-      puts err
-      puts "\n\n\nERROR WRITING: #{t.name}"
-      puts "EXIT CODE: #{$?}"
-      puts "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
-      puts "="*60
-      puts "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
-      exit
-  end
-
-  # run it fast a second time, to get /all/ references correct
-  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  # now all references should have been resolved. Run it a last time,
-  # but this time also output a pdf
-  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
-
-  if $?.exitstatus == 0
-      puts "Wrote #{t.name}"
-  else
-      puts "Some other error occured. It shouldn't be TeX-related, as"
-      puts "it already passed one run. Well, happy debugging."
-  end
+  warn "Rakefile pdf→tex rule is deprecated. Use tex_to_pdf(filename) directly."
+  tex_to_pdf(t.source)
 end

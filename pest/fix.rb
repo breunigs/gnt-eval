@@ -49,8 +49,6 @@ end
 require cdir + '/../lib/seee_config.rb'
 require Seee::Config.file_paths[:rmagick]
 
-require cdir + '/../lib/FunkyDBBits.rb'
-
 require File.join(cdir, 'helper.boxtools.rb')
 require File.join(cdir, 'helper.database.rb')
 require File.join(cdir, 'helper.constants.rb')
@@ -88,7 +86,6 @@ class PESTFix < PESTDatabaseTools
       set_debug_database
     end
 
-    ensure_database_access
     find_tables_to_process
 
     # global Variables
@@ -134,8 +131,8 @@ class PESTFix < PESTDatabaseTools
     return @current_db_value if @current_db_value
     debug "Loading current value from DB"
     table = @current_question["table"]
-    x = dbh.execute("SELECT #{current_db_column} FROM #{table} WHERE path = ?", current_path)
-    @current_db_value = x.fetch_array[0].to_i
+    x = RT.custom_query("SELECT #{current_db_column} FROM #{table} WHERE path = ?", [current_path], true)
+    @current_db_value = x[0].to_i
   end
 
   # stores the given value for the current question in the DB and calls
@@ -147,7 +144,8 @@ class PESTFix < PESTDatabaseTools
       debug nil, "db_save"
       table = @current_question["table"]
       field = @current_question["question"].db_column
-      dbh.do("UPDATE #{table} SET #{field} = ? WHERE path = ?", value, current_path)
+      RT.custom_query("UPDATE #{table} SET #{field} = ? WHERE path = ?",
+                                                  [value, current_path])
       debug "Set DB value to #{value}", "db_save"
 
       @statusbar.pop 1
@@ -177,7 +175,9 @@ class PESTFix < PESTDatabaseTools
 
   # loads the value stored in the DB for the given question
   def db_value_for_question(q)
-    dbh.execute("SELECT #{q["question"].db_column} FROM #{q["table"]} WHERE path = ?", q["path"]).fetch_array[0].to_i
+    col = q["question"].db_column
+    RT.custom_query("SELECT #{col} FROM #{q["table"]} WHERE path = ?",
+      [q["path"]], true)[col]
   end
 
   # Undo will first view the question without making any changes if it
@@ -212,7 +212,7 @@ class PESTFix < PESTDatabaseTools
     new_questions = 0
     @tables.each do |t,f|
       q = "SELECT path, abstract_form, #{f.join(", ")} FROM #{t} WHERE #{f.join("=-1 OR ")}=-1"
-      res = dbh.execute(q)
+      res = RT.custom_query(q)
       res.each do |q|
         # skip all files that have already been processed
         next if @all_processed_paths.include?(q[0])
@@ -289,8 +289,8 @@ class PESTFix < PESTDatabaseTools
       debug "Checking #{t}"
       # only add tables if they exist AND have an abstract_form column
       begin
-        form = dbh.execute("SELECT abstract_form FROM #{t} LIMIT 1")
-        form = Marshal.load(Base64.decode64(form.fetch_array[0]))
+        form = RT.custom_query("SELECT abstract_form FROM #{t}", [], true)
+        form = Marshal.load(Base64.decode64(form[0]))
         valid_fields = form.questions.collect do |q|
           SUPPORTED_TYPES.include?(q.type) ? q.db_column : nil
         end
@@ -306,7 +306,7 @@ class PESTFix < PESTDatabaseTools
         @tables[t] = valid_fields.flatten unless valid_fields.empty?
       rescue => e
         debug "Table #{t} doesn't appear to be valid. Error message:"
-        pp e
+        raise
       end
     end
     @tables
@@ -559,7 +559,6 @@ class PESTFix < PESTDatabaseTools
 
   # Updates the window title
   def update_window_title_and_progressbar
-    debug "start other crap", "crap"
     all = @all_failed_questions.size
 
     # find index of current question, set to 0 if not found
@@ -589,7 +588,6 @@ class PESTFix < PESTDatabaseTools
       title << current_path
     end
     @window.set_title title.join(" | ")
-    debug "stop other crap", "crap"
   end
 
   def update_toolbar

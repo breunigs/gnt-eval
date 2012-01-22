@@ -6,15 +6,8 @@
 #
 # Defines some random constants that may be used more than once
 
-# Used to convert radians to degrees
-RAD2DEG  = 360.0/(2.0 * Math::PI)
-DEG2RAD  = (2.0 * Math::PI)/360.0
-
 # _SEARCH defines the area in where to look for the printed element
 SQUARE_SEARCH = 55, 55
-
-# FIXME: This file should contain the definitions where to recognize the
-# rotation and offset
 
 # Scalepoints (sp) is the unit used by TeX to describe where elements are
 # placed. However, the scanned images is processed by pixel values, so we
@@ -30,10 +23,6 @@ SP_TO_PX = 65536 * 72.27 / 300
 # The default values are for A4 paper. Specify them as floats.
 PAGE_HEIGHT = 3508.0
 PAGE_WIDTH = 2480.0
-
-# Angle between diagonal and page top
-PAGE_DIAG_ANGLE = Math.atan(PAGE_WIDTH/PAGE_HEIGHT)
-
 
 # set the different fill grade levels. Checkboxes below or above the
 # min/max fill grade will be marked as not checked. DESPERATE_ is only

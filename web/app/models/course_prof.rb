@@ -6,15 +6,32 @@ class CourseProf < ActiveRecord::Base
   # shortcuts
   has_one :form, :through => :course
   has_one :faculty, :through => :course
+  has_one :semester, :through => :course
   # import some features from other classes
   delegate :gender, :gender=, :to => :prof
-
-  include FunkyDBBits
 
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
     RT.count(form.db_table, {:barcode => id})
+  end
+
+  # returns true if sheets have been returned.
+  def returned_sheets?
+    returned_sheets > 0
+  end
+
+  # returns true if currently rendering/printing. This only applies to
+  # jobs started from the web interface. Will return false once the job
+  # has been submitted via lpr.
+  def print_in_progress?
+    !@print_in_progress.nil? && @print_in_progress
+  end
+
+  # set to true before starting a print job to prevent collisions. Reset
+  # afterwards.
+  def print_in_progress=(val)
+    @print_in_progress = val ? true : false
   end
 
 
@@ -24,6 +41,7 @@ class CourseProf < ActiveRecord::Base
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      return b
     end
 
     questions.each do |q|
@@ -33,38 +51,6 @@ class CourseProf < ActiveRecord::Base
             self)
     end
     b
-  end
-
-  # evals sth against some form \o/
-  # returns a TeX-string
-  def evaluate
-    form = course.form
-    # setup for FunkyDBBits ...
-    # FIXME DEPRECATED
-    @db_table = form.db_table
-
-    b = ''
-
-    # only set locale if we want a mixed-lang document
-    I18n.locale = course.language if I18n.tainted?
-
-    sheet_count = count_forms({:barcode => barcode.to_i})
-    vorlhead = form.lecturer_header(prof.fullname, prof.gender, I18n.locale, sheet_count)
-    b << "\\profkopf{#{vorlhead}}\n\n"
-
-    if sheet_count < SCs[:minimum_sheets_required]
-      return b + form.too_few_questionnaires(I18n.locale, sheet_count) + "\n\n"
-    end
-
-    # b << "\\fragenzurvorlesung\n\n"
-
-    specific = { :barcode => barcode.to_i }
-    general = { :barcode => faculty.barcodes }
-    form.questions.find_all{ |q| q.section == 'prof' }.each do |q|
-      b << q.eval_to_tex(specific, general, form.db_table, I18n.locale, prof.gender)
-    end
-
-    return b
   end
 
   def barcode
@@ -89,11 +75,12 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form.name, course.language, course.title, prof.fullname, course.students.to_s + 'pcs'].join(' - ')
+    [course.form.name, course.language, course.title, prof.fullname, \
+      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' '). \
+      gsub(/^\s|\s$/, "")
   end
 
   private
   # quick access to some variables or classes
-  RT = ResultTools.instance
   SCs = Seee::Config.settings
 end

@@ -2,15 +2,6 @@ de:
   de: Deutsch
   en: Englisch
 
-  # Note: semester and “academic semester” differ. For example, if you
-  # first studied maths for 10 semesters and then matriculate for
-  # physics, you'll be in the 1st “academic semester” in physics, but in
-  # the 11th in maths.
-  # FIXME: Check deprecation
-  academic_term: Fachsemester
-  degree_course: Studiengänge
-  other: sonstiges
-  not_specified: keine Angabe
   submitted_questionnaires: Abgegebene Fragebögen
   by: bei
   comments: Kommentare
@@ -25,7 +16,6 @@ de:
 
   none: keine
   study_groups_overview_header: "Tutor/in & Bögen & Seite"
-  study_groups_header: Fragen zum Übungsbetrieb
   study_groups_overview: "Übersicht der Übungsgruppen"
 
   preface: Vorwort

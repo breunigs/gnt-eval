@@ -1,5 +1,9 @@
 <%= render "shared/main_menu" %>
+
+<% # can’t change anything while critical, so don’t load JS %>
+<% unless @course.critical? %>
 <%= render :partial => "courses/form_lang_select" %>
+<% end %>
 
 <% form_for(@course) do |f| %>
   <fieldset>

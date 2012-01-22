@@ -14,8 +14,6 @@ class Course < ActiveRecord::Base
   validates_presence_of :semester_id, :title, :faculty, :language, :form
   validates_numericality_of :students
 
-  include FunkyDBBits
-
   # finds all courses that contain all given keywords in their title.
   # The keywords must not appear in order. Only the first 10 keywords
   # are considered, Only alpha numerical characters and hyphens are
@@ -123,15 +121,21 @@ class Course < ActiveRecord::Base
     RT.count(form.db_table, {:barcode => barcodes})
   end
 
+  # returns true if there have been sheets returned.
+  def returned_sheets?
+    returned_sheets > 0
+  end
+
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
   def eval_lecture_head
     b = ""
-
-    sheets = returned_sheets
-
-    notspecified = t(:not_specified)
-    b << "\\kurskopf{#{title.escape_for_tex}}{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}{#{sheets}}{#{id}}{#{t(:by)}}{#{t(:submitted_questionnaires)}}\n\n"
+    b << "\\kurskopf{#{title.escape_for_tex}}"
+    b << "{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}"
+    b << "{#{returned_sheets}}"
+    b << "{#{id}}"
+    b << "{#{t(:by)}}"
+    b << "{#{t(:submitted_questionnaires)}}\n\n"
     b
   end
 
@@ -205,6 +209,5 @@ class Course < ActiveRecord::Base
 
   private
   # quick access to some variables and classes
-  RT = ResultTools.instance
   SCs = Seee::Config.settings
 end

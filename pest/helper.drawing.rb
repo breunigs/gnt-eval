@@ -13,7 +13,7 @@ module PESTDrawingTools
   end
 
   def draw_boilerplate(img_id, pwd, sheet, file)
-    text1 = "Blue: Search areas\ndark green lines: rotation visualization\ncheckboxes:\n  yellow = orig pos; cyan = TeX correction\nscanning skew correction: not drawn\n  green = checked; orange = empty; red = overfull; strange green = barely checked  (box marks searched area, number is black%)\ntext boxes: values are black pixels so far; red = not enough yet; green = now enough; large green area = exported to file\ntext pages: no debug prints"
+    text1 = "Blue: Search areas\ncheckboxes:\n  yellow = orig pos; cyan = TeX correction\nscanning skew correction: not drawn\n  green = checked; orange = empty; red = overfull; strange green = barely checked  (box marks searched area, number is black%)\ntext boxes: values are black pixels so far; red = not enough yet; green = now enough; large green area = exported to file\ntext pages: no debug prints"
     text2 = "WDir: #{pwd}\nSheet: #{sheet}\nFile: #{file}"
     draw_text(img_id, [500, 40], "black", text1)
     draw_text(img_id, [1000, 40], "red", text2)

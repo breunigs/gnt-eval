@@ -37,6 +37,10 @@ user_config =  "~/.gnt-eval-seee.rb"
 require 'active_support'
 require 'pathname'
 
+if not defined?(RAILS_ROOT)
+  RAILS_ROOT = File.join(File.dirname(__FILE__), "..", "..")
+end
+
 module Seee
   module Config
     mattr_accessor :application_paths, :file_paths, :commands, :external_database, :settings, :custom_builds
@@ -73,7 +77,13 @@ module Seee
       # point this to the script you use to import pages as 2-sided tif
       # images. Either name them ".tif" (NOT tif_f_) if you want them to
       # be recognized or send patches :)
-      :scan => File.join(RAILS_ROOT, '..', 'helfer', "scan.sh"),
+      :scan => File.join(RAILS_ROOT, '..', 'tools', "scan.sh"),
+      # point this to the script that can be used to print forms. It
+      # should accept file paths to PDF files to print and be non-
+      # interactive if --non-interactive is given on the command line.
+      # If no arguments are given, have it print files in tmp/forms/*pdf
+      # that do not start with " multiple" (note the leading space).
+      :print => File.join(RAILS_ROOT, '..', 'tools', 'print_forms_locally.rb'),
       # this is the old zbar, which uses the default ImageMagick
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
@@ -136,7 +146,7 @@ module Seee
 
       :texmfdir => File.join(RAILS_ROOT, '..', 'tex', 'bogen'),
 
-      :hunspell_personal_dic => File.join(Rails.root, "app", "lib", "persdic.dic"),
+      :hunspell_personal_dic => File.join(RAILS_ROOT, "app", "lib", "persdic.dic"),
 
       :scanned_pages_dir => File.join(RAILS_ROOT, "..", "tmp", "scanned"),
 

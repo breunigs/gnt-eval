@@ -15,6 +15,8 @@ class ResultTools
   # only allow one instance of this class
   include Singleton
 
+  SCed = Seee::Config.external_database unless defined?(SCed)
+
   # adds the variables that are available when designing the form.
   # By default, only the form does have these variables, however since
   # questions may refer to them (e.g. \lect{} to get the lecturer’s
@@ -70,7 +72,12 @@ class ResultTools
   # returns true if the given table exists, false otherwise
   def table_exists?(table)
     report_valid_name?(table)
-    sth = @dbh.prepare("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?")
+    qry = case SCed[:dbi_handler].downcase
+      when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+      # SQL standard as implemented by… nobody
+      else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
+    end
+    sth = @dbh.prepare(qry)
     sth.execute(table)
     r = sth.fetch
     sth.finish
@@ -118,8 +125,11 @@ class ResultTools
 
   # runs a custom query against the result-database. Returns the all
   # results as an array of DBI::Row and instantly finishes the statement.
-  # Therefore you don’t want to use this if you gather large values.
-  def custom_query(query, values, first_row = false)
+  # Therefore you don’t want to use this if you gather large values. If
+  # first_row is set to true, “LIMIT 1” will be added automatically.
+  def custom_query(query, values = [], first_row = false)
+    raise "values parameter must be an array." unless values.is_a?(Array)
+    query << " LIMIT 1" if first_row
     check_query(query, values)
     q = @dbh.prepare(query)
     begin
@@ -140,13 +150,25 @@ class ResultTools
   # singleton mixin, only one connection will be opened per Ruby
   # instance.
   def initialize
-    sced = Seee::Config.external_database
-    @dbh = DBI.connect(
-      "DBI:#{sced[:dbi_handler]}:#{sced[:database]}:#{sced[:host]}",
-      sced[:username],
-      sced[:password])
-
+    reconnect_to_database
     @tex = {}
+  end
+
+  # Closes the old connection, if it exists and opens a new one to the
+  # one defined in Seee:Config.external_database. Use this if the
+  # settings have changed, and you want to switch the database.
+  def reconnect_to_database
+    @dbh.disconnect if @dbh && @dbh.connected?
+    @dbh = DBI.connect(
+      "DBI:#{SCed[:dbi_handler]}:#{SCed[:database]}:#{SCed[:host]}",
+      SCed[:username],
+      SCed[:password])
+
+    if @dbh.nil? || !@dbh.connected?
+      debug "ERROR: Couldn’t open a results database connection."
+      debug "Have a look at lib/seee_config.rb to correct the settings."
+      exit 1
+    end
   end
 
   # evaluates a given question with the sheets matching special_where.

@@ -104,8 +104,4 @@ module FunkyTeXBits
     #~ I18n.locale = I18n.default_locale if I18n.tainted?
     I18n.translate(item.to_sym)
   end
-
-  private
-  # quick access to ResultTools.instance
-  RT = ResultTools.instance
 end

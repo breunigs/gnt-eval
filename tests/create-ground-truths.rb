@@ -6,7 +6,6 @@ require 'gtk2'
 require 'tempfile'
 require 'yaml'
 require 'dbi'
-require '../lib/FunkyDBBits.rb'
 require '../lib/AbstractForm.rb'
 require '../pest/helper.AbstractFormExtended.rb'
 require '../pest/helper.image.rb'
@@ -165,8 +164,6 @@ class CreateGroundTruths
     end
 
     locate_corners
-    determine_rotation
-    determine_offset
     if @cancelProcessing
       debug "OMR failed while trying to detect the rotation and offset."
       debug "Please have OMR create a debug print for this sheet; skipping"

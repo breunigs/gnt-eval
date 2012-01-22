@@ -1,5 +1,5 @@
 namespace :testhelper do
-  Scc = Seee::Config.commands
+  Scc = Seee::Config.commands unless defined?(Scc)
 
   # print and execute a command
   def cmd(line)
@@ -42,7 +42,7 @@ namespace :testhelper do
   desc "test OMR against reference files in tests/omr-test"
   task :test_omr do
     Dir.chdir("tests") do
-      cmd("./omr-test.rb")
+      system("./omr-test.rb")
       puts
     end
   end

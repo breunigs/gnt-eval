@@ -344,9 +344,9 @@ amount of copies required is included in the filename.
 Printing
 --------
 When printing the sheets, ensure that they are printed exactly the same
-size (i.e. no “fit to paper”). The default output is A4, but you might
-be able to change this in lib/FunkyTeXBits.rb. Unless a semester-id is
-specified, it will create forms for the current one.
+size (i.e. no “fit to paper”). The default output is A4, but you can
+change this in tex/bogen/tex/latex/eval/eval.cls. Unless a semester-id
+is specified, it will create forms for the current one.
 
 rake images:scan
 ----------------
@@ -473,6 +473,14 @@ THINGS TO CONSIDER
     - Language is English
     - indent with 2 spaces, no tabs.
     - file encoding must be UTF-8.
+
+===============
+FURTHER READING
+===============
+
+* tex/results/README
+  Information about how to add additional visualizers or change output
+  design
 
 
 =======
