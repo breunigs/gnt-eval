@@ -106,21 +106,34 @@ class ResultTools
   # e.g. if one of the names contains invalid chars.
   # If table is an array the query is run for each of the tables
   # separately, i.e. the tables are not joined.
-  def count(table, where_hash = {})
+  # If a db column is given as 3rd argument, will group by that db
+  # column and return multiple results. The format is a hash of
+  # { value => count }
+  def count(table, where_hash = {}, group = nil)
     return -1 unless report_valid_name?(table)
-    return table.uniq.collect {|t| count(t, where_hash) }.sum if table.is_a?(Array)
+    return table.uniq.collect {|t| count(t, where_hash, group) }.sum \
+      if table.is_a?(Array)
     unless table_exists?(table)
       warn "Given table `#{table}` does NOT exist."
       warn "Assuming this means there are no sheets for that table."
       warn "Returning 0 now."
       return 0
     end
-    sql = "SELECT COUNT(*) AS count FROM #{table} WHERE"
+    if group && group.is_a?(String)
+      sql = "SELECT #{group} AS value, COUNT(*) AS count FROM #{table} WHERE"
+    else
+      sql = "SELECT COUNT(*) AS count FROM #{table} WHERE"
+    end
     clause = hash_to_where_clause(where_hash)
     return -1 if clause.nil?
     sql << clause
-    r = custom_query(sql, where_hash.values, true)
-    r[:count]
+    if group && group.is_a?(String)
+      sql << " GROUP BY #{group} "
+      return Hash[custom_query(sql, where_hash.values, false)]
+    else
+      r = custom_query(sql, where_hash.values, true)
+      return r[:count]
+    end
   end
 
   # runs a custom query against the result-database. Returns the all
@@ -328,11 +341,11 @@ class ResultTools
       end
 
       # find common answers
-      q.boxes.each_with_index do |box, i|
+      q.get_answers.each_with_index do |txt, i|
         where_hash[q.db_column[i]] = i+1
         answ[(i+1)] = count(table, where_hash)
-        c = box.any_text.strip_common_tex unless box.any_text.nil?
-        answ[c] = answ[(i+1)] unless c.nil? || c.empty?
+        t = txt.strip_common_tex unless txt.nil?
+        answ[t] = answ[(i+1)] unless t.nil? || t.empty?
         where_hash.delete(q.db_column[i])
       end
 
@@ -343,18 +356,16 @@ class ResultTools
       where_hash[noansw_col] = 0 if q.no_answer?
       answ[:invalid] = count(table, where_hash)
     else # single choice questions #####################################
+      cc = count(table, where_hash, q.db_column)
       # find special values
-      where_hash[q.db_column] = [-1, -2, 0]
-      answ[:invalid] = count(table, where_hash)
+      answ[:invalid] = cc.foz(-2) + cc.foz(-1) + cc.foz(0)
       # don’t skip this, even if there cannot be any rows with that
       # value (i.e. the question doesn’t offer an «no answer» field)
-      where_hash[q.db_column] = 99
-      answ[:abstentions] = count(table, where_hash)
+      answ[:abstentions] = cc.foz(99)
       # find normal values, store them with their index as well as their
       # name if available
       q.get_answers.each_with_index do |txt, i|
-        where_hash[q.db_column] = i+1
-        answ[(i+1)] = count(table, where_hash)
+        answ[(i+1)] = cc.foz(i+1)
         t = txt.strip_common_tex unless txt.nil?
         answ[t] = answ[(i+1)] unless t.nil? || t.empty?
       end
