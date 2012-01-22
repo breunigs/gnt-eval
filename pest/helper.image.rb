@@ -322,7 +322,7 @@ module PESTImageTools
   # rotation themselves.
   def translate(img_id, coord)
     # TWEAK HERE
-    move_top = 60
+    move_top = 58
     move_left = 62
 
     c = @corners[img_id]
@@ -340,8 +340,6 @@ module PESTImageTools
 
     x = coord.x - move_left + off_left
     y = coord.y - move_top + off_top
-
-    # draw_text(img_id, [x,y], "blue", asd.round_to(4))
 
     [x, y]
   end
