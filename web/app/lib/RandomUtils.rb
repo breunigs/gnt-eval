@@ -48,6 +48,12 @@ class Symbol
 end
 
 class String
+  # Removes all UTF8 chars and replaces them by underscores. Usually
+  # required for LaTeX output.
+  def to_ascii
+    self.gsub(/[\x80-\xff]/, "_")
+  end
+
   # wraps text after a maximum of X cols. 72 is the default for mails,
   # so don’t change it here.
   def word_wrap(col = 72)
@@ -355,6 +361,34 @@ def get_or_fake_user_input(valid, fake)
   fake
 end
 
+# Renders the given TeX Code directly into a PDF file at the given
+# location
+def render_tex(tex_code, pdf_path)
+  I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
+  I18n.load_path.uniq!
+
+  pdf_path = File.expand_path(pdf_path)
+
+  id = File.basename(pdf_path, ".pdf")
+
+  # use normal result.pdf preamble
+  def t(t); I18n.t(t); end
+  evalname = "#{id} (#{pdf_path})"
+  head = ERB.new(RT.load_tex("preamble")).result(binding)
+  tex_code = head + tex_code + '\end{document}'
+
+  tmp = File.join(temp_dir(id), "#{id}.tex")
+  File.open(tmp, 'w') {|f| f.write(tex_code) }
+
+  if tex_to_pdf(tmp) and File.exists?(tmp)
+    File.makedirs(File.dirname(pdf_path))
+    FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
+    puts "Done, have a look at #{pdf_path}"
+  else
+    puts "Rendering your TeX Code failed."
+  end
+end
+
 # Takes path to tex file as input and will run pdflatex on it. Will exit
 # the program in case of en error. Returns nothing. Will overwrite
 # existing files.
@@ -384,9 +418,11 @@ def tex_to_pdf(file)
 
   if $?.exitstatus == 0
       puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}"
+      true
   else
       warn "Some other error occured. It shouldn’t be TeX-related, as"
       warn "it already passed one run. Well, happy debugging."
+      false
   end
 end
 
