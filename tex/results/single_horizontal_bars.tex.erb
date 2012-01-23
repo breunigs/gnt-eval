@@ -7,6 +7,7 @@
 }
 <%
   a = answ.delete_if { |k,v| v <= 0 || !k.is_a?(String) }.keys
+  raise if a.empty?
   a.sort! { |x,y| answ[x] <=> answ[y] }
 %>
 \singleHorizontalBars{<%=a.join(",")%>}{<%=answ.values_at(*a).join(",")%>}
