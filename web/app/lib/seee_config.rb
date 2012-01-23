@@ -84,6 +84,11 @@ module Seee
       # If no arguments are given, have it print files in tmp/forms/*pdf
       # that do not start with " multiple" (note the leading space).
       :print => File.join(RAILS_ROOT, '..', 'tools', 'print_forms_locally.rb'),
+      # Point this to your preferred PDF Viewer. It is recommended to
+      # choose one which can detect if it is already showing the same
+      # image instead of opening it again as well as detect changes to
+      # the source file.
+      :pdf_viewer => "evince",
       # this is the old zbar, which uses the default ImageMagick
       :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
