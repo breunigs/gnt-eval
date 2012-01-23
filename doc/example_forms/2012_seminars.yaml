@@ -341,7 +341,7 @@ pages:
       - !ruby/object:Box
         text: "> 20h"
       db_column: v_termpaper
-      visualizer: histogram
+      visualizer: horizontal_bars
       qtext:
         :de: "Falls eine Hausarbeit angefertigt wird: Für die Ausarbeitung benötige/benötigte ich:"
         :en: "In case a seminar paper was required, I spent this much time writing it:"
@@ -648,7 +648,7 @@ pages:
           :de: leichter Schein
           :en: "easy course"
       db_column: v_why_this_seminar
-      visualizer: histogram
+      visualizer: horizontal_bars
       qtext:
         :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt?"
         :en: "Why did you choose to attend exactly to this seminar?"
@@ -673,7 +673,7 @@ pages:
           :de: Spezialthema
           :en: "special topic"
       db_column: v_expectations
-      visualizer: histogram
+      visualizer: horizontal_bars
       qtext:
         :de: "Welche Erwartung hattest Du an das Seminar?"
         :en: "What did you expect from the seminar?"

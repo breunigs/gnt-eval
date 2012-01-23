@@ -812,9 +812,7 @@ pages:
         :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
         :en: "The materials provided for the lecture are:"
       type: square
-      # FIXME: This visualizer does not take the special meaning of the
-      # last field into account and is therefore unsuited.
-      visualizer: histogram
+      visualizer: horizontal_bars
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
