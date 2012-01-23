@@ -544,53 +544,36 @@ namespace :helper do
     puts "</table>"
   end
 
-  desc "Generate crappy output sorted by day for simplified packing"
+  desc "Generate output sorted by # of sheets (same as local printing)"
   task :packing_sheet do
-    crap = '<meta http-equiv="content-type" content=
-  "text/html; charset=utf-8"><style> td { border-right: 1px solid #000; } .odd { background: #eee; }</style><table>'
-    # used for sorting
-    h = Hash["mo", 1, "di", 2, "mi", 3, "do", 4, "fr", 5, "??", 6]
-    # used for counting
-    count = Hash["mo", 0, "di", 0, "mi", 0, "do", 0, "fr", 0, "??", 0]
-    d = curSem.courses.sort do |x,y|
-      a = x.description.strip.downcase
-      b = y.description.strip.downcase
+    puts "Rendering…"
+    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    courses.sort! { |a,b| b.students <=> a.students }
 
-      a = "??" if a.length < 2 || !h.include?(a[0..1])
-      b = "??" if b.length < 2 || !h.include?(b[0..1])
+    count = {}
+    data = []
+    courses.each do |c|
+      desc = c.description.to_ascii.escape_for_tex
 
-      if h[a[0..1]] > h[b[0..1]]
-        1
-      elsif h[a[0..1]] < h[b[0..1]]
-        -1
-      else
-        b <=> a
+      # use the first to letters of the description to count how many
+      # sheets there are for each day
+      count[desc[0..1].gsub(/\\$/, "")] ||= 0
+      count[desc[0..1].gsub(/\\$/, "")] += 1
+
+      c.course_profs.each do |cp|
+        d = []
+        d << desc[0..5]
+        d << c.title.escape_for_tex[0..47]
+        d << cp.prof.surname.escape_for_tex[0..20]
+        data << d
       end
     end
+    tex = ERB.new(RT.load_tex("../packing_sheet")).result(binding)
 
-    odd = false
-    d.each do |c|
-       odd = !odd
-       day = c.description.strip[0..1].downcase
-       day = "??" if day.length < 2 || !count.include?(day[0..1])
-       count[day] += 1
-       if odd
-         crap << "<tr>"
-       else
-         crap << "<tr class='odd'>"
-       end
-       crap << "<td>#{c.description}</td>"
-       crap << "<td>#{c.title}</td>"
-       crap << "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>"
-       crap << "<tr>"
-    end
-    crap << "</table><br><br>"
-    count.each { |k,v| crap << "#{k}: #{v}<br/>" }
-    `mkdir -p ./tmp/`
-    p = './tmp/mappen_packen.html'
-    File.open(p, 'w') {|f| f.write(crap) }
-    `x-www-browser #{p}`
-    puts "Wrote and opened #{p}"
+    p = "#{GNT_ROOT}/tmp/packing_sheet.pdf"
+    render_tex(tex, p)
+    puts "Opening in PDF viewer…"
+    fork { exec "#{Seee::Config.application_paths[:pdf_viewer]} \"#{p}\"" }
   end
 end
 
