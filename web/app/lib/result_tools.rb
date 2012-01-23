@@ -71,7 +71,7 @@ class ResultTools
 
   # returns true if the given table exists, false otherwise
   def table_exists?(table)
-    report_valid_name?(table)
+    raise unless report_valid_name?(table)
     qry = case SCed[:dbi_handler].downcase
       when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
       # SQL standard as implemented by… nobody
@@ -382,7 +382,12 @@ class ResultTools
       all = 0
       cc.each do |v,c|
         ind += 1
-        answ[v] = answ[ind] = c
+        answ[ind] = c
+        # don’t simply overwrite the value. There might be cases where
+        # the user wrote an answer although it is one of the earlier
+        # checkboxes.
+        answ[c] ||= 0
+        answ[c] += c
         all += c
       end
       # correct the “last textbox” count from above
