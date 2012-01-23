@@ -76,7 +76,8 @@ namespace :images do
   desc "(6) Correct invalid sheets"
   task :correct do
     require File.join(Rails.root, "lib", "AbstractForm.rb")
-    tables = curSem.forms.collect { |form| form.db_table }
+    form = Semester.currently_active.map { |s| s.forms }.flatten
+    tables = forms.collect { |form| form.db_table }
     `./pest/fix.rb #{tables.join(" ")}`
   end
 
@@ -93,84 +94,86 @@ namespace :images do
     expire_course_cache = []
     expire_tutor_cache = []
 
-    system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{curSem.dirFriendlyName}\"")
-    path=File.join(File.dirname(__FILE__), "tmp/images")
+    Semester.currently_active.each do |sem|
+      system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}\"")
+      path=File.join(File.dirname(__FILE__), "tmp/images")
 
-    # find all existing images for courses/profs and tutors
-    cpics = CPic.find(:all)
-    tpics = Pic.find(:all)
+      # find all existing images for courses/profs and tutors
+      cpics = CPic.find(:all, :conditions => { :semester => sem })
+      tpics = Pic.find(:all, :conditions => { :semester => sem })
 
-    # find all tables that include a tutor chooser
-    forms = curSem.forms.find_all { |form| form.include_question_type?("tutor_table") }
-    tables = {}
-    forms.each { |form| tables[form.db_table] = form.get_tutor_question.db_column }
+      # find all tables that include a tutor chooser
+      forms = sem.forms.find_all { |form| form.include_question_type?("tutor_table") }
+      tables = {}
+      forms.each { |form| tables[form.db_table] = form.get_tutor_question.db_column }
 
-    allfiles = Dir.glob(File.join(SCfp[:sorted_pages_dir], '**/*.jpg'))
-    allfiles.each_with_index do |f, curr|
-      bname = File.basename(f)
-      barcode = find_barcode_from_path(f)
+      allfiles = Dir.glob(File.join(SCfp[:sorted_pages_dir], '**/*.jpg'))
+      allfiles.each_with_index do |f, curr|
+	bname = File.basename(f)
+	barcode = find_barcode_from_path(f)
 
-      if barcode == 0
-        warn "Couldn’t detect barcode for #{bname}, skipping.\n"
-        next
-      end
+	if barcode == 0
+	  warn "Couldn’t detect barcode for #{bname}, skipping.\n"
+	  next
+	end
 
-      course_prof = CourseProf.find(barcode)
-      if course_prof.nil?
-        warn "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
-        next
-      end
+	course_prof = CourseProf.find(barcode)
+	if course_prof.nil?
+	  warn "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
+	  next
+	end
 
-      p = nil
-      # tutor comments, place them under each tutor
-      if f.downcase.end_with?("ucomment.jpg")
-        # skip existing images
-        next if tpics.any? { |x| x.basename == bname }
-        # find tutor id
-        tut_num = nil
-        tables.each do |table, column|
-          # remove everything after the last underscore and add .tif to
-          # find the original image
-          path = f.sub(/_[^_]+$/, "") + ".tif"
-          data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
-          tut_num = data[0].to_i if data
-          break if tut_num
-        end
+	p = nil
+	# tutor comments, place them under each tutor
+	if f.downcase.end_with?("ucomment.jpg")
+	  # skip existing images
+	  next if tpics.any? { |x| x.basename == bname }
+	  # find tutor id
+	  tut_num = nil
+	  tables.each do |table, column|
+	    # remove everything after the last underscore and add .tif to
+	    # find the original image
+	    path = f.sub(/_[^_]+$/, "") + ".tif"
+	    data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
+	    tut_num = data[0].to_i if data
+	    break if tut_num
+	  end
 
-        if tut_num.nil?
-          warn "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
-          next
-        end
+	  if tut_num.nil?
+	    warn "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+	    next
+	  end
 
-        if tut_num == 0
-          warn "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
-          next
-        end
+	  if tut_num == 0
+	    warn "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+	    next
+	  end
 
-        # load tutors
-        tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
+	  # load tutors
+	  tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
 
-        if tut_num > tutors.count
-          warn "Couldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
-          next
-        end
+	  if tut_num > tutors.count
+	    warn "Couldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
+	    next
+	  end
 
-        p = Pic.new
-        p.tutor_id = tutors[tut_num-1].id
-        expire_tutor_cache << tutors[tut_num-1]
-      else # files for the course/prof. Should be split up. FIXME.
-        next if cpics.any? { |x| x.basename == bname }
-        p = CPic.new
-        p.course_prof = course_prof
-        expire_course_cache << course_prof.course
-      end
-      p.basename = bname
-      # let rails know about this comment
-      p.save
-      # move comment to correct location
-      system("#{cp} \"#{f}\" \"#{SCfp[:comment_images_public_dir]}/#{curSem.dirFriendlyName}/\"")
-      print_progress(curr+1, allfiles.size)
-    end # Dir glob
+	  p = Pic.new
+	  p.tutor_id = tutors[tut_num-1].id
+	  expire_tutor_cache << tutors[tut_num-1]
+	else # files for the course/prof. Should be split up. FIXME.
+	  next if cpics.any? { |x| x.basename == bname }
+	  p = CPic.new
+	  p.course_prof = course_prof
+	  expire_course_cache << course_prof.course
+	end
+	p.basename = bname
+	# let rails know about this comment
+	p.save
+	# move comment to correct location
+	system("#{cp} \"#{f}\" \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}/\"")
+	print_progress(curr+1, allfiles.size)
+      end # Dir glob
+    end # Semester.each
 
     puts "Expiring caches for courses#edit and tutors#edit"
     expire_course_cache.each { |c| expire_page :controller => "courses", :action => "edit", :id => c }
@@ -189,7 +192,8 @@ namespace :images do
   desc "Finds all different forms for each folder and saves the form file as #{simplify_path(SCfp[:sorted_pages_dir])}/[form id].yaml."
   task :getyamls do |t,o|
     `mkdir -p ./tmp/images`
-    curSem.forms.each do |form|
+    forms = Semester.currently_active.map { |s| s.forms }.flatten
+    forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
         target = File.join(SCfp[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")
         next if File.exists?(target)

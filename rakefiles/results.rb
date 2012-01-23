@@ -96,37 +96,41 @@ namespace :results do
 
   desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
   task :pdf_report, [:lang_code, :semester_id, :faculty_id] => "forms:samples" do |t, a|
-    sem = a.semester_id.nil? ? curSem.id : a.semester_id
     lang_code = a.lang_code || "mixed"
-
     dirname = './tmp/results/'
     FileUtils.mkdir_p(dirname)
 
-    # we have been given a specific faculty, so evaluate it and exit.
-    if not a.faculty_id.nil?
-      I18n.default_locale = Seee::Config.settings[:default_locale]
-      # taint I18n to get a mixed-language results file. Otherwise set
-      # the locale that will be used
-      if lang_code == "mixed"
-        I18n.taint
-      else
-        I18n.untaint
-        I18n.default_locale = lang_code.to_sym
-        I18n.locale = lang_code.to_sym
-      end
-      I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-      evaluate(sem, a.faculty_id, dirname)
-      exit
+    sem_ids = if a.semester_id.nil?
+      Semester.currently_active.map { |s| s.id }
+    else
+      [a.semester_id]
     end
 
-    # no faculty specified, just find all and process them in parallel.
-    Faculty.all.each do |f|
-      args = [lang_code, sem, f.id].join(",")
-      puts "Running «rake \"pdf:semester[#{args}]\"»"
-      job = fork { exec "rake pdf:semester[#{args}]" }
-      # we don't want to wait for the process to finish
-      Process.detach(job)
-    end
+    sem_ids.each do |sem_id|
+      # we have been given a specific faculty, so evaluate it and exit.
+      if not a.faculty_id.nil?
+	I18n.default_locale = Seee::Config.settings[:default_locale]
+	# taint I18n to get a mixed-language results file. Otherwise set
+	# the locale that will be used
+	if lang_code == "mixed"
+	  I18n.taint
+	else
+	  I18n.untaint
+	  I18n.default_locale = lang_code.to_sym
+	  I18n.locale = lang_code.to_sym
+	end
+	I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+	evaluate(sem_id, a.faculty_id, dirname)
+      else
+	# no faculty specified, just find all and process them in parallel.
+	Faculty.all.each do |f|
+	  args = [lang_code, sem_id, f.id].join(",")
+	  puts "Running «rake \"results:pdf_report[#{args}]\"»"
+	  work_queue.enqueue_b { system("rake -s results:pdf_report[#{args}]") }
+	end
+	work_queue.join
+      end
+    end # sem_ids.each
   end
 
   desc "Creates preliminary versions of result files in tmp/results."

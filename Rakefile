@@ -18,13 +18,10 @@ include Magick
 require 'rake/clean'
 CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
 
-
-# requires rails database connection.
-def curSem
-  warn "DEPRECATED: curSem is deprecated and only returns one current semester. Please use Semester.currently_active instead, which returns an array of all current semesters." unless $curSumWarningGiven
-  $curSumWarningGiven = true
-  $curSem ||= Semester.currently_active.first
-  $curSem
+# Capture ctrl+c and stop all currently running jobs in the work queue.
+# needs current work_queue gem.
+if work_queue.respond_to?("kill")
+  trap("INT") { work_queue.kill  }
 end
 
 RT = ResultTools.instance unless defined?(RT)
@@ -134,9 +131,10 @@ namespace :misc do
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
-    puts curSem.courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
+    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    puts courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
     # Sort by faculty first, then by course title
-    sorted = curSem.courses.sort do |x,y|
+    sorted = courses.sort do |x,y|
       if x.faculty_id == y.faculty_id
         x.title <=> y.title
       else
