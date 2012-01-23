@@ -100,7 +100,7 @@ namespace :images do
     end
   end
 
-  desc "(4) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
+  desc "(5) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(Seee::Config.file_paths[:sorted_pages_dir])})"
   task :insertcomments do |t, d|
     cp = Seee::Config.commands[:cp_comment_image_directory]
     mkdir = Seee::Config.commands[:mkdir_comment_image_directory]
@@ -314,6 +314,11 @@ namespace :pest do
     require File.join(Rails.root, "lib", "AbstractForm.rb")
     tables = curSem.forms.collect { |form| form.db_table }
     `./pest/fix.rb #{tables.join(" ")}`
+  end
+
+  desc "(4) Fill in small text boxes (not comments)"
+  task :fill_text_box do
+    system("./pest/fill_text_box.rb")
   end
 end
 
