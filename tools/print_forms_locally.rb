@@ -49,7 +49,7 @@ end
 
 if interactive
   puts
-  puts "Please run rm -r tmp/forms && rake pdf:forms && rake pdf:howto"
+  puts "Please run rm -r tmp/forms && rake forms:generate && rake misc:howtos"
   puts "before running this script. Otherwise forms might be missing"
   puts "or outdated ones will be printed."
   puts

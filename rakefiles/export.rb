@@ -1,4 +1,4 @@
-namespace :helper do
+namespace :results do
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
   task :export, [:base64_data] => 'db:connect' do |t, a|
     # we now have gathered all necessary data to process the input. To

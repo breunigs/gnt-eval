@@ -1,0 +1,211 @@
+=============
+MY FIRST EVAL
+=============
+
+For now we’ll use Webrick to handle the webpage related work, in the long
+run you might want to use Apache instead, though. To start Webrick:
+  cd web/script && ./server
+If it starts properly, there should be a webpage available at
+  http://localhost:3000
+where you can enter all your profs, courses, forms, etc. To get an idea of
+how the data is organized, here’s a short wrap up:
+
+* Create a new semester to get started, the “current one” is determined
+  by the date automatically will always be the active one. For now, it’s
+  not possible to change that without hacking.
+* Once done you should add forms for the current semester – the
+  questionnaires. As of writing, there’s no GUI to help you develop
+  these forms and you have to enter them in YAML format. The best method
+  is to take one of the included examples in
+    doc/example_forms
+  and adjust them to your needs. Save often, it will display the form
+  as serialized Ruby object if the YAML file is valid. Some parts are
+  hard coded into TeX, grep is your friend. Patches welcome. Comments
+  with a db column attribute ending in “ucomment” will be placed at the
+  tutor’s page if one was selected. All other comments will be put in
+  the course section. The save_as attribute will only contain hyphens,
+  and latin1 alphanumerals (0-9, a-z, A-Z). It is derived from the db
+  column and cannot be entered separately.
+* Next, add some courses and once done,
+* you can add professors and tutors to the course. Profs are “real”
+  classes, so you can re-use them, but tutors are just a bunch of names
+  that are not connected throughout the application. If it ever comes
+  up, “CourseProf” is the model which holds the barcode id and that is
+  later used to distinguish the forms. It is therefore possible to have
+  more than one prof per lecture and give each of them their own
+  evaluation, but you also need to be more careful when handing out the
+  sheets.
+
+Once all data is entered, we’ll leave the web interface for now and
+work on the console. Change to the root of the repository and run
+  rake
+You’ll see a lot of options, most of which you can ignore.
+
+
+Below follows a list of commands you’ll likely need. They are ordered so
+that you can check off each step/command and end up with a complete eval
+that can be handed out to everyone.
+
+
+
+rake forms:generate
+-------------------
+Creates the forms for each course and prof that should be printed. The
+amount of copies required is included in the filename. Unless a
+semester-id is specified, it will create forms for the current ones.
+
+Printing (usually rake forms:print)
+-----------------------------------
+When printing the sheets, ensure that they are printed exactly the same
+size (i.e. no “fit to paper”). The default output is A4, but you can
+change this in tex/bogen/tex/latex/eval/eval.cls. If you are lucky
+enough to have a local printer, rake forms:print will work. Otherwise
+have a look at tools/print_forms_remote.rb and rake forms:multiply.
+
+rake images:scan
+----------------
+Calls the default scan script, which you can find in tools/scan.sh. If
+the script doesn’t work for you, even after installing “sane”, you likely
+want to point it to your customized version using seee_config (see above,
+the variable is application_paths/scan).
+
+If you change the script ensure that it only outputs two-sided, black/
+white tif images.
+
+rake images:sortandalign
+------------------------
+Before you can use this function, you need to scan the images into two-
+sided tif images. Only black-and-white tifs are supported. 300 DPI is
+usually enough (and what we use), but you can experiment with different
+settings if you like.
+
+If you specify a custom “directory”, make sure it is writable before
+running this command. This is required because the images are moved and
+edited in-place rather than copied. If you used images:scan or placed
+them into tmp/scanned you can omit the directory.
+
+The function will try to recognize the bar code and sort them depending
+on the form type into different folders in our tmp directory.
+
+If you get a lot of errors that are zbarimg related, the included exe-
+cutable is probably out of date compared to the libraries on your
+system. In that case, run “rake magick:buildZBar” to build a custom
+version.
+
+rake images:omr
+---------------
+This will work on the images previously sorted into the tmp directory
+and recognize if a certain field is filled out or if a comment field is
+empty or not. It may be required to hack some magic numbers in the
+pest/omr2.rb file, but we’re working on improving that.
+
+If you do this for the first time, you probably want to run it with
+debug output on, so you’ll get a graphical representation of what’s
+going on. Run pest/omr2.rb without any arguments to get a list of
+possible command line options. The following line should get you
+started for your debugging purposes:
+
+  ./pest/omr2.rb -s "./tmp/images/0.yaml" -p "./tmp/images/0" -d -v
+
+Activating debugging mode will store the data in an SQLite file in the
+working directory, so don’t worry about overwriting something in your
+production database
+
+rake images:correct
+-------------------
+For many questions there will be more than one cross detected, either
+because it wasn’t clear enough the question at hand is single-choice
+or if a correction was made. Testing showed that there are numerous ways
+of correcting and no auto-detection was possible. Question where OMR
+failed will appear here, too.
+
+You can use the arrow-keys to select the correct answer or choose the
+box in the upper left corner to mark an answer as unanswered (i.e. no
+cross at all) or unclear (i.e. more than one cross).
+
+rake images:fill_text_box
+-------------------------
+If you have any questions where the last box is a text box, you’ll need
+to run this. This small tool will help you fill in the handwritten
+answers. The reason these are not entered via the web interface is that
+they allow only short amounts of text and therefore should have a quite
+limited number of values.
+
+Beware: as of writing, there is no undo method.
+
+rake images:insertcomments
+--------------------------
+This grabs the recognized comments and makes them available in the
+web interface (under each course and/or tutor). Note that you need
+to configure the used directories in seee_config first (see INSTALL).
+
+
+Typing the comments/summaries
+-----------------------------
+When you’re done, switch to the webinterface and type the comments,
+write a summary for each course and/or tutor. Each field is directly
+passed to LaTeX so you’re not limited to some design options. If you
+need further packages add them in tex/results_preamble.tex.erb. If you
+want to draw images you can use “Dia” which can export as LaTeX PGF. The
+code can be pasted directly into the comment field and should render out
+of the box. If you want to include raster images, specify an absolute
+path somewhere on your disk.
+
+rake results:pdf_report
+-----------------
+Without parameters, this will generate results in one PDF per
+faculty for the current semester(s). You can run rake results:make_
+preliminary to mark these results as not final and that they shouldn’t
+be handed to anyone.
+
+“Rolling Eval”
+--------------
+You can execute all of the above commands as often as you wish without
+creating duplicates anywhere. This makes it possible to create a rolling
+eval, i.e. add new sheets each evening and hand the results so far to
+whomever you like. I don’t recommend advertising this on your first go,
+but remember it will be possible later.
+
+If you’ve made it so far, congratulations! This is your first eval.
+
+
+the little things
+-----------------
+Once you’ve gotten familiar with the general process, it might save you
+time to use one of the many helpers that were created to ease our work
+flow. For example, results:find_broken_comments will help you which
+comment has invalid TeX code if result:pdf_report fails. Many of the
+tools in the misc section are currently tailored to work for our setup,
+but you might derive some code from them.
+
+
+==================
+THINGS TO CONSIDER
+==================
+
+* Don’t rank. Many people believe creating a rank will actually solve
+  problems and over time improve the quality of the evaluated object.
+  There are many good reasons, but the main reasons are:
+    - oversimplification of the issue
+    - easy to dismiss by /anyone/
+    - doesn’t help interested people to improve themselves at all
+    - doesn’t make uninterested people magically better or interested
+  The results are just a bunch of worthless numbers unless you go to the
+  people involved, talk to them and offer them help where appropriate.
+
+  If you do it RIGHT, the actual evaluation will be the least amount of
+  work to be done. Seriously, don’t rank.
+
+* If you want to make the web interface available from the internet,
+  be sure to add HTTP-Authentication or similar to protect your data.
+  There’s no user/admin scheme in G'n'T, so everyone may to every-
+  thing. If someone is not trustworthy, don’t give them access.
+
+* Submit patches. Please do. We are only a small team and are happy for
+  any help. Even though the project does not yet follow the following
+  guidelines everywhere, they should be used nonetheless:
+    - use_underscores_for_everything_but_classes
+    - ClassesShouldUseCamelCase
+    - Language is English
+    - indent with 2 spaces, no tabs.
+    - file encoding must be UTF-8.

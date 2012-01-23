@@ -5,6 +5,7 @@ require 'rubygems'
 require 'work_queue'
 
 require File.join(File.dirname(__FILE__), "seee_config.rb")
+require File.join(File.dirname(__FILE__), "tex_tools.rb")
 
 Scc = Seee::Config.commands unless defined?(Scc)
 
@@ -48,11 +49,7 @@ class Symbol
 end
 
 class String
-  # Removes all UTF8 chars and replaces them by underscores. Usually
-  # required for LaTeX output.
-  def to_ascii
-    self.gsub(/[\x80-\xff]/, "_")
-  end
+
 
   # wraps text after a maximum of X cols. 72 is the default for mails,
   # so don’t change it here.
@@ -62,27 +59,6 @@ class String
 
   def bold
     "\e[1m#{self}\e[0m"
-  end
-
-  # escapes & _ and % signs if not already done so
-  def escape_for_tex
-    self.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%').gsub(/\\?_/, '\\\_')
-  end
-
-  # strips TeX tags that are commonly used when designing a form so the
-  # text actually fits into the sheet. Most likely, these tags are not
-  # required in the results, therefore they may be stripped here. It
-  # does not remove superfluous curly braces because that would be more
-  # effort… also TeX, doesn’t care about them… Currently removes:
-  # \linebreak, \mbox, \textls, \hspace*, \hspace.
-  # In case a line ends with an hyphen like this: long-\linebreak{}word
-  # the hypen will be removed as well.
-  def strip_common_tex
-    s = self.gsub(/-\\linebreak(\{\})?/, "") # no space due to hyphen
-    s = s.gsub(/\\linebreak(\{\})?/, " ")    # no hypen, so add space
-    s = s.gsub(/\\mbox/, "")
-    s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
-    s = s.gsub(/\\hspace\*?\{[^\}]+\}/, "")
   end
 
   # Actually only useful for arrays. This is a convenience feature so
@@ -105,6 +81,25 @@ def simplify_path(path)
   rr = File.expand_path(File.join(RAILS_ROOT, "..")) + "/"
   File.expand_path(path).gsub(/^#{rr}/, "")
 end
+
+# Finds the barcode of a given image file by looking at the image.
+# Automatically rotates and orders the pages if  a barcode is found.
+def find_barcode(filename)
+  zbar = Seee::Config.application_paths[:zbar]
+  unless File.exist?(zbar)
+    puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{`uname -m`.strip}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
+    exit 1
+  end
+  zbar = Seee::Config.commands[:zbar]
+
+  r = `#{zbar} "#{filename}"`
+  if not r.empty?
+    return r.strip.match(/^([0-9]+)/)[1].to_i
+  else
+    return nil
+  end
+end
+
 
 # once the barcode has been recognized the images are stored in the
 # format oldname_barcode.tif. This way barcode detection and OMR can
@@ -359,71 +354,6 @@ def get_or_fake_user_input(valid, fake)
   end
   puts "> #{fake.is_a?(Array) ? fake.join(" ") : fake}"
   fake
-end
-
-# Renders the given TeX Code directly into a PDF file at the given
-# location
-def render_tex(tex_code, pdf_path)
-  I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
-  I18n.load_path.uniq!
-
-  pdf_path = File.expand_path(pdf_path)
-
-  id = File.basename(pdf_path, ".pdf")
-
-  # use normal result.pdf preamble
-  def t(t); I18n.t(t); end
-  evalname = "#{id} (#{pdf_path})"
-  head = ERB.new(RT.load_tex("preamble")).result(binding)
-  tex_code = head + tex_code + '\end{document}'
-
-  tmp = File.join(temp_dir(id), "#{id}.tex")
-  File.open(tmp, 'w') {|f| f.write(tex_code) }
-
-  if tex_to_pdf(tmp) and File.exists?(tmp)
-    File.makedirs(File.dirname(pdf_path))
-    FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
-    puts "Done, have a look at #{pdf_path}"
-  else
-    puts "Rendering your TeX Code failed."
-  end
-end
-
-# Takes path to tex file as input and will run pdflatex on it. Will exit
-# the program in case of en error. Returns nothing. Will overwrite
-# existing files.
-def tex_to_pdf(file)
-  filename="\"#{File.basename(file)}\""
-  texpath="cd \"#{File.dirname(file)}\" && "
-
-  # run it once fast, to see if there are any syntax errors in the
-  # text and create first-run-toc
-  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  if $?.exitstatus != 0
-      warn "="*60
-      warn err
-      warn "\n\n\nERROR WRITING: #{file}"
-      warn "EXIT CODE: #{$?}"
-      warn "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
-      warn "="*60
-      warn "Running 'rake summary:fixtex' or 'rake summary:blame' might help."
-      raise
-  end
-
-  # run it fast a second time, to get /all/ references correct
-  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  # now all references should have been resolved. Run it a last time,
-  # but this time also output a pdf
-  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
-
-  if $?.exitstatus == 0
-      puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}"
-      true
-  else
-      warn "Some other error occured. It shouldn’t be TeX-related, as"
-      warn "it already passed one run. Well, happy debugging."
-      false
-  end
 end
 
 # Creates howtos for all available languages in the given directory, iff
