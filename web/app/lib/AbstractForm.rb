@@ -538,10 +538,10 @@ class AbstractForm
   private
   # returns array of db columns used in this form
   def get_all_db_columns
-    q = questions.collect { |q| q.db_column }
+    quest = questions.collect { |q| q.db_column }
     litf = questions.reject { |q| !q.last_is_textbox? } .map { |q| \
               (q.multi? ? q.db_column.last : q.db_column) + "_text" }
-    (q+litf)
+    (quest+litf)
   end
 
   def get_texhead(lang)
