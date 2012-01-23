@@ -142,25 +142,6 @@ class Question
     @boxes.nil? ? 0 : @boxes.count
   end
 
-  # belongs to: 'tutor', 'prof', 'uebungsgruppenbetrieb'
-  # FIXME: now questions belong to sections. is there a way we could …
-  # DEPRECATED
-  def section
-    warn "DEPRECATED: Question#section is not used any longer. Use Question#repeat_for instead."
-
-    if @db_column.nil?
-      return 'this is no question in a traditional sense'
-    end
-    first_letter = (@db_column.to_s)[0].chr
-    if first_letter == 'v'
-      return 'prof'
-    elsif first_letter == 't'
-      return 'tutor'
-    elsif first_letter == 'u'
-      return 'uebungsgruppenbetrieb'
-    end
-  end
-
   # Returns for which entities this question should be repeated or where
   # it belongs to. Returns either of the following:
   # :course, :lecturer, :tutor
