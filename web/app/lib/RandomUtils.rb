@@ -383,7 +383,7 @@ def tex_to_pdf(file)
   `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
 
   if $?.exitstatus == 0
-      puts "Wrote #{file}"
+      puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}"
   else
       warn "Some other error occured. It shouldn’t be TeX-related, as"
       warn "it already passed one run. Well, happy debugging."
