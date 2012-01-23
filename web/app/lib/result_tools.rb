@@ -386,8 +386,8 @@ class ResultTools
         # don’t simply overwrite the value. There might be cases where
         # the user wrote an answer although it is one of the earlier
         # checkboxes.
-        answ[c] ||= 0
-        answ[c] += c
+        answ[v] ||= 0
+        answ[v] += c
         all += c
       end
       # correct the “last textbox” count from above
