@@ -27,6 +27,18 @@ namespace :results do
     puts "protect the participant’s anonymity if applicable."
     puts
     puts
+    # select faculty to export
+    puts "======="
+    puts "Faculty"
+    puts "======="
+    puts "Choose semester to export:"
+    Faculty.all.each do |f|
+      puts "#{f.id}: #{f.shortname}"
+    end
+    faculty = get_or_fake_user_input(Faculty.all.collect{|x|x.id}, a[:faculty])
+    puts
+    puts
+
     # select semester to limit list of tables
     puts "========"
     puts "Semester"
@@ -132,6 +144,8 @@ namespace :results do
     end
     allcols = export.values.flatten.uniq
 
+    valid_barcodes = faculty.collect { |f| Faculty.find_by_id(f).barcodes }.flatten
+    where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
     header = nil
@@ -145,9 +159,9 @@ namespace :results do
       cols.flatten!
       cols = cols + (extracols.collect {|x| "\"\" AS #{x}"})
       if tutor_col[db]
-        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db} #{where}"
       else
-        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db} #{where}"
       end
     end
     qry = qry.join(" UNION ALL ")
@@ -228,10 +242,13 @@ namespace :results do
         if boxes.any? { |b| b.any_text.nil? || b.any_text.empty? }
           line << d[ind]
         else
+          # reduce count by one if the last one is a textbox to include
+          # the text field instead of “others”
+          cnt = question.last_is_textbox? ? boxes.count-1 : boxes.count
           line << case(d[ind])
             when -2..0: ""
-            when 99: I18n.t(:no_answer)
-            when 1..boxes.count: boxes[d[ind]-1].any_text.strip_common_tex
+            when 99: "NOT SPECIFIED"
+            when 1..cnt: boxes[d[ind]-1].any_text.strip_common_tex
             else (question.last_is_textbox? ? d[ind+1] : "ERROR")
           end
         end
@@ -276,7 +293,8 @@ namespace :results do
       export[tbl] -= columns_text[tbl].map { |ct| ct + "_text" }
     end
 
-    data = {:sems => sems, :dbs => dbs, :cols => export, :meta => meta_store}
+    data = {:sems => sems, :dbs => dbs, :cols => export,
+              :meta => meta_store, :faculty => faculty}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
     print "rake \"results:export["
