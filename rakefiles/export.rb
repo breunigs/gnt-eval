@@ -1,6 +1,6 @@
 namespace :results do
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
-  task :export, [:base64_data] => 'db:connect' do |t, a|
+  task :export, [:base64_data] do |t, a|
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
     require 'helfer/faster_csv.rb'
@@ -32,12 +32,16 @@ namespace :results do
     puts "Semester"
     puts "========"
     puts "Choose semester to export:"
-    Semester.find(:all).each do |s|
+    Semester.all.each do |s|
       puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
     end
-    sems = get_or_fake_user_input(Semester.find(:all).collect{|x|x.id}, a[:sems])
+    sems = get_or_fake_user_input(Semester.all.collect{|x|x.id}, a[:sems])
     puts
     puts
+    if sems.empty?
+      puts "no semester(s) chosen. Exiting."
+      exit 0
+    end
     # collect some data which will be required later
     # stores which tables exist
     dbs = []
@@ -46,15 +50,24 @@ namespace :results do
     title = []
     # stores which table has which columns
     columns = {}
+    # and which columns also have text
+    columns_text = {}
     # stores question text(s) for each column for selected tables
     ident = {}
+    # stores if a certain DB has a tutor table as well as its name
+    tutor_col = {}
     sems.each do |sem|
       sem = Semester.find_by_id(sem)
       dbs += sem.forms.collect { |f| f.db_table }.uniq
-      title += sem.forms.collect { |f| "#{f.db_table} (#{f.name})" }.uniq
+      title += sem.forms.collect do |f|
+        "#{f.db_table} (#{f.name}, #{sem.title})"
+      end.uniq
       sem.forms.each do |f|
         # collect which columns each table has
         columns[f.db_table] = f.questions.collect { |q| q.db_column }.flatten
+        columns_text[f.db_table] = f.questions.collect do |q|
+          q.last_is_textbox? ? q.db_column : nil
+        end.compact
       end
     end
 
@@ -66,21 +79,30 @@ namespace :results do
     dbs = get_or_fake_user_input(dbs, a[:dbs])
 
     # only collect identifiers for tables that were selected
-    Form.find(:all).select { |f| dbs.include?(f.db_table) }.each do |f|
-      f.questions.each do |q|
-        # also collect which question text each *identifier* has. They are
-        # later put into a single table, so the user should be aware if a
-        # label has multiple meanings.
-        if q.db_column.is_a? Array
-          # also collect answer text for multiple choice questions
-          q.db_column.each_with_index do |c,i|
-            ident[c] ||= []
-            ident[c] << "#{q.text}   --   #{q.boxes[i].any_text}"
-          end
-        else
-          ident[q.db_column] ||= []
-          ident[q.db_column] << q.text
+    forms = Form.all.select do |f|
+      f.abstract_form_valid? && dbs.include?(f.db_table)
+    end
+
+    # find tables that have tutor column
+    forms.each do |f|
+      q = f.get_tutor_question
+      next unless q
+      tutor_col[f.db_table] = q.db_column
+    end
+
+    forms.collect { |f| f.questions }.flatten.each do |q|
+      # also collect which question text each *identifier* has. They are
+      # later put into a single table, so the user should be aware if a
+      # label has multiple meanings.
+      if q.multi?
+        # also collect answer text for multiple choice questions
+        q.db_column.each_with_index do |c,i|
+          ident[c] ||= []
+          ident[c] << "#{q.text.strip_common_tex}   --   #{q.boxes[i].any_text}"
         end
+      else
+        ident[q.db_column] ||= []
+        ident[q.db_column] << q.text.strip_common_tex
       end
     end
 
@@ -110,40 +132,27 @@ namespace :results do
     end
     allcols = export.values.flatten.uniq
 
+
     qry = []
-    qry_stats = []
     header = nil
     export.each do |db,cols|
       extracols = allcols-export[db]
       # first subquery defines order of columns, so only write header
       # if not yet defined
       header ||= cols + extracols
+      # automatically add _text columns
+      cols.map! { |c| columns_text[db].include?(c) ? [c, "#{c}_text"] : c }
+      cols.flatten!
       cols = cols + (extracols.collect {|x| "\"\" AS #{x}"})
-      # note: the NULLIF command is used to exclude 0-valued columns from
-      # the average calculation
-      cols_stats = cols.collect { |x| "AVG(NULLIF(#{x}, 0)) as #{x}" } + (extracols.collect {|x| "\"\" AS #{x}"})
-      # FIXME: Do not hardcode tutor_id as it may change
-      qry << "SELECT barcode, tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
-      qry_stats << "SELECT barcode, '#{db}' as tbl, COUNT(*) as returned_sheets, #{cols_stats.join(", ")} FROM #{db} GROUP BY barcode"
+      if tutor_col[db]
+        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+      else
+        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db}"
+      end
     end
     qry = qry.join(" UNION ALL ")
-    qry_stats = qry_stats.join(" UNION ALL ")
     # add the question text to each question header as well
     fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
-    header_stats = Array.new(fullheader)
-
-    puts
-    puts "================="
-    puts "Further aggregate"
-    puts "================="
-    puts "You can further aggregate (average) the first n questions you"
-    puts "chose above for the statistics file. Enter 0 if you do not want"
-    puts "this additional column, enter 2 to average the average of the"
-    puts "first two questions. If you think the average of an average"
-    puts "is kind of dumb, then you are a good person. It’s included"
-    puts "because some people thought up the \"LQI\"; you can find some"
-    puts "info about it here: http://www.kit.edu/visit/pi_2010_2933.php"
-    lqi = get_or_fake_user_input((0..header.size).to_a, [a[:lqi].to_s]).first.to_i
 
     puts
     puts "========"
@@ -210,14 +219,30 @@ namespace :results do
             end
         end
       end
-      line += d
+
+      form = forms.find { |f| f.db_table == table }
+      export[table].each_with_index do |col, ind|
+        question = form.get_question(col)
+        next unless question # will fail for _text questions
+        boxes = question.boxes
+        if boxes.any? { |b| b.any_text.nil? || b.any_text.empty? }
+          line << d[ind]
+        else
+          line << case(d[ind])
+            when -2..0: ""
+            when 99: I18n.t(:no_answer)
+            when 1..boxes.count: boxes[d[ind]-1].any_text.strip_common_tex
+            else (question.last_is_textbox? ? d[ind+1] : "ERROR")
+          end
+        end
+      end
       lines << line
     end
 
     # write data to CSV
     `mkdir -p "tmp/export"`
     now = Time.now.strftime("%Y-%m-%d %H:%M")
-    file = "tmp/export/#{now} #{header.join(" ")}.csv"
+    file = "tmp/export/#{now}.csv"
     puts "Writing CSV"
     opt = {:headers => true, :write_headers => true}
     FasterCSV.open(file, "wb", opt) do |csv|
@@ -225,50 +250,14 @@ namespace :results do
       lines.each { |l| csv << l }
     end
 
-    # STATISTICS #######################################################
-
-    puts
-    puts "Running stats query: " + qry_stats
-    data = RT.custom_query(qry_stats)
-    lines = []
-
-    # add metadata to stats (predefined)
-    data.each_with_index do |d,i|
-      barcode, table, returned_sheets = *d.shift(3)
-      cp = CourseProf.find_by_id(barcode)
-      line = []
-      line << cp.course.form.name
-      line << barcode
-      line << cp.prof.fullname
-      line << cp.course.title
-      line << cp.course.students
-      line << returned_sheets
-      line << (d[0..lqi].sum.to_f/lqi.to_f) if lqi > 0
-
-      line += d
-      lines << line
-    end
-
-    file_stats = "tmp/export/#{now} #{header.join(" ")} Statistics.csv"
-    puts "Writing statistics CSV"
-    FasterCSV.open(file_stats, "wb", opt) do |csv|
-      csv << ["questionnaire", "unique id (lecture+prof+semester)", "prof",   \
-                  "lecture", "expected students", "returned sheets"]          \
-              + (lqi > 0 ? ["lqi (average of the next #{lqi} columns)"] : []) \
-              + header_stats.to_a
-      lines.each { |l| csv << l }
-    end
-
 
     puts
     puts
     puts "============"
-    puts "CVS exported"
+    puts "CSV exported"
     puts "============"
     puts "Done, have a look at " + "\"#{file}\"".bold
     puts
-    puts "Some stats about the exported data/lectures has been written to:"
-    puts "\"#{file_stats}\""
     puts "It’s recommended to not use this for anything, because it’s clearly"
     puts "a reduction to some random values that have no meaning."
     puts "The leftmost field is encoded as 1 and the count increases by one"
@@ -282,11 +271,15 @@ namespace :results do
     puts "Automatization"
     puts "=============="
     puts "If you want to run this query in the future, you can use:"
+    # remove any added _text columns
+    export.each do |tbl, cols|
+      export[tbl] -= columns_text[tbl].map { |ct| ct + "_text" }
+    end
 
-    data = {:sems => sems, :dbs => dbs, :cols => export, :meta => meta_store, :lqi => lqi}
+    data = {:sems => sems, :dbs => dbs, :cols => export, :meta => meta_store}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
-    print "rake \"helper:export["
+    print "rake \"results:export["
     print Base64.encode64(Marshal.dump(data)).gsub(/\s/, "")
     puts "\"]"
     puts
