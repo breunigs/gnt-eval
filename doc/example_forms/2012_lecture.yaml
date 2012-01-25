@@ -702,7 +702,9 @@ pages:
       repeat_for: lecturer
       visualizer: horizontal_bars
   - !ruby/object:Section
-    title: "Vorlesung"
+    title:
+      :de: "Vorlesung"
+      :en: "Lecture"
     answers:
       :de:
         - viel zu hoch
