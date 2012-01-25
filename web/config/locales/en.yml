@@ -2,7 +2,6 @@ en:
   en: English
   de: German
 
-  submitted_questionnaires: submitted questionnaires
   by: by
   comments: Comments
   notice_for_comments: "{ \\small\\emph{Note: } Each comment is an individual opinion and should be considered in relation to the total number of students.}"
@@ -61,3 +60,5 @@ en:
 
   # used if no intro is given for the sheets.
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
+
+  note: Note

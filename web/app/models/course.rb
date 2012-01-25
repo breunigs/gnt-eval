@@ -134,8 +134,12 @@ class Course < ActiveRecord::Base
     b << "{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}"
     b << "{#{returned_sheets}}"
     b << "{#{id}}"
-    b << "{#{t(:by)}}"
-    b << "{#{t(:submitted_questionnaires)}}\n\n"
+    b << "{#{t(:by)}}\n\n"
+    unless note.nil? || note.strip.empty?
+      b << RT.small_header(I18n.t(:note))
+      b << note.strip
+      b << "\n\n"
+    end
     b
   end
 

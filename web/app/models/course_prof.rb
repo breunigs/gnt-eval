@@ -41,6 +41,9 @@ class CourseProf < ActiveRecord::Base
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      # a little magic to see if the header was personalized. If not,
+      # add the lecturer’s name here:
+      b << " (#{prof.fullname})" unless section.match(/\\lect/)
       return b
     end
 

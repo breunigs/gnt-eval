@@ -2,7 +2,6 @@ de:
   de: Deutsch
   en: Englisch
 
-  submitted_questionnaires: Abgegebene Fragebögen
   by: bei
   comments: Kommentare
   notice_for_comments: "{ \\small\\emph{Hinweis:} Bei den Kommentaren handelt es sich um Einzelmeinungen, die immer in Relation zur Gesamthörerzahl gesetzt werden sollten.}"
@@ -59,3 +58,5 @@ de:
   # used if no intro is given for the sheets.
   default_intro: Kreuze so \checkLikeThis{} bzw. verbessere Dich mit \correctLikeThis{}. Bitte deutlich in Druckbuchstaben und nur in die dafür vorgesehenen Felder schreiben.
 
+
+  note: Hinweis

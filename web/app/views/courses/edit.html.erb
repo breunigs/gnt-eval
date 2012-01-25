@@ -44,7 +44,8 @@
           [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
           [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
           [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],
-          [f.label(:faculty_id),                        collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"]
+          [f.label(:faculty_id),                        collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"],
+          [f.label(:note),                              f.text_field(:note), "Small note/hint to be added right below the headline in result.pdf"]
         ]
       %>
         <tr style="background: #<%= cycle('efefef', 'fff') %>">

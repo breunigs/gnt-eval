@@ -19,7 +19,8 @@
         ["FS Account",    h(@course.fscontact)],
         ["Email",         mail_to(@course.fs_contact_addresses)],
         ["Description",   h(@course.description)],
-        ["Faculty",       h(@course.faculty.longname)]
+        ["Faculty",       h(@course.faculty.longname)],
+        ["Note",          h(@course.note)]
       ]
     %>
       <tr style="background: #<%= cycle('efefef', 'fff') %>">
