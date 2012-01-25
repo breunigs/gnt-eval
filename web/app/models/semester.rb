@@ -20,24 +20,20 @@ class Semester < ActiveRecord::Base
 
   # evaluate a faculty
   def evaluate(faculty)
-    puts "Finding possible db tables…"
     tables = forms.map { |f| f.db_table }
 
     # Let the database do the selection and sorting work. Also include
     # tutor and prof models since we are going to count them later on.
     # Since we need all barcodes, include course_prof as well.
-    puts "Finding associated courses…"
     cs = courses.find_all_by_faculty_id(faculty, \
       :order => "TRIM(LOWER(title))", \
       :include => [:course_profs, :profs, :tutors])
 
-    puts "Counting all kinds of things…"
     course_count = cs.count
     sheet_count = RT.count(tables, {:barcode => faculty.barcodes })
     prof_count = cs.map { |c| c.profs }.flatten.uniq.count
     study_group_count = cs.inject(0) { |sum, c| sum + c.tutors.count }
 
-    puts "Inserting preface and similar yadda yadda…"
     evalname = faculty.longname + ' ' + title
 
     b = ""

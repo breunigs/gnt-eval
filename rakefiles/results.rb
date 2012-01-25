@@ -3,7 +3,6 @@ namespace :results do
   # This is a helper function that will create the result PDF file for a
   # given semester and faculty_id in the specified directory.
   def evaluate(semester_id, faculty_id, directory)
-    puts "Looking up semester and faculty…"
     f = Faculty.find(faculty_id)
     s = Semester.find(semester_id)
 
