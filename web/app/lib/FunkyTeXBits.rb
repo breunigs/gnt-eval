@@ -10,43 +10,44 @@ require 'digest'
 
 module FunkyTeXBits
   def spellcheck(code)
-    # check if hunspell is installed
-    `#{Seee::Config.application_paths[:hunspell]} --version &> /dev/null`
-    unless $?.to_i == 0
-      logger.warn "hunspell does not seem to be installed. Skipping spellcheck."
-      return code
-    end
+    begin
+      # check if hunspell is installed
+      `#{Seee::Config.application_paths[:hunspell]} --version &> /dev/null`
+      unless $?.to_i == 0
+        logger.warn "hunspell does not seem to be installed. Skipping spellcheck."
+        return code
+      end
 
-    # write code to tempfile
-    name = Digest::SHA256.hexdigest(code)
-    path = File.join(temp_dir, "spellcheck_#{name}")
-    File.open("#{path}", 'w') {|f| f.write(code) }
+      # write code to tempfile
+      name = Digest::SHA256.hexdigest(code)
+      path = File.join(temp_dir, "spellcheck_#{name}")
+      File.open("#{path}", 'w') {|f| f.write(code) }
 
-    # spell check!
-    words = `cat #{path} | #{Seee::Config.commands[:hunspell]} 2> /dev/null`.split("\n")
+      # spell check!
+      words = `cat #{path} | #{Seee::Config.commands[:hunspell]} 2> /dev/null`.split("\n")
 
-    unless $?.to_i == 0
-      logger.warn "hunspell failed for some reason. Exit code: #{$?}"
-      logger.warn "hunspell: #{Seee::Config.commands[:hunspell]}"
-      logger.warn "Path was: #{path}"
-      logger.warn "Whole command: cat #{path} | #{Seee::Config.commands[:hunspell]}"
-      logger.warn "Code was: #{File.read(path)}"
-      logger.warn "hunspell output: #{words.join("\n")}"
-      return code
-    end
-    File.delete(path)
+      unless $?.to_i == 0
+        logger.warn "hunspell failed for some reason. Exit code: #{$?}"
+        logger.warn "hunspell: #{Seee::Config.commands[:hunspell]}"
+        logger.warn "Path was: #{path}"
+        logger.warn "Whole command: cat #{path} | #{Seee::Config.commands[:hunspell]}"
+        logger.warn "Code was: #{File.read(path)}"
+        logger.warn "hunspell output: #{words.join("\n")}"
+        return code
+      end
+      File.delete(path)
 
-    return code if words.empty?
+      return code if words.empty?
 
-    # highlight misspelled words
-    w = words.join("|")
-    r1 = Regexp.new(/.*\b(#{w})\b.*/)
-    r2 = Regexp.new(/\b(#{w})\b/)
-    blockers = Regexp.new(/\\pgf|\\spellingerror|\bpgf[a-z]+|\\color/)
-    code.gsub!(r1) do |s|
-      s.match(blockers).nil? ? s.gsub(r2, '\spellingerror{\1}') : s
-    end
-
+      # highlight misspelled words
+      w = words.join("|")
+      r1 = Regexp.new(/.*\b(#{w})\b.*/)
+      r2 = Regexp.new(/\b(#{w})\b/)
+      blockers = Regexp.new(/\\pgf|\\spellingerror|\bpgf[a-z]+|\\color/)
+      code.gsub!(r1) do |s|
+        s.match(blockers).nil? ? s.gsub(r2, '\spellingerror{\1}') : s
+      end
+    rescue; end
     code
   end
 
