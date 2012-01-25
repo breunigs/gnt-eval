@@ -344,7 +344,7 @@ class ResultTools
       q.get_answers.each_with_index do |txt, i|
         where_hash[q.db_column[i]] = i+1
         answ[(i+1)] = count(table, where_hash)
-        t = txt.strip_common_tex unless txt.nil?
+        t = "{#{txt.strip_common_tex}}" unless txt.nil?
         answ[t] = answ[(i+1)] unless t.nil? || t.empty?
         where_hash.delete(q.db_column[i])
       end
@@ -366,7 +366,7 @@ class ResultTools
       # name if available
       q.get_answers.each_with_index do |txt, i|
         answ[(i+1)] = cc.foz(i+1)
-        t = txt.strip_common_tex unless txt.nil?
+        t = "{#{txt.strip_common_tex}}" unless txt.nil?
         answ[t] = answ[(i+1)] unless t.nil? || t.empty?
       end
     end
