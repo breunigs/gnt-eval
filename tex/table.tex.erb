@@ -1,0 +1,41 @@
+<%
+margin ||= nil
+landscape ||= false
+table_height ||= 1
+intro ||= ""
+align ||= "l"*head.size
+%>
+
+
+<% if margin && margin.is_a?(Array) && margin.size == 4 %>
+  \marginsize{<%=margin.join("cm}{")%>cm}
+<% end %>
+
+<% if landscape %>
+  \begin{landscape}
+<% end %>
+
+\renewcommand{\arraystretch}{<%=table_height%>}
+
+<%=intro%>
+
+\pagestyle{empty}
+\rowcolors{1}{gray!20}{white}
+
+\begin{longtable}[l]{<%=align%>}
+\hline
+<%= head.map {|h| h.to_s.escape_for_tex}.join(" & ") %> \\
+\hline
+\endhead
+
+<% data.each do |d| %>
+  <%= d.map {|h| h.to_s.escape_for_tex}.join(" & ") %> \\
+<% end %>
+\end{longtable}
+
+
+<% if landscape %>
+  \end{landscape}
+<% end %>
+
+\renewcommand{\arraystretch}{1}

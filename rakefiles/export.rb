@@ -141,18 +141,20 @@ namespace :results do
     # Create PDF output on purpose because it’s hard to work with. These
     # are just some random numbers, so don’t work with them. Ever.
     puts "Rendering…"
-    tex = '\marginsize{1cm}{1cm}{1cm}{0cm}'
-    tex << '\begin{landscape}'
-    tex << 'It\'s recommended to \emph{not} use this list. '
-    tex << 'If you want to use this list for ranking, please visit your nearest suicide booth immediately. '
-    tex << '\# counts handed in sheets; ignores abstentions and invalid answers. Therefore \# is only a rough indicator of how valid the next columns are. '
-    tex << 'Columns are in the format AVG (STDDEV). '
-    tex << 'Values are rounded to one decimal place. '
-    tex << 'The list is sort of sorted. '
+    intro = ''
+    intro << 'It\'s recommended to \emph{not} use this list. '
+    intro << 'If you want to use this list for ranking, please visit your nearest suicide booth immediately. '
+    intro << '\# counts handed in sheets; ignores abstentions and invalid answers. Therefore \# is only a rough indicator of how valid the next columns are. '
+    intro << 'Columns are in the format AVG (STDDEV). '
+    intro << 'Values are rounded to one decimal place. '
+    intro << 'The list is sort of sorted. '
 
-    tex << '\renewcommand{\arraystretch}{1.5}'
-    tex << ERB.new(RT.load_tex("../table")).result(binding)
-    tex << '\end{landscape}'
+    landscape = true
+    table_height = 1.5
+    margin = [1, 1, 1, 0]
+    align = "lr"+"l"*cols.size
+    # + data + head for:
+    tex = ERB.new(RT.load_tex("../table")).result(binding)
     now = Time.now.strftime("%Y-%m-%d %H:%M")
     render_tex(tex, File.join(GNT_ROOT, "tmp/export/#{now} tutor export.pdf"))
   end
