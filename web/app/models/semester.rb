@@ -5,6 +5,7 @@
 class Semester < ActiveRecord::Base
   has_many :courses
   has_many :course_profs, :through => :courses
+  has_many :tutors, :through => :courses
   has_many :forms
   validates_presence_of :title
   validates_presence_of :longtitle
@@ -16,6 +17,11 @@ class Semester < ActiveRecord::Base
   def self.currently_active
     d = Date.today
     find(:all, :conditions => ["firstday <= ? AND lastday >= ?", d, d])
+  end
+
+  # lists all barcodes associated with the current semester
+  def barcodes
+    course_profs.map { |cp| cp.id }
   end
 
   # evaluate a faculty
