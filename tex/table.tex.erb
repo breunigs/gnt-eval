@@ -16,7 +16,7 @@ align ||= "l"*head.size
 <% end %>
 
 \renewcommand{\arraystretch}{<%=table_height%>}
-
+\newcolumntype{Y}{>{\raggedright\arraybackslash}p}
 <%=intro%>
 
 \pagestyle{empty}
