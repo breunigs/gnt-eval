@@ -49,7 +49,10 @@ class Symbol
 end
 
 class String
-
+  # removes all HTML Tags from text
+  def strip_html
+    self.gsub(/<\/?[^>]*>/, "")
+  end
 
   # wraps text after a maximum of X cols. 72 is the default for mails,
   # so don’t change it here.
