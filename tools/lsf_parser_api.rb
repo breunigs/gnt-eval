@@ -41,14 +41,9 @@ end
 
 data = getTree(@rootid)
 
-# do not fix the order of these! printFinalList calls
-# listProfs in a way that will destruct the data sets.
-# Or you /could/ fix either of these functions.
-getFile("lsf_parser_#{@name}_pre.html", true).puts printPreList(data)
 getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
-
 render_tex(print_final_tex(data), "lsf_parser_#{@name}_final.pdf")
-
+render_tex(print_pre_tex(data), "lsf_parser_#{@name}_pre.pdf")
 getFile("lsf_parser_#{@name}_sws.txt", true).puts printSWSSheet(data)
 
 

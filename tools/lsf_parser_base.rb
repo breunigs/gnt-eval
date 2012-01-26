@@ -383,24 +383,16 @@ end
 
 # Helper function that will list the professors for each date comma
 # separated. Dates are separated by newlines.
-# Warning: This function destroys the given input!
 def listProfs(arr)
     array = arr.clone
     s=""
     array.each do |a|
-        if a.empty?
-            s << "<br>"
-            next
-        end
+      if a.empty?
+        s << "<br>"
+        next
+      end
 
-        #fst = a.shift
-        #s = '<a href="mailto:'+fst.mail+'">'+fst.name+'</a>'
-        #a.each do |e|
-        #    s << ", " + '<a href="mailto:'+e.mail+'">'+e.name+'</a>'
-        #end
-        tmp = Array.new
-        a.each { |e| tmp << e.mailhref }
-        s << tmp.join(", ") + "<br>"
+      s << a.collect { |e| e.mailhref }.join(", ") + "<br>"
     end
     s
 end
@@ -467,7 +459,6 @@ def printYamlKummerKasten(data, faculty)
         case d.type
             when /vorlesung/i then type = "Vorlesung"
             when /seminar/i   then type = "Seminar"
-            #when /praktikum/i then type = "Praktikum" # Skipped anyway
             when /blockkurs/i then type = "Blockkurs"
             else next
         end
@@ -485,50 +476,33 @@ def printYamlKummerKasten(data, faculty)
     s
 end
 
-# generates nice PDF of final list.
 def print_final_tex(data)
     data.sort! { |x,y| x.name <=> y.name }
     ERB.new(RT.load_tex("../lsf_parser_final")).result(binding)
 end
 
-def printPreList(data)
-    # Sort by name and then by type. This way events are sorted alphabetically
-    # within types
-    data.sort! { |x,y| x.name <=> y.name }
-    data.sort! { |x,y| x.type <=> y.type }
+def print_pre_tex(input)
+  # sort be type, then by name
+  input.sort! { |x,y| x.type+x.name <=> y.type+y.name }
+  intro = 'Kreuze zu evaluierende Veranstaltungen. Streiche solche, die nicht evaluiert werden sollen. Achte besonders auf automatisch Gekreuzte. Erstellung: \the\day.\the\month.\the\year'
+  margin = [0.5,0.5,1,-1]
+  landscape = true
+  head = ["?", "Name", "Typ", "Spr", "DozentIn"]
+  align = "Y{0.5cm}Y{12cm}Y{4.5cm}Y{0.7cm}Y{8.2cm}"
+  data = input.collect do |d|
+    next if (d.times.empty? || d.rooms.empty? || d.profs.empty?)
 
-    s = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'
-    s << "Markiere zu evaluierende Veranstaltungen mit einem X.<br/>Streiche Veranstaltungen, die auf keinen Fall evaluiert werden sollen/können.<br/>Prüfe insbesondere die automatisch ausgewählten Veranstaltungen und streiche ggf. das (?) dahinter.<br/><br/>"
-    s << "<table border=1 cellspacing=0 cellpadding=0>";
-    s << "<tr>"
-    s << "<th style='width:50px;'>Soll Eval?</th>"
-    s << "<th>Name</th>"
-    s << "<th>Typ</th>"
-    s << "<th>Dozent_in</th>"
-    s << "</tr>\n\n"
-
-    data.each do |d|
-        next if (d.times.empty? || d.rooms.empty? || d.profs.empty?)
-
-        allprofs = Array.new
-        allprofs << d.profs.flatten.uniq
-        s << '<tr>'
-
-        if d.evalAlways? || allprofs.flatten.any? { |p| p.evalAlways? }
-            s << '<td style="text-align:center">X&nbsp;&nbsp;(?)</td>'
-        else
-            s << '<td>&nbsp;</td>'
-        end
-        s << '<td>' + d.name + '</td>'
-        s << '<td>' + d.type + '</td>'
-        s << '<td>' + listProfs(allprofs) + '</td>'
-
-        s << "</tr>\n"
+    profs = d.profs.flatten.uniq
+    if d.evalAlways? || profs.any? { |p| p.evalAlways? }
+      box = '$\boxtimes$'
+    else
+      box = '$\Box$'
     end
+    profs = profs.collect { |p| p.name }.uniq.join(", ")
+    [box, d.name, d.type, d.lang[0..2], profs]
+  end.compact
 
-    s << '</table>'
-
-    s
+  ERB.new(RT.load_tex("../table")).result(binding)
 end
 
 def getFile(name = nil, delete = false)
