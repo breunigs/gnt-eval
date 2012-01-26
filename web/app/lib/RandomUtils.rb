@@ -164,6 +164,13 @@ def print_progress(val, max)
   STDOUT.flush
 end
 
+# prints a headline surrounded by = into stdout
+def print_head(text)
+  puts "="*text.size
+  puts text
+  puts "="*text.size
+end
+
 # Generates a pdf file with the barcode in the specified location. Won’t
 # regenerate the barcode, if a file in the target location exists.
 def generate_barcode(barcode, path)
