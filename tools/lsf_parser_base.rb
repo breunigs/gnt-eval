@@ -5,6 +5,10 @@ require 'date'
 require 'rexml/document'
 require 'csv'
 require File.dirname(__FILE__) + "/faster_csv"
+require File.dirname(__FILE__) + "/../lib/result_tools.rb"
+require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
+
+RT = ResultTools.instance
 
 TOPLEVEL="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
 BASELINK="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&trex=step&P.vx=mittel&"
@@ -214,7 +218,7 @@ end
 def getEventDetails(vorlID)
     root = getXML('getVerDet?vid=' + vorlID.to_s)
     root.elements.each do |data|
-        sws = data.elements[getPrefix + ":sws"].text.to_i 
+        sws = data.elements[getPrefix + ":sws"].text.to_i
         lang = data.elements[getPrefix + ":unterrsprache"].text.strip
         est_part = data.elements[getPrefix + ":erwartteilnehmer"].text.to_i
         return sws, lang, est_part == 0 ? "" : est_part.to_s
@@ -359,6 +363,7 @@ def getTimetable(id)
                     .gsub("Speyererstr", "Spey.") \
                     .gsub("Gesellschaft für Schwerionenforschung", "G. f. Ionenforsch.") \
                     .gsub("Besprechungsraum", "Bsprchngsrm") \
+                    .gsub("Medienzentrum Raum", "R") \
                     .gsub("Seminarraum", "Semnarrm")
             times << s.gsub(/([0-9]):([0-9]{2})/, '\1<sup><small>\2</small></sup>') \
                     .gsub(/20([0-9]{2})/, '\1') \
@@ -379,7 +384,8 @@ end
 # Helper function that will list the professors for each date comma
 # separated. Dates are separated by newlines.
 # Warning: This function destroys the given input!
-def listProfs(array)
+def listProfs(arr)
+    array = arr.clone
     s=""
     array.each do |a|
         if a.empty?
@@ -479,45 +485,10 @@ def printYamlKummerKasten(data, faculty)
     s
 end
 
-def printFinalList(data)
+# generates nice PDF of final list.
+def print_final_tex(data)
     data.sort! { |x,y| x.name <=> y.name }
-
-    s = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>'
-    s << "<b>How To:</b><br/><b>1.</b> ankreuzen WANN Du evalst;<br/><b>2.</b> Deinen MathPhys-Account <i>oder</i> Deine E-Mail, falls Du keinen Acc hast;<br/><b>3.</b> Die Hörer schätzen.<br/><br/><b>Deine Verantwortung:</b><br/>- der Bogen im Seee stimmt (Dt/En, VL/Seminar);<br/>- Hörerzahl im Seee stimmt;<br/>- Du sorgst in der Evalwoche ggf. für Ersatz, falls Du nicht kannst;<br/>- Du klüngelst mit den Profs bei Sonderwünschen<br/>"
-    s << "<table border=1 cellspacing=0 cellpadding=0>";
-    s << "<tr>"
-    s << "<th>Name</th>"
-    s << "<th>Dozent_in</th>"
-    s << "<th style='width:220px;overflow:hidden'>Raum</th>"
-    s << "<th>Zeit</th>"
-    s << "<th style='width:100px;'>AccName?</th>"
-    s << "<th style='width:50px;'>Hörer?</th>"
-    s << "</tr>\n"
-
-     s << "<tr>"
-    s << "<td><b>Beispielveranstaltung</b></td>"
-    s << "<td>Evalteam</td>"
-    s << "<td style='width:220px;overflow:hidden'>FS Raum</td>"
-    s << "<td>[&nbsp;&nbsp;] Mi, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup><br>[X] Mo, 14<sup><small>00</small></sup>–16<sup><small>00</small></sup></td>"
-    s << "<td style='width:100px;'>evaluation@</td>"
-    s << "<td style='width:50px;'>&nbsp;37</td>"
-    s << "</tr>\n"
-
-    data.each do |d|
-        next if (d.times.empty? || d.rooms.empty? || d.profs.empty?)
-        s << '<tr>'
-        s << '<td style="max-width:10cm;overflow:hidden">' + d.name + '</td>'
-        s << '<td>' + listProfs(d.profs) + '</td>'
-        s << '<td>' + d.rooms.join("<br>") + '</td>'
-        s << '<td>' + d.times.collect{|x| "[&nbsp;&nbsp;] #{x}"}.join("<br>") + '</td>'
-        s << '<td>&nbsp;</td>'
-        s << '<td>&nbsp;</td>'
-        s << "</tr>\n\n"
-    end
-
-    s << '</table>'
-    s << '<br/>Veranstaltung absolut sinnlos zu evalen? Streiche sie!'
-    s
+    ERB.new(RT.load_tex("../lsf_parser_final")).result(binding)
 end
 
 def printPreList(data)

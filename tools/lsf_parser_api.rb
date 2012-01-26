@@ -46,7 +46,9 @@ data = getTree(@rootid)
 # Or you /could/ fix either of these functions.
 getFile("lsf_parser_#{@name}_pre.html", true).puts printPreList(data)
 getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
-getFile("lsf_parser_#{@name}_final.html", true).puts printFinalList(data)
+
+render_tex(print_final_tex(data), "lsf_parser_#{@name}_final.pdf")
+
 getFile("lsf_parser_#{@name}_sws.txt", true).puts printSWSSheet(data)
 
 
