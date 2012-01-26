@@ -153,7 +153,7 @@ namespace :results do
     tex << '\renewcommand{\arraystretch}{1.5}'
     tex << ERB.new(RT.load_tex("../table")).result(binding)
     tex << '\end{landscape}'
-    now = ""#Time.now.strftime("%Y-%m-%d %H:%M")
+    now = Time.now.strftime("%Y-%m-%d %H:%M")
     render_tex(tex, File.join(GNT_ROOT, "tmp/#{now} tutor export.pdf"))
   end
 
