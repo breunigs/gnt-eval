@@ -1,6 +1,6 @@
 <%= @anrede.word_wrap %>,
 
-in der Woche vom 04. bis 08. Juli am
+in der Woche vom 16. bis 20. Januar 2012 am
 
      <%= @course.description %>
 
@@ -12,11 +12,12 @@ evaluieren. Nach der momentanen Planung werden wir mit
 
      <%= @course.students %> <%= @course.form.name.gsub("bogen", "bögen") %> auf <%= @sprache %>
 
-vorbeikommen. Sollte diese Zahl viel zu hoch sein, die Sprache
-unangemessen sein oder Ihnen der Termin nicht passen, bitten wir Sie,
-uns darüber mit einer kurzen Mail zu informieren. Ferner gehen wir
-davon aus, dass es sich bei folgender Liste um eine vollständige Liste
-der Tutor_innen Ihrer Veranstaltung handelt:
+vorbeikommen. Sollte diese Zahl zu niedrig oder viel zu hoch sein, die
+Sprache oder die Bogenart unangemessen sein oder Ihnen der Termin
+nicht passen, bitten wir Sie, uns darüber mit einer kurzen Mail zu
+informieren. Ferner gehen wir davon aus, dass es sich bei folgender
+Liste um eine vollständige Liste der Tutor_innen Ihrer Veranstaltung
+handelt:
 
      <%= (@course.tutors.empty? ? 'keine' : @course.tutors.collect { |t| t.abbr_name
 }.join(', ')).word_wrap(67) %>
@@ -32,7 +33,7 @@ Sie hier [1].
 
 Bei Fragen stehe ich Ihnen natürlich gerne zur Verfügung.
 
-Mit bestem Gruß,
-Oliver Thomas -- FS MathPhys.
+Viele Grüße,
+Oliver Thomas -- FS MathPhys
 
 [1] http://mathphys.fsk.uni-heidelberg.de/eval-prof.html

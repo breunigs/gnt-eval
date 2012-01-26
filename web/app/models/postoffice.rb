@@ -16,6 +16,7 @@ class Postoffice < ActionMailer::Base
     recipients c.profs.collect{ |p| p.email }.join(', ')
     from Seee::Config.settings[:standard_mail_from]
     bcc Seee::Config.settings[:standard_mail_bcc]
+#    recipients "oliver+eval@aleph0.de"
     subject "Evaluation Ihrer Veranstaltung '#{c.title}'"
     headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
@@ -33,7 +34,7 @@ class Postoffice < ActionMailer::Base
     recipients c.fs_contact_addresses
     from Seee::Config.settings[:standard_mail_from]
     bcc Seee::Config.settings[:standard_mail_bcc]
-    subject "Dein Glück, die Veranstaltung '#{c.title}' evaluieren zu dürfen"
+    subject "Evaluation von '#{c.title}' am #{c.description}"
     headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
     sent_on Time.now
