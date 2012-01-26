@@ -11,7 +11,7 @@
 
 <% sample_sheets.each do |path, info| %>
 
-\includepdf[scale=0.78,pages=2-,frame,pagecommand={
+\includepdf[scale=0.78,pages=1,frame,pagecommand={
   \subsection*{<%=info[:name]%> -- <%=info[:lang]%>}}]
   {<%=path%>}
 \includepdf[scale=0.78,pages=2-,frame]{<%=path%>}
