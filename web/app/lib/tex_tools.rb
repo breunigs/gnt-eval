@@ -1,6 +1,8 @@
 # home to all TeX related tools that might be used in more than one
 # location.
 
+require 'erb'
+
 class String
   # Removes all UTF8 chars and replaces them by underscores. Usually
   # required for LaTeX output.
@@ -8,9 +10,10 @@ class String
     self.gsub(/[\x80-\xff]/, "_")
   end
 
-  # escapes & _ and % signs if not already done so
+  # escapes & _ # and % signs if not already done so
   def escape_for_tex
-    self.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%').gsub(/\\?_/, '\\\_')
+    s = self.gsub(/\\?&/, '\\\&').gsub(/\\?%/, '\\\%')
+    s.gsub(/\\?_/, '\\\_').gsub(/\\?#/, '\\\#')
   end
 
   # strips TeX tags that are commonly used when designing a form so the
@@ -68,7 +71,7 @@ end
 # Renders the given TeX Code directly into a PDF file at the given
 # location
 def render_tex(tex_code, pdf_path)
-  I18n.load_path += Dir.glob(File.join(Rails.root, '/config/locales/*.yml'))
+  I18n.load_path += Dir.glob(File.join(RAILS_ROOT, '/config/locales/*.yml'))
   I18n.load_path.uniq!
 
   pdf_path = File.expand_path(pdf_path)
@@ -87,6 +90,7 @@ def render_tex(tex_code, pdf_path)
   if tex_to_pdf(tmp) and File.exists?(tmp)
     File.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
+    puts
     puts "Done, have a look at #{pdf_path}"
   else
     puts "Rendering your TeX Code failed."
