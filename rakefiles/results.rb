@@ -140,7 +140,7 @@ namespace :results do
       next if d.match(/^preliminary_/)
       work_queue.enqueue_b do
         puts "Working on " + d
-        `pdftk #{p}/#{d} background ./helfer/wasserzeichen.pdf output #{p}/preliminary_#{d}`
+        `pdftk #{p}/#{d} background ./tools/wasserzeichen.pdf output #{p}/preliminary_#{d}`
       end
     end
     work_queue.join
