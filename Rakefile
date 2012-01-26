@@ -101,9 +101,9 @@ namespace :misc do
     File.makedirs(dir)
 
     puts "Mathe…"
-    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
+    `cd '#{dir}' && ../../tools/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
     puts "Physik…"
-    `cd '#{dir}' && ../../helfer/lsf_parser_api.rb physik '#{physik}' > physik.log`
+    `cd '#{dir}' && ../../tools/lsf_parser_api.rb physik '#{physik}' > physik.log`
 
     puts
     puts "All Done. Have a look in #{dir}"
@@ -126,7 +126,7 @@ namespace :misc do
     xls = Dir.glob("Hiwi*.xls")
     files = '"'+(ymls + csv + xls).join('" "')+'"'
     puts "Files found: #{files}"
-    system("./../helfer/mathe_tutoren.rb #{files}")
+    system("./../tools/mathe_tutoren.rb #{files}")
   end
 
   desc "Generate lovely HTML output for our static website"

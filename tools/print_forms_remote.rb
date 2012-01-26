@@ -44,7 +44,7 @@ puts "For reasons unknown the -# switch does not work with lpr."
 puts "Didn't test lp, just copying the PDF pages and printing a large PDF instead."
 puts "Multiply PDFs? (Press Enter)"
 gets
-system("cd \"#{mypath}/../tmp/forms/\" && ../../helfer/multiply_pdfs.rb")
+system("cd \"#{mypath}/../tmp/forms/\" && ../../tools/multiply_pdfs.rb")
 puts
 puts
 puts

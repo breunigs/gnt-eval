@@ -90,7 +90,7 @@ module Seee
       # the source file.
       :pdf_viewer => "evince",
       # this is the old zbar, which uses the default ImageMagick
-      :zbar_shared => File.join(RAILS_ROOT, '..', 'helfer', "zbarimg_#{`uname -m`.strip}"),
+      :zbar_shared => File.join(RAILS_ROOT, '..', 'tools', "zbarimg_#{`uname -m`.strip}"),
       # this is the custom zbar, which uses the custom ImageMagick
       :zbar_cust => File.join(@@custom_builds[:bld_zbar], "bin", "zbarimg")
     }
