@@ -22,6 +22,7 @@ else
   langs = I18n.t :tex_babel_lang
 end
 %>
+\usepackage{anysize}                  % control margins if we want to
 \usepackage[<%=langs%>]{babel}
 \usepackage{color}
 \usepackage{calc}
@@ -31,6 +32,7 @@ end
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}                  % tug.dk/FontCatalogue/lmodern
 \usepackage{longtable}                % so tutor tables may page break
+\usepackage{lscape}                   % insert landscape pages
 \usepackage{marvosym}                 % more symbols
 \usepackage{multicol}
 \usepackage[protrusion,expansion]{microtype} % nicer typesetting
