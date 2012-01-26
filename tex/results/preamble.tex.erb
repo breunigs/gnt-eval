@@ -22,6 +22,7 @@ else
   langs = I18n.t :tex_babel_lang
 end
 %>
+\usepackage{amssymb}                  % some math symbols
 \usepackage{anysize}                  % control margins if we want to
 \usepackage[<%=langs%>]{babel}
 \usepackage{color}
@@ -36,6 +37,7 @@ end
 \usepackage{marvosym}                 % more symbols
 \usepackage{multicol}
 \usepackage[protrusion,expansion]{microtype} % nicer typesetting
+\usepackage[olditem,oldenum]{paralist}% use less space for lists
 \usepackage{pdfpages}                 % for including the sample sheets
 \usepackage{pgf}                      % answers; drawings with jpgjdraw
 \usepackage{pgffor}                   % for each loops
