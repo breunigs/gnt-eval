@@ -1,4 +1,163 @@
 namespace :results do
+  # accepts array of semester IDs and returns array of valid forms for
+  # that semester
+  def get_forms_for_semesters(sems)
+    forms = sems.collect { |s| Semester.find_by_id(s).forms }.flatten
+    forms.select { |f| f.abstract_form_valid? }
+  end
+
+  # accepts array of forms or form IDs and returns hash in the format of
+  # { db_table => Name of Form }.
+  def get_tables_for_forms(forms)
+    forms.collect! { |f| f.is_a?(Form) ? f : Form.find_by_id(f) }
+    Hash[forms.collect { |f| [f.db_table, f.name] }]
+  end
+
+  # gets the semester(s) from the user, if it isn’t defined in the user
+  # input or not valid. Exists if no semester is chosen.
+  def ask_semester(user_input)
+    print_head "Semester"
+    puts "Choose semester to export:"
+    Semester.all.each do |s|
+      puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
+    end
+    sems = get_or_fake_user_input(Semester.all.collect{|x|x.id}, user_input)
+    puts
+    puts
+    if sems.empty?
+      puts "no semester(s) chosen. Exiting."
+      exit 0
+    end
+    sems
+  end
+
+  # Asks the user which faculties to include. Exits if no choice is
+  # made. Automatically takes user_input if given and valid. Returns
+  # actually Faculty instances (no IDs).
+  def ask_faculty(user_input)
+    print_head "Faculty"
+    puts "Choose faculty to export:"
+    Faculty.all.each do |f|
+      puts "#{f.id}: #{f.shortname}"
+    end
+    faculty = get_or_fake_user_input(Faculty.all.collect{|x|x.id}, user_input)
+    puts
+    puts
+    if faculty.empty?
+      puts "no faculty chosen. Exiting."
+      exit 0
+    end
+    faculty.map! { |f| Faculty.find_by_id(f) }
+    faculty
+  end
+
+  desc "Print list of tutors and user chosen fields"
+  task :tutor_blacklist do |t, a|
+    puts "This tool works on the assumption that two question asking"
+    puts "the same thing also have the same db column. If that is not"
+    puts "the case, you probably want to export one form at a time."
+    puts
+    faculty = ask_faculty(nil)
+    faculty_barcodes = faculty.map { |f| f.barcodes }.flatten
+
+    sems = ask_semester(nil)
+    # reject forms without tutors
+    forms = get_forms_for_semesters(sems).select { |f| f.get_tutor_question }
+
+    # step one: find tutor questions for each form, only allow single
+    fq = Hash[forms.collect do |f|
+      [f, f.questions.select { |q| q.repeat_for == :tutor && q.single? }]
+    end]
+    # step two: only keep questions that are present in all forms
+    # 2a: find columns for each form
+    valid_cols = fq.values.map { |qs| qs.map { |q| q.db_column } }
+    # 2b: intersect lists
+    valid_cols = valid_cols.inject {|x, y| x & y }
+
+    print_head "Columns"
+    puts "Please choose columns to include:"
+    valid_cols.each do |c|
+      # print db column
+      print c.ljust(30)
+      # print question text. Since all questions should be the same, it
+      # shouldn’t matter which question we choose…
+      puts fq.values.first.detect { |q| q.db_column == c }.text
+    end
+    cols = get_or_fake_user_input(valid_cols, nil)
+    if cols.empty?
+      puts "No columns chosen. Exiting."
+      exit 0
+    end
+    puts
+    puts
+
+    # helper function to exclude non-valid values from query; selects
+    # both AVG and STDDEV for given column. Still not very nice because
+    # only values from 1…98 are valid. However, this hack only excludes
+    # -2, -1, 0 and 99.
+    def vc(col)
+      null = "NULLIF(NULLIF(NULLIF(NULLIF(#{col}, 99), 0), -1), -2)"
+      "ROUND(AVG(#{null}), 1) AS #{col}_avg, " \
+        + "ROUND(STDDEV(#{null}), 1) AS #{col}_stddev"
+    end
+
+    head = ["tutor", "#", *cols]
+    head.map! { |h| h.gsub("_", " ") }
+    data = []
+
+    puts "Gathering data…"
+    # now we have all required data, let’s build the query
+    forms.each do |f|
+      tutor_col = f.get_tutor_question.db_column
+      bcs = faculty_barcodes & f.semester.barcodes
+      # outer query is only used for sorting by the sum of all AVGs to
+      # give a rough sorting on 'awesomeness' of the tutor. Highly
+      # doubtful, so please don’t tell anyone.
+      qry = "SELECT * FROM ("
+      qry << "SELECT barcode, #{tutor_col}, COUNT(*) AS count, "
+      qry << cols.map { |c| vc(c) }.join(", ")
+      qry << " FROM #{f.db_table}"
+      # exclude invalid tutor ids: 0 == no choice made, 30 == "none"
+      qry << " WHERE barcode IN (#{bcs.join(",")}) AND #{tutor_col} BETWEEN 1 AND 29"
+      qry << " GROUP BY barcode, #{tutor_col}"
+      qry << " HAVING COUNT(*) >= #{Seee::Config.settings[:minimum_sheets_required]}"
+      qry << ") AS tbl ORDER BY #{cols.map{|c|"#{c}_avg"}.join("+")} ASC"
+      data += RT.custom_query(qry)
+    end
+    # convert barcode + tutor id to tutor’s name
+    data.map! do |d|
+      barcode, tutor_id, count = d.shift(3)
+      c = CourseProf.find_by_id(barcode)
+      next if c.nil?
+      t = c.course.tutors[tutor_id-1]
+      next unless t && t.abbr_name
+      # combine avg+stddev into one column
+      [t.abbr_name, count, *d.each_slice(2).map {|x,y| "#{x} (#{y})"}]
+    end
+    # remove any entries we might have skipped
+    data.compact!
+
+
+    # Create PDF output on purpose because it’s hard to work with. These
+    # are just some random numbers, so don’t work with them. Ever.
+    puts "Rendering…"
+    tex = '\marginsize{1cm}{1cm}{1cm}{0cm}'
+    tex << '\begin{landscape}'
+    tex << 'It\'s recommended to \emph{not} use this list. '
+    tex << 'If you want to use this list for ranking, please visit your nearest suicide booth immediately. '
+    tex << '\# counts handed in sheets; ignores abstentions and invalid answers. Therefore \# is only a rough indicator of how valid the next columns are. '
+    tex << 'Columns are in the format AVG (STDDEV). '
+    tex << 'Values are rounded to one decimal place. '
+    tex << 'The list is sort of sorted. '
+
+    tex << '\renewcommand{\arraystretch}{1.5}'
+    tex << ERB.new(RT.load_tex("../table")).result(binding)
+    tex << '\end{landscape}'
+    now = ""#Time.now.strftime("%Y-%m-%d %H:%M")
+    render_tex(tex, File.join(GNT_ROOT, "tmp/#{now} tutor export.pdf"))
+  end
+
+
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
   task :export, [:base64_data] do |t, a|
     # we now have gathered all necessary data to process the input. To
@@ -28,33 +187,12 @@ namespace :results do
     puts
     puts
     # select faculty to export
-    puts "======="
-    puts "Faculty"
-    puts "======="
-    puts "Choose semester to export:"
-    Faculty.all.each do |f|
-      puts "#{f.id}: #{f.shortname}"
-    end
-    faculty = get_or_fake_user_input(Faculty.all.collect{|x|x.id}, a[:faculty])
-    puts
-    puts
+    faculty = ask_faculty(a[:faculty])
 
     # select semester to limit list of tables
-    puts "========"
-    puts "Semester"
-    puts "========"
-    puts "Choose semester to export:"
-    Semester.all.each do |s|
-      puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
-    end
-    sems = get_or_fake_user_input(Semester.all.collect{|x|x.id}, a[:sems])
-    puts
-    puts
-    if sems.empty?
-      puts "no semester(s) chosen. Exiting."
-      exit 0
-    end
-    # collect some data which will be required later
+    sems = get_semester(a[:sems])
+
+    ## collect some data which will be required later
     # stores which tables exist
     dbs = []
     # stores table name and form title (so the user can easily select
@@ -144,7 +282,7 @@ namespace :results do
     end
     allcols = export.values.flatten.uniq
 
-    valid_barcodes = faculty.collect { |f| Faculty.find_by_id(f).barcodes }.flatten
+    valid_barcodes = faculty.collect { |f| f.barcodes }.flatten
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
@@ -294,7 +432,7 @@ namespace :results do
     end
 
     data = {:sems => sems, :dbs => dbs, :cols => export,
-              :meta => meta_store, :faculty => faculty}
+              :meta => meta_store, :faculty => faculty.map { |f| f.id }}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
     print "rake \"results:export["
