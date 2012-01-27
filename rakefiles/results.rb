@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 namespace :results do
   # This is a helper function that will create the result PDF file for a
@@ -91,6 +92,39 @@ namespace :results do
     puts "\nIf there were errors you might want to try"
     puts "\trake results:fix_tex_errors"
     puts "first before fixing manually."
+  end
+
+  desc "create pdf report for a single course"
+  task :pdf_single, [:course_id] => "forms:samples" do |t,a|
+    dirname = './tmp/results/singles/'
+    FileUtils.mkdir_p(dirname)
+    I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
+
+    c = Course.find(a.course_id)
+    filename = c.title.strip.gsub(/\s+/, '_') << '_' << c.semester.dirFriendlyName << '.pdf'
+    render_tex(c.evaluate(true), dirname + filename, false)
+  end
+
+  desc "create pdf reports for all courses of a faculty for a given semester one at a time (i.e. a whole bunch of files). leave semester_id and faculty_id empty for current semester and all faculties."
+  task :pdf_singles, [:semester_id, :faculty_id] => "forms:samples" do |t,a|
+    sem_ids = if a.semester_id.nil?
+      Semester.currently_active.map { |s| s.id }
+    else
+      [a.semester_id]
+    end
+
+    faculty_ids = if a.faculty_id.nil?
+                    Faculty.find(:all).map { |f| f.id }
+                  else
+                    [a.faculty_id]
+                  end
+    courses = Course.find(:all).find_all do |c|
+      sem_ids.include?(c.semester_id) and faculty_ids.include?(c.faculty_id)
+    end
+    courses.each do |course|
+      work_queue.enqueue_b { system("rake -s results:pdf_single[#{course.id}]") }
+    end
+    work_queue.join
   end
 
   desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"

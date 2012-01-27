@@ -156,8 +156,9 @@ class Course < ActiveRecord::Base
     b
   end
 
-  # evaluates this whole course against the associated form
-  def evaluate
+  # evaluates this whole course against the associated form. if single
+  # is set, include headers etc.
+  def evaluate(single=nil)
     puts "   #{title}"
 
     # if this course doesn't have any lecturers it cannot have been
@@ -168,14 +169,29 @@ class Course < ActiveRecord::Base
       return ""
     end
 
-    I18n.locale = language if I18n.tainted?
+    I18n.locale = language if I18n.tainted? or single
 
+    
     b = "\n\n\n% #{title}\n"
+
+    if single
+      evalname = title.escape_for_tex
+      b << ERB.new(RT.load_tex("preamble")).result(binding)
+      b << RT.load_tex_definitions
+      b << '\maketitle' + "\n\n"
+      facultylong = faculty.longname
+      sem_title = { :short => semester.title, :long => semester.longtitle }
+      b << ERB.new(RT.load_tex("preface")).result(binding)
+    end
+
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
 
     if returned_sheets <= SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      if single
+        b << RT.sample_sheets_and_footer([form])
+      end
       return b
     end
 
@@ -208,6 +224,10 @@ class Course < ActiveRecord::Base
       end
     end
 
+    if single
+      b << RT.sample_sheets_and_footer([form])
+    end
+    
     return b
   end
 
