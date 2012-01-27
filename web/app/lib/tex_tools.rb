@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # home to all TeX related tools that might be used in more than one
 # location.
 
@@ -70,19 +71,21 @@ end
 
 # Renders the given TeX Code directly into a PDF file at the given
 # location
-def render_tex(tex_code, pdf_path)
+def render_tex(tex_code, pdf_path, include_head=true)
   I18n.load_path += Dir.glob(File.join(RAILS_ROOT, '/config/locales/*.yml'))
   I18n.load_path.uniq!
 
   pdf_path = File.expand_path(pdf_path)
 
   id = File.basename(pdf_path, ".pdf")
-
+  
   # use normal result.pdf preamble
-  def t(t); I18n.t(t); end
-  evalname = "#{id} (#{pdf_path})"
-  head = ERB.new(RT.load_tex("preamble")).result(binding)
-  tex_code = head + tex_code + '\end{document}'
+  if include_head
+    def t(t); I18n.t(t); end
+    evalname = "#{id} (#{pdf_path})"
+    head = ERB.new(RT.load_tex("preamble")).result(binding)
+    tex_code = head + tex_code + '\end{document}'
+  end
 
   tmp = File.join(temp_dir(id), "#{id}.tex")
   File.open(tmp, 'w') {|f| f.write(tex_code) }
