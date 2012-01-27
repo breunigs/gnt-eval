@@ -85,7 +85,7 @@ class Postoffice < ActionMailer::Base
     end
 
     if not File.exists?(path)
-      raise "There is no file to send for course #{c.title}. I have had a look here: '#{path}'"
+      raise "There is no file to send for course #{c.title} (#{c.id}). I have had a look here: '#{path}'"
     end
 
     attachment :content_type => 'application/pdf', :filename => File.basename(path), :body => File.read(path)

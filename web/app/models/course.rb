@@ -175,7 +175,7 @@ class Course < ActiveRecord::Base
     b = "\n\n\n% #{title}\n"
 
     if single
-      evalname = title
+      evalname = title.escape_for_tex
       b << ERB.new(RT.load_tex("preamble")).result(binding)
       b << RT.load_tex_definitions
       b << '\maketitle' + "\n\n"
@@ -189,6 +189,9 @@ class Course < ActiveRecord::Base
 
     if returned_sheets <= SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
+      if single
+        b << RT.sample_sheets_and_footer([form])
+      end
       return b
     end
 

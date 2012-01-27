@@ -102,9 +102,7 @@ namespace :results do
 
     c = Course.find(a.course_id)
     filename = c.title.strip.gsub(/\s+/, '_') << '_' << c.semester.dirFriendlyName << '.pdf'
-    puts filename
     render_tex(c.evaluate(true), dirname + filename, false)
-    puts "Wrote #{dirname + filename}"
   end
 
   desc "create pdf reports for all courses of a faculty for a given semester one at a time (i.e. a whole bunch of files). leave semester_id and faculty_id empty for current semester and all faculties."
