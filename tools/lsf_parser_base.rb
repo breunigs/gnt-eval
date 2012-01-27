@@ -12,6 +12,36 @@ RT = ResultTools.instance
 
 TOPLEVEL="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
 BASELINK="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&trex=step&P.vx=mittel&"
+# URL used to search for stuff
+SEARCH_LINK="https://lsf.uni-heidelberg.de/qisserver/rds?state=wsearchv&search=1&subdir=veranstaltung&personal.nachname=SURNAME&veranstaltung.dtxt=LECTURE&veranstaltung.semester=SEMESTER&_form=display"
+SEARCH_
+
+
+# Searches for a given lecture and prof, returns an array of possible
+# lecture IDs.
+def search(lecture, prof)
+  s = SEARCH_LINK.gsub("LECTURE", lecture)
+  s.gsub!("SURNAME", prof)
+
+  y = Time.now.year
+  summer = (Date.new(y, 3, 1)..Date.new(y, 8, 31)).include?(DateTime.now)
+  # if we’re in winter term, but already celebrated new years…
+  if !summer && (Date.new(y, 1, 1)..Date.new(y, 3, 1)).include?(DateTime.now)
+    y -= 1
+  end
+
+  s.gsub!("SEMESTER", "#{y}#{summer?1:2}")
+
+  req = Net::HTTP.get_response(URI.parse(URI.encode(s)))
+  unless req.is_a?(Net::HTTPSuccess)
+      puts "Sorry, couldn’t load LSF :("
+      req.error!
+  end
+  dec = req.body.gsub(/\s+/, " ")
+  dec = dec.scan(/state=wtree&amp;search=1&amp;trex=step&amp;(root[0-9][^&]+)[^"]+"\s+title="'([^']+)'/)
+  dec.reject! { |d| d[0].scan("|").count <= depth }
+  dec
+end
 
 def findSuitableURLs(link = TOPLEVEL)
     puts "Now checking #{link}" if @debug
@@ -126,6 +156,19 @@ class Event
     def evalAlways?
         self.type == "Grundvorlesung" || self.type == "Kursvorlesung"
     end
+end
+
+class REXML::Element
+  # get the text content of the first element with the given name.
+  # ignores prefixes. Returns nil if no valid results can be
+  # found.
+  def content(name)
+    begin
+      self.get_elements("*[local-name()='#{name}']").first.text.strip
+    rescue
+      nil
+    end
+  end
 end
 
 # It's usually possible to use element.blub to get the child element
@@ -267,8 +310,8 @@ def getProfs(id)
     root = getXML('getDozenten?vtid=' + id.to_s)
 
     root.elements.each do |p|
-        profid = Integer(p.elements[getPrefix + ":id"].text)
-        name = p.elements[getPrefix + ":name"].text.strip
+        profid = Integer(p.content("id"))
+        name = p.content("name")
         # we want all the details
         profs << getProfDetails(profid, name)
     end
@@ -285,17 +328,17 @@ def getProfDetails(id, name)
 
     puts "Reading Professor Details: #{id}" if @debug
     root = getXML("getDet?pid=#{id}")[0]
-    first = root.elements[getPrefix + ':vorname'].text || ""
-    last = root.elements[getPrefix + ':nachname'].text || ""
-    title = root.elements[getPrefix + ':titel'].text || ""
-    akad = root.elements[getPrefix + ':akadgrad'].text || ""
+    first = root.content("vorname") || ""
+    last = root.content("nachname")  || ""
+    title = root.content("titel")  || ""
+    akad = root.content(":akadgrad") || ""
 
     puts "Reading Professor Contact Details: " + id.to_s if @debug
     root = getXML('getKontakt?pid=' + id.to_s)[0]
 
-    mail = root.elements[getPrefix + ':email'].text || ""
-    tele = root.elements[getPrefix + ':telefon'].text || ""
-    kid = Integer(root.elements[getPrefix + ':kid'].text)
+    mail = root.content("email") || ""
+    tele = root.content("telefon") || ""
+    kid = Integer(root.content("kid"))
 
     @tempProfs[id] = Prof.new(kid, name.strip, mail.strip, tele.strip, first.strip, last.strip, title.strip, akad.strip)
 
@@ -311,49 +354,48 @@ end
 # gets all the dates an event has and finds according professors and
 # rooms
 def getTimetable(id)
-    puts "Reading Timetable: " + id.to_s if @debug
-    times = Array.new
-    rooms = Array.new
-    profs = Array.new
+    puts "Reading Timetable: #{id}" if @debug
+    times = []
+    rooms = []
+    profs = []
     detailTime = { :ryth => [], :wday => [], :time => [], :date => [] }
     root = getXML('getTermine?vid=' + id.to_s)
     root.elements.each do |t|
         begin
-            x = t.elements
-
             # Builds time string
-            ryth = x[getPrefix + ':rhythmus'].text.strip
-            s = ""
-            s << x[getPrefix + ':wochentag'].text.strip + ", "
-            s << ryth + ", " unless ryth == "wöch"
+            ryth = t.content("rhythmus")
 
-            if !isNil?(x, ":beginn") && !isNil?(x, ":ende")
+            s = ""
+            s << t.content("wochentag") << ", "
+            s << ryth << ", " unless ryth == "wöch"
+
+            if t.content("beginn") && t.content("ende")
                 # for single dates only print one date
-                s << x[getPrefix + ':beginn'].text.strip + "–" unless ryth == "Einzel"
-                s << x[getPrefix + ':ende'].text.strip
+                s << t.content("beginn") + "–" unless ryth == "Einzel"
+                s << t.content("ende")
             end
             # Only print dates if rhythm is not weekly
-            if !isNil?(x, ":begindat") && !isNil?(x, ":endedat") && ryth != "wöch"
+            if t.content("begindat") && t.content("endedat") && ryth != "wöch"
                 s << ", "
-                s << x[getPrefix + ':begindat'].text.strip + "–" unless ryth == "Einzel"
-                s << x[getPrefix + ':endedat'].text.strip
+                s << t.content("begindat") + "–" unless ryth == "Einzel"
+                s << t.content("endedat")
             end
             # skip very short entries because they're probably just spaces/commas
             next if s.length < 7
 
             # detailed times
-            detailTime[:ryth] << (x[getPrefix + ':rhythmus'].text || "").strip
-            detailTime[:wday] << (x[getPrefix + ':wochentag'].text || "").strip
-            detailTime[:time] << (x[getPrefix + ':beginn'].text || "?").strip + " – " + (x[getPrefix + ':ende'].text || "?").strip
-            detailTime[:date] << (x[getPrefix + ':begindat'].text || "?").strip + " – " + (x[getPrefix + ':endedat'].text || "?").strip
+            detailTime[:ryth] << t.content("rhythmus") || ""
+            detailTime[:wday] << t.content("wochentag") || ""
+            detailTime[:time] << t.content("beginn") + " – " + (t.content("ende") || "?")
+            detailTime[:date] << (t.content("begindat") || "?") + " – " + (t.content("endedat") || "?")
 
             # Get room
-            room = Integer(x[getPrefix + ':terRaumID'].text)
+            room = Integer(t.content("terRaumID"))
             room = getRoom(room)
             next if room.nil? || room.empty? || room.isStopRoom?
 
             # Get prof
-            prof = Integer(x[getPrefix + ':vtid'].text)
+            prof = Integer(t.content("vtid"))
             prof = getProfs(prof)
             next if prof.nil? || prof.empty?
 
