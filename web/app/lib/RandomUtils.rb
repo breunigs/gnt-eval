@@ -308,7 +308,7 @@ def temp_dir(subdir = "")
   tmp = File.join(Seee::Config.file_paths[:cache_tmp_dir], subdir)
   require 'ftools'
   File.makedirs(tmp)
-  `chmod 0777 -R #{tmp}  2> /dev/null`
+  `chmod 0777 -R '#{tmp.gsub("'","\\'")}'  2> /dev/null`
   tmp
 end
 
