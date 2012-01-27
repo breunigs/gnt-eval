@@ -16,7 +16,6 @@ class Postoffice < ActionMailer::Base
     recipients c.profs.collect{ |p| p.email }.join(', ')
     from Seee::Config.settings[:standard_mail_from]
     bcc Seee::Config.settings[:standard_mail_bcc]
-#    recipients "oliver+eval@aleph0.de"
     subject "Evaluation Ihrer Veranstaltung '#{c.title}'"
     headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
     content_type 'text/plain'
@@ -61,5 +60,34 @@ class Postoffice < ActionMailer::Base
     body[:title] = c.title
     body[:anrede] = profanrede(c)
     body[:link] = faculty_links[c.faculty] + '#nameddest=' + course_id.to_s
+  end
+
+  
+  def single_evalverschickung(course_id, faculty_links, path = "")
+    c = Course.find(course_id)
+    recipients c.profs.collect{ |p| p.email }.join(', ')
+    
+    from Seee::Config.settings[:standard_mail_from]
+    bcc Seee::Config.settings[:standard_mail_bcc]
+    subject 'Ergebnisse der diessemestrigen Veranstaltungsumfrage'
+    headers 'Reply-To' => Seee::Config.settings[:standard_mail_from]
+    content_type 'text/plain'
+    sent_on Time.now
+    
+    body[:title] = c.title
+    body[:anrede] = profanrede(c)
+    body[:link] = faculty_links[c.faculty]
+
+    # guess the correct path
+    if path.empty?
+      filename = c.title.strip.gsub(/\s+/, '_') << '_' << c.semester.dirFriendlyName << '.pdf'
+      path = File.join(Rails.root, '../tmp/results/singles/', filename)
+    end
+
+    if not File.exists?(path)
+      raise "There is no file to send for course #{c.title}. I have had a look here: '#{path}'"
+    end
+
+    attachment :content_type => 'application/pdf', :filename => File.basename(path), :body => File.read(path)
   end
 end
