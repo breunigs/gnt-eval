@@ -43,6 +43,7 @@ end
 \usepackage{pgffor}                   % for each loops
 \usepackage{pgfplots}                 % histograms, error bars, …
 \usetikzlibrary{patterns,positioning} % some fancy stuff
+\usepackage[breakall]{truncate}       % trim overlong strings
 \usepackage{xparse}                   % nicer than newcommand
 \usepackage{xstring}                  % common string functions for TeX
 
@@ -55,6 +56,9 @@ end
 
 <% additional_packages ||= "" %>
 <%=additional_packages%>
+
+% style settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\TruncateMarker}{\textasciitilde}
 
 % set meta information %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

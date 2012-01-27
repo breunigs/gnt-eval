@@ -8,6 +8,13 @@
 <%
   a = answ.delete_if { |k,v| !k.is_a?(String) }.keys
   a.sort! { |x,y| answ[x] <=> answ[y] }
+  short_answ = a.map do |x|
+    if x.size > 40
+      "\\truncate{10cm}{\\small #{x}}"
+    else
+      "{\\small #{x}}"
+    end
+  end.join(",")
 %>
-\multiHorizontalBars{<%=a.join(",")%>}{<%=answ.values_at(*a).join(",")%>}{<%=sc%>}
+\multiHorizontalBars{<%=short_answ%>}{<%=answ.values_at(*a).join(",")%>}{<%=sc%>}
 \end{tikzpicture}

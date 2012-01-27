@@ -9,6 +9,13 @@
   a = answ.delete_if { |k,v| v <= 0 || !k.is_a?(String) }.keys
   raise if a.empty?
   a.sort! { |x,y| answ[x] <=> answ[y] }
+  short_answ = a.map do |x|
+    if x.size > 40
+      "\\truncate{10cm}{\\small #{x}}"
+    else
+      "{\\small #{x}}"
+    end
+  end.join(",")
 %>
-\singleHorizontalBars{<%=a.join(",")%>}{<%=answ.values_at(*a).join(",")%>}
+\singleHorizontalBars{<%=short_answ%>}{<%=answ.values_at(*a).join(",")%>}
 \end{tikzpicture}
