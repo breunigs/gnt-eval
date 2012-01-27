@@ -25,7 +25,7 @@ require cdir + '/RandomUtils.rb'
 # Defines how many checkboxes are available for tutors. The last one is
 # used for 'none'. The boxes are laid out five per row, so the number
 # should be divisible by five.
-TUTOR_BOX_COUNT = 30
+TUTOR_BOX_COUNT = 30 unless defined?(TUTOR_BOX_COUNT)
 
 # This is a box on a printed form. Nothing more.
 # Especially, attributes such es width or x,y-positions are added to

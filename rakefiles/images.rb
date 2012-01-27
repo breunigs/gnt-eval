@@ -76,7 +76,7 @@ namespace :images do
   desc "(6) Correct invalid sheets"
   task :correct do
     require File.join(Rails.root, "lib", "AbstractForm.rb")
-    form = Semester.currently_active.map { |s| s.forms }.flatten
+    forms = Semester.currently_active.map { |s| s.forms }.flatten
     tables = forms.collect { |form| form.db_table }
     `./pest/fix.rb #{tables.join(" ")}`
   end
@@ -99,8 +99,10 @@ namespace :images do
       path=File.join(File.dirname(__FILE__), "tmp/images")
 
       # find all existing images for courses/profs and tutors
-      cpics = CPic.find(:all, :conditions => { :semester => sem })
-      tpics = Pic.find(:all, :conditions => { :semester => sem })
+      bcs = sem.barcodes
+      cpics = CPic.find(:all, :conditions => { :course_prof_id => bcs })
+      tids = sem.courses.map { |c| c.tutors.map { |t| t.id } }
+      tpics = Pic.find(:all, :conditions => { :tutor_id => tids })
 
       # find all tables that include a tutor chooser
       forms = sem.forms.find_all { |form| form.include_question_type?("tutor_table") }
@@ -113,13 +115,13 @@ namespace :images do
 	barcode = find_barcode_from_path(f)
 
 	if barcode == 0
-	  warn "Couldn’t detect barcode for #{bname}, skipping.\n"
+	  warn "\nCouldn’t detect barcode for #{bname}, skipping.\n"
 	  next
 	end
 
 	course_prof = CourseProf.find(barcode)
 	if course_prof.nil?
-	  warn "Couldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
+	  warn "\nCouldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
 	  next
 	end
 
@@ -140,12 +142,12 @@ namespace :images do
 	  end
 
 	  if tut_num.nil?
-	    warn "Couldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+	    warn "\nouldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
 	    next
 	  end
 
 	  if tut_num == 0
-	    warn "Couldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+	    warn "\nCouldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
 	    next
 	  end
 
@@ -175,9 +177,10 @@ namespace :images do
       end # Dir glob
     end # Semester.each
 
-    puts "Expiring caches for courses#edit and tutors#edit"
-    expire_course_cache.each { |c| expire_page :controller => "courses", :action => "edit", :id => c }
-    expire_tutor_cache.each { |t| expire_page :controller => "tutors", :action => "edit", :id => t }
+    # FIXME
+    #puts "Expiring caches for courses#edit and tutors#edit"
+    #expire_course_cache.each { |c| expire_page :controller => "courses", :action => "edit", :id => c }
+    #expire_tutor_cache.each { |t| expire_page :controller => "tutors", :action => "edit", :id => t }
 
     puts
     puts "Done."
