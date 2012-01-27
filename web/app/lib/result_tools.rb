@@ -329,6 +329,9 @@ class ResultTools
   def get_answer_counts(table, q, where_hash)
     where_hash = where_hash.clone
     answ = {}
+    # matches answer text to index. Required to also update the index
+    # counts if handwritten answers match the predefined ones.
+    text_to_ind = {}
     if q.multi? # multiple choice questions ############################
       # find special no_answer field
       noansw_col = q.db_column.find_common_start+"noansw"
@@ -345,7 +348,10 @@ class ResultTools
         where_hash[q.db_column[i]] = i+1
         answ[(i+1)] = count(table, where_hash)
         t = "{#{txt.strip_common_tex}}" unless txt.nil?
-        answ[t] = answ[(i+1)] unless t.nil? || t.empty?
+        unless t.nil? || t.empty?
+          answ[t] = answ[(i+1)]
+          text_to_ind[t] = i+1
+        end
         where_hash.delete(q.db_column[i])
       end
 
@@ -367,7 +373,9 @@ class ResultTools
       q.get_answers.each_with_index do |txt, i|
         answ[(i+1)] = cc.foz(i+1)
         t = "{#{txt.strip_common_tex}}" unless txt.nil?
-        answ[t] = answ[(i+1)] unless t.nil? || t.empty?
+        next if t.nil? || t.empty?
+        answ[t] = answ[(i+1)]
+        text_to_ind[t] = i+1
       end
     end
 
@@ -380,19 +388,28 @@ class ResultTools
       # make additional answers available via index as well
       ind = q.boxes.count
       all = 0
+
       cc.each do |v,c|
-        ind += 1
-        answ[ind] = c
+        # guard against commas
+        v = "{#{v}}"
         # don’t simply overwrite the value. There might be cases where
         # the user wrote an answer although it is one of the earlier
         # checkboxes.
-        answ[v] ||= 0
-        answ[v] += c
+        if answ.has_key?(v)
+          answ[text_to_ind[v]] += c
+          answ[v] += c
+        else
+          ind += 1
+          answ[ind] = c
+          answ[v] = c
+        end
         all += c
       end
+
       # correct the “last textbox” count from above
       answ[q.boxes.count] -= all
-      t = q.get_answers.last
+      # guard against commas
+      t = "{#{q.get_answers.last}}"
       answ[t] = answ[q.boxes.count] unless t.nil? || t.empty?
     end
 
