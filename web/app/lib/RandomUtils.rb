@@ -24,22 +24,6 @@ class Hash
   end
 end
 
-class String
-  # DEPRECATED
-  # keeps only characters that may be used in a table name or column for
-  # SQL querys. Adds some hacks to allow for COUNT(*) and DISTINCT blub.
-  def keep_valid_db_chars
-    warn "DEPRECATED: keep_valid_db_chars. Use ResultTools.instance.report_valid_name? instead"
-    new = self.scan(/[()*.0-9a-z_-]/i).join.gsub("DISTINCT", "DISTINCT ")
-    if new != self
-      puts "WARNING: String contained illegal characters for SQL queries."
-      puts "         Original string: #{self}"
-      puts "         Cleaned  string: #{new}"
-    end
-    new
-  end
-end
-
 class Symbol
   # DEPRECATED
   # The same function as for strings.
