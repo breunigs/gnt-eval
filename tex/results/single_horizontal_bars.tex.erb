@@ -11,9 +11,9 @@
   a.sort! { |x,y| answ[x] <=> answ[y] }
   short_answ = a.map do |x|
     if x.size > 40
-      "\\truncate{10cm}{\\small #{x}}"
+      "\\truncate{10cm}{#{x}}"
     else
-      "{\\small #{x}}"
+      "#{x}"
     end
   end.join(",")
 %>

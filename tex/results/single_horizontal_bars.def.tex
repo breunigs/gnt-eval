@@ -74,6 +74,8 @@
     extra y ticks={\extraYTicksString},
     extra y tick labels={#2},
     extra y tick style={ytick pos=right, yticklabel pos=right},
+    % make them a little bit smaller
+    tick label style={font=\footnotesize},
     ]
     % draw the filled part. Since \addplot doesn’t expand variables, we
     % need to do it manually so that \coordAString may be read correctly.
