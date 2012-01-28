@@ -80,7 +80,7 @@ class Postoffice < ActionMailer::Base
 
     # guess the correct path
     if path.empty?
-      filename = c.title.strip.gsub(/\s+/, '_') << '_' << c.semester.dirFriendlyName << '.pdf'
+      filename = c.dir_friendly_title << '_' << c.semester.dirFriendlyName << '.pdf'
       path = File.join(Rails.root, '../tmp/results/singles/', filename)
     end
 

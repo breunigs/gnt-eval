@@ -101,7 +101,7 @@ namespace :results do
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
     c = Course.find(a.course_id)
-    filename = c.title.strip.gsub(/\s+/, '_') << '_' << c.semester.dirFriendlyName << '.pdf'
+    filename = c.dir_friendly_title << '_' << c.semester.dirFriendlyName << '.pdf'
     render_tex(c.evaluate(true), dirname + filename, false)
   end
 

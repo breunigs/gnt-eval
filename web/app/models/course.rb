@@ -231,6 +231,10 @@ class Course < ActiveRecord::Base
     return b
   end
 
+  def dir_friendly_title
+    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9-_]/i,'')
+  end
+
   private
   # quick access to some variables and classes
   SCs = Seee::Config.settings
