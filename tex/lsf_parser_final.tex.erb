@@ -1,17 +1,3 @@
-<%
-def tbl_cell(cnt, escape = true)
-  cnt = cnt.gsub('<br>', "\n").strip_html.strip
-  cnt = cnt.escape_for_tex if escape
-  cnt = cnt.gsub("\n", '\linebreak{}')
-  cnt
-end
-
-def time_magic(s)
-  s.gsub!(/([0-9]+)<sup><small>([0-9]+)<\/small><\/sup>/,  "\\time{\\1}{\\2}")
-  s.gsub("-", "--")
-end
-%>
-
 \pagestyle{empty}
 \rowcolors{1}{gray!20}{white}
 \marginsize{0.5cm}{0.5cm}{1cm}{-1cm}
@@ -45,21 +31,24 @@ end
 \renewcommand{\arraystretch}{1.5}
 \renewcommand{\time}[2]{#1\textsuperscript{#2}}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}p}
+\newcolumntype{Z}{>{\raggedleft\arraybackslash}p}
 
-\begin{longtable}[l]{Y{8cm}Y{5cm}Y{4cm}Y{4cm}p{3.8cm}p{1cm}}
+\begin{longtable}[l]{Y{8cm}Y{5cm}Y{4cm}Y{4cm}Y{3.8cm}Z{1cm}}
 \hline
 Name             & DozentIn      & Raum    & Zeit                               & AccountName? & Hörer? \\
-Beispiel-Seminar & Rebecca Schön & FS-Raum & $\Box$ \time{18}{15}-\time{18}{45} & beccy@       & 37     \\
+Beispiel-Seminar & Rebecca Schön & FS-Raum & $\Box$ \time{18}{15}-\time{18}{45} & sischoen@    & 37     \\
 \hline
 \endhead
 
 <% data.each do |d| %>
   <% next if (d.times.empty? || d.rooms.empty? || d.profs.empty?) %>
-  <%= tbl_cell(d.name) %> &
-  <%= tbl_cell(listProfs(d.profs)) %> &
-  <%= tbl_cell(d.rooms.join("\n")) %> &
-  <%= d.times.collect{|x| "$\\Box$ #{time_magic(x)}"}.join('\linebreak{}') %> &
-  &
+  <%= d.name.to_table_cell_tex %> &
+  <%= LSF.list_profs_html(d.profs).to_table_cell_tex %> &
+  <%= d.rooms.join("\n").to_table_cell_tex %> &
+  <%= d.times.collect { |x| x.time_magic_tex(courses[d.name]) }.join('\linebreak{}')
+  %> &
+  <%= courses[d.name].fs_contact_addresses_short %> &
+  <%= n=courses[d.name].students; n == 999 ? "" : n %>
   \\
 <% end %>
 \end{longtable}

@@ -14,38 +14,34 @@
 require File.dirname(__FILE__) + "/lsf_parser_base"
 
 if ARGV.empty? || ARGV.length != 2
-    puts "USAGE: ./lsf_parser_api.rb NAME URL"
-    puts "The URL can be obtained by copying the link for one of the"
-    puts "faculties listed here:"
-    puts TOPLEVEL
-    puts
-    puts "Ensure that you have selected the right semester, otherwise"
-    puts "you will get old data."
-    puts
-    puts "These are the links available at top level:"
+  puts "USAGE: ./lsf_parser_api.rb NAME URL"
+  puts "The URL can be obtained by copying the link for one of the"
+  puts "faculties listed here:"
+  puts TOPLEVEL
+  puts
+  puts "Ensure that you have selected the right semester, otherwise"
+  puts "you will get old data."
+  puts
+  puts "These are the links available at top level:"
 
-    findSuitableURLs.each do |d|
-      puts "#{BASELINK}#{d[0].ljust(30)} #{d[1]}"
-    end
+  LSF.find_suitable_urls.each do |d|
+    puts "#{d[:url].ljust(120)} #{d[:title]}"
+  end
 
-    exit
-else
-    @name = ARGV[0].gsub(/[^a-z0-9_-]/i, "")
-    setSemAndRootFromURL(ARGV[1])
-    if @semester.nil? || @rootid.nil? || @semester == 0 || @rootid == 0 || @name.nil? || @name.empty?
-        puts "Couldn't extract semester and root id. Please fix"
-        puts "the script's code".
-        exit
-    end
+  exit
 end
 
-data = getTree(@rootid)
+name = ARGV[0].gsub(/[^a-z0-9_-]/i, "")
+term, rootid = LSF.set_term_and_root(ARGV[1])
+if term.nil? || rootid.nil? || term == 0 || rootid == 0 || name.nil? || name.empty?
+  warn "Couldn't extract semester and root id. Please fix the script."
+  exit 1
+end
 
-getFile("lsf_parser_#{@name}_kummerkasten.yaml", true).puts printYamlKummerKasten(data, "#{@name}")
-render_tex(print_final_tex(data), "lsf_parser_#{@name}_final.pdf")
-render_tex(print_pre_tex(data), "lsf_parser_#{@name}_pre.pdf")
-getFile("lsf_parser_#{@name}_sws.txt", true).puts printSWSSheet(data)
+data = LSF.get_tree(rootid)
 
+LSF.get_file("lsf_parser_#{name}_kummerkasten.yaml", true).puts LSF.print_yaml_kummerkasten(data, "#{name}")
+LSF.get_file("lsf_parser_#{name}_sws.txt", true).puts LSF.print_sws_sheet(data)
 
-
-puts "Cache hits: #{$cache_hits}"
+render_tex(LSF.print_final_tex(data), "lsf_parser_#{name}_final.pdf")
+render_tex(LSF.print_pre_tex(data), "lsf_parser_#{name}_pre.pdf")
