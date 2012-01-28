@@ -104,6 +104,12 @@ class Course < ActiveRecord::Base
     end.join(',')
   end
 
+  # Same as above, but do not include the default domain. Intended for
+  # display where “user@“ is sufficient to know what the address is.
+  def fs_contact_addresses_short
+    fs_contact_addresses.gsub(/#{SCs[:standard_mail_domain]}$/, "")
+  end
+
   def barcodes_with_checksum
     course_profs.map { |cp| cp.barcode_with_checksum }
   end
@@ -171,7 +177,7 @@ class Course < ActiveRecord::Base
 
     I18n.locale = language if I18n.tainted? or single
 
-    
+
     b = "\n\n\n% #{title}\n"
 
     if single
@@ -227,12 +233,12 @@ class Course < ActiveRecord::Base
     if single
       b << RT.sample_sheets_and_footer([form])
     end
-    
+
     return b
   end
 
   def dir_friendly_title
-    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9-_]/i,'')
+    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9\-_]/i,'')
   end
 
   private
