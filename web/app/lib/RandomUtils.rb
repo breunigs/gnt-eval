@@ -54,6 +54,11 @@ class String
     self
   end
 
+  # Make downcase support German umlauts
+  def downcase
+    self.tr 'A-ZÄÖÜ', 'a-zäöü'
+  end
+
   # Capitalizes the first letter of the string and leaves all other
   # chars alone.
   def capitalize_first
