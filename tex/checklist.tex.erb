@@ -1,6 +1,15 @@
 \rowcolors{1}{gray!20}{white}
 \pagestyle{empty}
 \renewcommand{\arraystretch}{1.5}
+\marginsize{2cm}{2cm}{1cm}{0cm}
+
+The following counts have been detected:
+
+<% count.sort { |a,b| a[1] <=> b[1] }.each do |c| %>%
+  \parbox{1.8cm}{\textbf{<%=c[0].strip%>:} <%=c[1]%>}
+<% end %>
+
+
 \begin{longtable}[l]{llll}
 \hline
 Desc & Title & Prof & \ \ ok?\ \ \\
@@ -13,9 +22,3 @@ Desc & Title & Prof & \ \ ok?\ \ \\
 \end{longtable}
 
 \renewcommand{\arraystretch}{1}
-
-The following counts have been detected:
-
-<% count.sort { |a,b| a[1] <=> b[1] }.each do |c| %>%
-  \parbox{1.8cm}{\textbf{<%=c[0].strip%>:} <%=c[1]%>}
-<% end %>
