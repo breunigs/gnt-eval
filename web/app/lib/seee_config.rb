@@ -183,7 +183,9 @@ module Seee
       :hunspell => "#{@@application_paths[:hunspell]} -t -l -d en_US,de_DE -p #{@@file_paths[:hunspell_personal_dic]}",
       :aspell => "#{@@application_paths[:aspell]} -t -d de_DE-neu list | #{@@application_paths[:aspell]} -t -d en list",
 
-      :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}"
+      :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}",
+
+      :xelatex => "#{@@application_paths[:xelatex]} -halt-on-error -file-line-error -interaction=nonstopmode"
     }
 
     @@commands.merge!({

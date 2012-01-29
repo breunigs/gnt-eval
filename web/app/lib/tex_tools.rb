@@ -100,6 +100,42 @@ def render_tex(tex_code, pdf_path, include_head=true)
   end
 end
 
+# Takes path to (xe)tex file as input and will run xelatex on it. Will
+# exit the program in case of en error. Returns nothing. Will overwrite
+# existing files. Set one_time to true if there are no references and
+# it’s sufficient to run xelatex only once.
+def xetex_to_pdf(file, one_time = false, quiet = false)
+  filename="\"#{File.basename(file)}\""
+  texpath="cd \"#{File.dirname(file)}\" && "
+
+  # run it once fast, to see if there are any syntax errors in the
+  # text and create first-run-toc
+  err = `#{texpath} #{Scc[:xelatex]} #{filename} 2>&1`
+  if $?.exitstatus != 0
+      warn "="*60
+      warn err
+      warn "\n\n\nERROR WRITING: #{file}"
+      warn "EXIT CODE: #{$?}"
+      warn "COMMAND: #{texpath} #{Scc[:xelatex]} #{filename}"
+      warn "="*60
+      raise
+  end
+
+  unless one_time
+    `#{texpath} #{Scc[:xelatex]} #{filename} 2>&1`
+    `#{texpath} #{Scc[:xelatex]} #{filename} 2>&1`
+  end
+
+  if $?.exitstatus == 0
+    puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}" unless quiet
+    true
+  else
+    warn "Some other error occured. It shouldn’t be TeX-related, as"
+    warn "it already passed one run. Well, happy debugging."
+    false
+  end
+end
+
 # Takes path to tex file as input and will run pdflatex on it. Will exit
 # the program in case of en error. Returns nothing. Will overwrite
 # existing files. Set one_time to true if there are no references and
