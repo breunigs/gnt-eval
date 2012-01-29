@@ -93,7 +93,15 @@ warningcounter = 0
 totalcounter = 0
 start_time = Time.now
 
-forms.sort { |a,b| b[1][:count] <=> a[1][:count] }.each do |file, data|
+forms_sorted = forms.sort do |a,b|
+  if b[1][:count] == a[1][:count]
+    a[0] <=> b[0]
+  else
+    b[1][:count] <=> a[1][:count]
+  end
+end
+
+forms_sorted.each do |file, data|
   count = data[:count]
   howtos = ([data[:lang]] + DEFAULT_HOWTOS).uniq
 
