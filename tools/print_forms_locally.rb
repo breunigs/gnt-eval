@@ -37,7 +37,7 @@ forms = {}
 
 # look in default location, if no paths are given via CMD line.
 if ARGV.nil? || ARGV.empty?
-  poss = Dir.glob("#{GNT_ROOT}/../forms/*pcs.pdf")
+  poss = Dir.glob("#{GNT_ROOT}/tmp/forms/*pcs.pdf")
 else
   poss = ARGV
   if poss.include?("--non-interactive")
