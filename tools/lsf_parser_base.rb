@@ -11,8 +11,6 @@ require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
 GNT_ROOT = File.dirname(__FILE__) + "/.." unless defined?(GNT_ROOT)
 RT = ResultTools.instance unless defined?(RT)
 
-DEBUG = true
-
 # About the term ID:
 # summer term 2009 == 20091
 # winter term 2009/10 == 20092
@@ -52,6 +50,8 @@ class LSF
 
   @@level = 0
 
+  @@debug = true
+
   # “net” methods ######################################################
 
   # Loads the given URL and returns the resulting body text. Eliminates
@@ -89,14 +89,15 @@ class LSF
   # lectures. Automatically rejects all courses that have a stop type or
   # name or have invalid or incomplete data.
   def self.search(lecture, prof)
-    s = LSF.SEARCH_URL.gsub("LECTURE", lecture)
+    s = SEARCH_URL.gsub("LECTURE", lecture)
     s.gsub!("SURNAME", prof)
     s.gsub!("TERM", LSF.guess_term)
 
     lect_ids = load_url(s).scan(/publishid=([0-9]+)&/).flatten
     lects = lect_ids.map { |l| [*LSF.get_lecture(l)] }
     # remove all lectures whose skip attribute is set to true
-    lects.reject { |l| l[1] }
+    lects.reject! { |l| l[1] }
+    lects.map { |l| l[0] }
   end
 
   # LSF Service methods ################################################
@@ -320,13 +321,13 @@ class LSF
   # Tries to guess the current term by looking at the date. Assumes
   # summer term is from March, 1st  to August, 31th.
   def self.guess_term
+    y = Time.now.year
     # terms overlap on March, 1st. This shouldn’t be a problem though,
     # since we only need the latter to correct the year value and not
     # to determine if it’s summer/winter.
     term_summer = Date.new(y, 3, 1)..Date.new(y, 8, 31)
     term_winter_newyear = Date.new(y, 1, 1)..Date.new(y, 3, 1)
 
-    y = Time.now.year
     summer = term_summer.include?(DateTime.now)
     # if we’re in winter term, but already celebrated new years…
     y -= 1 if !summer && term_winter_newyear.include?(DateTime.now)
@@ -356,9 +357,13 @@ class LSF
     dec
   end
 
+  def self.set_debug=(v)
+    @@debug = v ? true : false
+  end
+
   # prints a debug message if enabled.
   def self.debug(text)
-    return unless DEBUG
+    return unless @@debug
     print (" | "*@@level).strip + " "
     puts text
   end
@@ -476,9 +481,15 @@ class String
     s = self.gsub(/([0-9]+)<sup><small>([0-9]+)<\/small><\/sup>/,  "\\time{\\1}{\\2}")
     s.gsub!("-", "--")
     return "$\\Box$ #{s}" unless course
-    cdesc = course.description.strip.gsub(/[^a-z0-9]/i, "")[0..3].gsub(/h$/, "")
-    sdesc = s[0..1] + s.match(/time\{([0-9]+)\}/)[1].gsub(/0([1-9])/, "\\1")
-    (cdesc.downcase == sdesc.downcase ? "$\\boxtimes$ " : "$\\Box$ " ) + s
+    begin
+      cdesc = course.description.strip.gsub(/[^a-z0-9]/i, "")[0..3].gsub(/h$/, "")
+      sdesc = s[0..1] + s.match(/time\{([0-9]+)\}/)[1].gsub(/0([1-9])/, "\\1")
+      (cdesc.downcase == sdesc.downcase ? "$\\boxtimes$ " : "$\\Box$ " ) + s
+    rescue
+      # probably the regex didn’t match and we accessed an invalid array
+      # item. Take that as “no match”
+      "$\\Box$ #{s}"
+    end
   end
 end
 
