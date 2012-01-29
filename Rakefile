@@ -16,7 +16,8 @@ require 'ftools'
 include Magick
 
 require 'rake/clean'
-CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log', 'tmp/*/*.out', 'tmp/*/*.aux', 'tmp/*/*.toc', 'tmp/blame.tex')
+CLEAN.include('tmp/**/*.log', 'tmp/**/*.out', 'tmp/**/*.aux',
+  'tmp/**/*.toc', 'tmp/blame.tex', 'tmp/forms/**/*.tex')
 
 # Capture ctrl+c and stop all currently running jobs in the work queue.
 # needs current work_queue gem.
