@@ -149,10 +149,11 @@ end
 # Prints the current progress to the console without advancing one line
 # val: currently processed item
 # max: amount of items to process
-def print_progress(val, max)
+# title: print name of just processed item
+def print_progress(val, max, title = "")
   percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
   current = val.to_s.rjust(max.to_s.size)
-  print "\r#{percentage}% (#{current}/#{max})"
+  print "\r#{percentage}% (#{current}/#{max})\t#{title[0..49].ljust(50)}"
   STDOUT.flush
 end
 
