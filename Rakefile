@@ -21,8 +21,11 @@ CLEAN.include('tmp/*.log', 'tmp/*.out', 'tmp/*.aux', 'tmp/*.toc', 'tmp/*/*.log',
 # Capture ctrl+c and stop all currently running jobs in the work queue.
 # needs current work_queue gem.
 if work_queue.respond_to?("kill")
-  trap("INT") { work_queue.kill  }
+  trap("INT") { work_queue.kill; exit 99  }
+else
+  trap("INT") { exit 99  }
 end
+
 
 RT = ResultTools.instance unless defined?(RT)
 SCap = Seee::Config.application_paths unless defined?(SCap)
