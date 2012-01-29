@@ -28,7 +28,7 @@ DEFAULT_HOWTOS=["de"]
 SHEET_WARNING=1000
 
 
-GNT_ROOT=File.join(File.dirname(__FILE__), "..") unless defined?(GNT_ROOT)
+GNT_ROOT=File.expand_path(File.join(File.dirname(__FILE__), "..")) unless defined?(GNT_ROOT)
 # change into tmp directory
 Dir.chdir(Seee::Config.file_paths[:cache_tmp_dir])
 
@@ -63,13 +63,13 @@ end
 
 # now check the given files if they are suitable
 poss.each do |f|
-    next unless File.exist?(f)
-    next if File.basename(f).start_with?(" multiple")
-    data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
-    next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
-    count = data[2].to_i
-    sheets += count
-    forms[f] = { :count => count, :lang => data[1] }
+  next unless File.exist?(f)
+  next if File.basename(f).start_with?(" multiple")
+  data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
+  next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
+  count = data[2].to_i
+  sheets += count
+  forms[f] = { :count => count, :lang => data[1] }
 end
 
 if forms.empty?
