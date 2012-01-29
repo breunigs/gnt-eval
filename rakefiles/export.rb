@@ -156,7 +156,7 @@ namespace :results do
     # + data + head for:
     tex = ERB.new(RT.load_tex("../table")).result(binding)
     now = Time.now.strftime("%Y-%m-%d %H:%M")
-    render_tex(tex, File.join(GNT_ROOT, "tmp/export/#{now} tutor export.pdf"))
+    render_tex(tex, File.join(GNT_ROOT, "tmp/export/#{now} tutor export.pdf"), true, true)
   end
 
 

@@ -43,5 +43,5 @@ data = LSF.get_tree(rootid)
 LSF.get_file("lsf_parser_#{name}_kummerkasten.yaml", true).puts LSF.print_yaml_kummerkasten(data, "#{name}")
 LSF.get_file("lsf_parser_#{name}_sws.txt", true).puts LSF.print_sws_sheet(data)
 
-render_tex(LSF.print_final_tex(data), "lsf_parser_#{name}_final.pdf")
-render_tex(LSF.print_pre_tex(data), "lsf_parser_#{name}_pre.pdf")
+render_tex(LSF.print_final_tex(data), "lsf_parser_#{name}_final.pdf", true, true)
+render_tex(LSF.print_pre_tex(data), "lsf_parser_#{name}_pre.pdf", true, true)
