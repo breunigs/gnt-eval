@@ -70,8 +70,10 @@ end
 
 
 # Renders the given TeX Code directly into a PDF file at the given
-# location
-def render_tex(tex_code, pdf_path, include_head=true)
+# location. Set add_header to false if you plan to include your own
+# preamble and footer. Set one_time to true, if it’s enough to render
+# the document once. If false, it is rendered three times.
+def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
   I18n.load_path += Dir.glob(File.join(RAILS_ROOT, '/config/locales/*.yml'))
   I18n.load_path.uniq!
 
@@ -80,7 +82,7 @@ def render_tex(tex_code, pdf_path, include_head=true)
   id = File.basename(pdf_path, ".pdf")
 
   # use normal result.pdf preamble
-  if include_head
+  if add_header
     def t(t); I18n.t(t); end
     evalname = "#{id} (#{pdf_path})"
     head = ERB.new(RT.load_tex("preamble")).result(binding)
@@ -140,7 +142,7 @@ end
 # the program in case of en error. Returns nothing. Will overwrite
 # existing files. Set one_time to true if there are no references and
 # it’s sufficient to run pdflatex only once.
-def tex_to_pdf(file, one_time = false)
+def tex_to_pdf(file, one_time = false, quiet = false)
   filename="\"#{File.basename(file)}\""
   texpath="cd \"#{File.dirname(file)}\" && "
 
@@ -169,12 +171,12 @@ def tex_to_pdf(file, one_time = false)
   end
 
   if $?.exitstatus == 0
-      puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}"
-      true
+    puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}" unless quiet
+    true
   else
-      warn "Some other error occured. It shouldn’t be TeX-related, as"
-      warn "it already passed one run. Well, happy debugging."
-      false
+    warn "Some other error occured. It shouldn’t be TeX-related, as"
+    warn "it already passed one run. Well, happy debugging."
+    false
   end
 end
 
