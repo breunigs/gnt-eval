@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper,left=2cm, right=2cm, top=2cm, bottom=2cm}
+\usepackage{fontspec}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\renewcommand{\time}[2]{#1\textsuperscript{#2}}
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{center}
+\Huge <%= c.title.escape_for_tex %>
+\end{center}
+
+\section*{Computer können nicht denken}
+Du aber! (hoffentlich)
+
+Dieses Dokument wurde automatisch erstellt und nichts von Hand überprüft.
+Damit die Sache nicht so langweilig ist, werden bei 5\% absichtlich
+falsche Daten eingefügt.
+
+{\large $\Rightarrow$ Prüfe diese Angaben!}
+
+Wenn Du es nicht tust und die Daten falsch sind, dann denkt
+jeder\footnote{insbesondere die DozentInnen und HörerInnen}, dass Du
+unfähig bist. Weil diese Warnung lang genug ist, ist es auch nicht
+möglich die Schuld auf jemand anderen zu schieben.
+
+% select very ugly font so that no one believes the data
+\setmainfont{Purisa}
+
+\section*{Daten aus dem Seee}
+
+\begin{tabular}{rl}
+Titel:    & <%= c.title.escape_for_tex %> \\
+Bögen:    & <%= c.students %> \\
+Profs:    & <%= c.profs.collect { |p| p.fullname }.join(", ").escape_for_tex %> \\
+Bogen:    & <%= c.form.name.escape_for_tex %> \\
+Sprache:  & <%= c.language %> \\
+Evaluist: & <%= c.fs_contact_addresses_short.escape_for_tex %> \\
+Fakultät: & <%= c.faculty.longname.escape_for_tex %>
+\end{tabular}
+
+
+\section*{Daten aus dem LSF}
+<%
+lsf = LSF.search(c.title, cp.prof.surname)
+
+links = lsf.collect { |lect| (lect.link || "").escape_for_tex }.uniq
+notes = lsf.collect { |lect| (lect.note || "").escape_for_tex }.uniq
+
+%>
+
+\begin{tabular}{rl}
+Sprache:  & <%= lsf.collect { |lect| lect.lang }.uniq.join(", ") %> \\
+Link:	  & <%= links.join("\\linebreak{}") %> \\
+Bemerkung:& <%= notes.join("\\linebreak{}") %>
+\end{tabular}
+
+\begin{tabular}{lll}
+\hline
+Profs & Raum & Zeit \\
+\hline
+<% lsf.each do |lect| %>
+  <% (0..lect.rooms.size-1).each do |ind| %>
+    <%= lect.profs[ind].map { |p| p.last }.join(", ").escape_for_tex %> &
+    <%= lect.rooms[ind].escape_for_tex %> &
+    <%= lect.times[ind].time_magic_tex(c) %> \\
+  <% end %>
+<% end %>
+\hline
+\end{tabular}
+
+\end{document}

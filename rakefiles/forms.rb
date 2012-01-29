@@ -28,15 +28,64 @@ namespace :forms do
       Semester.find(a.semester_id).course_profs
     end
 
+    prog = 0
+    puts
+    puts "Creating forms:"
     cps.each do |cp|
-      work_queue.enqueue_b { make_pdf_for(cp, dirname) }
+      work_queue.enqueue_b do
+        make_pdf_for(cp, dirname)
+        prog += 1
+        print_progress(prog, cps.size, cp.course.title)
+      end
     end
     work_queue.join
 
+    Rake::Task["forms:cover_sheets"].invoke(a.semester_id)
     Rake::Task["clean".to_sym].invoke
     puts
     puts "Done."
     puts "You can print the forms using «rake forms:print»"
+  end
+
+  desc "Generate cover sheets that contain all available information about the lectures. Leave empty for current terms."
+  task :cover_sheets, [:semester_id] do |t, a|
+    require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
+    LSF.set_debug = false
+
+    dirname = './tmp/forms/covers/'
+    FileUtils.mkdir_p(dirname)
+
+    puts "\n\n"
+    puts "Please note: Although the covers contain the lecturer’s name"
+    puts "they are only customized per lecture. If there are multiple"
+    puts "lecturers the name of the last lecturer will be used (when"
+    puts "sorted by fullname). This allows to print the cover page only"
+    puts "once and have it printed on top of the last stack of that"
+    puts "lecture."
+
+    courses =  if a.semester_id.nil?
+      Semester.currently_active.map { |s| s.courses }.flatten
+    else
+      Semester.find(a.semester_id).courses
+    end
+
+    prog = 0
+
+    puts
+    puts "Creating cover sheets:"
+    courses.each do |c|
+      work_queue.enqueue_b do
+        cp = c.course_profs.sort_by { |cp| cp.get_filename }.last
+        # probably should have language selector…
+        tex = ERB.new(RT.load_tex("../form_cover")).result(binding)
+        path = "#{dirname}cover #{cp.get_filename}.tex"
+        File.open(path, 'w') {|f| f.write(tex) }
+        xetex_to_pdf(path, true, true)
+        prog += 1
+        print_progress(prog, courses.size, c.title)
+      end
+    end
+    work_queue.join
   end
 
   desc "(2) Print all #{"existing".bold} forms in tmp/forms. Uses local print by default."
@@ -61,7 +110,9 @@ namespace :forms do
       count[desc[0..1].gsub(/\\$/, "")] ||= 0
       count[desc[0..1].gsub(/\\$/, "")] += 1
 
-      c.course_profs.each do |cp|
+      # this will create a seemingly random sort order in checklist.pdf
+      # due to sorting by fullname although only surname is printed.
+      c.course_profs.sort_by { |cp| cp.get_filename }.each do |cp|
         d = []
         d << desc[0..5]
         d << c.title.escape_for_tex[0..47]

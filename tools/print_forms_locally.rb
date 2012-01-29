@@ -133,9 +133,12 @@ forms_sorted.each do |file, data|
   end
 
   # issue print commands / submit to queue
+  cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
+  cover =  "lpr            -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
   print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
   banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
   howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/howtos/howto_#{h}.pdf\"" }
+  system(cover) if File.exists?(cover_file)
   howtos.each { |h| system(h) }
   system(print)
   system(banner)
