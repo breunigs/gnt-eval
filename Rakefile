@@ -59,7 +59,7 @@ def make_sample_sheet(form, lang)
   end
 
   puts "Wrote #{filename}.tex"
-  Rake::Task[(filename + '.pdf').to_sym].invoke
+  tex_to_pdf("#{filename}.tex", true)
   `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
   filename
 end

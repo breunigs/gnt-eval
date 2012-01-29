@@ -208,7 +208,7 @@ def make_pdf_for(cp, dirname)
   puts "Wrote #{filename}.tex"
 
   # generate PDF
-  tex_to_pdf("#{filename}.tex")
+  tex_to_pdf("#{filename}.tex", true)
 
   # it may be useful for debugging to have a YAML for each course.
   # however, it is not needed by gnt-eval itself, so remove it immediately

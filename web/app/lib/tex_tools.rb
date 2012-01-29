@@ -78,7 +78,7 @@ def render_tex(tex_code, pdf_path, include_head=true)
   pdf_path = File.expand_path(pdf_path)
 
   id = File.basename(pdf_path, ".pdf")
-  
+
   # use normal result.pdf preamble
   if include_head
     def t(t); I18n.t(t); end
@@ -102,30 +102,35 @@ end
 
 # Takes path to tex file as input and will run pdflatex on it. Will exit
 # the program in case of en error. Returns nothing. Will overwrite
-# existing files.
-def tex_to_pdf(file)
+# existing files. Set one_time to true if there are no references and
+# it’s sufficient to run pdflatex only once.
+def tex_to_pdf(file, one_time = false)
   filename="\"#{File.basename(file)}\""
   texpath="cd \"#{File.dirname(file)}\" && "
 
+  first = Scc[one_time ? :pdflatex_real : :pdflatex_fast]
+
   # run it once fast, to see if there are any syntax errors in the
   # text and create first-run-toc
-  err = `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+  err = `#{texpath} #{first} #{filename} 2>&1`
   if $?.exitstatus != 0
       warn "="*60
       warn err
       warn "\n\n\nERROR WRITING: #{file}"
       warn "EXIT CODE: #{$?}"
-      warn "COMMAND: #{texpath} #{Scc[:pdflatex_fast]} #{filename}"
+      warn "COMMAND: #{texpath} #{first} #{filename}"
       warn "="*60
       warn "Running 'rake results:find_broken_comments' or 'rake results:fix_tex_errors' might help."
       raise
   end
 
-  # run it fast a second time, to get /all/ references correct
-  `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
-  # now all references should have been resolved. Run it a last time,
-  # but this time also output a pdf
-  `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
+  unless one_time
+    # run it fast a second time, to get /all/ references correct
+    `#{texpath} #{Scc[:pdflatex_fast]} #{filename} 2>&1`
+    # now all references should have been resolved. Run it a last time,
+    # but this time also output a pdf
+    `#{texpath} #{Scc[:pdflatex_real]} #{filename} 2>&1`
+  end
 
   if $?.exitstatus == 0
       puts "Wrote #{file.gsub(/\.tex$/, ".pdf")}"
