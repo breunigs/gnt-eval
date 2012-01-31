@@ -347,17 +347,25 @@ end
 # valid is a regular expression a string is returned iff it matches
 # the expression. Please note that all array values are converted to
 # strings and entries will be seperated by space.
-def get_user_input(valid)
+# If exactly_one is set to true and valid is an array, exactly one of
+# the items in valid must be selected. If valid is a regex, exactly_one
+# has no effect.
+def get_user_input(valid, exactly_one = false)
   valid = valid.collect { |x| x.to_s } if valid.is_a? Array
   while true
     print "> "
+    STDOUT.flush
     data = STDIN.gets.chomp
     if valid.is_a? Array
-      data = data.strip.split(/\s+/)
-      return data if data.all? { |x| valid.include?(x) }
+      if exactly_one
+        return data if valid.include?(data)
+      else
+        data = data.strip.split(/\s+/)
+        return data if data.all? { |x| valid.include?(x) }
+      end
       puts
       puts "Sorry, your input isn't valid. All entries must be in the following list."
-      puts "Seperate entries by spaces if you want multiple values."
+      puts "Seperate entries by spaces if you want multiple values." unless exactly_one
       puts valid.join(" ")
     else # regex
       return data if data =~ valid
