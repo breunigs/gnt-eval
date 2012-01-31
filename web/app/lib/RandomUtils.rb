@@ -415,3 +415,33 @@ def create_howtos(saveto, form_path = nil)
   end
   work_queue.join
 end
+
+# guesses gender based on the first name. Either returns :male, :female
+# or :unknown. Uses beliebte-vornamen.de by looking through their lists.
+# Requires two HTTP queries, so be patient.
+def guess_gender(firstname)
+  return :unknown if firstname.empty?
+  require 'net/http'
+  require 'rubygems'
+  require 'asciify'
+  name = firstname.downcase
+  letter = name.asciify[0..0]
+  base = "http://www.beliebte-vornamen.de/lexikon/#{letter}"
+  m = Net::HTTP.get(URI("#{base}-mann")).compress_whitespace.downcase
+  f = Net::HTTP.get(URI("#{base}-frau")).compress_whitespace.downcase
+  # find all names, and split variants separated by comma or slash
+  m = m.scan(/<dt>(.*?)<\/dt>/).map { |s| s[0].strip_html.split(/[,\/]/) }
+  f = f.scan(/<dt>(.*?)<\/dt>/).map { |s| s[0].strip_html.split(/[,\/]/) }
+  # Also find name like Alfhild(e)
+  m = m.flatten.map { |n| [n.gsub(/[\(\)]/, ""), n.gsub(/\(.*?\)/, "")] }
+  f = f.flatten.map { |n| [n.gsub(/[\(\)]/, ""), n.gsub(/\(.*?\)/, "")] }
+  m.flatten!
+  f.flatten!
+  m.map! { |n| n.strip }
+  f.map! { |n| n.strip }
+
+  return :unkown if m.include?(name) && f.include?(name)
+  return :male if m.include?(name)
+  return :female if f.include?(name)
+  :unknown
+end
