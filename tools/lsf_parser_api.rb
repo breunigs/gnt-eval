@@ -17,7 +17,7 @@ if ARGV.empty? || ARGV.length != 2
   puts "USAGE: ./lsf_parser_api.rb NAME URL"
   puts "The URL can be obtained by copying the link for one of the"
   puts "faculties listed here:"
-  puts TOPLEVEL
+  puts LSF.toplevel
   puts
   puts "Ensure that you have selected the right semester, otherwise"
   puts "you will get old data."

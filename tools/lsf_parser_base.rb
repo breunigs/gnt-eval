@@ -62,9 +62,9 @@ class LSF
 
     req = Net::HTTP.get_response(URI.parse(URI.encode(url)))
     unless req.is_a?(Net::HTTPSuccess)
-        puts "Sorry, couldn’t load LSF :("
-        puts "URL: #{url}"
-        req.error!
+      warn "Sorry, couldn’t load LSF :("
+      warn "URL: #{url}"
+      req.error!
     end
     @@cache_http[url] = req.body.gsub(/\s+/, " ")
     @@cache_http[url]
@@ -108,12 +108,14 @@ class LSF
   # type occured type occured or incomplete data). Does not include
   # faculty.
   def self.get_lecture(id)
+    return nil, true if id.to_s.empty? || id.to_s == "0"
     LSF.debug("Reading lecture: #{id}")
     @@level += 1
     l = LSF.get_lecture_details(id)
     l.merge!(LSF.get_timetable(id))
 
-    skip = l[:type].is_stop_type? || l[:name].nil? || l[:name].is_stop_name?
+    skip = !l[:type].nil? && l[:type].is_stop_type?
+    skip = skip || l[:name].nil? || l[:name].is_stop_name?
     # skip lectures that neither has time/rooms/prof nor SWS information
     no_sws = l[:sws].nil? || l[:sws] == 0
     no_trp = l[:times].empty? || l[:rooms].empty? || l[:profs].empty?
@@ -126,6 +128,7 @@ class LSF
   def self.get_lecture_details(id)
     LSF.debug("Reading lecture details: #{id}")
     root = LSF.load_xml("getVerDet?vid=#{id}").first
+    return {} if root.nil?
     {
       :id       => id,
       :sws      => root.content("sws").to_i,
@@ -305,7 +308,7 @@ class LSF
   # returns the stored root ID which may be passed to get_tree. Root ID
   # is currently not used internally.
   def self.rootid
-
+    @@rootid
   end
 
   # extracts term and root id from the given URL and stores it as class
@@ -374,6 +377,10 @@ class LSF
     name = "lsf_parser_out.html" if name.nil?
     File.delete(name) if delete && File.exists?(name)
     return File.new(name, "a")
+  end
+
+  def self.toplevel
+    TOPLEVEL
   end
 end
 
