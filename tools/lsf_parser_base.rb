@@ -63,6 +63,11 @@ class LSF
   def self.load_url(url)
     return @@cache_http[url] if @@cache_http[url]
 
+    if File.exists?("/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, ""))
+       @@cache_http[url] = `cat #{"/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, "")}`
+       return @@cache_http[url]
+    end
+    puts "actually loading #{url}"
     req = Net::HTTP.get_response(URI.parse(URI.encode(url)))
     unless req.is_a?(Net::HTTPSuccess)
       warn "Sorry, couldn’t load LSF :("
@@ -70,6 +75,8 @@ class LSF
       req.error!
     end
     @@cache_http[url] = req.body.gsub(/\s+/, " ")
+    File.open("/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, ""), 'w') {|f| f.write(@@cache_http[url]) }
+
     @@cache_http[url]
   end
 

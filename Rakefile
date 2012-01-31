@@ -72,6 +72,7 @@ end
 require 'rakefiles/export.rb'
 require 'rakefiles/forms.rb'
 require 'rakefiles/images.rb'
+require 'rakefiles/import.rb'
 require 'rakefiles/mail.rb'
 require 'rakefiles/omr-test-helper.rb'
 require 'rakefiles/results.rb'
@@ -91,47 +92,31 @@ namespace :misc do
     Rake::Task["clean".to_sym].invoke
   end
 
-  desc "Generate printable event lists 'what to eval?' and 'who evals what?'. Also creates import YAML for Kummerkasten."
+  desc "Export data from LSF in various ways helpful for our cause."
   task :lsfparse do
+    # if you change stuff here, also adjust rakefiles/import.rb
+    require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     puts "Finding IDs…"
-    require 'net/http'
-    url = "http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&category=veranstaltung.browse&topitem=lectures&subitem=lectureindex&breadcrumb=lectureindex"
+    search = ["Mathematik und Informatik", "Fakultät für Physik und Astronomie"]
+    mathe, physik = LSF.find_certain_roots(search)
 
-    req = Net::HTTP.get_response(URI.parse(url))
-    mathe = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Mathematik und Informatik/)[0][0]
-    physik = req.body.scan(/href="([^"]+?)"\s+?title="'Fakultät für Physik und Astronomie/)[0][0]
+    @dir = "tmp/lsfparse/"
+    File.makedirs(@dir)
 
-    dir = "tmp/lsfparse/"
-    File.makedirs(dir)
-
-    puts "Mathe…"
-    `cd '#{dir}' && ../../tools/lsf_parser_api.rb mathe '#{mathe}' > mathe.log`
-    puts "Physik…"
-    `cd '#{dir}' && ../../tools/lsf_parser_api.rb physik '#{physik}' > physik.log`
-
+    def run(name, url)
+      cmd = "cd '#{@dir}' && "
+      cmd << "../../tools/lsf_parser_api.rb #{name} '#{url}' "
+      cmd << "> #{name}.log"
+      `#{cmd}`
+    end
+    puts "Gathering data…"
+    work_queue.enqueue_b { run("mathe", mathe[:url]) }
+    work_queue.enqueue_b { run("physik", physik[:url]) }
+    work_queue.join
     puts
     puts "All Done. Have a look in #{dir}"
   end
 
-  desc "Grabs the current list of tutors from uebungen.physik.uni-hd.de and puts them into a human readable file"
-  task :tutors_physics do
-    `cd tmp && ./../tools/physik_tutoren.rb`
-    require 'date'
-    puts Date.today.strftime("Done, have a look at: tmp/%Y-%m-%d Tutoren Physik.txt")
-  end
-
-  desc "Tries to find suitable files in ./tmp that might contain tutor/lecutre information for the maths fac."
-  task :tutors_maths do
-    Dir.chdir("tmp")
-    # selecting all "yml"s is okay because by default only "yamls" are
-    # written into /tmp by other parts
-    ymls = Dir.glob("*.yml") + Dir.glob("mues*.yaml") + Dir.glob("lect*.yaml")
-    csv = Dir.glob("Hiwi*.csv")
-    xls = Dir.glob("Hiwi*.xls")
-    files = '"'+(ymls + csv + xls).join('" "')+'"'
-    puts "Files found: #{files}"
-    system("./../tools/mathe_tutoren.rb #{files}")
-  end
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
