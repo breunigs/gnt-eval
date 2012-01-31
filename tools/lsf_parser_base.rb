@@ -360,6 +360,16 @@ class LSF
     dec
   end
 
+  # Returns the root links matching the given strings. One hash in the
+  # form of { :url => "", :title => "" } is returned for each search
+  # item. If there are multiple matches for a string, only the first is
+  # returned.
+  def self.find_certain_roots(search)
+    raise "Search needs to be an Array" unless search.is_a?(Array)
+    urls = LSF.find_suitable_urls
+    return *search.map { |s| urls.detect { |x| x[:title].include?(s) } }
+  end
+
   def self.set_debug=(v)
     @@debug = v ? true : false
   end
