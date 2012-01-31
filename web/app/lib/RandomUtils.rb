@@ -33,6 +33,12 @@ class Symbol
 end
 
 class String
+  # converts all whitespace, html or otherwise, to a single space. This
+  # allows for much easier regular expressions when dealing with HTML.
+  def compress_whitespace
+    self.gsub("&nbsp;", " ").gsub(/\s+/, " ").strip
+  end
+
   # removes all HTML Tags from text
   def strip_html
     self.gsub(/<\/?[^>]*>/, "")
@@ -310,6 +316,30 @@ def work_queue
   $global_work_queue
 end
 
+# Ask the user a simple yes/no question. Defaults to yes, but may be
+# overwritten using :y for yes, :n for no and :none for no default.
+# Include @@opt in the question to control where the [y/n] block will
+# be positioned. If not given, it will be placed at the end of the
+# question.
+def get_user_yesno(question, default = :y)
+  opt = case default
+    when :y: " [Y/n]"
+    when :n: " [y/N]"
+    when :none: " [y/n]"
+    else raise "Invalid default answer option."
+  end
+  q = question
+  q << "@@opt" unless q.include?("@@opt")
+  q.gsub!("@@opt", opt)
+  input = ""
+  while !["y", "n"].include?(input)
+    puts
+    puts q
+    input = STDIN.gets.strip.downcase
+    input = default.to_s if input.empty? && default.to_s.size == 1
+  end
+  (input == "y")
+end
 
 # reads user input and validates it. Returns an array if valid was an
 # array and all items in the returned array are elements of valid. If
