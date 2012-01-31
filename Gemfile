@@ -9,6 +9,7 @@ gem "work_queue",      ">=2.0"
 gem "open4"
 gem "text"
 gem "mechanize"
+gem "asciify"
 
 gem "mysql"
 gem "dbd-mysql"
