@@ -42,6 +42,9 @@ class LSF
   # order to get a full and correct address.
   BASELINK="http://lsf.uni-heidelberg.de/qisserver/rds?state=wtree&search=1&trex=step&P.vx=mittel&"
 
+  # Used to look for the faculty’s name
+  FACULTY="http://lsf.uni-heidelberg.de/qisserver/rds?state=verpublish&status=init&vmfile=no&moduleCall=webInfo&publishConfFile=webInfoEinrichtung&publishSubDir=einrichtung&einrichtung.eid="
+
   @@cache_http = {}
   @@cache_xml = {}
   @@cache_profs = {}
@@ -100,6 +103,10 @@ class LSF
     lects.map { |l| l[0] }
   end
 
+  def self.facul_id_to_name(id)
+    load_url(FACULTY + id.to_s).match(/<h2>(.*?)<\/h2>/)[0].strip_html
+  end
+
   # LSF Service methods ################################################
 
 
@@ -150,6 +157,7 @@ class LSF
     l = root.elements.map do |ldat|
       lect, skip = LSF.get_lecture(ldat.content("vorID"))
       lect.facul = ldat.content("eid")
+      lect.facul_name = LSF.facul_id_to_name(lect.facul)
       skip ? nil : lect
     end.compact
     @@level -= 1
@@ -191,6 +199,7 @@ class LSF
 
   # Gets a room’s name for the given room id
   def self.get_room(id)
+    return "" unless id.to_i > 0
     return @@cache_room[id] if @@cache_room[id]
     LSF.debug "Reading Room: #{id}"
     @@cache_room[id] = LSF.load_xml("getRaum?rgid=#{id}").content("return")
@@ -423,7 +432,7 @@ end
 
 class LSFLecture
   attr_accessor :id, :name, :times, :rooms, :profs, :type, :facul, :sws
-  attr_accessor :lang, :est_part, :detail_time, :note, :link
+  attr_accessor :lang, :est_part, :detail_time, :note, :link, :facul_name
 
   # Creates an LSFLecture from the given Hash. Raises for all keys that
   # are not supported by the class.
