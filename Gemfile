@@ -8,6 +8,7 @@ gem "gtk2"
 gem "work_queue",      ">=2.0"
 gem "open4"
 gem "text"
+gem "mechanize"
 
 gem "mysql"
 gem "dbd-mysql"
