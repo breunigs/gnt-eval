@@ -333,10 +333,11 @@ def get_user_yesno(question, default = :y)
   q.gsub!("@@opt", opt)
   input = ""
   while !["y", "n"].include?(input)
-    puts
-    puts q
+    puts "\n#{q}"
+    print "> "; STDOUT.flush
     input = STDIN.gets.strip.downcase
     input = default.to_s if input.empty? && default.to_s.size == 1
+    puts
   end
   (input == "y")
 end
