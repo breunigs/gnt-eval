@@ -4,7 +4,7 @@
 *                  →                  → .
 
 v_central_major    → .                → NOT SPECIFIED
-v_central_required_course → .	        → 0
+v_central_required_course → .         → 0
 
 sheet              → Vorlesungsbogen  → 5
 sheet              → Seminarbogen     → 6
@@ -12,7 +12,7 @@ sheet              → Seminarbogen     → 6
 v_central_degree   → .                → 0
 v_central_degree   → Bachelor         → 1
 v_central_degree   → Master           → 2
-v_central_degree   → Kirchlicher Abschluss \mbox{(Ecclesiastical Degree)} → 3
+v_central_degree   → Kirchlicher Abschluss {(Ecclesiastical Degree)} → 3
 v_central_degree   → Staatsexamen \emph{excluding Lehramt} (State Examination \emph{excluding Civil \textls[-15]{Service Examination)}} → 4
 v_central_degree   → Staatsexamen \emph{including Lehramt} (State Examination \emph{including Civil {Service Examination)}} → 5
 v_central_degree   → Diplom (Diploma) → 6
@@ -34,7 +34,7 @@ v_central_credits  → high             → 4
 v_central_credits  → very high        → 5
 
 v_central_semester → .                → 0
-v_central_semester → 1-3  	          → 1
+v_central_semester → 1-3              → 1
 v_central_semester → 4-6              → 2
 v_central_semester → 7-10             → 3
 v_central_semester → > 10             → 4
