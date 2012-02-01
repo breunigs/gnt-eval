@@ -1,0 +1,78 @@
+You can directly connect to the result database and work with it. If
+that’s not possible, or if you do not wish to grant access to all data,
+you can use
+  rake results:export
+to export the data to CSV.
+
+Usage
+=====
+
+Start the task without any arguments in order to have an interactive
+selection what semester, columns, meta data etc. to export. Once
+you are done, the CSV will be written to tmp/export/(date and time).csv
+If you need to automate this task, read the “Automatization” section
+here.
+
+CSV Header
+==========
+
+The first line of the CSV will be the header. Exported metadata have
+the same title as the one you selected. Questions are exported in the
+format “column: Question text”.
+
+Mappings
+========
+
+If possible, the data will be exported as text. This is obviously the
+case for normal text fields, and if every checkbox has its own text or
+description. For example, given the following questions:
+  Wer ist besonders doof? [ ] Beccy  [X] Oliver   [ ] Jasper  [ ] Stefan
+  Bewerte die Doofheit:   [X] sehr   [ ]          [ ]         [ ] nicht
+I’ll call questions similar to the former “text” and ones to the latter “range” questions. So, the “text” question in above example will be
+exported as “Oliver”, while “range” will be exported as “1”.
+
+If your forms are multi-language the exported strings will always be in
+English (or the “first” language, if there is no English translation…
+for whatever “first” means in that case, due to Hashes not being sorted)
+
+If “last_is_textbox” is enabled and text was written into that box, that
+text will be exported regardless if it’s a range or text question.
+
+Special values are encoded differently for text and range:
+                            range   text
+no answer (i.e. no check):     0                  (i.e. empty string)
+invalid (e.g. two checks): 		-1                  (i.e. empty string)
+“not specified” checked:      99    NOT SPECIFIED
+
+Remapping
+=========
+
+If above mappings do not fit your external program or you would like to
+change them for aesthetic reasons, you can use:
+  rake results:remap_export_data
+It takes the remaps from tmp/export/remap.txt and applies them to all
+CSV files in tmp/export. The format of the remap files is simple:
+  column → match string → replacestring
+This is the format for each line. Column may either be a “*” to apply
+this rule to all columns or an id string, as selected during the export
+task. The question text must not be included, otherwise the mapping
+won’t work. The matching is done case-sensitive and per cell, so it’s
+not possible to do partial replacements. Also note that the arrows must
+be proper UTF-8 ones, not the ugly ASCII equivalent. You can find a
+(real world) example in:
+  docs/export_remap_example.txt
+
+
+Automatization
+==============
+
+The idea is basically to provide a Hash of settings you did manually
+before and have them filled out for you. Since providing a hash via
+command line is annoying, it’s required to convert it prior to handing
+it to the export task. First, the Hash is marshaled, i.e. converted to
+a string and then base64 encoded. The command used for this is:
+  Base64.encode64(Marshal.dump(hash)).gsub(/\s/, "")
+
+You can easily modify the hash and then paste it into an «irb».
+You’ll likely need to «require "base64"», but then the above
+command should work and print out the required string.

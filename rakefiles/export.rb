@@ -448,4 +448,57 @@ namespace :results do
     puts "will give you the data you can pass to the export task."
     pp data
   end
+
+  desc "If the output style of the export feature does not suit you, you can use this tool to remap values."
+  task :remap_export_data do
+    require "rubygems"
+    require "fastercsv"
+
+    unless File.exists?("#{GNT_ROOT}/tmp/export/remap.txt")
+      puts "Remap rule file does not exist in tmp/export/remap.txt."
+      puts "Exiting."
+      exit 0
+    end
+
+    rules = []
+    File.foreach("#{GNT_ROOT}/tmp/export/remap.txt") do |rule|
+      next if rule.strip.empty?
+      r = rule.split("→", 3)
+      next if r.any? { |x| x.nil? }
+      rules << r.map { |x| x.strip }
+    end
+
+    puts "Reading CSVs…"
+    # Convert contents directly while reading. The header converter is
+    # required because otherwise it would turn them into symbols. Would
+    # be superfluous if I knew how to directly write the CSV in one go.
+    opt =  { :header_converters => lambda { |h| h },
+      :converters => lambda { |field, field_info|
+        h = field_info.header.to_s.gsub(/:.*$/, "").strip
+        field = field.to_s
+        rules.each do |r|
+          next unless r[0] == h || r[0] == "*"
+          if r[1].empty?
+            field = r[2] if field.empty?
+            next
+          end
+          field = r[2] if field == r[1]
+        end
+        field
+      }
+    }
+    csvs = {}
+    Dir.glob("#{GNT_ROOT}/tmp/export/*.csv") do |d|
+      csvs[d] = FasterCSV.table(d, opt)
+    end
+    if csvs.empty?
+      puts "No CSV files found in tmp/export. Exiting."
+      exit 0
+    end
+
+    puts "Writing to disk…"
+    csvs.each { |path, csv_table|
+      File.open(path, 'w') {|f| f.write(csv_table) }
+    }
+  end
 end

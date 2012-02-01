@@ -1,0 +1,44 @@
+*                  → NOT SPECIFIED    → .
+*                  →  0               → .
+*                  → 99               → .
+*                  →                  → .
+
+v_central_major    → .                → NOT SPECIFIED
+v_central_required_course → .	        → 0
+
+sheet              → Vorlesungsbogen  → 5
+sheet              → Seminarbogen     → 6
+
+v_central_degree   → .                → 0
+v_central_degree   → Bachelor         → 1
+v_central_degree   → Master           → 2
+v_central_degree   → Kirchlicher Abschluss \mbox{(Ecclesiastical Degree)} → 3
+v_central_degree   → Staatsexamen \emph{excluding Lehramt} (State Examination \emph{excluding Civil \textls[-15]{Service Examination)}} → 4
+v_central_degree   → Staatsexamen \emph{including Lehramt} (State Examination \emph{including Civil {Service Examination)}} → 5
+v_central_degree   → Diplom (Diploma) → 6
+v_central_degree   → Magister         → 7
+v_central_degree   → others           → 8
+v_central_degree   → Ph.D.            → 13
+
+
+v_central_workload → very low         → 1
+v_central_workload → low              → 2
+v_central_workload → appropriate      → 3
+v_central_workload → high             → 4
+v_central_workload → very high        → 5
+
+v_central_credits  → very low         → 1
+v_central_credits  → low              → 2
+v_central_credits  → appropriate      → 3
+v_central_credits  → high             → 4
+v_central_credits  → very high        → 5
+
+v_central_semester → .                → 0
+v_central_semester → 1-3  	          → 1
+v_central_semester → 4-6              → 2
+v_central_semester → 7-10             → 3
+v_central_semester → > 10             → 4
+
+v_central_required_course → {yes, I have to attend} {\emph{exactly this one}} → 1
+v_central_required_course → no, I could attend  another one → 2
+
