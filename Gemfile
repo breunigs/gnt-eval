@@ -10,6 +10,7 @@ gem "open4"
 gem "text"
 gem "mechanize"
 gem "asciify"
+gem "fastercsv"
 
 gem "mysql"
 gem "dbd-mysql"

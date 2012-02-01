@@ -164,7 +164,8 @@ namespace :results do
   task :export, [:base64_data] do |t, a|
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
-    require 'tools/faster_csv.rb'
+    require "rubygems"
+    require "fastercsv"
     require "base64"
     # restore data if available
     a = a.base64_data.nil? ? {} : Marshal.load(Base64.decode64(a.base64_data))
