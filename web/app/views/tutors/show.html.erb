@@ -26,7 +26,7 @@
 <fieldset>
   <legend>Comments preview</legend>
   <div class="preview">
-    <%= render :partial => "shared/preview" %>
+    <%= render :partial => "shared/preview", :locals => {:text => @tutor.comment} %>
   </div>
   <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @tutor} %></p>
 </fieldset>

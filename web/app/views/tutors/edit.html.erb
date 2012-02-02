@@ -1,4 +1,5 @@
 <%= render "shared/main_menu" %>
+<%= render :partial => "shared/aceify_textareas", :locals => {:line_offset => texpreview_header_offset }  %>
 
 <% form_for([@course, @tutor]) do |f| %>
 

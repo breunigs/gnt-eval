@@ -5,4 +5,4 @@
   <%= courseEditLink %>
 </fieldset>
 
-<%= render :partial => "shared/preview_big" %>
+<%= render :partial => "shared/preview_big", :locals => {:text => @course.summary } %>

@@ -35,10 +35,6 @@ module CoursesHelper
     ActiveSupport::JSON.encode(map_semesters_and_forms)
   end
 
-  def render_preview
-    texpreview(@course.summary)
-  end
-
   def courseShowLink
     link_to("Show '#{@course.title}'", course_path(@course))
   end

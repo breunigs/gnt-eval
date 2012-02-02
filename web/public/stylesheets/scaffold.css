@@ -193,3 +193,13 @@ tr.odd {
   text-decoration: line-through;
 }
 
+.ace_editor {
+  position:relative !important;
+  height: 340px;
+  width:100%;
+  border:1px solid #D9D7D7;
+}
+
+span.error {
+  color:red;
+}

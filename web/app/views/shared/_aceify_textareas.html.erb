@@ -1,0 +1,7 @@
+<% line_offset ||= 0 %>
+
+<% content_for :script, javascript_include_tag("prototype") %>
+<% content_for :script, javascript_include_tag("ace/ace") %>
+<% content_for :script, javascript_include_tag("ace/mode-latex") %>
+<% content_for :script, "<script>var line_offset_number = #{line_offset};</script>" %>
+<% content_for :script, javascript_include_tag("aceify-textareas") %>

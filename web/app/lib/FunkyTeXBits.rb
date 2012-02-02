@@ -51,6 +51,15 @@ module FunkyTeXBits
     code
   end
 
+  # returns # of lines the code given to texpreview will be offset. This
+  # can be used to correct the display to correspond to the actual lines
+  # as they will be in the TeX file.
+  def texpreview_header_offset
+    evalname = ""
+    l = ERB.new(RT.load_tex("preamble")).result(binding).split("\n").size
+    l + 3
+  end
+
   def texpreview(code)
     return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
 
@@ -95,7 +104,14 @@ module FunkyTeXBits
     files = '"' + Dir.glob("#{path}*").join('" "') + '"'
     `rm -f #{files}`
 
-    return failed, exitcodes, error.gsub("\n", "<br/>"), base64
+    # beautify error output. If there’s a TeX error it will remove the
+    # stuff TeX prints before it encounters the error.
+    e = error.split("\n" + path[0..77], 2)
+    error = "\n" + path[0..77] + e.last if e.size == 2
+    # highlight likely TeX errors
+    error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"error\">\\0</span>")
+
+    return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64
   end
 
   def t(item)

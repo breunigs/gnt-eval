@@ -5,4 +5,4 @@
   <%= tutor_edit_link %>
 </fieldset>
 
-<%= render :partial => "shared/preview_big" %>
+<%= render :partial => "shared/preview_big", :locals => {:text => @tutor.comment} %>
