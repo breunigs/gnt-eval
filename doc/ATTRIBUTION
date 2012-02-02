@@ -1,11 +1,16 @@
 Software used by G'n'T-Eval:
 
+Name:    Ace
+Web:     http://ace.ajax.org/
+License: MPL/LGPL/GPL
+ …local: doc/licenses/mpl_lgpl_gpl.txt
+…online: https://raw.github.com/ajaxorg/ace/master/LICENSE
+
 Name:    ZBar Barcode Reader
 Web:     http://zbar.sourceforge.net/
 License: GNU LGPL 2.1
  …local: doc/licenses/lgpl-2.1.txt
 …online: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
-
 
 Name:    Prototype
 Web:     http://www.prototypejs.org/
