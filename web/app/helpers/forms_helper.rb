@@ -55,7 +55,7 @@ module FormsHelper
       exitcodes << Open4::popen4("sh") do |pid, stdin, stdout, stderr|
         stdin.puts cmd
         stdin.close
-	logger << stderr.read.strip
+        logger << stderr.read.strip
       end.exitstatus
     end
 
@@ -71,6 +71,14 @@ module FormsHelper
     `rm -rf #{files}`
 
     return exitcodes.total > 0, exitcodes, logger.gsub("\n", "<br/>"), base64
+  end
+
+  def texpreview(text)
+    unless text.nil? || text.empty?
+      raise "Forms use their own render method and do not need text to be passed. Please replace by texpreview(nil)."
+    end
+
+    return render_preview
   end
 
   private
