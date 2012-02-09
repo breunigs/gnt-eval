@@ -22,7 +22,6 @@
 \RequirePackage{MnSymbol}
 \let\Box\amssymbBox
 \RequirePackage{tabularx}
-\RequirePackage{tokeniz0r}
 \RequirePackage{tgheros}
 \RequirePackage[breakall]{truncate}
 \RequirePackage{xparse}
