@@ -43,6 +43,18 @@ namespace :forms do
     Rake::Task["forms:cover_sheets"].invoke(a.semester_id)
     Rake::Task["clean".to_sym].invoke
     puts
+    puts "Checking if any form does not have two pages…"
+    path = File.expand_path(GNT_ROOT + "/tmp/forms/*pcs.pdf")
+    data = `#{GNT_ROOT}/tools/identify_pdfs_with_not_2_pages.rb #{path}`.strip
+    if data.empty?
+      puts "Done."
+    else
+      puts "The following forms do not have exactly two pages:"
+      puts data
+      puts
+      puts "Please note that the software is currently not equipped to handle more than two pages properly."
+    end
+    puts
     puts "Done."
     puts "You can print the forms using «rake forms:print»"
   end
