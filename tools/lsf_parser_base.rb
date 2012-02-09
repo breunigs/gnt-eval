@@ -4,7 +4,7 @@ require 'rubygems'
 require 'date'
 require 'rexml/document'
 require 'csv'
-require File.dirname(__FILE__) + "/faster_csv"
+require 'fastercsv'
 require File.dirname(__FILE__) + "/../lib/result_tools.rb"
 require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
 
