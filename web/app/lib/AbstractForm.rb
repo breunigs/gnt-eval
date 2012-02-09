@@ -504,9 +504,9 @@ class AbstractForm
     tex << "\\documentclass[#{I18n.t(:tex_babel_lang)}]{eval}\n"
     tex << "\\lecturerFirst{#{lecturer_first.escape_for_tex}}\n"
     tex << "\\lecturerLast{#{lecturer_last.escape_for_tex}}\n"
-    tex << "\\vorlesung{#{title.escape_for_tex}}\n"
+    tex << "\\lecture{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
-    tex << "\\semester{#{semester.escape_for_tex}}\n"
+    tex << "\\term{#{semester.escape_for_tex}}\n"
     tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
     # note: these cannot be customized per tutor, as the tutor is not
     # known yet. They will be filled in result.pdf, so give placeholders
@@ -516,7 +516,7 @@ class AbstractForm
 
     # tutors
     tutors.collect! { |t| t.escape_for_tex }
-    tex << "\\tutoren{\n  "
+    tex << "\\tutors{\n  "
     (0..(TUTOR_BOX_COUNT-2)).each do |i|
       tex << "\\tutorbox[#{i+1}][#{tutors[i] || "\\\\ "}]".ljust(35)
       tex << ((i%5 == 4) ? '\\\\'+"\n  " : ' & ')
