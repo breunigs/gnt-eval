@@ -129,10 +129,13 @@
 
 
 % let the user store data using these commands
-\newcommand{\vorlesung}[1]{\def\vor{#1}}
-\newcommand{\semester}[1]{\def\sem{#1}}
+\newcommand{\lecture}[1]{\def\storedLecture{#1}}
+\newcommand{\vorlesung}[1]{\message{DEPRECATION: The command "vorlesung" is deprecated. Please use "lecture" instead. Arguments are exactly the same.}\def\storedLecture{#1}}
+\newcommand{\term}[1]{\def\storedTerm{#1}}
+\newcommand{\semester}[1]{\message{DEPRECATION: The command "semester" is deprecated. Please use "term" instead. Arguments are exactly the same.}\def\storedTerm{#1}}
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
-\newcommand{\tutoren}[1]{\def\tut{#1}}
+\newcommand{\tutoren}[1]{\message{DEPRECATION: The command "tutoren" is deprecated. Please use "tutors" instead. Arguments are exactly the same.}\def\tut{#1}}
+\newcommand{\tutors}[1]{\def\tut{#1}}
 \newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
 \newcommand{\lecturerLast}[1]{\def\lectLast{#1}}
 \newcommand{\lecturerFirst}[1]{\def\lectFirst{#1}}
@@ -290,7 +293,7 @@
 
 % prints data that identifies what/who is being evaluated
 \newcommand{\dataline}[3]{
-  \textbf{#1:} \vor \hfill\textbf{#2:} \lect \hfill\textbf{#3:} \sem \\[0.2em]
+  \textbf{#1:} \storedLecture \hfill\textbf{#2:} \lect \hfill\textbf{#3:} \storedTerm \\[0.2em]
 }
 
 
