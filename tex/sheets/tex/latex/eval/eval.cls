@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{eval}[2011/05/12 Evaluationsb�gen]
+\ProvidesClass{eval}[2012/02/09 evalsheets]
 
 \RequirePackage{fix-cm}
 \LoadClass[twoside,8pt]{scrartcl}
@@ -376,9 +376,7 @@
 % centered nor on top. Long story short, multirow enables the text to overflow; height issues are
 % handled in \printTable.
 \newcommand{\questText}[1]{
-  \multirow{1}{7.7cm}{%
-    #1
-  }
+  \multirow{1}{7.7cm}{#1}
 }
 
 % prints the answer text for each box unless printAnswers has been disabled for this question
@@ -391,14 +389,13 @@
 % space if the text exceeds the table. This is due to multirow not extending the table as
 % required, leading to overflows when the question text needs more space than the answers.
 \newcommand{\printTable}[1]{
-  \microtypesetup{activate=false} % causes height calculation errors
-  % calc some basic heights. Also used by other functions that follow.
-  \settototalheight{\tmpa}{\parbox{7.7cm}{#1}}
+  % calc some basic heights. Also used by other functions that follow. raggedright somehow
+  % influences where line breaks occur (some may fit in one line while others don’t),
+  % therefore it’s important for the height calculation.
+  \settototalheight{\tmpa}{\parbox{7.7cm}{\raggedright{}#1}}
   \settototalheight{\tmpb}{\tbl}
   % find height of (question text)-(table)+(magic value)
   \setlength{\questionHeight}{\tmpa-\tmpb+2.5mm}
-  % if answers are hidden, subtract the amount of space the empty line needs
-  %\ifthenelse{\boolean{printAnswers}}{}{\addtolength{\questionHeight}{100mm}}
   % measuring the table lays it out, thus increasing the choiceCounter even though it shouldn't be
   \setcounter{choiceCounter}{0}
   %some unused debug info to print into the document
@@ -414,7 +411,6 @@
   }
   % print the table
   \tbl
-  \microtypesetup{activate=true}
   \vspace*{\questionHeight}
   %\ifthenelse{\boolean{printAnswers}}{}{\vspace*{-3mm}}
 }
