@@ -382,7 +382,7 @@ pages:
         :en:
           :both: "The lecturer treated the students with respect."
           :male: "Mr \\lectLast{} treated the students with respect."
-          :female: "Mrs \\lectLast{}treated the students with respect."
+          :female: "Mrs \\lectLast{} treated the students with respect."
       type: square
     - !ruby/object:Question
       boxes:
