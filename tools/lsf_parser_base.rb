@@ -224,7 +224,7 @@ class LSF
     root = LSF.load_xml("getTermine?vid=#{id}")
     root.elements.each do |t|
       # Builds time string
-      ryth = t.content("rhythmus")
+      ryth = t.content("rhythmus") || ""
 
       s = ""
       s << t.content("wochentag") << ", "

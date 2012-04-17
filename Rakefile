@@ -114,7 +114,7 @@ namespace :misc do
     work_queue.enqueue_b { run("physik", physik[:url]) }
     work_queue.join
     puts
-    puts "All Done. Have a look in #{dir}"
+    puts "All Done. Have a look in #{@dir}"
   end
 
 
