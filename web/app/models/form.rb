@@ -7,6 +7,8 @@ class Form < ActiveRecord::Base
   has_many :courses
   validates_presence_of :semester, :name, :content
 
+  alias_attribute :title, :name
+
   # returns if the form is critical. This is the case if the semester is
   # critical. It may be edited/removed even if there are associated
   # courses. Latter would not be too wise, though.

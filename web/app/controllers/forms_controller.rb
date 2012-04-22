@@ -93,11 +93,39 @@ class FormsController < ApplicationController
     end
   end
 
+  def copy_to_current
+    form = Form.find(params[:id])
+    sems = Semester.currently_active
+    if sems.empty?
+      flash[:error] = "No current semesters found. Please create them first."
+    else
+      sems.each do |s|
+        if s.forms.map { |f| f.name }.include?(form.title)
+          flash[:warning] = "Could not add #{form.title} to #{s.title} because there is already a form with that name."
+          next
+        end
+        new_form = form.clone
+        new_form.semester = s
+        if new_form.save
+          flash[:notice] = "Copied #{form.title} to #{s.title}."
+        else
+          flash[:warning] = "Could not add #{form.title} to #{s.title} because of some error."
+        end
+      end
+    end
+
+    respond_to do |format|
+      flash[:error] = 'Form was critical and has therefore not been destroyed.' if form.critical?
+      format.html { redirect_to(forms_url) }
+      format.xml  { head :ok }
+    end
+  end
+
   caches_page :index, :show, :new, :edit
   private
   def kill_caches(form = nil)
     puts "="*50
-    puts "Expiring form caches" + (form ? " for #{form.name}" : "")
+    puts "Expiring form caches" + (form ? " for #{form.title}" : "")
     expire_page :action => "index"
     expire_page :action => "new"
     if form

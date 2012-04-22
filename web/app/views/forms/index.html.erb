@@ -1,3 +1,5 @@
+<% current_forms = Semester.currently_active_forms.map { |f| f.title } %>
+
 <fieldset>
   <h1>Listing forms</h1>
   <%= link_to 'New form', new_form_path %><br/><br/>
@@ -12,12 +14,14 @@
       <th></th>
     </tr>
 
-  <% for form in @forms.sort { |x,y|
+    <% for form in @forms.sort { |x,y|
       s = x.semester_id <=> y.semester_id
       s == 0 ? (x.name <=> y.name) : s
     } %>
     <tr style="background:#<%= cycle('efefef', 'fff')%>">
-      <td><%=h form.semester.title %></td>
+      <td <%=Semester.currently_active.include?(form.semester) ? 'style="font-weight:bold"' : ""%>>
+        <%=h form.semester.title %>
+      </td>
       <td><%= link_to form.name, form %></td>
       <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
 
@@ -27,6 +31,7 @@
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
       <% end %>
+      <td><%= link_to 'Copy to current semester', :action => :copy_to_current, :id => form unless current_forms.include?(form.name) %></td>
       <%= (not form.form_checks_out?) ? "<td>⚠ Form is invalid</td>" : ""%>
     </tr>
   <% end %>

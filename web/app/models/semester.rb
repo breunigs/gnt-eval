@@ -19,6 +19,10 @@ class Semester < ActiveRecord::Base
     find(:all, :conditions => ["firstday <= ? AND lastday >= ?", d, d])
   end
 
+  def self.currently_active_forms
+    Semester.currently_active.map { |s| s.forms }.flatten
+  end
+
   # lists all barcodes associated with the current semester
   def barcodes
     course_profs.map { |cp| cp.id }
