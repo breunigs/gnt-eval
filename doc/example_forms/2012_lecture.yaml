@@ -154,7 +154,7 @@ pages:
         - stimme voll zu
         -
         -
-        - "\\mbox{\hspace*{-3mm}stimme gar nicht zu}"
+        - "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
         - "\\noAnswTxt"
       :en:
         - "\\mbox{completely agree}"
@@ -349,7 +349,7 @@ pages:
         - stimme voll zu
         -
         -
-        - "\\mbox{\hspace*{-3mm}stimme gar nicht zu}"
+        - "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
         - "\\noAnswTxt"
       :en:
         - "\\mbox{completely agree}"
@@ -647,7 +647,7 @@ pages:
           :en: "insufficient structure"
       - !ruby/object:Box
         text:
-          :de: "sonstige (bitte im\\linebreak\mbox{Freitext angeben)}"
+          :de: "sonstige (bitte im\\linebreak\\mbox{Freitext angeben)}"
           :en: "others (please note in free text)"
       db_column:
       - v_presentation_problems_a
@@ -681,7 +681,7 @@ pages:
           :en: "too quiet/technical problems"
       - !ruby/object:Box
         text:
-          :de: "sonstige (bitte im\\linebreak\mbox{Freitext angeben)}"
+          :de: "sonstige (bitte im\\linebreak\\mbox{Freitext angeben)}"
           :en: "others (please note in free text)"
       db_column:
       - v_acoustic_problems_a
@@ -948,7 +948,7 @@ pages:
         - stimme voll zu
         -
         -
-        - "\\mbox{\hspace*{-3mm}stimme gar nicht zu}"
+        - "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
         - "\\noAnswTxt"
       :en:
         - "\\mbox{completely agree}"
@@ -1055,7 +1055,7 @@ pages:
           :en: "schedule problems"
       - !ruby/object:Box
         text:
-          :de: "sonstige (bitte im\\linebreak\mbox{Freitext angeben)}"
+          :de: "sonstige (bitte im\\linebreak\\mbox{Freitext angeben)}"
           :en: "others (please note in free text)"
       db_column:
       - u_group_problems_a
@@ -1102,7 +1102,7 @@ pages:
         - stimme voll zu
         -
         -
-        - "\\mbox{\hspace*{-3mm}stimme gar nicht zu}"
+        - "\\mbox{\\hspace*{-3mm}stimme gar nicht zu}"
         - "\\noAnswTxt"
       :en:
         - "\\mbox{completely agree}"
