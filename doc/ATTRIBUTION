@@ -6,11 +6,13 @@ License: MPL/LGPL/GPL
  …local: doc/licenses/mpl_lgpl_gpl.txt
 …online: https://raw.github.com/ajaxorg/ace/master/LICENSE
 
+
 Name:    ZBar Barcode Reader
 Web:     http://zbar.sourceforge.net/
 License: GNU LGPL 2.1
  …local: doc/licenses/lgpl-2.1.txt
 …online: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
 
 Name:    Prototype
 Web:     http://www.prototypejs.org/
@@ -32,8 +34,20 @@ License: MIT
 …online: http://www.opensource.org/licenses/mit-license.php
 
 
+Name:    js-yaml
+Web:     https://github.com/nodeca/js-yaml
+License: MIT
+…online: https://github.com/nodeca/js-yaml/blob/master/LICENSE
+
+
+Name:    json2yaml
+Web:     https://github.com/jeffsu/json2yaml
+License: MIT
+…online: https://github.com/jeffsu/json2yaml/blob/master/LICENSE
+
+
 Name:    ImageMagick (system wide one, unless you build it)
 Web:     http://www.imagemagick.org/
 License: ImageMagick License
  …local: doc/licenses/imagemagick
-…online: http://www.imagemag…ick.org/script/license.php
+…online: http://www.imagemagick.org/script/license.php
