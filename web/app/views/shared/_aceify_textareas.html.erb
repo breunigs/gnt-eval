@@ -1,7 +1,11 @@
 <% line_offset ||= 0 %>
+<% mode ||= "latex" %>
 
 <% content_for :script, javascript_include_tag("prototype") %>
 <% content_for :script, javascript_include_tag("ace/ace") %>
-<% content_for :script, javascript_include_tag("ace/mode-latex") %>
-<% content_for :script, "<script>var line_offset_number = #{line_offset};</script>" %>
+<% content_for :script, javascript_include_tag("ace/mode-#{mode}") if File.exists?("#{RAILS_ROOT}/public/javascripts/ace/mode-#{mode}.js") %>
+<% content_for :script, %(<script>
+  var line_offset_number = #{line_offset};
+  var ace_mode = "#{mode}";
+</script>) %>
 <% content_for :script, javascript_include_tag("aceify-textareas") %>

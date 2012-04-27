@@ -1,6 +1,6 @@
 /** converts all textareas to ACE Editors in place. Sets some default
- * options on the editor, especially sets the mode to LaTeX. Expects
- * Prototype, ACE and mode-latex to be loaded beforehand. */
+ * options on the editor. Expects Prototype, ACE and mode-latex to be
+ * loaded beforehand. */
 
 if(line_offset_number == null)
   var line_offset_number = 0;
@@ -33,6 +33,8 @@ function hack_line_offset_into_ace(editor) {
 
 window.onload = function() {
   $$("textarea").each(function(txt) {
+    if(txt.hasAttribute("readonly"))
+      return;
     // create DIV that will be used for ACE
     var id = txt.readAttribute("id");
     var d = document.createElement('div');
@@ -42,7 +44,8 @@ window.onload = function() {
 
     // setup ACE
     var editor = ace.edit(id + "_ace_editor");
-    var texmode = require("ace/mode/latex").Mode;
+    
+    var texmode = require("ace/mode/" + ace_mode).Mode;
     editor.getSession().setMode(new texmode());
     editor.getSession().setUseWrapMode(true);
     editor.getSession().setWrapLimitRange();
