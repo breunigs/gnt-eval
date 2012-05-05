@@ -1,4 +1,5 @@
-<%= render :partial => "shared/aceify_textareas", :locals => {:mode => "json" }  %>
+<%#= render :partial => "shared/aceify_textareas", :locals => {:mode => "json" }  %>
+<% content_for :script, javascript_include_tag("formeditor") %>
 
 <% form_for(@form) do |f| %>
   <fieldset>
@@ -34,15 +35,24 @@
   <legend>js-yaml playground</legend>
   Currently this is not impressive at all as it displays (nearly) the same text as above. However, it has been a proper JS-object in between which can be more easily used to create a form designer. Until that happens you can use it as a <b>debugger</b>.
   <textarea readonly="readonly" id="result" style="width:100%;min-height:10em"></textarea>
-  <script type="text/javascript">
-    try {
-      str = document.getElementById('form_content').value;
-      document.getElementById('result').value = json2yaml(jsyaml.load(str));
-    } catch (err) {
-      document.getElementById('result').value = err.toString();
-    }
-  </script>
 </fieldset>
+
+<fieldset>
+  <div id="form_editor">
+
+  </div>
+</fieldset>
+
+<script type="text/javascript">
+  /*try {
+    str = document.getElementById('form_content').value;
+    document.getElementById('result').value = json2yaml(jsyaml.load(str));
+  } catch (err) {
+    document.getElementById('result').value = err.toString();
+  }*/
+  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES) %>;
+  var x = new FormEditor();
+</script>
 
 <fieldset>
   <legend>Some helpful comments</legend>

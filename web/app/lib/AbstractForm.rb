@@ -360,6 +360,10 @@ end
 #
 
 class AbstractForm
+  # List of valid attributes
+  ATTRIBUTES = :title, :intro, :lecturer_header, :texhead, :texfoot, :db_table, :pages
+
+
   # printed headline of the form
   attr_writer :title
   def title(lang)
