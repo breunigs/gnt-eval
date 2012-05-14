@@ -62,3 +62,17 @@ en:
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
 
   note: Note
+
+
+
+
+  # rename attributes in the Rails web GUI
+  attributes:
+    email: Mail
+
+  activerecord:
+    # rename the models
+    models:
+      semester: Term
+
+

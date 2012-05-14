@@ -1,0 +1,189 @@
+* {
+  padding:0;
+  border:0;
+  outline:0;
+  margin:0;
+  color:#000;
+  font-size:13px;
+}
+
+body {
+  background:transparent;
+}
+
+$group_border: 1px solid #aaa;
+$group_box_shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.2);
+
+body div.group:first-of-type {
+  border-top:0;
+  margin-top:0;
+}
+
+h1 {
+  margin-bottom:1rem;
+  font-size:250%;
+}
+
+.infobox {
+  float:right;
+  vertical-align:top;
+}
+
+div.group {
+  padding:1rem;
+  margin:1rem;
+  background:#fff;
+  border: $group_border;
+  box-shadow: $group_box_shadow;
+
+  h2 {
+    font-size:180%;
+    margin-bottom:0.5em;
+  }
+}
+
+a {
+  color:#FF3636;
+  text-decoration:none;
+  background:transparent;
+  &:hover:not(.button) {
+    border-bottom:1px dotted #FF3636;
+    text-shadow: 0 0 0.05em rgba(0, 0, 0, 0.1);
+  }
+}
+
+table {
+  margin-left:-1px; /* browsers insert 1px between thead/tbody and the table tag */
+  margin-bottom:1em;
+  margin-top:0.5em;
+
+  th {
+    text-align:left;
+    padding:0.2em;
+    background:transparent;
+  }
+  td {
+    padding:0.2em;
+    background:transparent;
+  }
+
+  thead tr {
+    background:#efefef !important;
+  }
+
+  /* automatically zebra stripe tables unless they have even/odd classes.
+   * This allows for table filtering where the even/odd are added via js.
+   */
+  tr:nth-child(2n+1):not(.odd):not(.even), .odd {
+    background:#fafafa;
+  }
+}
+
+ul, ol {
+  list-style-position:inside;
+  margin-top:0.3em;
+  li {
+    padding:0.2em;
+  }
+}
+
+.fade {
+  color:#777;
+}
+
+label {
+  padding:0.2em;
+  padding-right:0.4em;
+  display:inline-block;
+}
+
+input:not(.button), textarea, select {
+  background-color: #FBFBFB;
+  background-image: -moz-linear-gradient(#FFFFFF, #FBFBFB);
+  border: 1px solid #D4D4D4;
+  border-radius: 0.2em 0.2em 0.2em 0.2em;
+  padding: 0.4em;
+  height:1.08em;
+  min-width:25em;
+}
+
+select {
+  min-width:26em;
+  height:2em;
+  padding:0;
+  padding-top:0.2em;
+  option {
+    padding:0.2em;
+    &:nth-child(2n+1) {
+      background:#fafafa;
+    }
+    &:nth-child(2n) {
+      background:#fff;
+    }
+  }
+}
+
+.field_with_errors {
+  input, textarea, select {
+    border:1px solid #FFB3B3;
+    box-shadow: 0 0 0.2em rgba(255, 54, 54, 0.2);
+  }
+}
+
+::-webkit-input-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+:-moz-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+
+table.large_text_area {
+  width: 100%;
+}
+
+table.large_text_area td > div, table.large_text_area td textarea {
+  width:100%;
+  min-height:40em;
+}
+
+.hold_button input {
+  background: transparent;
+  border:0;
+  cursor: pointer;
+  color:#000;
+  text-decoration: underline;
+  display:inline;
+  padding:0;
+}
+
+
+.hold_button input:hover {
+  background: #000;
+  color:#fff;
+}
+
+.hold_button input[disabled], .hold_button input[disabled]:hover {
+  background: transparent;
+  cursor: text;
+  color:#333;
+  text-decoration: line-through;
+}
+
+.ace_editor {
+  position:relative !important;
+  height: 340px;
+  width:100%;
+  border:1px solid #D9D7D7;
+}
+
+span.error {
+  color:red;
+}
+
+.button {
+  vertical-align:top;
+}

@@ -1,9 +1,8 @@
 <% current_forms = Semester.currently_active_forms.map { |f| f.title } %>
 
-<fieldset>
-  <h1>Listing forms</h1>
-  <%= link_to 'New form', new_form_path %><br/><br/>
-
+<div class="group">
+  <h2>Available Forms</h2>
+  <%= link_to 'create new form', new_form_path, :class=>"button" %><br/><br/>
 
   <table>
     <tr>
@@ -18,7 +17,7 @@
       s = x.semester_id <=> y.semester_id
       s == 0 ? (x.name <=> y.name) : s
     } %>
-    <tr style="background:#<%= cycle('efefef', 'fff')%>">
+    <tr>
       <td <%=Semester.currently_active.include?(form.semester) ? 'style="font-weight:bold"' : ""%>>
         <%=h form.semester.title %>
       </td>
@@ -26,7 +25,7 @@
       <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
 
       <% if form.critical? %>
-        <td colspan="2">Semester critical</td>
+        <td colspan="2" class="fade">Semester critical</td>
       <% else %>
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
@@ -36,4 +35,4 @@
     </tr>
   <% end %>
   </table>
-</fieldset>
+</div>

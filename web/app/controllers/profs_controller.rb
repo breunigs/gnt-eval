@@ -4,7 +4,7 @@ class ProfsController < ApplicationController
   # GET /profs
   # GET /profs.xml
   def index
-    @profs = Prof.find(:all)
+    @profs = Prof.find(:all, :order => [:surname, :firstname])
 
     respond_to do |format|
       format.html # index.html.erb

@@ -1,0 +1,25 @@
+<%# adds filtering and sorting goodies to up to one table per page. %>
+<%# Use it like this: %>
+<%# render "shared/tablemagic" %>
+<%# <table id="tablemagic"> … %>
+
+
+
+<% content_for :script do %>
+  <script>
+  $(document).ready(function() {
+      var t = $("#tablemagic");
+      var f = $("#filterfield");
+      t.tablesorter({widthFixed: true, widgets: ['zebra']});
+      f.bind("keyup change", function() {
+        $.uiTableFilter(t, this.value);
+        // fix zebra striping.
+        $("#tablemagic tr:visible:even").removeClass("odd").addClass("even");
+        $("#tablemagic tr:visible:odd").removeClass("even").addClass("odd");
+      }).trigger("change");
+  });
+  </script>
+<% end %>
+
+<input type="text" id="filterfield" placeholder="Filter table…"/>
+<a href="#" onclick="var f=$('#filterfield'); f.val(''); f.trigger('change'); return false;" class="button">Clear</a>

@@ -4,3 +4,6 @@
 [submodule "submodules/table-filter"]
 	path = submodules/table-filter
 	url = git://github.com/gregwebs/jquery-uitablefilter.git
+[submodule "submodules/js-yaml"]
+	path = submodules/js-yaml
+	url = https://github.com/nodeca/js-yaml.git

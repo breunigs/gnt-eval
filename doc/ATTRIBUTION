@@ -1,9 +1,27 @@
 Software used by G'n'T-Eval:
 
+Name:    Github Buttons
+Web:     https://github.com/necolas/css3-github-buttons
+License: Public Domain
+ …local: submodules/github-buttons/LICENSE.txt
+…online: https://raw.github.com/necolas/css3-github-buttons/master/LICENSE.txt
+
+
+Name:    JQuery UI Tablefilter
+Web:     https://github.com/gregwebs/jquery-uitablefilter
+License: GPL and MIT
+
+
+Name:    JQuery Tablesorter
+Web:     http://tablesorter.com/
+License: GPL or MIT
+ …local: doc/licenses/gplv2.txt or doc/licenses/mit.txt
+
+
 Name:    Ace
 Web:     http://ace.ajax.org/
 License: MPL/LGPL/GPL
- …local: doc/licenses/mpl_lgpl_gpl.txt
+ …local: submodules/js-yaml/LICENSE
 …online: https://raw.github.com/ajaxorg/ace/master/LICENSE
 
 
@@ -14,19 +32,11 @@ License: GNU LGPL 2.1
 …online: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
 
 
-Name:    Prototype
-Web:     http://www.prototypejs.org/
-License: MIT
- …local: doc/licenses/prototype
-…online: https://raw.github.com/sstephenson/prototype/master/LICENSE
-
-
-Name:    Script.aculo.us
-Web:     http://script.aculo.us/
-License: MIT
- …local: doc/licenses/script.aculo.us
-…online: http://madrobby.github.com/scriptaculous/license/
-
+Name:    JQuery + JQueryUI
+Web:     http://jquery.com/
+License: MIT or GPL
+ …local: doc/licenses/gplv2.txt or doc/licenses/mit.txt
+…online: http://jquery.org/license
 
 Name:    Ruby on Rails
 Web:     http://rubyonrails.org/
@@ -37,12 +47,14 @@ License: MIT
 Name:    js-yaml
 Web:     https://github.com/nodeca/js-yaml
 License: MIT
+ …local: doc/licenses/mit.txt
 …online: https://github.com/nodeca/js-yaml/blob/master/LICENSE
 
 
 Name:    json2yaml
 Web:     https://github.com/jeffsu/json2yaml
 License: MIT
+ …local: doc/licenses/mit.txt
 …online: https://github.com/jeffsu/json2yaml/blob/master/LICENSE
 
 

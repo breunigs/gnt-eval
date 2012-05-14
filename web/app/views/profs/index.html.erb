@@ -1,29 +1,33 @@
-<fieldset>
-  <h1>Listing profs</h1>
+<div class="group">
+  <h2>Available professors</h2>
 
-  <%= link_to 'New Prof', new_prof_path %>
-</fieldset>
+  <%= link_to 'create new professor', new_prof_path, :class => "button" %><br/><br/>
 
-<fieldset>
-  <table>
-    <tr>
-      <th>Firstname</th>
-      <th>Surname</th>
-      <th>Email</th>
-      <th>Gender</th>
-    </tr>
+  <%= render "shared/tablemagic" %>
 
-  <% for prof in @profs %>
-    <tr style="background: #<%= cycle('efefef', 'fff') %>">
-      <td><%=h prof.firstname %></td>
-      <td><%=h prof.surname %></td>
-      <td><%= mail_to prof.email %></a></td>
-      <td><%=h prof.gender %></td>
-      <td><%= link_to "Edit #{prof.fullname}", edit_prof_path(prof) %></td>
-      <td><%= link_to('Destroy', {:controller => 'profs', :id => prof, :action => 'destroy'},
-          :confirm => "Really delete prof #{prof.fullname}?",
-          :method => :delete) unless prof.critical? %></td>
-    </tr>
-  <% end %>
+  <table id="tablemagic">
+    <thead>
+      <tr>
+        <th>Firstname</th>
+        <th>Surname</th>
+        <th>Mail</th>
+        <th>Gender</th>
+        <th colspan="2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @profs.each do |prof| %>
+      <tr>
+        <td><%=prof.firstname %></td>
+        <td><%=prof.surname %></td>
+        <td><%=mail_to prof.email %></a></td>
+        <td><%=prof.gender %> <%=prof.gender_symbol%></td>
+        <td><%=link_to "Show Details / Edit #{prof.fullname}", edit_prof_path(prof) %></td>
+        <td><%=link_to('Destroy', {:controller => 'profs', :id => prof, :action => 'destroy'},
+            :confirm => "Really delete prof #{prof.fullname}?",
+            :method => :delete) unless prof.critical? %></td>
+      </tr>
+    <% end %>
+    </tbody>
   </table>
-</fieldset>
+</div>
