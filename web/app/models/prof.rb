@@ -21,11 +21,12 @@ class Prof < ActiveRecord::Base
 
   def gender
     g = read_attribute(:gender)
-    if g == 1
-      return :male
-    else
-      return :female
-    end
+    g == 1 ? :male : :female
+  end
+
+  def gender_symbol
+    g = read_attribute(:gender)
+    g == 1 ? "♂" : "♀"
   end
 
   # Returns if the prof is critical. This is the case if there are any
