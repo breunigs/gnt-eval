@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :testhelper do
   Scc = Seee::Config.commands unless defined?(Scc)
 

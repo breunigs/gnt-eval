@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :forms do
   desc "Create form samples for all available forms. Leave empty for current terms."
   task :samples, :semester_id do |t,a|

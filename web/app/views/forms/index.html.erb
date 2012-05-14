@@ -32,7 +32,7 @@
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
       <% end %>
       <td><%= link_to 'Copy to current semester', :action => :copy_to_current, :id => form unless current_forms.include?(form.name) %></td>
-      <%= (not form.form_checks_out?) ? "<td>⚠ Form is invalid</td>" : ""%>
+      <%= (not form.form_checks_out?) ? "<td>⚠ Form is invalid</td>".html_safe : ""%>
     </tr>
   <% end %>
   </table>

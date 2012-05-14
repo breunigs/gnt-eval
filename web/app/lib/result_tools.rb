@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # contains useful utilities to work with result data and transform it
 # in into a more suitable way to display. The actual display routines
 # are located in text/results/. I.e. database and TeX handling.
@@ -9,7 +11,7 @@ require "singleton"
 require "dbi"
 
 cdir = File.dirname(__FILE__)
-require cdir + "/seee_config.rb"
+require File.join(File.dirname(__FILE__), "../../config/initializers", "seee_config.rb")
 
 class ResultTools
   # only allow one instance of this class
@@ -73,7 +75,7 @@ class ResultTools
   def table_exists?(table)
     raise unless report_valid_name?(table)
     qry = case SCed[:dbi_handler].downcase
-      when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+      when "sqlite3" then "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
       # SQL standard as implemented by… nobody
       else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
     end
@@ -113,6 +115,9 @@ class ResultTools
     return -1 unless report_valid_name?(table)
     return table.uniq.collect {|t| count(t, where_hash, group) }.sum \
       if table.is_a?(Array)
+    # Don’t report missing tables in test mode and don’t query them
+    # even if they exist
+    return 0 if ENV["RAILS_ENV"] == "test"
     unless table_exists?(table)
       warn "Given table `#{table}` does NOT exist."
       warn "Assuming this means there are no sheets for that table."
@@ -179,7 +184,7 @@ class ResultTools
 
     if @dbh.nil? || !@dbh.connected?
       debug "ERROR: Couldn’t open a results database connection."
-      debug "Have a look at lib/seee_config.rb to correct the settings."
+      debug "Have a look at seee_config.rb to correct the settings."
       exit 1
     end
   end
@@ -464,5 +469,13 @@ class ResultTools
   # convenience translation method
   def t(name)
     I18n.translate(name.to_sym)
+  end
+
+  def warn(text)
+    if logger
+      logger.warn text
+    else
+      warn text
+    end
   end
 end

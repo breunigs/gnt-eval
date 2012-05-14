@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # PEST
 # Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)

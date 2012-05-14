@@ -1,7 +1,7 @@
 <% form_for(@form) do |f| %>
   <fieldset>
     <h1>New form</h1>
-    <%= f.error_messages %>
+    <%= render "shared/error_messages", :model => @form %>
 
     <table class="large_text_area">
       <% for item in

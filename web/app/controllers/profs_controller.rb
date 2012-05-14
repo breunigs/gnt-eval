@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class ProfsController < ApplicationController
   # GET /profs
   # GET /profs.xml
@@ -90,8 +92,8 @@ class ProfsController < ApplicationController
   caches_page :index, :new, :edit
   private
   def kill_caches(prof = nil)
-    puts "="*50
-    puts "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
+    logger.info "="*50
+    logger.info "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
     expire_page :action => "index"
     expire_page :action => "new"
     expire_page :action => "edit", :id => prof
@@ -110,7 +112,7 @@ class ProfsController < ApplicationController
     # courses with that prof.
     return unless prof
     prof.courses.each do |c|
-      puts "Expiring courses#edit for #{c.title}"
+      logger.info "Expiring courses#edit for #{c.title}"
       expire_page :controller => "courses", :action => "edit", :id => c
     end
   end

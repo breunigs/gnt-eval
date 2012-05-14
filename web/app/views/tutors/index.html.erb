@@ -18,7 +18,7 @@
 
   <% for tutor in @tutors %>
     <tr class="<%= cycle('odd', 'even') %>">
-      <td><%= link_to tutor.abbr_name, tutor  %></td>
+      <td><%= link_to tutor.abbr_name, [tutor.course, tutor] %></td>
       <td><%= link_to tutor.course.title, tutor.course %></td>
       <td><%=h tutor.course.semester.title %></td>
     </tr>

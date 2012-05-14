@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Provides general features to work with the scanned images and the
 # associated YAML files. Offers the ability to detect rotation and
 # offset, as well as features to search for black areas in the sheet.

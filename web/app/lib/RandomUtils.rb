@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 require 'enumerator'
 require 'tmpdir'
 require 'rubygems'
 require 'work_queue'
 
-require File.join(File.dirname(__FILE__), "seee_config.rb")
-require File.join(File.dirname(__FILE__), "tex_tools.rb")
-
-Scc = Seee::Config.commands unless defined?(Scc)
+cdir = File.dirname(File.realdirpath(__FILE__))
+require File.join(cdir, "../../config/initializers", "seee_config.rb")
+require File.join(cdir, "tex_tools.rb")
 
 module Enumerable
   # finds duplicates in an Enum. As posted by user bshow on
@@ -108,11 +108,13 @@ def find_barcode_from_path(path)
   bc[1]
 end
 
-# http://snippets.dzone.com/posts/show/3486
 class Array
+  # Splits array into equal arrays of given size. Example:
+  # [1,2,3,4,5].chunk(2) => [[1,2], [3,4], [5]]
+  # See http://snippets.dzone.com/posts/show/3486
   def chunk(pieces)
     q, r = length.divmod(pieces)
-    (0..pieces).map { |i| i * q + [r, i].min }.enum_cons(2).map { |a, b| slice(a...b) }
+    (0..pieces).map { |i| i * q + [r, i].min }.each_cons(2).map { |a, b| slice(a...b) }
   end
 
   # converts the values in the array to their value in % with 100% being
@@ -301,8 +303,8 @@ end
 # that path.
 def temp_dir(subdir = "")
   tmp = File.join(Seee::Config.file_paths[:cache_tmp_dir], subdir)
-  require 'ftools'
-  File.makedirs(tmp)
+  require 'fileutils'
+  FileUtils.makedirs(tmp)
   `chmod 0777 -R '#{tmp.gsub("'","\\'")}'  2> /dev/null`
   tmp
 end
@@ -323,9 +325,9 @@ end
 # question.
 def get_user_yesno(question, default = :y)
   opt = case default
-    when :y: " [Y/n]"
-    when :n: " [y/N]"
-    when :none: " [y/n]"
+    when :y    then " [Y/n]"
+    when :n    then " [y/N]"
+    when :none then " [y/n]"
     else raise "Invalid default answer option."
   end
   q = question
@@ -423,10 +425,8 @@ def guess_gender(firstname)
   return :unknown if firstname.empty?
   require 'net/http'
   require 'rubygems'
-  require 'asciify'
   name = firstname.downcase
-  letter = name.asciify[0..0]
-  base = "http://www.beliebte-vornamen.de/lexikon/#{letter}"
+  base = "http://www.beliebte-vornamen.de/lexikon/#{name[0..0]}"
   m = Net::HTTP.get(URI("#{base}-mann")).compress_whitespace.downcase
   f = Net::HTTP.get(URI("#{base}-frau")).compress_whitespace.downcase
   # find all names, and split variants separated by comma or slash

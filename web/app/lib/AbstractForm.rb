@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :mail do
   desc "send reminder mails to FSlers"
   task :reminder do

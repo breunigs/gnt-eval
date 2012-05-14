@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class SemestersController < ApplicationController
   # GET /semesters
   # GET /semesters.xml
@@ -78,10 +80,11 @@ class SemestersController < ApplicationController
   def destroy
     killall_caches
     @semester = Semester.find(params[:id])
-    @semester.destroy unless @semester.critical?
+    d = @semester.critical? || @semester.courses.any?
+    @semester.destroy unless d
 
     respond_to do |format|
-      flash[:error] = 'Semester was critical and has therefore not been destroyed.' if @semester.critical?
+      flash[:error] = 'Semester was critical and has therefore not been destroyed.' if d
       format.html { redirect_to(semesters_url) }
       format.xml  { head :ok }
     end
@@ -90,8 +93,8 @@ class SemestersController < ApplicationController
   caches_page :index, :edit, :new
   private
   def killall_caches
-    puts "="*50
-    puts "Expiring all caches"
+    logger.info "="*50
+    logger.info "Expiring all caches"
     expire_page(:action => "index")
     expire_page(:action => "new")
     expire_page(:action => "edit")

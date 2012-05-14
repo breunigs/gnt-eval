@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddCriticalBoolToSemester < ActiveRecord::Migration
   def self.up
     add_column :semesters, :critical, :boolean

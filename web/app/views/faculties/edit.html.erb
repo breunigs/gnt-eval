@@ -2,7 +2,7 @@
 
   <fieldset>
     <h1>Editing faculty of <%=h @faculty.longname %></h1>
-    <%= f.error_messages %>
+    <%= render "shared/error_messages", :model => @faculty %>
 
    <table>
       <% for item in

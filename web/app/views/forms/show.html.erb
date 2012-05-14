@@ -20,7 +20,7 @@
   <%= nav_links %>
 </fieldset>
 
-<% if @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
+<% if @form.questions && @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
   <fieldset>
     <legend>ERROR: more than one tutor_table</legend>
     <p>You specified a tutor_table question more than once. However, it is

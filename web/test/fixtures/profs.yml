@@ -1,13 +1,26 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
-  firstname: MyString
-  surname: MyString
-  email: 
-  gender: 
+stefan:
+  firstname: Stefan
+  surname: Breunig
+  email: stefan+istdoof@mathphys.fsk.uni-heidelberg.de
+  gender: 1
 
-two:
-  firstname: MyString
-  surname: MyString
-  email: 
-  gender: 
+oliver:
+  firstname: Oliver
+  surname: Thomas
+  email: oliver+istdoof@mathphys.fsk.uni-heidelberg.de
+  gender: 1
+
+rebecca:
+  firstname: Rebecca
+  surname: Schönberger
+  email: sischoen+istdoof@mathphys.fsk.uni-heidelberg.de
+  gender: 0
+
+jasper:
+  firstname: Jasper
+  surname: Franke
+  email: jasper+istdoof@mathphys.fsk.uni-heidelberg.de
+  gender: 1
+

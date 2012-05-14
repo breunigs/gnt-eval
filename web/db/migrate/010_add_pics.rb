@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddPics < ActiveRecord::Migration
   def self.up
     create_table :pics do |t|

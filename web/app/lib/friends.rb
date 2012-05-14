@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # contains Friends class which handles matching names similar to each
 # other. Define FRIENDS_PATH if you want to appear the true/false
 # friends files to appear elsewhere. The class is tailored for import,

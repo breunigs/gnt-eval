@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'net/http'
 require 'pp'
 require 'rubygems'

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # PEST
 # Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
@@ -18,7 +20,7 @@ class Rails
     RAILS_ROOT
   end
 end
-require cdir + '/../lib/seee_config.rb'
+require cdir + '/../web/config/initializers/seee_config.rb'
 require Seee::Config.file_paths[:rmagick]
 
 

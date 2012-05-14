@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'rubygems'
 require 'date'
 
@@ -169,8 +171,8 @@ namespace :misc do
 	  get_user_input(/^[1-9][0-9]*|skip$/, true)
 	end
 	case action
-	  when "skip": next
-	  when "add":
+	  when "skip" then next
+	  when "add"
 	    p = Prof.new(:firstname => p.first,
 			  :surname => p.last,
 			  :email => p.mail,

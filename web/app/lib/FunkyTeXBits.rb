@@ -1,11 +1,14 @@
+# encoding: utf-8
+
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+cdir = File.dirname(File.realdirpath(__FILE__))
 require 'rubygems'
 require 'erb'
 require 'work_queue'
-require 'lib/RandomUtils.rb'
-require 'lib/result_tools.rb'
+require File.join(cdir, 'RandomUtils.rb')
+require File.join(cdir, 'result_tools.rb')
 require 'digest'
 
 module FunkyTeXBits

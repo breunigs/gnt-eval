@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class CreateCPics < ActiveRecord::Migration
   def self.up
     create_table :c_pics do |t|

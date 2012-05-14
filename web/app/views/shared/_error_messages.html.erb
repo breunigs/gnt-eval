@@ -1,0 +1,12 @@
+<% if model && model.errors.any? %>
+<div>
+  <div class="errorExplanation" id="errorExplanation">
+    <h2><%= pluralize(model.errors.size, "error") %> <%= model.errors.size == 1 ? "needs" : "need" %> to be fixed.</h2>
+    <ul>
+      <% model.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+<% end %>

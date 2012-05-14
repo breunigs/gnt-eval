@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 
 class CourseProf < ActiveRecord::Base
   belongs_to :course

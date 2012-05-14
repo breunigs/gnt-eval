@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # -*- coding: utf-8 -*-
 
 require 'erb'
@@ -28,8 +30,8 @@ class Course < ActiveRecord::Base
     return Course.filter(inc, cond, vals) if c.nil? || c.empty?
     cols = ["evaluator", "title", "description", "profs.surname", "profs.firstname"]
     qry = case ActiveRecord::Base.configurations[Rails.env]['adapter']
-      when "mysql": "CONCAT_WS(' ', #{cols*","}) LIKE ?"
-      when "postgresql": "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
+      when "mysql"      then "CONCAT_WS(' ', #{cols*","}) LIKE ?"
+      when "postgresql" then "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
       # SQL standard as implemented by… nobody
       else "(#{cols.join(" || ' ' || ")}) LIKE ?"
     end
@@ -97,7 +99,7 @@ class Course < ActiveRecord::Base
   # evaluators from their name, simply by adding a standand mail
   # domain to it
   def fs_contact_addresses
-    pre_format = fscontact.empty? ? evaluator : fscontact
+    pre_format = fscontact.blank? ? evaluator : fscontact
 
     pre_format.split(',').map do |a|
       (a =~ /@/ ) ? a : a + '@' + SCs[:standard_mail_domain]
@@ -218,11 +220,11 @@ class Course < ActiveRecord::Base
         # repeat_for/belong_to value
         s = section.any_title
         case repeat_for
-          when :course:
+          when :course
             b << eval_block(block, s)
-          when :lecturer:
+          when :lecturer
             course_profs.each { |cp| b << cp.eval_block(block, s) }
-          when :tutor:
+          when :tutor
             tutors_sorted.each { |t| b << t.eval_block(block, s) }
           else
             raise "Unimplemented repeat_for type #{repeat_for}"

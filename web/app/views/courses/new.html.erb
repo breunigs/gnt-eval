@@ -5,7 +5,7 @@
   <fieldset>
     <legend>main details</legend>
     <h1>New course</h1>
-    <%= error_messages_for :course %>
+    <%= render "shared/error_messages", :model => @semester %>
 
     <table>
       <% for item in

@@ -2,16 +2,16 @@
 
 require 'rubygems'
 require 'action_mailer'
-require 'web/config/boot'
-require 'web/lib/ext_requirements.rb'
-require 'web/lib/RandomUtils.rb'
+require './web/config/boot.rb'
+require './lib/ext_requirements.rb'
+require './lib/RandomUtils.rb'
 
 require 'pp'
 require 'yaml'
 
 # needed for image manipulations
 require 'RMagick'
-require 'ftools'
+require 'fileutils'
 
 include Magick
 
@@ -69,14 +69,14 @@ def make_sample_sheet(form, lang)
 end
 
 # load external rakefiles
-require 'rakefiles/export.rb'
-require 'rakefiles/forms.rb'
-require 'rakefiles/images.rb'
-require 'rakefiles/import.rb'
-require 'rakefiles/mail.rb'
-require 'rakefiles/omr-test-helper.rb'
-require 'rakefiles/results.rb'
-require 'custom_build/build.rb'
+require './rakefiles/export.rb'
+require './rakefiles/forms.rb'
+require './rakefiles/images.rb'
+require './rakefiles/import.rb'
+require './rakefiles/mail.rb'
+require './rakefiles/omr-test-helper.rb'
+require './rakefiles/results.rb'
+require './custom_build/build.rb'
 
 # automatically calls rake -T when no task is given
 task :default do

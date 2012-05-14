@@ -1,6 +1,6 @@
 <fieldset>
   <h1>New semester</h1>
-  <%= error_messages_for :semester %>
+  <%= render "shared/error_messages", :model => @semester %>
 
   <% form_for(@semester) do |f| %>
     <table>

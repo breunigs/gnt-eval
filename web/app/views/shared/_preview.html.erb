@@ -1,8 +1,11 @@
 <%
 # this is a general preview shared view. Hand in the text that should
 # be previewed as a local variable, like this:
-# <%= render :partial => "shared/preview", :locals => { :text => TEXT } %>
+#    render "shared/preview", :text => TEXT
 %>
+
+
+
 
 <% cache("#{params[:controller]}_#{params[:id]}") do %>
   <% failed, exitcodes, error, base64 = texpreview(text) %>
@@ -12,5 +15,5 @@
     EXIT CODES: <%= exitcodes.join(", ") %> <br/> <%= error %>
   <% end %>
 
-  <%= "<img src=\"data:image/png;base64,#{base64}\"/>" unless failed || base64.nil? || base64.empty? %>
+  <%= "<img src=\"data:image/png;base64,#{base64}\"/>".html_safe unless (failed || base64.nil? || base64.empty?) %>
 <% end %>

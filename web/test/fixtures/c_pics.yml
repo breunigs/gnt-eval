@@ -1,9 +1,7 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
-
 one:
-  basename: MyString
-  course: 
+  basename: some_image_file.jpg"
+  course_prof: :oneA
 
 two:
-  basename: MyString
-  course: 
+  basename: some_image_file.jpg"
+  course_prof: :oneB

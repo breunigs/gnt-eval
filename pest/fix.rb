@@ -46,7 +46,7 @@ class Rails
   end
 end
 
-require cdir + '/../lib/seee_config.rb'
+require cdir + '/../web/config/initializers/seee_config.rb'
 require Seee::Config.file_paths[:rmagick]
 
 require File.join(cdir, 'helper.boxtools.rb')

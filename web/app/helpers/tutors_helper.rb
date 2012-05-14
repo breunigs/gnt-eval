@@ -1,8 +1,10 @@
+# encoding: utf-8
+
 module TutorsHelper
   include FunkyTeXBits
 
   def tutor_edit_link
-    link_to "Edit '#{@tutor.abbr_name}'", edit_tutor_path(@tutor)
+    link_to "Edit '#{@tutor.abbr_name}'", edit_course_tutor_path(@tutor.course, @tutor)
   end
 
   def tutor_return_link

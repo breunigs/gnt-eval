@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddLongtitleToSemester < ActiveRecord::Migration
   def self.up
     add_column :semesters, :role, :string

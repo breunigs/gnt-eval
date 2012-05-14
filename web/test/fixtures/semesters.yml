@@ -1,11 +1,20 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
-  firstday: 2008-05-26
-  lastday: 2008-05-26
-  title: MyString
+summerTerm:
+  firstday: 2012-03-01
+  lastday: 2012-08-31
+  title: ST12
+  longtitle: Summer Term 2012
+  critical: true
 
-two:
-  firstday: 2008-05-26
-  lastday: 2008-05-26
-  title: MyString
+winterTerm:
+  firstday: 2012-09-01
+  lastday: 2013-02-28
+  title: WT12/13
+  longtitle: Winter Term 2012/2013
+
+emptyTerm:
+  firstday: 2012-09-01
+  lastday: 2013-02-28
+  title: empty123
+  longtitle: Empty Term that is empty

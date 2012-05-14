@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Faculty < ActiveRecord::Base
   has_many :courses
   has_many :course_profs, :through => :courses

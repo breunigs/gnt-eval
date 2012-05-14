@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module CoursesHelper
   include FunkyTeXBits
 
@@ -55,7 +57,7 @@ module CoursesHelper
     d = []
     d << courseEditLink
     d << courseDestroyLink unless @course.semester.critical?
-    d.join(" | ")
+    d.join(" | ").html_safe
   end
 
   def comment_image_link

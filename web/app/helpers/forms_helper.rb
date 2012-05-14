@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module FormsHelper
   def nav_links
     s = []
@@ -23,7 +25,7 @@ module FormsHelper
 
     name = Digest::SHA256.hexdigest(code)
     tmppath = File.join(temp_dir, "form_preview")
-    File.makedirs(tmppath)
+    FileUtils.makedirs(tmppath)
     path = File.join(tmppath, "form_#{@form.id}__#{name}")
 
     exitcodes = []
@@ -73,9 +75,9 @@ module FormsHelper
     return exitcodes.total > 0, exitcodes, logger.gsub("\n", "<br/>"), base64
   end
 
-  def texpreview(text)
+  def texpreview(text = nil)
     unless text.nil? || text.empty?
-      raise "Forms use their own render method and do not need text to be passed. Please replace by texpreview(nil)."
+      raise "Forms use their own render method and do not need text to be passed. Please replace by texpreview()."
     end
 
     return render_preview

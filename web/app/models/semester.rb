@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
 # A semester is a period of time, in which courses are held --
 # typically a semester. A semester has many courses.

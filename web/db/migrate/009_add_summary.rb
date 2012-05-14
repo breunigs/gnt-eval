@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddSummary < ActiveRecord::Migration
   def self.up
     add_column :courses, :summary, :text

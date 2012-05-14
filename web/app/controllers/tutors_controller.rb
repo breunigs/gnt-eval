@@ -1,11 +1,12 @@
+# encoding: utf-8
+
 class TutorsController < ApplicationController
-  before_filter :load_course
+  before_filter :load_course, :except => :index
 
   def load_course
-    if not params[:course_id].nil?
-          @course = Course.find(params[:course_id])
-    end
+    @course = Course.find(params[:course_id])
   end
+
   # GET /tutors
   # GET /tutors.xml
   def index
@@ -31,17 +32,6 @@ class TutorsController < ApplicationController
     end
   end
 
-  # GET /tutors/new
-  # GET /tutors/new.xml
-  def new
-    @tutor = @course.tutors.build
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @tutor }
-    end
-  end
-
   # GET /tutors/1/edit
   def edit
     @tutor = Tutor.find(params[:id])
@@ -62,25 +52,24 @@ class TutorsController < ApplicationController
   def create
     existingTutors = @course.tutors.map { |x| x.abbr_name }
     par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
-    failure = nil
+
+    errors = []
     par.uniq.sort.each do |p|
-      next if existingTutors.include? p
+      next if existingTutors.include?(p)
       t = @course.tutors.build({'abbr_name'=>p})
-      if not t.save
-        failure = true
+      unless t.save
+        errors << t.errors
       end
     end
 
     kill_caches
 
     respond_to do |format|
-      if failure.nil?
+      if errors.empty?
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
-        format.xml  { render :xml => @tutor, :status => :created, :location => @course }
      else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -88,14 +77,14 @@ class TutorsController < ApplicationController
   # PUT /tutors/1
   # PUT /tutors/1.xml
   def update
-    @tutor = @course.tutors.find(params[:id])
+    @tutor = Tutor.find(params[:id])
     kill_caches @tutor
     expire_fragment("tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
 
     respond_to do |format|
       if @tutor.update_attributes(params[:tutor])
         flash[:notice] = 'Tutor was successfully updated.'
-        format.html { redirect_to(@tutor) }
+        format.html { redirect_to([@tutor.course, @tutor]) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -107,7 +96,8 @@ class TutorsController < ApplicationController
   # DELETE /tutors/1
   # DELETE /tutors/1.xml
   def destroy
-    @tutor = @course.tutors.find(params[:id])
+    @tutor = Tutor.find(params[:id])
+
     kill_caches @tutor
     # expire preview cache as well
     expire_fragment("tutors_#{params[:id]}")
@@ -124,8 +114,8 @@ class TutorsController < ApplicationController
 
   private
   def kill_caches(tutor = nil)
-    puts "="*50
-    puts "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
+    logger.info "="*50
+    logger.info "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
     expire_page :action => "index"
     expire_page :action => "show", :id => tutor
     expire_page :action => "preview", :id => tutor

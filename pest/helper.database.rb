@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # extends the PESTOmr with some database related tools. Connecting to
 # the database is handled by lib/result_tools.rb.
 

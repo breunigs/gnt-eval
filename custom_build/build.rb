@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # requires: git, wget
 
 namespace :magick do

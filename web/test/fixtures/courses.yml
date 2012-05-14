@@ -1,13 +1,22 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+mathSummerCourse:
+  semester: :summerTerm
+  title: Mathematical background of east-asian art-history
+  students: 123
+  faculty: :mathFac
+  evaluator: stefan
+  description: needs more sheets
+  summary: everyone’s happy, nice lecture
+  form: :someFormForST
+  language: de
 
-one:
-  semester: 
-  title: MyString
-  students: 1
-  faculty: 
-
-two:
-  semester: 
-  title: MyString
-  students: 1
-  faculty: 
+physWinterCourse:
+  semester: :winterTerm
+  title: Physical background of east-asian art-history
+  students: 321
+  faculty: :physFac
+  evaluator: beccy
+  fscontact: sischoen
+  summary: Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+  form: :someFormForWT
+  language: en
+  note: well, I don’t know. Who reads test data anyway?

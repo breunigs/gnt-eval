@@ -1,7 +1,13 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
-  name: MyString
+mathFac:
+  longname: Faculty of Mathematics and Computer Science Heidelberg
+  shortname: MathFac
 
-two:
-  name: MyString
+physFac:
+  longname: Faculty of Physics and Astronomy Heidelberg
+  shortname: PhysFac
+
+emptyFac:
+  longname: Faculty that has no courses
+  shortname: EmptyFac

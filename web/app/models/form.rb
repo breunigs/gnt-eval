@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # -*- coding: utf-8 -*-
 require 'pp'
 require 'stringio'
@@ -28,7 +30,10 @@ class Form < ActiveRecord::Base
       # Sheet does not appear to be a valid YAML. In this case the
       # value will be nil (and thus not an AbstractForm). This will
       # later be picked up as an invalid form.
-      $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.inspect
+      $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.join("\n")
+      logger.warn "Given AbstractForm is invalid:"
+      logger.warn $loaded_yaml_sheets[id]
+      logger.warn "\n\n\nGiven content was:\n#{content}"
     end
     $loaded_yaml_sheets[id]
   end
@@ -68,13 +73,14 @@ class Form < ActiveRecord::Base
   # lecturers per course, therefore these variables cannot be used out-
   # side the correct repeat_for-scope.
   def find_out_of_scope_variables
+    return [] unless abstract_form_valid?
     a = []
     questions.each do |q|
-      next if !q.qtext.to_a.join.include?("\\lect") || q.repeat_for == :lecturer
+      next if !q.qtext.to_s.include?("\\lect") || q.repeat_for == :lecturer
       a << "Question #{q.db_column.find_common_start} appears to use \\lect* even though repeat_for is not lecturer."
     end
     sections.each do |s|
-      next if !s.title.to_a.join.include?("\\lect") || s.questions.first.repeat_for == :lecturer
+      next if !s.title.to_s.include?("\\lect") || s.questions.first.repeat_for == :lecturer
       a << "Section #{s.title} appears to use \\lect* even though repeat_for for the following question is not lecturer."
     end
     a
@@ -106,19 +112,32 @@ class Form < ActiveRecord::Base
     !abstract_form.get_duplicate_db_columns.empty?
   end
 
+  # needs to be specified manually because method_missing somehow kills
+  # it. It is called when calling somethign like redirect_to @form.
+  def to_str
+    "Form"
+  end
+
   # catches all methods that are not implemented and sees if
   # AbstractForm has them. If it doesn’t either, a more detailed error
   # message is thrown.
   def method_missing(name, *args, &block)
     begin; super; rescue
-      return abstract_form.method(name).call(*args) if abstract_form.respond_to?(name)
-      raise "undefined method #{name} for both web/app/models/form.rb and lib/AbstractForm.rb"
+      # Can’t use responds_to? because we need to know about instance
+      # methods and not class ones.
+      unless AbstractForm.instance_methods.include?(name.to_sym)
+        raise "undefined method #{name} for both web/app/models/form.rb and lib/AbstractForm.rb"
+      end
+      return abstract_form.method(name).call(*args) if abstract_form_valid?
+      # return nil when AbstractForm has the method, but it cannot be
+      # used because the form is invalid
+      return nil
     end
   end
 
   # tell everyone that we know about abstract_form’s methods
-  def respond_to?(name)
-    return true if abstract_form.respond_to?(name)
+  def respond_to?(name, include_private = false)
+    return true if AbstractForm.instance_methods.include?(name.to_sym)
     super
   end
 
@@ -137,9 +156,9 @@ class Form < ActiveRecord::Base
   # and more than 1 situations.
   def too_few_sheets(count)
     case count
-      when 0: I18n.t(:too_few_questionnaires)[:null]
-      when 1: I18n.t(:too_few_questionnaires)[:singular]
-      else    I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, count.to_s)
+      when 0 then I18n.t(:too_few_questionnaires)[:null]
+      when 1 then I18n.t(:too_few_questionnaires)[:singular]
+      else        I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, count.to_s)
     end
   end
 end

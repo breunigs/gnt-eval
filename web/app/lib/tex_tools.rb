@@ -1,14 +1,19 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 # home to all TeX related tools that might be used in more than one
 # location.
 
 require 'erb'
 
 class String
+  # needs strange parameters so it accepts the multi part bytes.
+  # see http://www.ruby-forum.com/topic/183413
+  TO_ASCII_REGEX = Regexp.new '[\x80-\xff]', nil, 'n'
+
   # Removes all UTF8 chars and replaces them by underscores. Usually
   # required for LaTeX output.
   def to_ascii
-    self.gsub(/[\x80-\xff]/, "_")
+    self.gsub(TO_ASCII_REGEX, "_")
   end
 
   # escapes & _ # and % signs if not already done so

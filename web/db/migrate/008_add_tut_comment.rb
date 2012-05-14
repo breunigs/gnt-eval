@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddTutComment < ActiveRecord::Migration
   def self.up
     add_column :tutors, :comment, :text

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :results do
   # accepts array of semester IDs and returns array of valid forms for
   # that semester
@@ -356,17 +358,17 @@ namespace :results do
       line = []
       meta.each do |m|
         case m
-          when "path":       line << path
-          when "barcode":    line << barcode
-          when "table":      line << table
-          when "lecture":    line << cp.course.title
-          when "lang":       line << cp.course.language
-          when "sheet":      line << cp.course.form.name
-          when "semester":   line << cp.course.semester.title
-          when "prof":       line << cp.prof.fullname
-          when "profmail":   line << cp.prof.email
-          when "profgender": line << cp.prof.gender.to_s[0..0]
-          when "tutor":
+              when "path"       then line << path
+              when "barcode"    then line << barcode
+              when "table"      then line << table
+              when "lecture"    then line << cp.course.title
+              when "lang"       then line << cp.course.language
+              when "sheet"      then line << cp.course.form.name
+              when "semester"   then line << cp.course.semester.title
+              when "prof"       then line << cp.prof.fullname
+              when "profmail"   then line << cp.prof.email
+              when "profgender" then line << cp.prof.gender.to_s[0..0]
+          when "tutor"
             if tutnum-1 >=0 && tutnum-1 < cp.course.tutors.size
               line << cp.course.tutors[tutnum-1].abbr_name
             else
@@ -387,9 +389,9 @@ namespace :results do
           # the text field instead of “others”
           cnt = question.last_is_textbox? ? boxes.count-1 : boxes.count
           line << case(d[ind])
-            when -2..0: ""
-            when 99: "NOT SPECIFIED"
-            when 1..cnt: boxes[d[ind]-1].any_text.strip_common_tex
+            when -2..0 then ""
+            when 99 then "NOT SPECIFIED"
+            when 1..cnt then boxes[d[ind]-1].any_text.strip_common_tex
             else (question.last_is_textbox? ? d[ind+1] : "ERROR")
           end
         end

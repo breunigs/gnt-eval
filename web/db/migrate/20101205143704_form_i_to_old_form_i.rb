@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class FormIToOldFormI < ActiveRecord::Migration
   def self.up
     rename_column :courses, :form, :old_form_i

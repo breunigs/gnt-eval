@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class FormsController < ApplicationController
   # GET /forms
   # GET /forms.xml
@@ -68,9 +70,7 @@ class FormsController < ApplicationController
         format.html { redirect_to(@form) }
         format.xml  { head :ok }
       elsif @form.update_attributes(params[:form])
-        flash[:notice] = 'Form was successfully updated.'
-        format.html { redirect_to(@form) }
-        format.xml  { head :ok }
+        format.html { redirect_to @form, notice: 'Form was successfully updated.' }
       else
         format.html { render :action => "edit" }
         format.xml  { render :xml => @form.errors, :status => :unprocessable_entity }
@@ -124,8 +124,8 @@ class FormsController < ApplicationController
   caches_page :index, :show, :new, :edit
   private
   def kill_caches(form = nil)
-    puts "="*50
-    puts "Expiring form caches" + (form ? " for #{form.title}" : "")
+    logger.info "="*50
+    logger.info "Expiring form caches" + (form ? " for #{form.title}" : "")
     expire_page :action => "index"
     expire_page :action => "new"
     if form
@@ -135,9 +135,9 @@ class FormsController < ApplicationController
     end
 
     # need to expire all edit+new pages, in case a form was added
-    if defined? Courses && !Courses.nil?
-      Courses.find(:all) do |c|
-        puts "Expiring courses#edit+new caches for #{c.title}"
+    if defined? Course && !Course.nil?
+      Course.find(:all) do |c|
+        logger.info "Expiring courses#edit+new caches for #{c.title}"
         expire_page :controller => "courses", :action => "edit", :id => c
         expire_page :controller => "courses", :action => "new", :id => c
       end
@@ -145,10 +145,10 @@ class FormsController < ApplicationController
 
     return unless form
     form.courses.each do |c|
-      puts "Expiring courses#show caches for #{c.title}"
+      logger.info "Expiring courses#show caches for #{c.title}"
       expire_page :controller => "courses", :action => "show", :id => c
       c.profs.each do |p|
-        puts "Expiring profs#edit for #{p.surname}"
+        logger.info "Expiring profs#edit for #{p.surname}"
         expire_page :controller => "profs", :action => "edit", :id => p
       end
     end

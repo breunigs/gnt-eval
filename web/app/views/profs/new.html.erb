@@ -1,6 +1,6 @@
 <fieldset>
   <h1>New prof</h1>
-  <%= error_messages_for :prof %>
+  <%= render "shared/error_messages", :model => @prof %>
 
   <% form_for(@prof) do |f| %>
     <table>

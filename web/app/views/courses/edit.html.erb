@@ -9,7 +9,8 @@
 <% form_for(@course) do |f| %>
   <fieldset>
     <h1>Editing course <%=h @course.title %></h1>
-    <%= error_messages_for :course %>
+    <%= render "shared/error_messages", :model => @course %>
+
 
     <p>
       <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %>

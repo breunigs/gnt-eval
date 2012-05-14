@@ -70,11 +70,12 @@
   </table>
 
   <p>
-    <% form_for :course, @course, :url => { :action => 'add_prof', :id => @course } do |f| %>
+    <form method="post" action="<%=course_add_prof_path(@course)%>">
+    <input type="hidden" value="<%= form_authenticity_token %>" style="display:none"/>
     <%= collection_select(:courses, :profs, Prof.find(:all, :order => 'surname'), :id, :surnamefirst) %>
     <%= submit_tag 'Add' %>
     <%= link_to 'Create New Prof', new_prof_path %>
-    <% end %>
+    </form>
   </p>
 </fieldset>
 
@@ -90,7 +91,7 @@
     </tr>
     <% for tutor in @course.tutors %>
     <tr style="background: #<%= cycle('efefef', 'fff') %>">
-      <td><%= link_to tutor.abbr_name, edit_tutor_path(tutor) %></td>
+      <td><%= link_to tutor.abbr_name, edit_course_tutor_path(@course, tutor) %></td>
       <td style="text-align:center"><%= tutor.pics.count %></td>
       <td style="text-align:center"><%= tutor.returned_sheets %></td>
       <% unless tutor.critical? %>

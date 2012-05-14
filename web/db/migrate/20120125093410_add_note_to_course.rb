@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddNoteToCourse < ActiveRecord::Migration
   def self.up
     add_column :courses, :note, :text

@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
-require 'digest/md5'
-require 'ftools'
+# -*- coding: utf-8 -*-
 
 class CoursesController < ApplicationController
   # GET /courses
@@ -97,6 +96,7 @@ class CoursesController < ApplicationController
         format.html { redirect_to(@course) }
         format.xml  { render :xml => @course, :status => :created, :location => @course }
       else
+        flash[:error] = "Selected form and language combination isn’t valid." unless form_lang_combo_valid?
         format.html { render :action => "new" }
         format.xml  { render :xml => @course.errors, :status => :unprocessable_entity }
       end
@@ -117,6 +117,16 @@ class CoursesController < ApplicationController
         format.html { redirect_to(@course) }
         format.xml  { head :ok }
       else
+        if not @course.form.abstract_form_valid?
+          flash[:error] = "The selected form is not valid. Please fix it first."
+        elsif !form_lang_combo_valid?
+          flash[:error] = "The selected form/language combination isn’t valid. #{flash[:error]}"
+        elsif critical_changes?(@course)
+          flash[:error] = "Some of the changes are critical. Those are currently not allowed."
+        else
+          flash[:error] = "Could not update the course."
+        end
+
         format.html { render :action => "edit" }
         format.xml  { render :xml => @course.errors, :status => :unprocessable_entity }
       end
@@ -213,13 +223,21 @@ class CoursesController < ApplicationController
   def form_lang_combo_valid?
     # if the semester is critical, these fields will not be submitted.
     # supply them from the database instead.
-    params[:course][:form_id] ||= @course.form.id
-    params[:course][:language] ||= @course.language
-    params[:course][:semester_id] ||= @course.semester.id
+    if @course
+      params[:course][:form_id] ||= @course.form.id if @course.form
+      params[:course][:language] ||= @course.language
+      params[:course][:semester_id] ||= @course.semester.id if @course.semester
+    end
 
     # check semester has form
     s = Semester.find(params[:course][:semester_id])
     f = Form.find(params[:course][:form_id])
+
+    unless s && f
+      flash[:error] = "Selected semester or form not found."
+      return false
+    end
+
     unless s.forms.map { |f| f.id }.include?(params[:course][:form_id].to_i)
       flash[:error] = "Form “#{f.name}” (id=#{f.id}) is not " \
                         + "available for semester “#{s.title}”"
@@ -235,7 +253,7 @@ class CoursesController < ApplicationController
 
   caches_page :index, :new, :show, :edit, :preview
   def kill_caches(course = nil)
-    puts "="*50
+    logger.info "="*50
 
     expire_page :action => "index"
 
@@ -246,15 +264,15 @@ class CoursesController < ApplicationController
 
     # course title and form are listed on the prof’s page.
     course.profs.each do |p|
-      puts "Expiring profs#show for #{p.surname}"
+      logger.info "Expiring profs#show for #{p.surname}"
       expire_page :controller => "profs", :action => "show", :id => p.id
     end
 
     course.tutors.each do |t|
-      puts "Expiring tutors#show for #{t.abbr_name}"
+      logger.info "Expiring tutors#show for #{t.abbr_name}"
       expire_page :controller => "tutors", :action => "show", :id => t.id
     end
-    puts "Expiring tutors#index"
+    logger.info "Expiring tutors#index"
     expire_page :controller => "tutors", :action => "index"
   end
 end

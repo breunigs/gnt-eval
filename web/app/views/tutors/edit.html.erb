@@ -6,7 +6,7 @@
 <fieldset>
   <h1>Editing tutor</h1>
   <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %> | <%= link_to "Cancel", @tutor.course %>
-  <%= error_messages_for :tutor %>
+  <%= render "shared/error_messages", :model => @tutor %>
 
   <table style="margin-top:2em">
     <tr style="background:#efefef">

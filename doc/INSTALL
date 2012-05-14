@@ -85,11 +85,11 @@ To see if this worked open a new shell and type execute "rvm". If the
 command is not found, please refer to the manual at
   http://rvm.beginrescueend.com/rvm/install/
 
-Then we need to install openssl and ruby:
-  rvm pkg install openssl
-  rvm install 1.8.7-p334 --with-zlib-dir=/usr  --with-openssl-dir=$HOME/.rvm/usr
+Then we need to install ruby and its dependencies:
+  rvm pkg install openssl zlib
+  rvm install 1.9.3                                  --with-openssl-dir=$rvm_path/usr --with-readline-dir=$rvm_path/usr
 and create a gemset, which will be seperate from your other system gems:
-  rvm 1.8.7-p334
+  rvm 1.9.3
   rvm gemset create 'gnt-eval'
 
 
@@ -105,7 +105,7 @@ A)  if you want to use the system-provided packages:
       librmagick-ruby
 
 B)  if you want to build your own you'll need to additionally install:
-      ruby1.8-dev
+      ruby1.9-dev
     and run "rake magick:all" once the repository has been checked out.
     You can install the system libraries alongside the custom repository
     without any problems. This way you can uninstall the custom versions

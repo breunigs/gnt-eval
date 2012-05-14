@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :images do
   desc "(3) Run the scan script to import pages to #{simplify_path(SCfp[:scanned_pages_dir])}"
   task :scan do

@@ -1,19 +1,22 @@
+# encoding: utf-8
+
 # This means physical persons. They have many courses.
 class Prof < ActiveRecord::Base
   has_many :course_profs
   has_many :courses, :through => :course_profs
   validates_presence_of :firstname, :surname, :gender
+  validates_uniqueness_of :email, :allow_nil => true
 
   def lastname
     surname
   end
 
   def fullname
-    return firstname.strip + ' ' + surname.strip
+    "#{firstname} #{surname}".gsub(/\s+/, " ")
   end
 
   def surnamefirst
-    return surname.strip + ', ' + firstname.strip
+    "#{surname} #{firstname}".gsub(/\s+/, " ")
   end
 
   def gender

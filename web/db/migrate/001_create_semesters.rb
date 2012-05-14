@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class CreateSemesters < ActiveRecord::Migration
   def self.up
     create_table :semesters do |t|

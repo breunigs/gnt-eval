@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class CreateForms < ActiveRecord::Migration
   def self.up
     create_table :forms do |t|
