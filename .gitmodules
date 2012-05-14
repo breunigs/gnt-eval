@@ -1,0 +1,3 @@
+[submodule "submodules/github-buttons"]
+	path = submodules/github-buttons
+	url = https://github.com/necolas/css3-github-buttons.git
