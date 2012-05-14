@@ -1,3 +1,6 @@
 [submodule "submodules/github-buttons"]
 	path = submodules/github-buttons
 	url = https://github.com/necolas/css3-github-buttons.git
+[submodule "submodules/table-filter"]
+	path = submodules/table-filter
+	url = git://github.com/gregwebs/jquery-uitablefilter.git
