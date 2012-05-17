@@ -4,6 +4,9 @@ gem "rails",           "3.2.3"
 gem "jquery-rails"
 gem "jquery_datepicker"
 
+# replaces WebRick to get rid of the content length warnings. See
+# http://stackoverflow.com/questions/9612618/
+gem "thin"
 
 # See http://stackoverflow.com/questions/5769352/connect-to-sql-server-without-activerecord
 # why rails-dbi is required

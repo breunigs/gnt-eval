@@ -13,7 +13,7 @@ class TutorsController < ApplicationController
     # (inner) join prevents us from loading tutors whose course does
     # not exist anymore
     @tutors = Tutor.all(:joins => :course, :include => [:semester],
-                :order => :abbr_name)
+                :order => ["semester_id DESC", :title, :abbr_name])
 
     respond_to do |format|
       format.html # index.html.erb

@@ -69,6 +69,7 @@ en:
   # rename attributes in the Rails web GUI
   attributes:
     email: Mail
+    abbr_name: Abbreviated Name
 
   activerecord:
     # rename the models

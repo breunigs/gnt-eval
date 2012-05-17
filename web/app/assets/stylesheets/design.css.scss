@@ -9,12 +9,13 @@
 
 body {
   background:transparent;
+  font-family:sans-serif;
 }
 
 $group_border: 1px solid #aaa;
 $group_box_shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.2);
 
-body div.group:first-of-type {
+body > div:first-of-type {
   border-top:0;
   margin-top:0;
 }
@@ -24,21 +25,73 @@ h1 {
   font-size:250%;
 }
 
+h2 {
+  font-size:180%;
+  margin-bottom:0.5em;
+}
+
+h3 {
+  margin-bottom:0.3em;
+}
+
+.warning, .error, .info {
+  margin: 0.4em 0 0.4em 0;
+  font-style:italic;
+  &:before {
+    float:left;
+    font-size: 300%;
+    margin-top: -0.12em;
+    margin-right: 0.3em;
+    font-style:normal;
+  }
+  &:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+  }
+}
+
+.warning {
+  color: #9F6000;
+  &:before {
+    content: "⚠";
+  }
+}
+
+.error {
+  color: #D8000C;
+  &:before {
+    content: "⚡";
+  }
+}
+
 .infobox {
   float:right;
   vertical-align:top;
+  max-width:35em;
+  text-align:right;
+  .warning {
+
+    display:inline-block;
+    &:before {
+      float: right;
+      margin-left: 0.3em;
+      margin-right: 0;
+    }
+  }
 }
 
-div.group {
+
+
+body > div, div.group {
   padding:1rem;
   margin:1rem;
   background:#fff;
   border: $group_border;
   box-shadow: $group_box_shadow;
-
-  h2 {
-    font-size:180%;
-    margin-bottom:0.5em;
+  > div:not(.button-group) {
+    margin-top:1em;
   }
 }
 
@@ -62,6 +115,8 @@ table {
     text-align:left;
     padding:0.2em;
     background:transparent;
+    vertical-align:top;
+    line-height:2.1em;
   }
   td {
     padding:0.2em;
@@ -104,7 +159,7 @@ input:not(.button), textarea, select {
   border: 1px solid #D4D4D4;
   border-radius: 0.2em 0.2em 0.2em 0.2em;
   padding: 0.4em;
-  height:1.09em;
+  height:1.12em;
   min-width:25em;
 }
 
@@ -126,6 +181,10 @@ select {
       background:#fff;
     }
   }
+}
+
+textarea {
+  min-height:10em;
 }
 
 .field_with_errors {
@@ -152,7 +211,7 @@ table.large_text_area {
 
 table.large_text_area td > div, table.large_text_area td textarea {
   width:100%;
-  min-height:40em;
+  min-height:25em;
 }
 
 .hold_button input {
@@ -195,4 +254,27 @@ span.error {
 
 .ui-datepicker {
   box-shadow: $group_box_shadow;
+}
+
+/* DEBUG */
+body > div ~ div h1 {
+  color: #ffff00;
+}
+
+.preview {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height:10em;
+  margin:1em 0 0.5em 0;
+  padding-bottom:0.5em;
+
+  img {
+    border:1px solid #ccc;
+    padding:1em;
+    box-shadow: 0.1em 0.1em 0.2em rgba(0,0,0, 0.2);
+  }
+
+  &.large {
+    max-height:none;
+  }
 }

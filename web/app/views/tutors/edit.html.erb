@@ -1,44 +1,47 @@
-<%= render "shared/main_menu" %>
-<%= render :partial => "shared/aceify_textareas", :locals => {:line_offset => texpreview_header_offset }  %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
 
-<% form_for([@course, @tutor]) do |f| %>
+<%= form_for([@course, @tutor]) do |f| %>
+  <div class="group">
+    <h2>Editing <%=@tutor.abbr_name%></h2>
 
-<fieldset>
-  <h1>Editing tutor</h1>
-  <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %> | <%= link_to "Cancel", @tutor.course %>
-  <%= render "shared/error_messages", :model => @tutor %>
-
-  <table style="margin-top:2em">
-    <tr style="background:#efefef">
-      <th>Abbr name</th>
-      <td><%= f.text_field :abbr_name %></td>
-    </tr>
-  </table>
-
-</fieldset>
-
-<fieldset>
-  <legend>Comments</legend>
-    <p>(This is LaTeX-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, i.e. &#8222;Deutsch&#8220; or &#8220;English&#8221;)</p>
-      <%= f.text_area(:comment, :style => 'width:99%')%>
-    </p>
-</fieldset>
-
-<fieldset>
-  <legend>Scanned comments</legend>
-    <div class="commentview">
-  <% for p in @tutor.pics %>
-      <img
-        style="border-left:2em solid #<%= cycle('efefef', 'bfbfbf') %>"
-        src="<%=h comment_image_link %>/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" /><br/>
-  <% end %>
-      <span style="background:#f00;color:#fff">end of comments</span>
+    <div class="button-group">
+      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;", :class => "button primary" %>
+      <%= link_to "Cancel", @tutor.course, :class => "button" %>
+      <%= render "shared/error_messages", :model => @tutor %>
     </div>
 
-</fieldset>
+    <table style="width:100%" class="large_text_area">
+      <tr>
+        <th><%=Tutor.human_attribute_name("abbr_name")%></th>
+        <td><%= f.text_field :abbr_name %></td>
+      </tr>
+      <tr>
+        <th>Comments</th>
+        <td>
+          (This is <%=latex_logo%>-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, e.g. „Deutsch“ or “English”)
+          <%= f.text_area(:comment, :style => 'width:99%')%>
+        </td>
+      </p>
 
-<fieldset>
-  <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %> | <%= link_to "Cancel", @tutor.course %>
-</fieldset>
+            </tr>
+    </table>
+  </div>
+
+  <div class="group">
+    <h3>Scanned comments</h3>
+      <div class="commentview">
+        <% for p in @tutor.pics %>
+          <figure><span><img src="<%=comment_image_link %>/<%=@course.semester.dirfriendly_title + '/' + p.basename %>"></span></figure>
+        <% end %>
+        <span class="end">end of comments</span>
+      </div>
+  </div>
+
+  <div class="group">
+    <div class="button-group">
+      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;", :class => "button primary" %>
+      <%= link_to "Cancel", @tutor.course, :class => "button" %>
+    </div>
+  </div>
 
 <% end %>

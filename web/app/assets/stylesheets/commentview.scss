@@ -1,0 +1,67 @@
+.commentview {
+  overflow-y:scroll;
+  overflow-x:hidden;
+  height:12em;
+  text-align:center;
+  counter-reset: comments;
+  white-space: nowrap;
+
+  img {
+    vertical-align:bottom;
+    max-width:100%;
+  }
+
+  span {
+    vertical-align:bottom; /* required for Opera */
+    max-width:91%;  /* If images are shrinked, this saves us from having to scroll vertically. */
+    display:inline-block;
+  }
+
+  figure {
+    display:block;
+    counter-increment: comments;
+
+    &:before {
+      text-align:right;
+      width:10%;
+      padding-right:0.2em;
+      margin-left: -0.4em;
+      box-sizing:padding-box;
+      -moz-box-sizing:padding-box;
+      -webkit-box-sizing:padding-box;
+      background:white;
+      color:#eee;
+      font-size:400%;
+      display:inline-block;
+      content: counter(comments) " ";
+    }
+
+    &:nth-child(odd) {
+      &:before {
+        color:rgba(0,0,255,0.05);
+      }
+
+      span {
+        background:blue;
+        display:inline-block;
+        img {
+          opacity:0.96;
+        }
+      }
+    }
+  }
+
+  /* the end and divider spans */
+  > span {
+    display:block;
+    width:100%;
+    max-width:100%;
+    padding:0.2em 0;
+    color:#fff;
+    font-weight:bold;
+    background:#007608;
+    &.end {
+      background:#D8000C;
+    }
+  }
+}

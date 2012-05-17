@@ -13,4 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require jquery-ui
-//= require_tree .
+//= require hold_button
+//= require jquery.tablesorter.min
+//= require jquery.uitablefilter
+//= require jquery-ui-timepicker-addon

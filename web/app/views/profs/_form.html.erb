@@ -19,8 +19,8 @@
     <% end %>
   </table>
 
-  <p>
+  <div class="button-group">
     <%= f.submit submit_text, :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
     <%= link_to 'Cancel', profs_path, :class => "button" %>
-  </p>
+  </div>
 <% end %>

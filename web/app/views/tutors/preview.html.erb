@@ -1,8 +1,11 @@
-<%= render "shared/main_menu" %>
-<fieldset>
-  <h1>Previewing <%=@tutor.abbr_name %></h1>
-  <%= tutor_return_link %>
-  <%= tutor_edit_link %>
-</fieldset>
+<div>
+  <h2>Previewing <%=@tutor.abbr_name %></h2>
+  <div class="button-group">
+    <%= tutor_return_link %>
+    <%= tutor_edit_link %>
+  </div>
 
-<%= render :partial => "shared/preview_big", :locals => {:text => @tutor.comment} %>
+  <%= render "shared/preview_big", :text => @tutor.comment %>
+</div>
+
+

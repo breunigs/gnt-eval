@@ -20,31 +20,30 @@ function hack_line_offset_into_ace(editor) {
   var upd = editor.renderer.$gutterLayer.update.toString()
     // strip of function header and its braces
     .replace(/^[^{]+{/i, "").replace(/}[^}]*$/i, "")
-    // fix dom not being defined here (replace by Prototype
-    // function which does the same)
-    .replace("this.element = d.setInnerHtml(this.element, c.join(\"\"))",
-             "this.element.update(c.join(\"\"))" )
+    // fix dom not being defined here (replace by JQuery function which
+    // does the same). Looks so awkward so because some browsers insert
+    // spaces and some don’t (and regexes wouldn’t be better)
+    .replace("d.setInnerHtml", "this.element; $(this.element).html" )
+    .replace("this.element,", "")
     // actual payload: offset line numbers
-    .replace("a.lineHeight, \"px;'>\", e + 1);",
-             "a.lineHeight, \"px;'>\", e + 1 + line_offset_number);");
+    .replace("e + 1", "e + 1 + line_offset_number")
+    .replace("e+1", "e + 1 + line_offset_number")
   // convert into an actual function again and replace the original one
   editor.renderer.$gutterLayer.update  = new Function("a", upd);
 }
 
 window.onload = function() {
-  $("textarea").each(function(txt) {
-    if(txt.hasAttribute("readonly"))
-      return;
+  $("textarea").each(function(index, txt) {
+    txt = $(txt);
+    if(txt.attr("readonly")) return;
+
     // create DIV that will be used for ACE
-    var id = txt.readAttribute("id");
-    var d = document.createElement('div');
-    d.writeAttribute("id", id + "_ace_editor");
-    d.addClassName("ace_editor");
-    txt.insert({'after': d});
+    var id = txt.attr("id");
+    $('<div id="'+id+'_ace_editor" class="ace_editor"></div>').insertAfter(txt);
 
     // setup ACE
     var editor = ace.edit(id + "_ace_editor");
-    
+
     var texmode = require("ace/mode/" + ace_mode).Mode;
     editor.getSession().setMode(new texmode());
     editor.getSession().setUseWrapMode(true);
@@ -54,11 +53,11 @@ window.onload = function() {
     hack_line_offset_into_ace(editor);
 
     // copy textarea’s value to ACE
-    editor.getSession().setValue($F(id));
+    editor.getSession().setValue(txt.val());
 
     // add on submit listener to copy data back to textarea
-    Event.observe(txt.up("form"), 'submit', function(event) {
-      txt.value = editor.getSession().getValue();
+    txt.parents("form").submit(function() {
+      txt.val(editor.getSession().getValue());
     });
 
     // finally hide text area

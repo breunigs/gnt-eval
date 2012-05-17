@@ -8,6 +8,7 @@ Seee::Application.routes.draw do
   match "/tutors" => "tutors#index"
   resources :courses do
     resources :tutors
+    get "/tutors/:id/preview" => "tutors#preview"
     post "/add_prof" => "courses#add_prof"
   end
 
