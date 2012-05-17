@@ -2,6 +2,8 @@ source "http://rubygems.org"
 
 gem "rails",           "3.2.3"
 gem "jquery-rails"
+gem "jquery_datepicker"
+
 
 # See http://stackoverflow.com/questions/5769352/connect-to-sql-server-without-activerecord
 # why rails-dbi is required

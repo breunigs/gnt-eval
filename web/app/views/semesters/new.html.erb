@@ -1,38 +1,4 @@
-<fieldset>
-  <h1>New semester</h1>
-  <%= render "shared/error_messages", :model => @semester %>
-
-  <% form_for(@semester) do |f| %>
-    <table>
-      <tr style="background:#efefef">
-        <th>Firstday</th>
-        <td><%= f.date_select :firstday %></td>
-        <td>required</td>
-      </tr>
-
-      <tr>
-        <th>Lastday</th>
-        <td><%= f.date_select :lastday %></td>
-        <td>required</td>
-      </tr>
-
-      <tr style="background:#efefef">
-        <th><%= f.label :title %></th>
-        <td><%= f.text_field :title %></td>
-        <td>required</td>
-      </tr>
-
-      <tr>
-        <th><%= f.label :longtitle %></th>
-        <td><%= f.text_field :longtitle %></td>
-        <td>required</td>
-      </tr>
-    </table>
-    <p>
-      <%= f.submit "Create new semester", :disable_with => "Saving&hellip;" %>
-      <%= link_to 'Cancel', semesters_path %>
-    </p>
-  <% end %>
-
-
-</fieldset>
+<div class="group">
+  <h2>Create new <%=Semester.model_name.human%></h2>
+  <%= render "form" %>
+</div>

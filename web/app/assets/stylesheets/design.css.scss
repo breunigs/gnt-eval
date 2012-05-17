@@ -46,7 +46,8 @@ a {
   color:#FF3636;
   text-decoration:none;
   background:transparent;
-  &:hover:not(.button) {
+  cursor:pointer;
+  &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
     border-bottom:1px dotted #FF3636;
     text-shadow: 0 0 0.05em rgba(0, 0, 0, 0.1);
   }
@@ -105,6 +106,10 @@ input:not(.button), textarea, select {
   padding: 0.4em;
   height:1.08em;
   min-width:25em;
+}
+
+input[type=checkbox] + label {
+  cursor:pointer;
 }
 
 select {
@@ -186,4 +191,8 @@ span.error {
 
 .button {
   vertical-align:top;
+}
+
+.ui-datepicker {
+  box-shadow: $group_box_shadow;
 }

@@ -1,26 +1,33 @@
-<fieldset>
-  <h1>Listing semesters</h1>
-  <%= link_to 'New semester', new_semester_path %>
-<br />
-<br />
-<table>
-  <tr>
-    <th>Firstday</th>
-    <th>Lastday</th>
-    <th>Title</th>
-  </tr>
+<div class="group">
+  <h1>Available Terms</h1>
+  <%= link_to 'Create new term', new_semester_path, :class => "button" %>
+  <br />
+  <br />
+  <%=render "shared/tablemagic"%>
+  <table id="tablemagic" style="min-width:55em">
+    <thead>
+      <tr>
+        <th>Firstday</th>
+        <th>Lastday</th>
+        <th>Title</th>
+        <th>Longtitle</th>
+        <th colspan="2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% for semester in @semesters %>
+      <tr>
+        <td><%=h semester.firstday %></td>
+        <td><%=h semester.lastday %></td>
+        <td><%=h semester.title %></td>
+        <td><%=h semester.longtitle %></td>
+        <td><%= link_to "Edit #{semester.title}", edit_semester_path(semester) %></td>
+        <td><%= semester.critical ? "Critical" : (link_to 'Destroy', semester, :confirm => 'Are you sure?', :method => :delete) %></td>
 
-<% for semester in @semesters %>
-  <tr style="background: #<%= cycle('efefef', 'fff') %>">
-    <td><%=h semester.firstday %></td>
-    <td><%=h semester.lastday %></td>
-    <td><%=h semester.title %></td>
-    <td><%= link_to "Edit #{semester.title}", edit_semester_path(semester) %></td>
-    <td><%= semester.critical ? "Critical" : (link_to 'Destroy', semester, :confirm => 'Are you sure?', :method => :delete) %></td>
-
-  </tr>
-<% end %>
-</table>
-</fieldset>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>
 
 
