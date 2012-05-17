@@ -16,7 +16,9 @@ Seee::Application.routes.draw do
 
   resources :profs
 
-  resources :semesters
+  resources :semesters do
+    get "/courses" => "courses#index"
+  end
 
   root :to => "courses#index"
 

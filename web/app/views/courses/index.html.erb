@@ -23,11 +23,11 @@
 <%
 
 @courses.each do |course| %>
-  <tr class="<%= cycle('odd', 'even') %>">
+  <tr>
     <td><%= link_to course.title, course %></td>
     <td><%=course.students || "MISSING" %></td>
     <td><%=course.evaluator %></td>
-    <td><%=course.profs.collect { |p| p.fullname }.join(", ") %></td>
+    <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>
     <td><%=course.description %></td>
     <td><%=course.faculty.shortname %></td>
   </tr>

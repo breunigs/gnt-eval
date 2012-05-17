@@ -4,7 +4,7 @@ class CoursesController < ApplicationController
   # GET /courses
   # GET /courses.xml
   def index
-    @curr_sem ||= Semester.currently_active
+    @curr_sem ||= view_context.get_selected_semesters
     if @curr_sem.empty?
       flash[:error] = "Cannot list courses for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"
@@ -17,7 +17,7 @@ class CoursesController < ApplicationController
     end
 
     cond = "semester_id IN (?)"
-    vals = Semester.currently_active
+    vals = view_context.get_selected_semesters
 
     # filter by search term. If none given, search will return all
     # courses that match the additional filter criteria.
@@ -56,7 +56,7 @@ class CoursesController < ApplicationController
   # GET /courses/new.xml
   def new
     @course = Course.new
-    @curr_sem ||= Semester.currently_active
+    @curr_sem ||= view_context.get_selected_semesters
     if @curr_sem.empty?
       flash[:error] = "Cannot create a new course for current semester, as there isn’t any current semester. Please create a new one first."
       redirect_to :controller => "semesters", :action => "index"

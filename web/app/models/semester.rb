@@ -7,6 +7,7 @@ class Semester < ActiveRecord::Base
   has_many :courses, :inverse_of => :semester
   has_many :course_profs, :through => :courses
   has_many :tutors, :through => :courses
+  has_many :faculties, :through => :courses, :uniq => true
   validates_presence_of :title
   validates_presence_of :longtitle
 
