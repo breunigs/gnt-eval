@@ -263,7 +263,7 @@ class Question
         s << "\n\\printtutors{#{qq}}{#{@db_column}}\n"
 
       when "square" then
-        answers = @boxes.map{ |x| "[#{x.any_text(lang)}]" }
+        answers = @boxes.map{ |x| "[#{x ? x.any_text(lang) : ""}]" }
         # add dummy entry so the no answer checkbox in the first row is taken
         # into account. it will be removed later.
         answers.unshift(nil) if no_answer?
