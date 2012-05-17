@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%=APP_NAME%> // <%=controller.human_name %> // <%= controller.action_name.capitalize %> <%=yield(:title) %></title>
+  <title><%=APP_NAME%> // <%=controller.human_name %> // <%= params[:action].humanize %> <%= yield(:title) %></title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
@@ -12,11 +12,11 @@
   <div class="group">
     <div class="infobox">
       <% if @curr_sem.nil? %>
-        <span class="warning">No semester currently active. Change the dates or create a new one.</span>
+        <span class="warning">No active terms. Change the dates or create a new one.</span>
       <% end %>
 
       <% unless @curr_sem.nil? %>
-        <b>active semester</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
+        <b>active term</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
       <% end %>
 
       <% if @course && @course.semester && @course.semester.critical? %>
@@ -24,11 +24,11 @@
       <% end %>
 
       <% if (@course.nil? || @course.semester.nil?) && @curr_sem.any? { |c| c.critical? } %>
-        <span class="warning">Careful, current semester is critical.</span>
+        <span class="warning">Careful, current term is critical.</span>
       <% end %>
     </div>
 
-    <h1><%=controller.class.name.sub("Controller", "")%> // <%= controller.action_name.capitalize %> <%=yield(:title) %></h1>
+    <h1><%=controller.human_name%> // <%= params[:action].humanize %> <%=yield(:title) %></h1>
     <div class="button-group">
       <%= link_to 'Courses', 	  "/courses",   :class => "button big" %>
       <%= link_to 'Professors', "/profs",     :class => "button big" %>
@@ -42,7 +42,6 @@
 
 
   </div>
-<%#= render "shared/error_messages" %>
 
 <%= yield %>
 
