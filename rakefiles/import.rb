@@ -284,10 +284,10 @@ namespace :misc do
 
       # select smallest number. Try to guess based on tutor count, if
       # there are any tutors but no other data
-      students = [999, *dat.map { |d| d[:students] }].compact.min
-      students = 999 if students == 0
-      students_source = students == 999 ? "not known" : "from data"
-      if students == 999 && tutors.size >= 1
+      students = dat.map { |d| d[:students] }.compact.min
+      students = nil if students == 0
+      students_source = students ? "from data" : "not known"
+      if students.nil? && tutors.size >= 1
 	students = 30*tutors.size
 	students_source = "guessed from tutor count"
       end
@@ -323,7 +323,7 @@ namespace :misc do
       puts "About to import lecture with the following data:"
       puts "Title:     #{title}"
       puts "Lecturers: #{lects.map { |l| "#{l.fullname} (#{l.id})" }.join(", ")}"
-      puts "Students:  #{students} (#{students_source})"
+      puts "Students:  #{students ? students : "?"} (#{students_source})"
       puts "Form:      #{form.name} (#{form_source})"
       puts "Language:  #{lang}"
       puts "Tutors:    #{tutors.join(", ")}"

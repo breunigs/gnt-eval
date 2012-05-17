@@ -3,40 +3,34 @@
 
   function updateSelectors() {
     // gather data derivable from "semester"
-    var semSelect = document.getElementById("course_semester_id");
-    var semId = semSelect.options[semSelect.selectedIndex].value;
-    var sem = sfl[semId];
-    var availForms = sem["forms"];
+    // $("#course_form_id > option:selected").text()
+    var availForms = sfl[$("#course_semester_id").val()].forms;
 
     // find current settings of "form"
-    var formSelect = document.getElementById("course_form_id");
-    var formOldId = formSelect.options[formSelect.selectedIndex].value;
+    var formOldName = $("#course_form_id > option:selected").text();
 
     // rebuild forms drop down
-    formSelect.options.length = 0
-    for(var fid in availForms) {
-      var i = formSelect.options.length;
-      var name = availForms[fid]["name"];
-      formSelect.options[i]=new Option(name, fid, fid == formOldId);
-    }
+    var cfi = $("#course_form_id");
+    cfi.html("");
+    $.each(availForms, function (fid, data) {
+      cfi.append($("<option />").val(fid).text(data.name).attr("selected", formOldName == data.name));
+    });
 
     // gather data derivable from "form"
-    var formId = formSelect.options[formSelect.selectedIndex].value;
-    var form = availForms[formId];
-    var availLangs = form["langs"];
+    var langs = availForms[$("#course_form_id").val()].langs;
 
     // find current settings of "lang"
-    var langSelect = document.getElementById("course_language");
-    var langOld = langSelect.options[langSelect.selectedIndex].value;
+    var langOld = $("#course_language > option:selected").text();
 
     // rebuild langs drop down
-    langSelect.options.length = 0
-    for(var lid in availLangs) {
-      var i = langSelect.options.length;
-      var l = availLangs[lid];
-      langSelect.options[i]=new Option(l, l, l == langOld);
-    }
+    var cl = $("#course_language");
+    cl.html("");
+    $.each(langs, function (index, lang) {
+      cl.append($("<option />").val(lang).text(lang).attr("selected", langOld == lang));
+    });
   }
 
-  window.onload=updateSelectors;
+  $(document).ready(function() {
+    updateSelectors();
+  });
 </script>

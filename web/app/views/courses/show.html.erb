@@ -1,9 +1,7 @@
-<%= render "shared/main_menu" %>
-
-<fieldset>
-<h1><%=h @course.title %> (<%=h @course.semester.title %>)</h1>
+<div>
+<h2><%=h @course.title %> (<%=@course.semester.title %>)</h2>
 <%= courseLinksForShowPage %>
-</fieldset>
+</div>
 
 
 <fieldset>
@@ -11,16 +9,16 @@
   <table>
     <% for item in
       [
-        ["Semester",      h(@course.semester.title)],
-        ["Title",         h(@course.title)],
-        ["Students",      h("#{@course.students} (returned sheets: #{@course.returned_sheets})")],
+        ["Semester",      @course.semester.title],
+        ["Title",         @course.title],
+        ["Students",      "#{@course.students} (returned sheets: #{@course.returned_sheets})"],
         ["Form",          link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
-        ["Evaluated by",  h(@course.evaluator)],
-        ["FS Account",    h(@course.fscontact)],
+        ["Evaluated by",  @course.evaluator],
+        ["FS Account",    @course.fscontact],
         ["Email",         mail_to(@course.fs_contact_addresses)],
-        ["Description",   h(@course.description)],
-        ["Faculty",       h(@course.faculty.longname)],
-        ["Note",          h(@course.note)]
+        ["Description",   @course.description],
+        ["Faculty",       @course.faculty.longname],
+        ["Note",          @course.note]
       ]
     %>
       <tr style="background: #<%= cycle('efefef', 'fff') %>">

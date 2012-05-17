@@ -48,7 +48,7 @@ Beispiel-Seminar & Rebecca Schön & FS-Raum & $\Box$ \time{18}{15}-\time{18}{45}
   <%= d.times.collect { |x| x.time_magic_tex(courses[d.name]) }.join('\linebreak{}')
   %> &
   <%= courses[d.name].fs_contact_addresses_short %> &
-  <%= n=courses[d.name].students; n == 999 ? "" : n %>
+  <%= n=courses[d.name].students; n ? n : "" %>
   \\
 <% end %>
 \end{longtable}

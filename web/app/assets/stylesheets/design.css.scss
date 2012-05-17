@@ -268,7 +268,7 @@ body > div ~ div h1 {
   margin:1em 0 0.5em 0;
   padding-bottom:0.5em;
 
-  img {
+  img:not(.no-shadow) {
     border:1px solid #ccc;
     padding:1em;
     box-shadow: 0.1em 0.1em 0.2em rgba(0,0,0, 0.2);
@@ -277,4 +277,14 @@ body > div ~ div h1 {
   &.large {
     max-height:none;
   }
+}
+
+pre {
+  width:100%;
+  overflow-x:hidden;
+  overflow-y:auto;
+  white-space: pre-wrap;
+  max-height:35em;
+  border:1px solid #ccc;
+  padding:0.2em;
 }

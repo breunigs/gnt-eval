@@ -3,12 +3,12 @@
 module FormsHelper
   def nav_links
     s = []
-    s << link_to("Edit #{@form.name}", edit_form_path(@form)) unless @form.critical?
-    s << link_to('Show rendered preview', "#tex-image-preview")
-    s << link_to('Show TeX-Code used for preview', "#tex-code-preview")
-    s << link_to('Show Ruby-fied form code', "#ruby-yaml-code")
-    s << link_to('List all available forms', forms_path)
-    s.join(" | ")
+    s << link_to("Edit #{@form.name}", edit_form_path(@form), :class => "button primary") unless @form.critical?
+    s << link_to('Show rendered preview', "#tex-image-preview", :class => "button")
+    s << link_to('Show TeX-Code used for preview', "#tex-code-preview", :class => "button")
+    s << link_to('Show Ruby-fied form code', "#ruby-yaml-code", :class => "button")
+    s << link_to('List all available forms', forms_path, :class => "button")
+    (%(<div class="button-group">#{s.join}</div>)).html_safe
   end
 
   def form_tex_code(form)
@@ -72,7 +72,7 @@ module FormsHelper
     files = '"' + Dir.glob("#{path}*").join('" "') + '"'
     `rm -rf #{files}`
 
-    return exitcodes.total > 0, exitcodes, logger.gsub("\n", "<br/>"), base64
+    return exitcodes.total > 0, exitcodes, logger, base64
   end
 
   def texpreview(text = nil)

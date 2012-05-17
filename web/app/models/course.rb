@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-# -*- coding: utf-8 -*-
-
 require 'erb'
 
 # A course has many professors, belongs to a semester and has a lot of
@@ -14,7 +12,7 @@ class Course < ActiveRecord::Base
   has_many :profs, :through => :course_profs
   has_many :tutors, :inverse_of => :course
   validates_presence_of :semester_id, :title, :faculty, :language, :form
-  validates_numericality_of :students
+  validates_numericality_of :students, :allow_nil => true
 
   # finds all courses that contain all given keywords in their title.
   # The keywords must not appear in order. Only the first 10 keywords

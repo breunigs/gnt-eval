@@ -1,9 +1,9 @@
-<%#= render :partial => "shared/aceify_textareas", :locals => {:mode => "json" }  %>
+<%= render "shared/aceify_textareas", :mode => "json" %>
 <% content_for :script, javascript_include_tag("formeditor") %>
 
-<% form_for(@form) do |f| %>
-  <fieldset>
-    <h1>Editing form <%=h @form.name + ' in ' + @form.semester.title %></h1>
+<%= form_for(@form) do |f| %>
+  <div class="group">
+    <h2>Editing form <%=@form.name + ' in ' + @form.semester.title %></h2>
     <%= render "shared/error_messages", :model => @form %>
 
     <table class="large_text_area">
@@ -23,25 +23,25 @@
       <% end %>
     </table>
 
-
-    <p>
-      <%= f.submit "Update and Preview #{@form.name}", :disable_with => "Saving&hellip;" %>
-      <%= link_to 'Cancel', forms_path %>
-    </p>
-  </fieldset>
+    <div class="button-group">
+      <%= f.submit "Update and Preview #{@form.name}", :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
+      <%= link_to "Discard and Preview #{@form.name}", @form, :class => "button" %>
+      <%= link_to "Show all forms", forms_path, :class => "button" %>
+    </div>
+  </div>
 <% end %>
 
-<fieldset>
-  <legend>js-yaml playground</legend>
+<div>
+  <h3>js-yaml playground</h3>
   Currently this is not impressive at all as it displays (nearly) the same text as above. However, it has been a proper JS-object in between which can be more easily used to create a form designer. Until that happens you can use it as a <b>debugger</b>.
   <textarea readonly="readonly" id="result" style="width:100%;min-height:10em"></textarea>
-</fieldset>
+</div>
 
-<fieldset>
+<div>
   <div id="form_editor">
 
   </div>
-</fieldset>
+</div>
 
 <script type="text/javascript">
   /*try {
@@ -50,12 +50,12 @@
   } catch (err) {
     document.getElementById('result').value = err.toString();
   }*/
-  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES) %>;
+  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES).html_safe %>;
   var x = new FormEditor();
 </script>
 
-<fieldset>
-  <legend>Some helpful comments</legend>
+<div>
+  <h3>Some helpful comments</h3>
   <ul>
     <li>In questions and their answers use \linebreak to force one and avoid \\ or \newline altogether.</li>
     <li>If you want to prevent automatic line breaks place the contents inside an \mbox{}. Be aware that this might lead to texts overlapping each other.</li>
@@ -70,4 +70,4 @@
       <pre>text: Oliver ist doof</pre>
     In many cases the software will simply choose the right snippet.
   </ul>
-</fieldset>
+</div>
