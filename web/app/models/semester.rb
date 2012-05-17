@@ -3,10 +3,10 @@
 # A semester is a period of time, in which courses are held --
 # typically a semester. A semester has many courses.
 class Semester < ActiveRecord::Base
-  has_many :courses
+  has_many :forms, :inverse_of => :semester
+  has_many :courses, :inverse_of => :semester
   has_many :course_profs, :through => :courses
   has_many :tutors, :through => :courses
-  has_many :forms
   validates_presence_of :title
   validates_presence_of :longtitle
 

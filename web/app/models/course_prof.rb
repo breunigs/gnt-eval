@@ -2,9 +2,9 @@
 
 
 class CourseProf < ActiveRecord::Base
-  belongs_to :course
-  belongs_to :prof
-  has_many :c_pics
+  belongs_to :course, :inverse_of => :course_profs
+  belongs_to :prof, :inverse_of => :course_profs
+  has_many :c_pics, :inverse_of => :course_prof
   # shortcuts
   has_one :form, :through => :course
   has_one :faculty, :through => :course

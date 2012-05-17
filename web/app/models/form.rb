@@ -5,8 +5,8 @@ require 'pp'
 require 'stringio'
 
 class Form < ActiveRecord::Base
-  belongs_to :semester
-  has_many :courses
+  belongs_to :semester, :inverse_of => :forms
+  has_many :courses, :inverse_of => :form
   validates_presence_of :semester, :name, :content
 
   alias_attribute :title, :name

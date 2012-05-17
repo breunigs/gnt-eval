@@ -2,7 +2,7 @@
 
 # This means physical persons. They have many courses.
 class Prof < ActiveRecord::Base
-  has_many :course_profs
+  has_many :course_profs, :inverse_of => :prof
   has_many :courses, :through => :course_profs
   validates_presence_of :firstname, :surname, :gender
   validates_uniqueness_of :email, :allow_nil => true

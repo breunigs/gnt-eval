@@ -7,12 +7,12 @@ require 'erb'
 # A course has many professors, belongs to a semester and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
-  belongs_to :semester
-  belongs_to :faculty
-  belongs_to :form
-  has_many :course_profs
+  belongs_to :semester, :inverse_of => :courses
+  belongs_to :faculty, :inverse_of => :courses
+  belongs_to :form, :inverse_of => :courses
+  has_many :course_profs, :inverse_of => :course
   has_many :profs, :through => :course_profs
-  has_many :tutors
+  has_many :tutors, :inverse_of => :course
   validates_presence_of :semester_id, :title, :faculty, :language, :form
   validates_numericality_of :students
 

@@ -2,8 +2,8 @@
 
 # tutors belong to a course.
 class Tutor < ActiveRecord::Base
-  belongs_to :course
-  has_many :pics
+  belongs_to :course, :inverse_of => :tutors
+  has_many :pics, :inverse_of => :tutor
   has_one :form, :through => :course
   has_one :faculty, :through => :course
   has_one :semester, :through => :course
