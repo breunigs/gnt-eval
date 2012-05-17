@@ -2,25 +2,30 @@
   <h2>Available Faculties</h2>
   <%= link_to 'create new faculty', new_faculty_path, :class => "button" %> <br/><br/>
 
-
-  <table>
-    <tr>
-      <th>Short</th>
-      <th>Longname</th>
-      <th colspan="3">Destroy?</th>
-    </tr>
-  <% for faculty in @faculties.sort { |x,y| x.shortname <=> y.shortname } %>
-    <tr>
-      <td><%= link_to faculty.shortname, edit_faculty_path(faculty) %></td>
-      <td><%= link_to faculty.longname,  edit_faculty_path(faculty) %></td>
-      <td>
-        <% if faculty.critical? %>
-          Has associated courses. Cannot destroy.
-        <% else %>
-          <%= link_to 'Destroy', faculty, :confirm => "Do you really want to DESTROY the faculty of #{faculty.longname}?", :method => :delete %>
-        <% end %>
-      </td>
-    </tr>
-  <% end %>
+  <%=render "shared/tablemagic" %>
+  <table id="tablemagic" style="min-width:60em">
+    <thead>
+      <tr>
+        <th>Short</th>
+        <th>Longname</th>
+        <th colspan="2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% for faculty in @faculties.sort { |x,y| x.shortname <=> y.shortname } %>
+      <tr>
+        <td><%=faculty.shortname%></td>
+        <td><%=faculty.longname%></td>
+        <td><%= link_to "Edit #{faculty.longname}",  edit_faculty_path(faculty) %></td>
+        <td>
+          <% if faculty.critical? %>
+            Has associated courses. Cannot destroy.
+          <% else %>
+            <%= link_to 'Destroy', faculty, :confirm => "Do you really want to DESTROY the faculty of #{faculty.longname}?", :method => :delete %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </tbody>
   </table>
 </div>

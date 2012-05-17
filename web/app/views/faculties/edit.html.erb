@@ -1,7 +1,7 @@
 <% form_for(@faculty) do |f| %>
 
   <fieldset>
-    <h1>Editing faculty of <%=h @faculty.longname %></h1>
+    <h1></h1>
     <%= render "shared/error_messages", :model => @faculty %>
 
    <table>
@@ -26,3 +26,9 @@
     </p>
   </fieldset>
 <% end %>
+
+
+<div class="group">
+  <h2>Editing <%=@faculty.longname %></h2>
+  <%= render "form" %>
+</div>

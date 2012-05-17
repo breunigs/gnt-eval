@@ -1,0 +1,25 @@
+<%= form_for(@faculty) do |f| %>
+
+  <%= render "shared/error_messages", :model => @faculty %>
+  <table>
+    <% for item in
+      [
+        [f.label(:shortname),   f.text_field(:shortname), 'required, short identifier to save space, only used internally'],
+        [f.label(:longname),    f.text_field(:longname),  'required, should be the full official name']
+      ]
+    %>
+      <tr>
+        <th><%= item.shift %></th>
+        <th><%= item.shift %></th>
+        <% for data in item do %> <td><%=h data %></td> <% end %>
+      </tr>
+    <% end %>
+  </table>
+
+
+  <p>
+    <% text = {"edit" => "Save Changes", "new" => "Create new #{controller.human_name}"}[controller.action_name] %>
+    <%= f.submit text, :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
+    <%= link_to 'Cancel', faculties_path, :class => "button" %>
+  </p>
+<% end %>

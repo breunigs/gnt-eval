@@ -21,7 +21,7 @@
   </table>
 
   <p>
-    <% text = {"edit" => "Save Changes", "new" => "Create new #{Semester.model_name.human}"}[controller.action_name] %>
+    <% text = {"edit" => "Save Changes", "new" => "Create new #{controller.human_name}"}[controller.action_name] %>
     <%= f.submit text, :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
     <%= link_to 'Cancel', semesters_path, :class => "button" %>
   </p>
