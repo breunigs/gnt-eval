@@ -17,11 +17,11 @@ class CoursesController < ApplicationController
     end
 
     cond = "semester_id IN (?)"
-    vals = view_context.get_selected_semesters
+    vals = view_context.get_selected_semesters.map { |s| s.id }
 
     # filter by search term. If none given, search will return all
     # courses that match the additional filter criteria.
-    @courses = Course.search(params[:search], [:profs, :faculty], [cond], [vals])
+    @courses = Course.search(params[:search], [:profs, :faculty], [cond], [vals], [:faculty_id, :title])
 
     # if a search was performed and there is exactly one result go to it
     # directly instead of listing it

@@ -36,4 +36,7 @@ Seee::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
+
+  # Turn off asset serve logging
+  config.assets.logger = false
 end

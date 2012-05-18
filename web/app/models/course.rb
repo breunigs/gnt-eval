@@ -22,27 +22,29 @@ class Course < ActiveRecord::Base
   # the inc variable. An array is expected. Use cond and vals to specify
   # additional search criteria. For example, to limit to certain
   # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
-  def self.search(term, inc = [], cond = [], vals = [])
-    return Course.filter(inc, cond, vals) if term.nil?
+  # You can also sort by passing an array of attributes to sorty by.
+  def self.search(term, inc = [], cond = [], vals = [], order = nil)
+    return Course.filter(inc, cond, vals, order) if term.nil?
     c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
-    return Course.filter(inc, cond, vals) if c.nil? || c.empty?
+    return Course.filter(inc, cond, vals, order) if c.nil? || c.empty?
     cols = ["evaluator", "title", "description", "profs.surname", "profs.firstname"]
     qry = case ActiveRecord::Base.configurations[Rails.env]['adapter']
-      when "mysql"      then "CONCAT_WS(' ', #{cols*","}) LIKE ?"
+      when /^mysql/     then "CONCAT_WS(' ', #{cols*","}) LIKE ?"
       when "postgresql" then "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
       # SQL standard as implemented by… nobody
       else "(#{cols.join(" || ' ' || ")}) LIKE ?"
     end
     cond += [qry]*c.size
     vals += c
-    Course.filter(inc, cond, vals)
+    Course.filter(inc, cond, vals, order)
   end
 
   # filters the courses by the given SQL-statement in cond and the
   # values corresponding to the ? in vals. Specify an array of classes
-  # to load as well in inc.
-  def self.filter(inc, cond, vals)
-    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals])
+  # to load as well in inc. Pass array of variables to sort by, if
+  # wished.
+  def self.filter(inc, cond, vals, order = nil)
+    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals], :order => order)
   end
 
   # Create an alias for this rails variable
