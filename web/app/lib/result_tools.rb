@@ -472,10 +472,10 @@ class ResultTools
   end
 
   def warn(text)
-    if logger
-      logger.warn text
+    if defined?(Rails) && Rails.logger
+      Rails.logger.warn text
     else
-      warn text
+      Kernel.warn text
     end
   end
 end
