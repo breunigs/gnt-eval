@@ -1,3 +1,17 @@
+/* fix some settings so the buttons integrate better into the rest of
+ * the project */
+
+.button {
+  vertical-align:top;
+  padding: 0.4rem 0.8rem !important;
+}
+
+.button:not(.big) {
+  display:inline-block;
+}
+
+
+
 .button:hover,
 .button:focus,
 .button:active,
