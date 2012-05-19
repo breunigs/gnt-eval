@@ -7,11 +7,13 @@ class FormsControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:forms)
+    assert_select "h1", 1
   end
 
   test "should get new" do
     get :new
     assert_response :success
+    assert_select "h1", 1
   end
 
   test "should create form" do
@@ -29,11 +31,13 @@ class FormsControllerTest < ActionController::TestCase
   test "should show form" do
     get :show, :id => forms(:someFormForST).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   test "should get edit" do
     get :edit, :id => forms(:someFormForWT).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   test "should update form" do

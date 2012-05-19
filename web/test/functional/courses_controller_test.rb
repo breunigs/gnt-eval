@@ -7,11 +7,19 @@ class CoursesControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:courses)
+    assert_select "h1", 1
   end
 
   def test_should_get_new
     get :new
     assert_response :success
+    assert_select "h1", 1
+  end
+
+  def test_should_get_preview
+    get :preview
+    assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_create_course
@@ -32,11 +40,13 @@ class CoursesControllerTest < ActionController::TestCase
   def test_should_show_course
     get :show, :id => courses(:mathSummerCourse).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_get_edit
     get :edit, :id => courses(:mathSummerCourse).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_update_course

@@ -7,11 +7,13 @@ class ProfsControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:profs)
+    assert_select "h1", 1
   end
 
   def test_should_get_new
     get :new
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_create_prof
@@ -30,6 +32,7 @@ class ProfsControllerTest < ActionController::TestCase
   def test_should_get_edit
     get :edit, :id => profs(:rebecca).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_update_prof

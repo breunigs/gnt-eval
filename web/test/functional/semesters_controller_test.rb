@@ -7,11 +7,13 @@ class SemestersControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:semesters)
+    assert_select "h1", 1
   end
 
   def test_should_get_new
     get :new
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_create_semester
@@ -31,6 +33,7 @@ class SemestersControllerTest < ActionController::TestCase
   def test_should_get_edit
     get :edit, :id => semesters(:winterTerm).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_update_semester

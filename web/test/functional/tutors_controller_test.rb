@@ -7,6 +7,7 @@ class TutorsControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:tutors)
+    assert_select "h1", 1
   end
 
   def test_should_create_one_tutor
@@ -40,11 +41,13 @@ class TutorsControllerTest < ActionController::TestCase
   def test_should_show_tutor
     get :show, :course_id => tutors(:paul).course_id, :id => tutors(:paul).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_get_edit
     get :edit, :course_id => tutors(:oliver).course_id, :id => tutors(:oliver).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   def test_should_update_tutor

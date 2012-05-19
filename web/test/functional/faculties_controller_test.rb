@@ -7,11 +7,13 @@ class FacultiesControllerTest < ActionController::TestCase
     get :index
     assert_response :success
     assert_not_nil assigns(:faculties)
+    assert_select "h1", 1
   end
 
   test "should get new" do
     get :new
     assert_response :success
+    assert_select "h1", 1
   end
 
   test "should create faculty" do
@@ -28,6 +30,7 @@ class FacultiesControllerTest < ActionController::TestCase
   test "should get edit" do
     get :edit, :id => faculties(:physFac).id
     assert_response :success
+    assert_select "h1", 1
   end
 
   test "should update faculty" do
