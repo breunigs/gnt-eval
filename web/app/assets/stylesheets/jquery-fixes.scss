@@ -1,0 +1,18 @@
+input + button.ui-button {
+  height:2.1rem;
+  border-left:0;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+}
+
+input.ui-corner-left {
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+}
+
+/** limit height of drop down boxes **/
+.ui-menu {
+  max-height:15em;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
