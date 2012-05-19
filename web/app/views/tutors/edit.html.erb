@@ -39,7 +39,7 @@
 
   <div class="group">
     <div class="button-group">
-      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;", :class => "button primary" %>
+      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
       <%= link_to "Cancel", @tutor.course, :class => "button" %>
     </div>
   </div>

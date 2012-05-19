@@ -38,17 +38,18 @@ module CoursesHelper
   end
 
   def courseShowLink
-    link_to("Show '#{@course.title}'", course_path(@course))
+    link_to("Show '#{@course.title}'", course_path(@course), :class => "button")
   end
 
   def courseEditLink
-    link_to("Edit '#{@course.title}'", edit_course_path(@course))
+    link_to("Edit '#{@course.title}'", edit_course_path(@course), :class => "button")
   end
 
   def courseDestroyLink
     link_to_unless(@course.critical?, 'Destroy course', @course, \
       :confirm => "Really destroy course '#{@course.title}'?", \
-      :method => :delete) do
+      :method => :delete,
+      :class => "button") do
       "⚠ Course is critical"
     end
   end
@@ -57,7 +58,8 @@ module CoursesHelper
     d = []
     d << courseEditLink
     d << courseDestroyLink unless @course.semester.critical?
-    d.join(" | ").html_safe
+    d << link_to("List courses", semester_courses_path(@course.semester), :class => "button")
+    %(<div class="button-group">#{d*""}</div>).html_safe
   end
 
   def comment_image_link

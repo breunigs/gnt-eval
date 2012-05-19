@@ -17,3 +17,4 @@
 //= require jquery.tablesorter.min
 //= require jquery.uitablefilter
 //= require jquery-ui-timepicker-addon
+//= require combobox

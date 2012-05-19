@@ -19,19 +19,18 @@
     <% end %>
   </tr>
   </thead>
-
-<%
-
-@courses.each do |course| %>
-  <tr>
-    <td><%= link_to course.title, course %></td>
-    <td><%=course.students || "MISSING" %></td>
-    <td><%=course.evaluator %></td>
-    <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>
-    <td><%=course.description %></td>
-    <td><%=course.faculty.shortname %></td>
-  </tr>
-<% end %>
+  <tbody>
+    <% @courses.each do |course| %>
+      <tr>
+        <td><%= link_to course.title.truncate(50), course, :title => course.title %></td>
+        <td><%=course.students || "MISSING" %></td>
+        <td><%=course.evaluator %></td>
+        <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>
+        <td><%=course.description %></td>
+        <td><%=course.faculty.shortname %></td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>
 
 <div>

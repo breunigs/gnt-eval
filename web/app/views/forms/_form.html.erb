@@ -1,0 +1,81 @@
+<%= render "shared/aceify_textareas", :mode => "json" %>
+<% content_for :script, javascript_include_tag("formeditor")
+is_edit = controller.action_name == "edit"
+is_new = !is_edit
+%>
+
+<%= form_for(@form) do |f| %>
+  <div class="group">
+    <% if is_edit %>
+      <h2>Editing form <%=@form.name + ' in ' + @form.semester.title %></h2>
+    <% else %>
+      <h2>Creating new form</h2>
+    <% end %>
+    <%= render "shared/error_messages", :model => @form %>
+
+    <table class="large_text_area">
+      <% for item in
+        [
+          [f.label(:semester_id),  collection_select(:form, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}), "required"],
+          [f.label(:name),      f.text_field(:name),     "required"],
+          [f.label(:content),   f.text_area(:content),   "required"],
+
+        ]
+      %>
+        <tr style="background: #<%= cycle('efefef', 'fff') %>">
+          <th><%= item.shift %></th>
+          <td><%= item.shift %></td>
+          <% for data in item do %> <td><%=h data %></td> <% end %>
+        </tr>
+      <% end %>
+    </table>
+
+    <div class="button-group">
+      <%= f.submit (is_edit ? "Update and Preview #{@form.name}" : "Save and Preview"), :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
+      <%= link_to "Discard and Preview #{@form.name}", @form, :class => "button" unless is_new %>
+      <%= link_to "Discard and show all forms", forms_path, :class => "button" %>
+    </div>
+  </div>
+<% end %>
+
+
+<div>
+  <h3>js-yaml playground</h3>
+  Currently this is not impressive at all as it displays (nearly) the same text as above. However, it has been a proper JS-object in between which can be more easily used to create a form designer. Until that happens you can use it as a <b>debugger</b>.
+  <textarea readonly="readonly" id="result" style="width:100%;min-height:10em"></textarea>
+</div>
+
+<div>
+  <div id="form_editor">
+
+  </div>
+</div>
+
+<script type="text/javascript">
+  /*try {
+    str = document.getElementById('form_content').value;
+    document.getElementById('result').value = json2yaml(jsyaml.load(str));
+  } catch (err) {
+    document.getElementById('result').value = err.toString();
+  }*/
+  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES).html_safe %>;
+  var x = new FormEditor();
+</script>
+
+<div>
+  <h3>Some helpful comments</h3>
+  <ul>
+    <li>In questions and their answers use \linebreak to force one and avoid \\ or \newline altogether.</li>
+    <li>If you want to prevent automatic line breaks place the contents inside an \mbox{}. Be aware that this might lead to texts overlapping each other.</li>
+    <li>If TeX fails with error messages that are clearly not related to your code: we are not sure why they appear, but they may usually be resolved by inserting page breaks manually or by fiddling with \vspaces.
+    <li>Questions may need to be repeated for each lecturer or tutor while others may be valid for the whole course. Think of a course with two lecturers and two tutors. Do you like the course’s title? → course; Do you like «lecturer»? → lecturer; Do you like «tutor»? → tutor.</li>
+    <li>Use \lect to refer to the lecturer’s full name and \lectLast to refer to his/her/its last name. NOTE: Only valid within repeat_for = lecturer</li>
+    <li>Texts may be translated like this, e.g.
+      <pre>text:
+  :de: Oliver ist doof
+  :en: Oliver is daft</pre>
+    or not at all:
+      <pre>text: Oliver ist doof</pre>
+    In many cases the software will simply choose the right snippet.
+  </ul>
+</div>

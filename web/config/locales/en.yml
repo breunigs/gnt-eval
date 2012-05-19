@@ -70,6 +70,10 @@ en:
   attributes:
     email: Mail
     abbr_name: Abbreviated Name
+    semester: Term
+    students: "# Students"
+    evaluator: "Evaluated By"
+    fscontact: "Account Name"
 
   activerecord:
     # rename the models

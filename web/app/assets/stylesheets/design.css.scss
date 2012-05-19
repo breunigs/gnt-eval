@@ -1,3 +1,15 @@
+/* ensures the contents of the element will be cleared after the element.
+   Uses content:after rules. */
+@mixin clear-after {
+  &:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+  }
+}
+
+
 * {
   padding:0;
   border:0;
@@ -5,6 +17,7 @@
   margin:0;
   color:#000;
   font-size:13px;
+  outline-style: none;
 }
 
 body {
@@ -44,12 +57,7 @@ h3 {
     margin-right: 0.3em;
     font-style:normal;
   }
-  &:after {
-    content: "";
-    display: block;
-    height: 0;
-    clear: both;
-  }
+  @include clear-after;
 }
 
 .warning {
@@ -83,28 +91,25 @@ h3 {
 }
 
 
-
 body > div, div.group {
   padding:1rem;
   margin:1rem;
   background:#fff;
   border: $group_border;
   box-shadow: $group_box_shadow;
-  > div:not(.button-group) {
+  /* automatically add spacing for DIVs. Unless they form a button group
+   * or if they are the group’s first element. */
+  > div:not(.button-group):not(:first-of-type) {
     margin-top:1em;
   }
+
+  @include clear-after;
 }
 
-a {
-  color:#FF3636;
-  text-decoration:none;
-  background:transparent;
-  cursor:pointer;
-  &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
-    border-bottom:1px dotted #FF3636;
-    text-shadow: 0 0 0.05em rgba(0, 0, 0, 0.1);
-  }
+.hold_button input[disabled], .hold_button input[disabled]:hover {
+  text-decoration: line-through;
 }
+
 
 table {
   margin-left:-1px; /* browsers insert 1px between thead/tbody and the table tag */
@@ -159,8 +164,12 @@ input:not(.button), textarea, select {
   border: 1px solid #D4D4D4;
   border-radius: 0.2em 0.2em 0.2em 0.2em;
   padding: 0.4em;
-  height:1.12em;
+  height:1.1em;
+  font-size:1rem;
   min-width:25em;
+  &:focus, &:active {
+    border:1px solid #999;
+  }
 }
 
 input[type=checkbox] + label {
@@ -214,29 +223,6 @@ table.large_text_area td > div, table.large_text_area td textarea {
   min-height:25em;
 }
 
-.hold_button input {
-  background: transparent;
-  border:0;
-  cursor: pointer;
-  color:#000;
-  text-decoration: underline;
-  display:inline;
-  padding:0;
-}
-
-
-.hold_button input:hover {
-  background: #000;
-  color:#fff;
-}
-
-.hold_button input[disabled], .hold_button input[disabled]:hover {
-  background: transparent;
-  cursor: text;
-  color:#333;
-  text-decoration: line-through;
-}
-
 .ace_editor {
   position:relative !important;
   height: 340px;
@@ -252,13 +238,30 @@ span.error {
   vertical-align:top;
 }
 
-.ui-datepicker {
-  box-shadow: $group_box_shadow;
+a, .hold_button input {
+  color:#FF3636;
+  text-decoration:none;
+  background:transparent;
+  cursor:pointer;
+  &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
+    border-bottom:1px dotted #FF3636;
+    text-shadow: 0 0 0.05em rgba(0, 0, 0, 0.1);
+  }
 }
 
-/* DEBUG */
-body > div ~ div h1 {
-  color: #ffff00;
+.hold_button input {
+  border:0;
+  border-bottom:1px dotted transparent;
+  display:inline;
+  height:auto;
+  width:auto;
+  padding:0;
+  min-width:0em;
+  border-radius:0;
+}
+
+.ui-datepicker {
+  box-shadow: $group_box_shadow;
 }
 
 .preview {

@@ -1,114 +1,109 @@
 <div>
-<h2><%=h @course.title %> (<%=@course.semester.title %>)</h2>
-<%= courseLinksForShowPage %>
-</div>
+  <h2><%=@course.title %> (<%=@course.semester.title %>)</h2>
+  <%= courseLinksForShowPage %>
+  <br style="clear:both"/>
 
-
-<fieldset>
-  <legend>main details</legend>
-  <table>
-    <% for item in
-      [
-        ["Semester",      @course.semester.title],
-        ["Title",         @course.title],
-        ["Students",      "#{@course.students} (returned sheets: #{@course.returned_sheets})"],
-        ["Form",          link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
-        ["Evaluated by",  @course.evaluator],
-        ["FS Account",    @course.fscontact],
-        ["Email",         mail_to(@course.fs_contact_addresses)],
-        ["Description",   @course.description],
-        ["Faculty",       @course.faculty.longname],
-        ["Note",          @course.note]
-      ]
-    %>
-      <tr style="background: #<%= cycle('efefef', 'fff') %>">
-        <th><%=h item.shift %></th>
-        <% for data in item do %> <td><%=data %></td> <% end %>
+  <table style="float:left;min-width:50%;">
+    <tr><th colspan="2" style="font-size:120%">master data</th></tr>
+    <% for item in [
+        [:title,         @course.title],
+        [:semester,      link_to(@course.semester.title, edit_semester_path(@course.semester))],
+        [:faculty,       link_to(@course.faculty.longname, edit_faculty_path(@course.faculty))],
+        [:form,          link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
+        [:students,      "#{@course.students} (returned sheets: #{@course.returned_sheets})"],
+        [:note,          @course.note]] %>
+      <tr>
+        <th><%=Course.human_attribute_name(item.shift) %></th>
+        <% item.each { |d| %> <td><%=d %></td> <% } %>
       </tr>
     <% end %>
   </table>
-</fieldset>
 
-<fieldset>
-  <legend>Comments Preview</legend>
-  <div class="preview">
-    <%= render :partial => "shared/preview", :locals => { :text => @course.summary } %>
-  </div>
-  <p><%= link_to 'Show preview in full', { :action => 'preview', :id => @course} %></p>
-</fieldset>
+  <table style="float:left;margin-left:2em;">
+    <tr><th colspan="2" style="font-size:120%">adminstrative data</th></tr>
+    <% for item in [
+        [:evaluator,      @course.evaluator],
+        [:fscontact,      @course.fscontact],
+        [:email,          mail_to(@course.fs_contact_addresses)],
+        [:description,    @course.description]] %>
+      <tr>
+        <th><%=Course.human_attribute_name(item.shift) %></th>
+        <% item.each { |d| %> <td><%=d %></td> <% } %>
+      </tr>
+    <% end %>
+  </table>
+</div>
 
-<fieldset <%=@course.profs.empty? ? "class=\"attention\"" : "" %>>
-  <legend>Profs</legend>
+<div>
+<%= render "shared/preview_big", :text => @course.summary %>
+<%= link_to 'Show preview in full', course_preview_path(@course), :class => "button" %>
+</div>
+
+
+<div>
+  <h3>Professors</h3>
+  <% if @course.profs.empty? %><span class="warning">No professors have been specified so far. The course cannot be evaluated and no sheets will be printed until at least one professor is added.</span><% end %>
+
   <table>
-    <tr class="<%= cycle('even', 'odd') %>">
+    <tr>
       <th>Name</th>
-      <th>Email</th>
-      <th>Barcode</th>
-      <th>manual print</th>
+      <th>Mail</th>
+      <th colspan="<%=@course.critical? ? 1 : 2%>">Actions</th>
     </tr>
     <% @course.course_profs.each do |cp| %>
-    <tr class="<%= cycle('even', 'odd') %>">
-      <td><%= link_to cp.prof.fullname, {:controller => "profs", :action => "edit", :id => cp.prof } %></td>
-      <td><%=h cp.prof.email %></td>
-      <td><%=h cp.id %></td>
+    <tr>
+      <td><%=link_to cp.prof.fullname, edit_prof_path(cp.prof) %></td>
+      <td><%=cp.prof.email %></td>
       <td>
         <% if @course.returned_sheets? %>
           <%="Can’t print, has returned sheets."%>
         <% else %>
-          <% url = url_for({ :controller => "course_profs", :action => 'print', :id => cp }) %>
-          <%= render :partial => 'shared/hold_button', :locals => {:url => url, :name => "print (evil)", :id => "print#{cp.id}"} %>
+          <%= render 'shared/hold_button', :url => print_course_prof_path(cp), :name => "print (evil)", :id => "print#{cp.id}" %>
         <% end %>
       </td>
       <% unless @course.critical? %>
-        <td style="padding-left:4em"><%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => cp.prof},
-          :confirm => "Really remove #{cp.prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %></td>
+        <td>
+          <%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => cp.prof},
+          :confirm => "Really remove #{cp.prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %>
+        </td>
       <% end %>
     </tr>
     <% end %>
   </table>
 
-  <p>
-    <form method="post" action="<%=course_add_prof_path(@course)%>">
-    <input type="hidden" value="<%= form_authenticity_token %>" style="display:none"/>
-    <%= collection_select(:courses, :profs, Prof.find(:all, :order => 'surname'), :id, :surnamefirst) %>
-    <%= submit_tag 'Add' %>
-    <%= link_to 'Create New Prof', new_prof_path %>
-    </form>
-  </p>
-</fieldset>
+  <%=render "add_prof"%>
+</div>
 
 
-<fieldset>
-  <legend>Tutors</legend>
+<div>
+  <h3>Tutors</h3>
   <table>
     <tr>
       <th>Name</th>
       <th># Comments</th>
       <th># Sheets</th>
-      <th></th>
+      <th>Actions</th>
     </tr>
     <% for tutor in @course.tutors %>
-    <tr style="background: #<%= cycle('efefef', 'fff') %>">
+    <tr>
       <td><%= link_to tutor.abbr_name, edit_course_tutor_path(@course, tutor) %></td>
-      <td style="text-align:center"><%= tutor.pics.count %></td>
-      <td style="text-align:center"><%= tutor.returned_sheets %></td>
+      <td style="text-align:right"><%= tutor.pics.count %></td>
+      <td style="text-align:right"><%= tutor.returned_sheets %></td>
+      <td>
       <% unless tutor.critical? %>
-        <td><%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
+        <%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
           :course_id => @course.id, :action => 'destroy'},
           :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
           :method => :delete %></td>
-      <% else %>
-        <td title="Tutor is critical because the course is critical OR the course has returned sheets">⚠</td>
       <% end %>
+      </td>
     </tr>
     <% end %>
   </table>
 
-  <p>
-    <%= render :partial => @tutor = Tutor.new, :locals => { :button_name => 'Add Tutor(s)' } %>
-  </p>
-</fieldset>
+    <%= render @tutor = Tutor.new, :button_name => 'Add Tutor(s)' %>
+</div>
 
-<fieldset>
-<%= courseLinksForShowPage %>
-</fieldset>
+<div>
+  <%= courseLinksForShowPage %>
+</div>
