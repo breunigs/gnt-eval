@@ -19,9 +19,12 @@ class CourseProfsController < ApplicationController
       make_pdf_for(@cp, pdf_path)
       # print!
       p = Seee::Config.application_paths[:print]
-      p << " --non-interactive \""
+      p << %( --simulate ) if ENV['RAILS_ENV'] == "test" # prevent actual printing in test mode
+      p << %( --non-interactive ")
       p << File.join(pdf_path, @cp.get_filename)
-      p << ".pdf\""
+      p << %(.pdf")
+      logger.debug "Command line used for printing:"
+      logger.debug p
       `#{p}`
 
       if $?.exitstatus == 0
