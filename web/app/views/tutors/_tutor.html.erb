@@ -1,5 +1,21 @@
 <%= form_for([@course, @tutor]) do |f| %>
   <% a = Tutor.human_attribute_name(:abbr_name) %>
-    <%= f.text_field :abbr_name, :placeholder => "#{a}, #{a}, …" %>
-    <%= f.submit button_name, :class=>"button primary" %>
+  <%= f.text_field :abbr_name, :placeholder => "#{a}, #{a}, …" %>
+  <%= f.submit button_name, :class=>"button primary" %>
+  <% content_for :script do %>
+    <script>
+      $(document).ready(function() {
+        $("#new_tutor").submit(function(e) {
+          if(!$("#tutor_abbr_name").val())
+            e.preventDefault();
+        });
+
+        $("#tutor_abbr_name").bind("blur change keydown", function() {
+          var l = $(this).val().split(",").length;
+          var s = l > 1 ? "Add "+l+" Tutors" : "Add Tutor";
+          $("#new_tutor").find("[type=submit]").val(s);
+        }).blur();
+      });
+    </script>
+  <% end %>
 <% end %>

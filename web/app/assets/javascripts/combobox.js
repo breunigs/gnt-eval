@@ -10,6 +10,7 @@ $.widget( "ui.combobox", {
       value = selected.val() ? selected.text() : "";
     var input = $( "<input />" )
       .insertAfter(select)
+      .attr("placeholder", "Search or select…")
       .val( value )
       .autocomplete({
         delay: 50,

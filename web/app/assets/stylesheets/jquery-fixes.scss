@@ -16,3 +16,19 @@ input.ui-corner-left {
   overflow-x:hidden;
   overflow-y:auto;
 }
+
+/* fix placeholder color net being grey due to .ui-widget-content
+ * setting the text color */
+.ui-widget-content {
+  &::-webkit-input-placeholder {
+    color:#777;
+  }
+
+  &:-moz-placeholder {
+    color:#777;
+  }
+
+  &:-ms-input-placeholder {
+    color:#777;
+  }
+}
