@@ -21,4 +21,9 @@ module ApplicationHelper
 
     Semester.currently_active
   end
+
+  # returns seee module so config data may be read
+  def get_seee
+    Seee
+  end
 end
