@@ -16,7 +16,7 @@ class Prof < ActiveRecord::Base
   end
 
   def surnamefirst
-    "#{surname} #{firstname}".gsub(/\s+/, " ")
+    "#{surname}, #{firstname}".gsub(/\s+/, " ")
   end
 
   def gender
