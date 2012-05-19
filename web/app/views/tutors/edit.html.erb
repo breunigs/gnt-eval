@@ -21,20 +21,18 @@
           (This is <%=latex_logo%>-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, e.g. „Deutsch“ or “English”)
           <%= f.text_area(:comment, :style => 'width:99%')%>
         </td>
-      </p>
-
-            </tr>
+      </tr>
     </table>
   </div>
 
   <div class="group">
     <h3>Scanned comments</h3>
-      <div class="commentview">
-        <% for p in @tutor.pics %>
-          <figure><span><img src="<%=comment_image_link %>/<%=@course.semester.dirfriendly_title + '/' + p.basename %>"></span></figure>
-        <% end %>
-        <span class="end">end of comments</span>
-      </div>
+    <div class="commentview">
+      <% for p in @tutor.pics %>
+        <figure><span><img src="<%=comment_image_link %>/<%=@course.semester.dirfriendly_title + '/' + p.basename %>"></span></figure>
+      <% end %>
+      <span class="end">end of comments</span>
+    </div>
   </div>
 
   <div class="group">
