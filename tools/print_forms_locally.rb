@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
+
 
 require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
 require File.dirname(__FILE__) + "/../web/config/initializers/seee_config.rb"
 
 interactive = true
+simulate = false
 
 # Define which tray contains which type of sheet
 TRAY_NORMAL="1Tray,2Tray,3Tray"
@@ -43,6 +46,13 @@ else
   if poss.include?("--non-interactive")
     interactive = false
     poss.delete("--non-interactive")
+    puts "Printing non-interactively."
+  end
+
+  if poss.include?("--simulate")
+    simulate = true
+    poss.delete("--simulate")
+    puts "Simulating only. LPR is not really called."
   end
 end
 
@@ -138,10 +148,12 @@ forms_sorted.each do |file, data|
   print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
   banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
   howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{Dir.pwd}/howtos/howto_#{h}.pdf\"" }
-  system(cover) if File.exists?(cover_file)
-  howtos.each { |h| system(h) }
-  system(print)
-  system(banner)
+  unless simulate
+    system(cover) if File.exists?(cover_file)
+    howtos.each { |h| system(h) }
+    system(print)
+    system(banner)
+  end
   puts "The sheets will be put in the #{BIN_DESC[bin].bold}"
   puts
 
