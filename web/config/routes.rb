@@ -10,6 +10,7 @@ Seee::Application.routes.draw do
     resources :tutors
     get "/tutors/:id/preview" => "tutors#preview"
     post "/add_prof" => "courses#add_prof"
+    get "/preview" => "courses#preview"
   end
 
   #~ match 'exit' => 'sessions#destroy', :as => :tutor
@@ -21,6 +22,8 @@ Seee::Application.routes.draw do
   end
 
   root :to => "courses#index"
+
+  post "/course_profs/:id/print" => "course_profs#print", :as => :print_course_prof
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
