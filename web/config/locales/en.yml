@@ -79,5 +79,6 @@ en:
     # rename the models
     models:
       semester: Term
+      prof: Professor
 
 
