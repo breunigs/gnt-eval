@@ -36,7 +36,9 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
           
-          
+group :test do
+  gem "shoulda"
+end          
 
 # used for debugging
 gem "sqlite3"
@@ -46,3 +48,5 @@ gem "dbd-sqlite3"
 group :pest do
   gem "gtk2"
 end
+
+gem "strip_attributes"

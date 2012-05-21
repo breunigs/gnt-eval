@@ -7,16 +7,18 @@ class Prof < ActiveRecord::Base
   validates_presence_of :firstname, :surname, :gender
   validates_uniqueness_of :email, :allow_nil => true
 
+  strip_attributes
+
   def lastname
     surname
   end
 
   def fullname
-    "#{firstname} #{surname}".gsub(/\s+/, " ")
+    "#{firstname} #{surname}"
   end
 
   def surnamefirst
-    "#{surname}, #{firstname}".gsub(/\s+/, " ")
+    "#{surname}, #{firstname}"
   end
 
   def gender
