@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%=APP_NAME%> // <%=controller.human_name %> // <%= params[:action].humanize %> <%= yield(:title) %></title>
+  <title><%=APP_NAME%> // <%=controller.human_name.pluralize %> // <%= params[:action].humanize %> <%= yield(:title) %></title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
@@ -28,7 +28,7 @@
       <% end %>
     </div>
 
-    <h1><%=controller.human_name%> // <%= params[:action].humanize %> <%=yield(:title) %></h1>
+    <h1><%=controller.human_name.pluralize%> // <%= params[:action].humanize %> <%=yield(:title) %></h1>
     <div class="button-group">
       <%= link_to 'Courses', 	  "/courses",   :class => "button big" %>
       <%= link_to 'Professors', "/profs",     :class => "button big" %>
