@@ -4,14 +4,14 @@
   <br />
   <br />
   <%=render "shared/tablemagic"%>
-  <table id="tablemagic" style="min-width:55em">
+  <table id="tablemagic" style="min-width:60em">
     <thead>
       <tr>
         <th>Firstday</th>
         <th>Lastday</th>
         <th>Title</th>
         <th>Longtitle</th>
-        <th colspan="2">Actions</th>
+        <th colspan="3">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -22,6 +22,7 @@
         <td><%=h semester.title %></td>
         <td><%=h semester.longtitle %></td>
         <td><%= link_to "Edit #{semester.title}", edit_semester_path(semester) %></td>
+        <td><%= link_to "Show courses", semester_courses_path(semester) %></td>
         <td><%= semester.critical ? "Critical" : (link_to 'Destroy', semester, :confirm => 'Are you sure?', :method => :delete) %></td>
 
       </tr>
