@@ -6,6 +6,10 @@
   padding: 0.4rem 0.8rem !important;
 }
 
+.button.big {
+  padding: 0.5rem 1.2rem !important;
+}
+
 .button:not(.big) {
   display:inline-block;
 }
