@@ -20,7 +20,7 @@
       <tr>
         <td><%=prof.firstname %></td>
         <td><%=prof.surname %></td>
-        <td><%=mail_to prof.email %></a></td>
+        <td><%=mail_to prof.email %></td>
         <td><%=prof.gender %> <%=prof.gender_symbol%></td>
         <td><%=link_to "Show Details / Edit #{prof.fullname}", edit_prof_path(prof) %></td>
         <td><%=link_to('Destroy', {:controller => 'profs', :id => prof, :action => 'destroy'},

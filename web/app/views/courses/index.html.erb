@@ -10,28 +10,29 @@
 
   <%=links %>
 
-<%=render "shared/tablemagic", :search => true %>
-<table id="tablemagic" style="min-width:70em; width:100%">
-  <thead>
-  <tr>
-    <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
-      <th><%=x%></th>
-    <% end %>
-  </tr>
-  </thead>
-  <tbody>
-    <% @courses.each do |course| %>
-      <tr>
-        <td><%= link_to course.title.truncate(50), course, :title => course.title %></td>
-        <td><%=course.students || "MISSING" %></td>
-        <td><%=course.evaluator %></td>
-        <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>
-        <td><%=course.description %></td>
-        <td><%=course.faculty.shortname %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+  <%=render "shared/tablemagic", :search => true %>
+  <table id="tablemagic" style="min-width:70em; width:100%">
+    <thead>
+    <tr>
+      <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
+        <th><%=x%></th>
+      <% end %>
+    </tr>
+    </thead>
+    <tbody>
+      <% @courses.each do |course| %>
+        <tr>
+          <td><%= link_to course.title.truncate(50), course, :title => course.title %></td>
+          <td><%=course.students || "MISSING" %></td>
+          <td><%=course.evaluator %></td>
+          <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>
+          <td><%=course.description %></td>
+          <td><%=course.faculty.shortname %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 
 <div>
   <%= links %>

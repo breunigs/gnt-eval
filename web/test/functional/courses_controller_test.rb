@@ -17,7 +17,7 @@ class CoursesControllerTest < ActionController::TestCase
   end
 
   def test_should_get_preview
-    get :preview
+    get :preview, :id => courses(:mathSummerCourse).id
     assert_response :success
     assert_select "h1", 1
   end

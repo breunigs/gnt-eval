@@ -38,7 +38,7 @@ user_config =  "~/.gnt-eval-seee.rb"
 # end
 ########################################################################
 
-require 'active_support'
+require 'rails/all'
 require 'pathname'
 
 if not defined?(RAILS_ROOT)
@@ -230,4 +230,4 @@ end
 
 # some commonly used shorthands
 Scc = Seee::Config.commands
-SCed = Seee::Config.external_database 
+SCed = Seee::Config.external_database

@@ -2,7 +2,7 @@
 
 <%= form_for(@course) do |f| %>
   <div class="group">
-    <h1>Create new course</h1>
+    <h2>Create new course</h2>
     <%= render "shared/error_messages", :model => @semester %>
 
     <table>
@@ -26,13 +26,10 @@
         </tr>
       <% end %>
     </table>
-  </fieldset>
 
-
-  <div class="button-group">
-    <%= f.submit "Create new course", :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
-<!--
-    <%= link_to "Cancel", @course, :class => "button" %>
--->
+    <div class="button-group">
+      <%= f.submit "Create new course", :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
+      <%= link_to "Cancel", Course, :class => "button" %>
+    </div>
   </div>
 <% end %>

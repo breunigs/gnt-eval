@@ -1,14 +1,18 @@
-# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+# these fixtures need to have their id specified because the random
+# generated ones are too large to be converted into a 1D barcode.
 
 oneA:
+  id: 10
   course: :mathSummerCourse
   prof: :oliver
 
 oneB:
+  id: 123
   course: :mathSummerCourse
   prof: :rebecca
 
 
 twoA:
+  id: 42
   course: :physWinterCourse
   prof: :jasper
