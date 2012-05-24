@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-environment_id="ruby-1.9.3@gnt-eval"
+environment_id="ruby-1.9.3@global"
 
 if [[ -d "${rvm_path:-$HOME/.rvm}/environments" \
   && -s "${rvm_path:-$HOME/.rvm}/environments/$environment_id" ]] ; then
