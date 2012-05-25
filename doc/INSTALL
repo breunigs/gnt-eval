@@ -292,6 +292,10 @@ FURTHER READING
 * docs/MY_FIRST_EVAL
   Read up on how to actually use the software.
 
+* docs/Setting up production
+  How to setup the web component of GnT Eval to run in production mode
+  and serve it via Apache or Nginx.
+
 * tex/results/README
   Information about how to add additional visualizers or change output
   design
