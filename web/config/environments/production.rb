@@ -19,7 +19,8 @@ Seee::Application.configure do
   config.serve_static_assets = true
 
   # Don’t compress the assets for now. It takes ages and many of the
-  # large files are already compressed.
+  # large JS files are already compressed. Also, CSS compression removes
+  # the px-instead-of-rem fallback for older browsers.
   config.assets.compress = false
 
   # don't fallback to assets pipeline if a precompiled asset is missing
