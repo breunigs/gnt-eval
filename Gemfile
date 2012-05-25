@@ -17,8 +17,6 @@ gem "work_queue",      ">=2.0"
 gem "open4"
 
 group :production do
-  # required for multi threading
-  gem "rack-fiber_pool"
 end
 
 # Gems used only for assets and not required in production environments
@@ -27,6 +25,7 @@ group :assets do
   gem "sass-rails",   "~> 3.2.3"
   gem "coffee-rails", "~> 3.2.1"
   gem "uglifier", ">= 1.0.3"
+  gem "therubyracer"
 end
 
 group :test do
