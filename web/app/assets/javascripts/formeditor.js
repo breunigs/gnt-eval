@@ -1,7 +1,8 @@
 function FormEditor() {
-  this.source = $('form_content');
-  this.root = $('form_editor');
+  this.source = $('#form_content');
+  this.root = $('#form_editor');
   this.data = this.getValue();
+  this.invalidData = false;
 
   this.parseAbstractForm(this.data, "/");
 }
@@ -17,10 +18,10 @@ FormEditor.prototype.parseAbstractForm = function(data, path) {
 
   for(var x in data) {
     var d = this.data[x];
-    if(x.endsWith("rubyobject") || x.endsWith("pages") || x.endsWith("db_table"))
+    if(x.match("rubyobject|pages|db_table$"))
       continue;
 
-    if(!ATTRIBUTES["AbstractForm"].include(x))
+    if(!$.inArray(ATTRIBUTES["AbstractForm"].x))
       throw("The given data subset contains an unknown attribute for AbstractForm: " + x + ".");
 
     //~ if(typeof(d) == "string")
@@ -33,10 +34,17 @@ FormEditor.prototype.parseAbstractForm = function(data, path) {
 };
 
 FormEditor.prototype.createTranslateableTextBox = function(path, name) {
-  //~ if(type == undefined || type == null)
-    //~ type = "text";
+  var lang = [];
+  if(typeof this.data[path] === "string") {
+    this.createTextBox(path, "texhead");
+  } else {
+    for(var x in this.data) {
+      var lang = x, translation = this.data[x];
 
-  this.root.insert('<p>text'+path+':  '+this.data[path]+'</p>');
+      this.assert(lang.length == 2, "Language Code must be two letters long. Given: "+lang+": "+translation);
+      this.createTextBox(path+name, lang.toLowerCase);
+    }
+  }
 };
 
 // creates a textbox for a single value that is not translatable.
@@ -50,21 +58,29 @@ FormEditor.prototype.createTextBox = function(path, name) {
   // so we can add a random string to avoid collisions without storing
   // it for later.
   var id = path + name + "|" + Math.random();
-  this.root.insert('<label for="'+id+'">'+name+'</label>');
-  this.root.insert('<input type="text" name="'+path+name+'" id="'+id+'" value="'+this.subtree[name]+'"/>');
+  this.root.append('<label for="'+id+'">'+name+'</label>');
+  this.root.append('<input type="text" name="'+path+name+'" id="'+id+'" value="'+this.subtree[name]+'"/>');
 };
 
 // retrieves the value from the source textarea, parses it into a JS
 // object and returns it.
 FormEditor.prototype.getValue = function() {
   try {
-    return jsyaml.load(this.source.value);
+    return jsyaml.load(this.source.val());
   } catch(err) {
-    this.log(err.toString());
+    this.log("Error loading JS-YAML: " + err.message);
+    this.invalidData = true;
   }
 };
 
 // log to Firebug and the like if available
 FormEditor.prototype.log = function(strng) {
   if(window.console) console.log(strng);
+};
+
+FormEditor.prototype.assert = function(expression, message) {
+  if (!expression) {
+    this.invalidData = true;
+    throw(message);
+  }
 };
