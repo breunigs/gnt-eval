@@ -4,6 +4,14 @@ custom_build/build_*
 tmp/
 web/log/
 
+### asset and other cache files
+web/public/assets/*
+web/public/*.html
+web/public/*/*.html
+!web/public/404.html
+!web/public/422.html
+!web/public/500.html
+
 ### project root
 Gemfile.lock
 .rvmrc*
