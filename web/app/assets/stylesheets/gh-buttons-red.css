@@ -22,6 +22,7 @@
 .button.active {
   border-color: #BA2727 !important;
   border-bottom-color: #801B1B !important;
+  background-color: #FF3636 !important;
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF3636), to(#BA2727)) !important;
   background-image: -moz-linear-gradient(#FF3636, #BA2727) !important;
   background-image: -o-linear-gradient(#FF3636, #BA2727) !important;
