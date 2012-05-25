@@ -32,10 +32,10 @@ function hack_line_offset_into_ace(editor) {
   editor.renderer.$gutterLayer.update  = new Function("a", upd);
 }
 
-window.onload = function() {
+$(document).ready(function() {
   $("textarea").each(function(index, txt) {
     txt = $(txt);
-    if(txt.attr("readonly")) return;
+    if(txt.length == 0 || txt.attr("readonly")) return;
 
     // create DIV that will be used for ACE
     var id = txt.attr("id");
@@ -63,4 +63,4 @@ window.onload = function() {
     // finally hide text area
     txt.hide();
   });
-};
+});

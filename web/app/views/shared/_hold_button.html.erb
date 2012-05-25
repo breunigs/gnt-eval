@@ -1,5 +1,3 @@
-<% content_for :script, javascript_include_tag("hold_button") %>
-
 <form class="hold_button" method="post">
   <input type="submit" id="<%=id%>" value="<%=name%>" disabled="disabled"/>
   <script> hold_button(document.getElementById("<%=id%>"), 5, true, "<%=url%>"); </script>

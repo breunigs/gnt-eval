@@ -8,6 +8,14 @@
  * You're free to add application-wide styles to this file and they'll appear at the top of the
  * compiled file, but it's generally better to create a new file per style scope.
  *
- *= require_self
- *= require_tree .
+ *= require design
+ *= require css-noise
+ *= require commentview
+ *= require table-sorter
+ *= require tex-latex-logo
+ *= require gh-buttons
+ *= require gh-buttons-red
+ *= require jquery-ui-1.8.20.custom
+ *= require jquery-ui-timepicker-addon
+ *= require jquery-fixes
 */

@@ -47,10 +47,9 @@ Seee::Application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server
   # config.action_controller.asset_host = "http://assets.example.com"
 
-  # Simply precompile every JavaScript and CSS file found. By default, only
-  # application.{js,css} and non-JS/CSS files are precompiled. We are too lazy
-  # to adjust the list for every new file, so simply compile them all.  
-  config.assets.precompile += ['*.js', '*.css']
+  # The following files are not included in the application.{css,js} files. List
+  # them here so they get precompiled for production.
+  config.assets.precompile += %w(js-yaml.min.js json2yaml.js formeditor.js ace/*.js)
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
