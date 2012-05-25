@@ -1,7 +1,11 @@
 # encoding: utf-8
 
 Seee::Application.routes.draw do
-  resources :forms
+  resources :forms do
+    member do
+      get "/copy_to_current" => "forms#copy_to_current"
+    end
+  end
 
   resources :faculties
 
