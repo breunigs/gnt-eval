@@ -6,7 +6,7 @@ require 'rubygems'
 require 'work_queue'
 
 cdir = File.dirname(File.realdirpath(__FILE__))
-require File.join(cdir, "../../config/initializers", "seee_config.rb")
+require File.join(cdir, "../../config", "seee_config.rb")
 require File.join(cdir, "tex_tools.rb")
 
 module Enumerable

@@ -1,10 +1,5 @@
 # encoding: utf-8
 
-# encoding: utf-8
-
-#!/usr/bin/env ruby
-# -*- coding: utf-8 -*-
-
 ########################################################################
 # HOW 2 CONFIG
 ########################################################################
@@ -42,7 +37,7 @@ require 'rails/all'
 require 'pathname'
 
 if not defined?(RAILS_ROOT)
-  RAILS_ROOT = File.join(File.dirname(__FILE__), "..", "..")
+  RAILS_ROOT = File.join(File.dirname(__FILE__), "..")
 end
 
 module Seee
