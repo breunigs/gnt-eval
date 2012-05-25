@@ -3,7 +3,7 @@
 
 
 require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
-require File.dirname(__FILE__) + "/../web/config/initializers/seee_config.rb"
+require File.dirname(__FILE__) + "/../web/config/seee_config.rb"
 
 interactive = true
 simulate = false
