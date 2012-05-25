@@ -23,7 +23,6 @@
   outline:0;
   margin:0;
   color:#000;
-  font-size:13px;
   outline-style: none;
   // force the same box model on all elements. Just to be safe.
   box-sizing:content-box;
@@ -32,9 +31,15 @@
   -webkit-box-sizing:content-box;
 }
 
+/* 1rem == 10px; See http://snook.ca/archives/html_and_css/font-size-with-rem */
+html {
+  font-size: 62.5%;
+}
+
 body {
   background:transparent;
   font-family:sans-serif;
+  font-size:1.3rem;
 }
 
 $group_border: 1px solid #aaa;
@@ -46,26 +51,32 @@ body > div:first-of-type {
 }
 
 h1 {
+  margin-bottom:10px;
   margin-bottom:1rem;
   font-size:250%;
 }
 
 h2 {
   font-size:180%;
+  margin-bottom:5px;
   margin-bottom:0.5rem;
 }
 
 h3 {
+  margin-bottom:3px;
   margin-bottom:0.3rem;
 }
 
 .warning, .error, .info {
+  margin: 4px 0 4px 0;
   margin: 0.4rem 0 0.4rem 0;
   font-style:italic;
   &:before {
     float:left;
     font-size: 300%;
+    margin-top: -1px;
     margin-top: -0.12rem;
+    margin-right: 3px;
     margin-right: 0.3rem;
     font-style:normal;
   }
@@ -89,6 +100,7 @@ h3 {
 .infobox {
   float:right;
   vertical-align:top;
+  max-width:350px;
   max-width:35rem;
   text-align:right;
   .warning {
@@ -96,6 +108,7 @@ h3 {
     display:inline-block;
     &:before {
       float: right;
+      margin-left: 3px;
       margin-left: 0.3rem;
       margin-right: 0;
     }
@@ -104,7 +117,9 @@ h3 {
 
 
 body > div, div.group {
+  padding:10px;
   padding:1rem;
+  margin:10px;
   margin:1rem;
   background:#fff;
   border: $group_border;
@@ -112,6 +127,7 @@ body > div, div.group {
   /* automatically add spacing for DIVs. Unless they form a button group
    * or if they are the group’s first element. */
   > div:not(.button-group):not(:first-of-type) {
+    margin-top:10px;
     margin-top:1rem;
   }
 
@@ -125,17 +141,22 @@ body > div, div.group {
 
 table {
   margin-left:-1px; /* browsers insert 1px between thead/tbody and the table tag */
+  margin-bottom:10px;
   margin-bottom:1rem;
+  margin-top:5px;
   margin-top:0.5rem;
 
   th {
     text-align:left;
+    padding:2px;
     padding:0.2rem;
     background:transparent;
     vertical-align:top;
+    line-height:21px;
     line-height:2.1rem;
   }
   td {
+    padding:2px;
     padding:0.2rem;
     background:transparent;
   }
@@ -154,8 +175,10 @@ table {
 
 ul, ol {
   list-style-position:inside;
+  margin-top:3px;
   margin-top:0.3rem;
   li {
+    padding:2px;
     padding:0.2rem;
   }
 }
@@ -165,7 +188,9 @@ ul, ol {
 }
 
 label {
+  padding:2px;
   padding:0.2rem;
+  padding-right:4px;
   padding-right:0.4rem;
   display:inline-block;
 }
@@ -173,11 +198,16 @@ label {
 input:not(.button), textarea, select {
   background-color: #FBFBFB;
   @include gradient(#FFFFFF, #FBFBFB);
+  border: 1px solid #D4D4D4;
   border: 0.1rem solid #D4D4D4;
   border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 4px;
   padding: 0.4rem;
-  height:1.1rem;
-  font-size:1rem;
+  height:14px;
+  height:1.4rem;
+  font-size:13px;
+  font-size:1.3rem;
+  min-width:250px;
   min-width:25rem;
   &:focus, &:active {
     border:1px solid #999;
@@ -194,13 +224,16 @@ input + span.hint {
     style:italic;
     size:90%;
   }
+  padding: 0.4px 0;
   padding: 0.4rem 0;
   display:block;
 }
 
 button {
   border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 4px !important;
   padding: 0.4rem !important;
+  height:11px;
   height:1.1rem;
 }
 
@@ -211,11 +244,15 @@ td, th {
 }
 
 select {
+  min-width:260px;
   min-width:26rem;
+  height:20px;
   height:2rem;
   padding:0;
+  padding-top:2px;
   padding-top:0.2rem;
   option {
+    padding:2px;
     padding:0.2rem;
     &:nth-child(2n+1) {
       background:#fafafa;
@@ -227,6 +264,7 @@ select {
 }
 
 textarea {
+  min-height:100px;
   min-height:10rem;
 }
 
@@ -260,6 +298,7 @@ table.large_text_area {
 
 table.large_text_area td > div, table.large_text_area td textarea {
   width:100%;
+  min-height:250px;
   min-height:25rem;
 }
 
@@ -292,7 +331,7 @@ a, .hold_button input {
   height:auto;
   width:auto;
   padding:0;
-  min-width:0rem;
+  min-width:0;
   border-radius:0;
 }
 
@@ -303,12 +342,16 @@ a, .hold_button input {
 .preview {
   overflow-x: hidden;
   overflow-y: auto;
+  max-height:100px;
   max-height:10rem;
+  margin:10px 0 5px 0;
   margin:1rem 0 0.5rem 0;
+  padding-bottom:5px;
   padding-bottom:0.5rem;
 
   img:not(.no-shadow) {
     border:1px solid #ccc;
+    padding:10px;
     padding:1rem;
     box-shadow: 0.1rem 0.1rem 0.2rem rgba(0,0,0, 0.2);
   }
@@ -323,7 +366,9 @@ pre {
   overflow-x:hidden;
   overflow-y:auto;
   white-space: pre-wrap;
+  max-height:350px;
   max-height:35rem;
   border:1px solid #ccc;
+  padding:2px;
   padding:0.2rem;
 }

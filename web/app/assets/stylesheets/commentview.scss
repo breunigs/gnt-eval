@@ -1,6 +1,7 @@
 .commentview {
   overflow-y:scroll;
   overflow-x:hidden;
+  height:120px;
   height:12rem;
   text-align:center;
   counter-reset: comments;
@@ -24,7 +25,9 @@
     &:before {
       text-align:right;
       width:10%;
+      padding-right:2px;
       padding-right:0.2rem;
+      margin-left: -4px;
       margin-left: -0.4rem;
       box-sizing:padding-box;
       -moz-box-sizing:padding-box;
@@ -56,6 +59,7 @@
     display:block;
     width:100%;
     max-width:100%;
+    padding:2px 0;
     padding:0.2rem 0;
     color:#fff;
     font-weight:bold;

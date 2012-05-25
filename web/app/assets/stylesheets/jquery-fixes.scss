@@ -15,6 +15,7 @@ input.ui-widget {
 
 /** limit height of drop down boxes **/
 .ui-menu {
+  max-height:150px;
   max-height:15rem;
   overflow-x:hidden;
   overflow-y:auto;
