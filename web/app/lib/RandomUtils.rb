@@ -109,6 +109,11 @@ def find_barcode_from_path(path)
 end
 
 class Array
+  # Shorthand to see if any of the entries are nil
+  def any_nil?
+    self.any? { |e| e.nil? }
+  end
+
   # Splits array into equal arrays of given size. Example:
   # [1,2,3,4,5].chunk(2) => [[1,2], [3,4], [5]]
   # See http://snippets.dzone.com/posts/show/3486
