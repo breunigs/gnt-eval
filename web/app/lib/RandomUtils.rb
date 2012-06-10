@@ -143,11 +143,6 @@ class Array
     end
     a.first
   end
-
-  # calls String#strip_common_tex for each argument
-  def strip_common_tex
-    self.map { |x| x.to_s.strip_common_tex }
-  end
 end
 
 def number_of_processors

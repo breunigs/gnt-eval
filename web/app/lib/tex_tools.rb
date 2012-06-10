@@ -10,6 +10,9 @@ class String
   # see http://www.ruby-forum.com/topic/183413
   TO_ASCII_REGEX = Regexp.new '[\x80-\xff]', nil, 'n'
 
+  STRIP_ALL_TEX_REGEX = Regexp.new '\\\[a-z0-9]+(?:\[[^\]]*\])*((?:\{[^\}]*\})*)', nil, 'i'
+  STRIP_UNESCAPED_BRACES = Regexp.new '([^\\\])[\{\}]+', nil, ''
+
   # Removes all UTF8 chars and replaces them by underscores. Usually
   # required for LaTeX output.
   def to_ascii
@@ -36,6 +39,14 @@ class String
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
     s = s.gsub(/\\hspace\*?\{[^\}]+\}/, "")
+  end
+
+  # Tries to remove all TeX from the string. It will remove all commands
+  # that look like this:
+  # \command[optional]{output}   ⇒ output
+  def strip_all_tex
+    x = self.gsub(STRIP_ALL_TEX_REGEX, "\\1")
+    "X#{x}".gsub(STRIP_UNESCAPED_BRACES, "\\1")[1..-1]
   end
 
   # Fixes some often encountered errors in TeX Code.
@@ -73,6 +84,12 @@ class String
   end
 end
 
+class Array
+  # calls String#strip_common_tex for each argument
+  def strip_common_tex
+    self.map { |x| x.to_s.strip_common_tex }
+  end
+end
 
 # Renders the given TeX Code directly into a PDF file at the given
 # location. Set add_header to false if you plan to include your own
@@ -211,4 +228,24 @@ def test_tex_code(content)
   end
 
   (stat == 0)
+end
+
+
+
+
+
+
+if ENV['TESTING']
+  require 'test/unit'
+
+  class TestString < Test::Unit::TestCase
+    def test_strip_all_tex
+      assert_equal("1 asd", "\\emph[lol]{1} asd".strip_all_tex)
+      assert_equal("2 asd", "\\emph[][gg]{2} asd".strip_all_tex)
+      assert_equal(" asd3", "\\emph[]{} asd3".strip_all_tex)
+      assert_equal(" asd4", "\\emph{} asd4".strip_all_tex)
+      assert_equal(" asd5", "\\cmd asd5".strip_all_tex)
+      assert_equal("X123456", "X\\some{123}{456}".strip_all_tex)
+    end
+  end
 end
