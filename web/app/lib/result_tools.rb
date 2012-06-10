@@ -462,7 +462,12 @@ class ResultTools
   # it is not.
   def report_valid_name?(name)
     v = valid_name?(name)
-    warn "Given name #{name} is invalid." unless v
+    unless v
+      warn "Given name “#{name}” is invalid."
+      begin; raise; rescue Exeption => e
+        warn e.backtrace
+      end
+    end
     v
   end
 
