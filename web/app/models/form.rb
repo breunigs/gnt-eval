@@ -33,7 +33,7 @@ class Form < ActiveRecord::Base
       $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.join("\n")
       logger.warn "Given AbstractForm is invalid:"
       logger.warn $loaded_yaml_sheets[id]
-      logger.warn "\n\n\nGiven content was:\n#{content}"
+      #~ logger.warn "\n\n\nGiven content was:\n#{content}"
     end
     $loaded_yaml_sheets[id]
   end
@@ -43,7 +43,9 @@ class Form < ActiveRecord::Base
     if abstract_form_valid?
       abstract_form.pretty_print_me
     else
-      "This is not a valid form. Here's what could be parsed: \n\n\n" + PP.pp(abstract_form, "")
+      # no idea why PP outputs broken newlines
+      dbg = PP.pp(abstract_form, "").gsub('\n', "\n")
+      "This is not a valid form. Here's what could be parsed: \n\n\n" + dbg
     end
   end
 
@@ -129,6 +131,7 @@ class Form < ActiveRecord::Base
         raise "undefined method #{name} for both web/app/models/form.rb and lib/AbstractForm.rb"
       end
       return abstract_form.method(name).call(*args) if abstract_form_valid?
+      logger.warn "AbstractForm invalid, therefore can’t call «#{name}»"
       # return nil when AbstractForm has the method, but it cannot be
       # used because the form is invalid
       return nil
