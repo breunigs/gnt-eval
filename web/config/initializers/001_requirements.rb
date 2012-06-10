@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require "fileutils"
+require "pp"
 
 
 cdir = File.dirname(File.realdirpath(__FILE__))
