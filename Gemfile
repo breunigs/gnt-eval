@@ -16,6 +16,9 @@ gem "strip_attributes"
 gem "work_queue",      ">=2.0"
 gem "open4"
 
+# Proper unicode downcase and the like
+gem "unicode_utils"
+
 group :production do
 end
 
