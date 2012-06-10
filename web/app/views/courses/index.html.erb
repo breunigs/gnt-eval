@@ -1,14 +1,7 @@
-<% links = %(
-  <div class="button-group">
-    #{link_to 'Create new Course', new_course_path, :class => "button"}
-    #{link_to 'Create new Professor', new_prof_path, :class => "button"}
-    #{link_to 'Create new Term', new_semester_path, :class => "button"}
-  </div>).html_safe %>
-
 <div>
   <h2>Available courses</h2>
 
-  <%=links %>
+  <%=link_to 'Create new Course', new_course_path, :class => "button"%><br/><br/>
 
   <%=render "shared/tablemagic", :search => true %>
   <table id="tablemagic" style="min-width:70em; width:100%">
@@ -35,5 +28,5 @@
 </div>
 
 <div>
-  <%= links %>
+  <%=link_to 'Create new Course', new_course_path, :class => "button"%>
 </div>
