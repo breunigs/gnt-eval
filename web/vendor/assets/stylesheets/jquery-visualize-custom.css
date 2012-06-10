@@ -1,0 +1,92 @@
+.visualize {
+  margin-top:1rem;
+  padding: 1rem 1rem 9rem 4rem;
+  border: 1px solid #ddd;
+}
+
+.visualize * {
+  color: #000 !important;
+}
+
+.visualize canvas {
+    border: 1px solid #aaa;
+    margin: -1px;
+    background: #fff;
+
+}
+
+
+.visualize-labels-x, .visualize-labels-y {
+  top: 1rem;
+  left: 4rem;
+  z-index: 100;
+}
+
+.visualize-labels-x {
+}
+
+
+.visualize-pie .visualize-labels {
+  position: absolute;
+  top: 1rem;
+  left: 4rem;
+}
+
+
+.visualize-labels-x li span.label, .visualize-labels-y li span.label {
+  padding-right: 0.5rem;
+}
+
+
+.visualize-labels-y li span.line {
+  border-style: solid;
+  opacity: .1;
+}
+
+.visualize-labels-x li span.line {
+  border-right:1px solid #ccc;
+  opacity: .1;
+}
+
+.visualize .visualize-info {
+  border: 0;
+  position: static;
+  opacity: 1;
+  background: none;
+}
+
+
+.visualize .visualize-title {
+  position: absolute;
+  top: 2rem;
+  margin-bottom: 0;
+  left: 2rem;
+}
+
+
+.visualize ul.visualize-key {
+  position: absolute;
+  background: #eee;
+  z-index: 10;
+  padding: 1rem 0;
+  width: 100%;
+  left: 0;
+  bottom:0;
+}
+
+
+.visualize ul.visualize-key li {
+  margin-left: 2rem;
+  padding-left: 1.8rem;
+}
+
+
+.visualize ul.visualize-key .visualize-key-color {
+  width: 1rem;
+  height: 1rem;
+  margin-top: -0.4rem;
+}
+
+
+.visualize ul.visualize-key .visualize-key-label {
+}

@@ -10,3 +10,6 @@
 [submodule "submodules/jquery-timepicker"]
 	path = submodules/jquery-timepicker
 	url = https://github.com/trentrichardson/jQuery-Timepicker-Addon.git
+[submodule "submodules/jquery-visualize"]
+	path = submodules/jquery-visualize
+	url = git://github.com/filamentgroup/jQuery-Visualize.git

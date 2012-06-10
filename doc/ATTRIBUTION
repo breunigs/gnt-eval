@@ -23,6 +23,12 @@ License: GPL or MIT
  …local: doc/licenses/gplv2.txt or doc/licenses/mit.txt
 
 
+Name:    JQuery Visualize
+Web:     https://github.com/filamentgroup/jQuery-Visualize
+License: MIT
+ …local: doc/licenses/mit.txt
+
+
 Name:    Ace
 Web:     http://ace.ajax.org/
 License: MPL/LGPL/GPL
