@@ -12,7 +12,7 @@ module FormsHelper
   end
 
   def form_tex_code(form)
-    form.abstract_form_valid? ? form.abstract_form.to_tex : ""
+    form.abstract_form_valid? ? form.abstract_form.to_tex : nil
   end
 
   def render_preview
