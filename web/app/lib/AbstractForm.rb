@@ -121,8 +121,6 @@ class Question
     !@visualizer.nil?
   end
 
-  attr_accessor :donotuse
-
   # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='')
@@ -580,7 +578,6 @@ class AbstractForm
         b << "\n"
         sect_open = true
         s.questions.each do |q|
-          next if ((not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           quest = q.to_tex(lang, gender)
           # need to remove line breaks at the end to avoid spacing issues
           b << (sect_open ? quest.strip : quest)
