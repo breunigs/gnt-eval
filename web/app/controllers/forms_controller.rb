@@ -59,22 +59,17 @@ class FormsController < ApplicationController
   end
 
   # PUT /forms/1
-  # PUT /forms/1.xml
   def update
     @form = Form.find(params[:id])
     kill_caches @form
 
-    respond_to do |format|
-      if @form.critical?
-        flash[:error] = 'Form was critical and has therefore not been updated.' if @form.critical?
-        format.html { redirect_to(@form) }
-        format.xml  { head :ok }
-      elsif @form.update_attributes(params[:form])
-        format.html { redirect_to @form, notice: 'Form was successfully updated.' }
-      else
-        format.html { render :action => "edit" }
-        format.xml  { render :xml => @form.errors, :status => :unprocessable_entity }
-      end
+    if @form.critical?
+      flash[:error] = 'Form was critical and has therefore not been updated.'
+      redirect_to(@form)
+    elsif @form.update_attributes(params[:form])
+      redirect_to @form, notice: 'Form was successfully updated.'
+    else
+      render :action => "edit"
     end
   end
 
