@@ -76,10 +76,6 @@ class CoursesController < ApplicationController
   # GET /courses/1/preview
   def preview
     @course = Course.find(params[:id])
-
-    respond_to do |format|
-      format.html # preview.html.erb
-    end
   end
 
   # POST /courses
