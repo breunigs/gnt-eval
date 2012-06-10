@@ -134,7 +134,7 @@ class ResultTools
     sql << clause
     if group && group.is_a?(String)
       sql << " GROUP BY #{group} "
-      return Hash[custom_query(sql, where_hash.values, false)]
+      return custom_query(sql, where_hash.values, false)
     else
       r = custom_query(sql, where_hash.values, true)
       return r[:count]
@@ -152,7 +152,16 @@ class ResultTools
     q = @dbh.prepare(query)
     begin
       q.execute(*values.flatten)
-      v = first_row ? q.fetch : q.fetch_all
+      if first_row
+        v = q.fetch
+      else
+        v = {}
+        # fetch_all is broken and returns the first result multiple
+        # times when using group_by. Work around using loop.
+        while h = q.fetch do
+          v[h[0]] = h[1]
+        end
+      end
     rescue DBI::DatabaseError => e
       warn ""
       warn "Query:  #{query}"
