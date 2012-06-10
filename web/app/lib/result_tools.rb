@@ -507,7 +507,7 @@ class ResultTools
     v = valid_name?(name)
     unless v
       warn "Given name “#{name}” is invalid."
-      begin; raise; rescue Exeption => e
+      begin; raise; rescue Exception => e
         warn e.backtrace
       end
     end
