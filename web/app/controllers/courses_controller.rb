@@ -52,6 +52,47 @@ class CoursesController < ApplicationController
     end
   end
 
+  def correlate
+    @course = Course.find(params[:id])
+    respond_to do |format|
+      format.html
+      format.json do
+        if [params[:correlate_by], params[:question]].any_nil?
+          render :json => "Missing parameters.", :status => :unprocessable_entity
+          return
+        end
+
+        if params[:correlate_by] == params[:question]
+          render :json => "correlate_by and question must be different", :status => :unprocessable_entity
+          return
+        end
+
+        c = @course.form.get_question(params[:correlate_by])
+        q = @course.form.get_question(params[:question])
+        if [c,q].any_nil?
+          render :json => "Invalid question/correlate_by specified.", :status => :unprocessable_entity
+          return
+        end
+
+        filter = {:barcode => @course.barcodes }
+        data = RT.correlate(@course.form.db_table, c.db_column, q.db_column, filter, true)
+        sorted_answers = data.values.map { |v| v.keys }.flatten.uniq.sort_by { |v| v.to_s }
+        results = {}
+        data.sort_by { |k,v| k.to_s }.each do |k,v|
+          k = c.box_text_by_value(k).strip_all_tex if k.is_a?(Integer)
+          results[k] = {}
+          sorted_answers.each do |kk|
+            vv = v[kk] || 0
+            kk = q.box_text_by_value(kk).strip_all_tex if kk.is_a?(Integer)
+            results[k][kk] = vv
+          end
+        end
+        render :json => results
+      end
+    end
+  end
+
+
   # GET /courses/new
   # GET /courses/new.xml
   def new

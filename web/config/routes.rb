@@ -16,6 +16,7 @@ Seee::Application.routes.draw do
     member do
       post "/add_prof" => "courses#add_prof"
       get "/preview" => "courses#preview"
+      get "/correlate" => "courses#correlate"
     end
   end
 

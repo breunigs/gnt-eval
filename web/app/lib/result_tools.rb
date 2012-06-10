@@ -141,6 +141,49 @@ class ResultTools
     end
   end
 
+  # May be used to group a given question by what was answered in
+  # correlate_by. For example, if you want to see how the study group
+  # attendance differs per major, you would it like this:
+  # RT.correlate("some_table", "major", "study_group_attendance", {:barcode => 123})
+  # Set combine_no_answers to true if you don’t want to differentiate
+  # between “no checkmark” and “checked not specified”.
+  def correlate(table, correlate_by, question, where_hash = {}, combine_no_answers = false)
+    return -1 unless report_valid_name?(table)
+    return -1 unless report_valid_name?(correlate_by)
+    return -1 unless report_valid_name?(question)
+    clause = hash_to_where_clause(where_hash)
+    return -1 if clause.nil?
+    qry = "SELECT DISTINCT #{correlate_by} FROM #{table} WHERE #{clause}"
+    answ = custom_query(qry, where_hash.values).keys
+    if combine_no_answers && answ.include?(99)
+      answ << 0 unless answ.include?(0)
+      answ.delete(99)
+    end
+
+    results = {}
+    answ.each do |a|
+      if combine_no_answers && a == 0
+        where_hash[correlate_by] = [0, 99]
+        a = "not specified/no answer given"
+      else
+        where_hash[correlate_by] = a
+      end
+      results[a] = RT.count(table, where_hash, question)
+    end
+    # combine 0/99 for each value
+    if combine_no_answers
+      cpy = results
+      cpy.each do |k,v|
+        sum = (v[0] || 0 ) + (v[99] || 0 )
+        next if sum == 0
+        results[k]["not specified/no answer given"] = sum
+        results[k].delete(99)
+        results[k].delete(0)
+      end
+    end
+    results
+  end
+
   # runs a custom query against the result-database. Returns the all
   # results as an array of DBI::Row and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values. If

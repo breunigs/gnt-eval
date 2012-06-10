@@ -58,6 +58,7 @@ module CoursesHelper
     d = []
     d << courseEditLink
     d << courseDestroyLink unless @course.semester.critical?
+    d << link_to("Correlate", correlate_course_path(@course), :class => "button")
     d << link_to("List courses", semester_courses_path(@course.semester), :class => "button")
     %(<div class="button-group">#{d*""}</div>).html_safe
   end

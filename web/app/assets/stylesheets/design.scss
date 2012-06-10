@@ -270,6 +270,16 @@ select {
     &:nth-child(2n) {
       background:#fff;
     }
+    &[disabled] {
+      text-decoration: line-through;
+    }
+  }
+
+  optgroup {
+    font-weight:bold;
+    padding-top:10px;
+    padding-top:1rem;
+    background:#fff;
   }
 }
 
@@ -381,4 +391,9 @@ pre {
   border:1px solid #ccc;
   padding:2px;
   padding:0.2rem;
+}
+
+select.question {
+  margin-bottom:3px;
+  margin-bottom:0.3rem;
 }
