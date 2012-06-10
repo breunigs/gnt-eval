@@ -107,7 +107,7 @@ unless oosv.empty?
 <div id="tex-code-preview">
   <h3>TeX-Code used for generating the preview</h3>
   <%= nav_links %>
-  <pre><%=form_tex_code(@form) %></pre>
+  <pre><%=form_tex_code(@form) || "Your form is invalid. Please fix the errors first." %></pre>
   <br/>
   You can use this line to compile the document yourself:
   <pre><%=Seee::Config.commands[:pdflatex_real] %> somefile.tex</pre>
