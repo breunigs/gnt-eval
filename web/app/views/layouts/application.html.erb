@@ -9,7 +9,7 @@
   <%= yield(:script) %>
 </head>
 <body>
-  <div class="group">
+  <div>
     <div class="infobox">
       <% if @curr_sem.nil? %>
         <span class="warning">No active terms. Change the dates or create a new one.</span>
@@ -37,11 +37,15 @@
       <%= link_to 'Faculties',  "/faculties", :class => "button big" %>
       <%= link_to 'Tutors', 		"/tutors",    :class => "button big" %>
     </div>
-
-
-
-
   </div>
+
+  <% if flash.any? %>
+    <div>
+      <% flash.each do |key, msg| %>
+        <%= content_tag :div, msg, :class => [key, " message"], :id => "notice_#{key}" %>
+      <% end %>
+    </div>
+  <% end %>
 
 <%= yield %>
 
