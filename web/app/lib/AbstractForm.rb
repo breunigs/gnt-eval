@@ -121,6 +121,18 @@ class Question
     !@visualizer.nil?
   end
 
+  # Returns box description text for the given value. The value is one-
+  # based, i.e. it does not refer to the actual array but to the value
+  # the box is associated with. In other words, the first box has the
+  # value 1 and it is stored like this in the database.
+  # If a box does not have a description, the position of the box is
+  # returned.
+  def box_text_by_value(val, lang = I18n.locale)
+    raise "Value must be integer" unless val.is_a?(Integer)
+    raise "Value is out of range. Only 1-#{boxes.size} is valid, given was #{val}." unless val.between?(1, boxes.size)
+    boxes[val-1] ? boxes[val-1].any_text : "#{val}/#{boxes.size}"
+  end
+
   # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
                  nochoice=nil, type='square', db_column='')
