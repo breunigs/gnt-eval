@@ -45,7 +45,8 @@ class String
   # that look like this:
   # \command[optional]{output}   ⇒ output
   def strip_all_tex
-    x = self.gsub(STRIP_ALL_TEX_REGEX, "\\1")
+    x = self.gsub('\dots', '…').gsub('\ldots', "…")
+    x.gsub!(STRIP_ALL_TEX_REGEX, "\\1")
     "X#{x}".gsub(STRIP_UNESCAPED_BRACES, "\\1")[1..-1]
   end
 
@@ -246,6 +247,9 @@ if ENV['TESTING']
       assert_equal(" asd4", "\\emph{} asd4".strip_all_tex)
       assert_equal(" asd5", "\\cmd asd5".strip_all_tex)
       assert_equal("X123456", "X\\some{123}{456}".strip_all_tex)
+      assert_equal("asd…", "asd\\dots".strip_all_tex)
+      assert_equal("asd…", "asd\\ldots".strip_all_tex)
+      assert_equal("test", "\\textls[-15]test".strip_all_tex)
     end
   end
 end
