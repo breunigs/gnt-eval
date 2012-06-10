@@ -1,17 +1,16 @@
 /* fix some settings so the buttons integrate better into the rest of
  * the project */
 
-.button {
-  vertical-align:top;
-  padding: 0.4rem 0.8rem !important;
-}
-
 .button.big {
   padding: 0.5rem 1.2rem !important;
 }
 
 .button:not(.big) {
+  padding: 0 0.8rem !important;
   display:inline-block;
+  height:2.2rem;
+  line-height:2.3rem !important;
+  vertical-align:middle;
 }
 
 

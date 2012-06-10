@@ -6,6 +6,9 @@
     display: block;
     height: 0;
     clear: both;
+    overflow:hidden;
+    margin-bottom:-3px;
+    margin-bottom:-0.3rem;
   }
 }
 
@@ -67,20 +70,27 @@ h3 {
   margin-bottom:0.3rem;
 }
 
-.warning, .error, .info {
+.warning, .error, .info, .notice {
   margin: 4px 0 4px 0;
   margin: 0.4rem 0 0.4rem 0;
   font-style:italic;
   &:before {
     float:left;
     font-size: 300%;
-    margin-top: -1px;
-    margin-top: -0.12rem;
-    margin-right: 3px;
-    margin-right: 0.3rem;
+    margin-top: -5px;
+    margin-top: -0.5rem;
+    margin-right: 8px;
+    margin-right: 0.8rem;
     font-style:normal;
   }
   @include clear-after;
+}
+
+.info, .notice {
+  color: #404DFF;
+  &:before {
+    content: "ℹ";
+  }
 }
 
 .warning {
