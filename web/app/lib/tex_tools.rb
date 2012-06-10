@@ -10,8 +10,8 @@ class String
   # see http://www.ruby-forum.com/topic/183413
   TO_ASCII_REGEX = Regexp.new '[\x80-\xff]', nil, 'n'
 
-  STRIP_ALL_TEX_REGEX = Regexp.new '\\\[a-z0-9]+(?:\[[^\]]*\])*((?:\{[^\}]*\})*)', nil, 'i'
-  STRIP_UNESCAPED_BRACES = Regexp.new '([^\\\])[\{\}]+', nil, ''
+  STRIP_ALL_TEX_REGEX = Regexp.new '\\\[a-z0-9]+(?:\[[^\]]*\])*((?:\{[^\}]*\})*)', nil
+  STRIP_UNESCAPED_BRACES = Regexp.new '([^\\\])[\{\}]+', nil
 
   # Removes all UTF8 chars and replaces them by underscores. Usually
   # required for LaTeX output.
@@ -39,13 +39,16 @@ class String
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
     s = s.gsub(/\\hspace\*?\{[^\}]+\}/, "")
+    s = s.gsub('\dots', '…').gsub('\ldots', "…")
   end
 
   # Tries to remove all TeX from the string. It will remove all commands
   # that look like this:
   # \command[optional]{output}   ⇒ output
   def strip_all_tex
-    x = self.gsub('\dots', '…').gsub('\ldots', "…")
+    x = self.strip_common_tex
+    x = "X#{x}".gsub(/([^\\])%.*$/, "\\1")[1..-1]
+    x.gsub!('\%', '%')
     x.gsub!(STRIP_ALL_TEX_REGEX, "\\1")
     "X#{x}".gsub(STRIP_UNESCAPED_BRACES, "\\1")[1..-1]
   end
@@ -241,6 +244,8 @@ if ENV['TESTING']
 
   class TestString < Test::Unit::TestCase
     def test_strip_all_tex
+      assert_equal("Staatsexamen including Lehramt", "Staatsexamen\\linebreak\\emph{including Lehramt}".strip_all_tex)
+      assert_equal("Staatsexamen including Lehramt (State Examination including Civil Service Examination)", "Staatsexamen\\linebreak\\emph{including Lehramt} (State Examination \\emph{including Civil \\textls[-15]{Service Examination)}}".strip_all_tex)
       assert_equal("1 asd", "\\emph[lol]{1} asd".strip_all_tex)
       assert_equal("2 asd", "\\emph[][gg]{2} asd".strip_all_tex)
       assert_equal(" asd3", "\\emph[]{} asd3".strip_all_tex)
@@ -248,8 +253,9 @@ if ENV['TESTING']
       assert_equal(" asd5", "\\cmd asd5".strip_all_tex)
       assert_equal("X123456", "X\\some{123}{456}".strip_all_tex)
       assert_equal("asd…", "asd\\dots".strip_all_tex)
-      assert_equal("asd…", "asd\\ldots".strip_all_tex)
-      assert_equal("test", "\\textls[-15]test".strip_all_tex)
+      assert_equal("test%", "\\textls[-15]test\\%".strip_all_tex)
+      assert_equal("asd…", "\\emph{asd\\ldots}% wtf".strip_all_tex)
+
     end
   end
 end
