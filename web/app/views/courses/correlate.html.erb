@@ -1,12 +1,12 @@
-<% content_for :script, javascript_include_tag("excanvas") %>
-<% content_for :script, javascript_include_tag("visualize.jQuery") %>
+<% content_for :script, javascript_include_tag("excanvas.js") %>
+<% content_for :script, javascript_include_tag("visualize.jQuery.js") %>
 <% content_for :script do %>
 <script>
   var root = "<%=j url_for(:only_path => false) %>";
   var question = <%=(params[:question] ? %("#{j params[:question]}") : null).html_safe %>;
 </script>
 <% end %>
-<% content_for :script, javascript_include_tag("correlate") %>
+<% content_for :script, javascript_include_tag("correlate.js") %>
 
 <%
   links = %(<div class="button-group">)
