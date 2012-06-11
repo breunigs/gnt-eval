@@ -6,3 +6,4 @@
   var line_offset_number = #{line_offset};
   var ace_mode = "#{mode}";
 </script>).html_safe %>
+<% content_for :script, javascript_include_tag("aceify-textareas") %>

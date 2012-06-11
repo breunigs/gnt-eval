@@ -20,4 +20,3 @@
 //= require jquery-ui-timepicker-addon
 //= require jquery-ui-timepicker-addon
 //= require combobox
-//= require aceify-textareas

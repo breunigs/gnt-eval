@@ -3,18 +3,35 @@ function FormEditor() {
   this.root = $('#form_editor');
   this.data = this.getValue();
   this.invalidData = false;
+  this.generatedHtml = "";
 
-  this.parseAbstractForm(this.data, "/");
+  this.parseAbstractForm(this.data, "");
 }
+
+FormEditor.prototype.append = function(content) {
+  this.generatedHtml += content + "\n";
+}
+
+FormEditor.prototype.getPath = function(path) {
+  var l = path.split("/");
+  this.assert("" == l.shift(), "Invalid path given. Must start with /. Given: " + path);
+  var r = this.data;
+  for(var x in l) {
+    r = r[l[x]];
+    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path);
+  }
+  return r;
+};
+
+FormEditor.prototype.getPathDepth = function(path) {
+  return path.split("/").length - 1;
+};
 
 FormEditor.prototype.parseAbstractForm = function(data, path) {
   if(data["rubyobject"] != "AbstractForm")
     throw("First entry of data is not an AbstractForm. Either the form is broken or the data subset passed is not an AbstractForm.");
 
-  // this variable will hold the currently processed subtree
-  this.subtree = data;
-
-  this.createTextBox(path, "db_table");
+  this.createTextBox(path + "/db_table", "database table");
 
   for(var x in data) {
     var d = this.data[x];
@@ -25,41 +42,65 @@ FormEditor.prototype.parseAbstractForm = function(data, path) {
       throw("The given data subset contains an unknown attribute for AbstractForm: " + x + ".");
 
     //~ if(typeof(d) == "string")
-    this.createTranslateableTextBox(x);
+      this.log(x + ": " + path);
+    this.createTranslateableTextBox(path + "/" + x, x);
     //~ else
-      //~ this.log(x + ": " + typeof(d));
   }
 
   // handle pages here
+
+  this.log(this.generatedHtml);
+  this.root.append(this.generatedHtml);
 };
 
-FormEditor.prototype.createTranslateableTextBox = function(path, name) {
-  var lang = [];
-  if(typeof this.data[path] === "string") {
-    this.createTextBox(path, "texhead");
-  } else {
-    for(var x in this.data) {
-      var lang = x, translation = this.data[x];
+FormEditor.prototype.createHeading = function(path) {
+  var last = path.split("/").pop();
+  this.append('<span>'+last+'</span><div class="indent">');
+}
 
-      this.assert(lang.length == 2, "Language Code must be two letters long. Given: "+lang+": "+translation);
-      this.createTextBox(path+name, lang.toLowerCase);
+FormEditor.prototype.createTranslateableTextBox = function(path) {
+  var lang = [];
+  var texts = this.getPath(path);
+  //this.log("Creating translateable textbox at: " + path + " " + name);
+  if(typeof(texts) == "string") {
+    this.createTextBox(path, path.split("/").pop());
+    // TODO: translate link
+  } else {
+    this.createHeading(path);
+    for(var lang in texts) {
+      var newPath = path+"/"+lang;
+      this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
+      if(typeof(texts[lang] ) == "string") {
+        this.createTextBox(newPath, lang.toLowerCase());
+        // TODO: genderize link
+      } else {
+        this.createHeading(newPath);
+        this.createTextBox(newPath + "/:both", "neutral");
+        this.createTextBox(newPath + "/:female", "female");
+        this.createTextBox(newPath + "/:male", "male");
+        this.append("</div>");
+      }
     }
+    this.append('</div>');
   }
 };
 
 // creates a textbox for a single value that is not translatable.
-FormEditor.prototype.createTextBox = function(path, name) {
+FormEditor.prototype.createTextBox = function(path, label) {
   if(path === undefined)
     throw("Given path is invalid.");
-  if(name === undefined)
-    throw("Given field name is invalid.");
+  if(label === undefined)
+    throw("Given label is invalid.");
+
+  //this.assert(typeof(this.getPath(path)) == "string", "Content for textbox is not a string. Given path: " + path);
 
   // create unique ID for this element. It’s required for GUI uses only,
   // so we can add a random string to avoid collisions without storing
   // it for later.
-  var id = path + name + "|" + Math.random();
-  this.root.append('<label for="'+id+'">'+name+'</label>');
-  this.root.append('<input type="text" name="'+path+name+'" id="'+id+'" value="'+this.subtree[name]+'"/>');
+  var id = path + "|" + Math.random();
+  this.append('<label for="'+id+'">'+label+'</label>');
+  this.append('<input type="text" title="'+path+'" id="'+id+'" value="'+this.getPath(path)+'"/>');
+  this.append('<br/>');
 };
 
 // retrieves the value from the source textarea, parses it into a JS

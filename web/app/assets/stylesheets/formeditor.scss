@@ -1,0 +1,33 @@
+#form_editor {
+  max-width:70rem;
+
+  label {
+    display: inline-block;
+    width:5rem;
+    overflow:hidden;
+    height:2.5rem;
+    white-space: nowrap;
+  }
+
+  input {
+    width:40rem;
+    height:1.5rem;
+  }
+
+  span {
+    display:block;
+    font-weight:bold;
+/*
+    margin-top:1r em;
+*/
+    margin-left:0.2rem;
+  }
+
+  .indent {
+    border-left:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    margin-left:0.4rem;
+    padding-left:1rem;
+    margin-bottom:1rem;
+  }
+}
