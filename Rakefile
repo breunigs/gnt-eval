@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-require './lib/ext_requirements.rb'
+require './web/config/ext_requirements.rb'
 Bundler.require(:rakefiles)
 
 include Magick

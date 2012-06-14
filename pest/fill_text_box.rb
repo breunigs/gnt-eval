@@ -6,7 +6,7 @@ require 'base64'
 cdir = File.dirname(__FILE__)
 require cdir + '/helper.AbstractFormExtended.rb'
 require cdir + '/../web/config/boot'
-require cdir + '/../web/lib/ext_requirements.rb'
+require cdir + '/../web/config/ext_requirements.rb'
 
 RT = ResultTools.instance
 SCap = Seee::Config.application_paths

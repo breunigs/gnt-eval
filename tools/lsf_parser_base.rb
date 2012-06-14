@@ -1,6 +1,8 @@
 # encoding: utf-8
 
-require File.dirname(__FILE__) + "/../lib/ext_requirements.rb"
+# Boot Rails iff the tool is called stand alone. If some of the Rails
+# stack is already loaded, assume that all dependencies are fulfilled.
+require "#{File.dirname(__FILE__)}/../web/config/environment" unless defined?(GNT_ROOT)
 require 'net/http'
 require 'rexml/document'
 
@@ -90,8 +92,7 @@ class LSF
 
   # Includes all required files in order to connect to Seee/Rails
   def self.connect_rails
-    require "#{GNT_ROOT}/web/config/boot"
-    require "#{GNT_ROOT}/web/lib/ext_requirements.rb"
+    require "#{GNT_ROOT}/web/config/environment"
   end
 
   # Searches for a given lecture and prof, returns an array of possible
