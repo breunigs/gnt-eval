@@ -13,7 +13,7 @@ class Rails
     RAILS_ROOT
   end
 end
-require mypath + '/../web/app/lib/ext_requirements.rb'
+require mypath + '/../web/config/ext_requirements.rb'
 
 semester = Semester.find(:all).find { |s| s.now? }.title.gsub(/\s+/, "_").scan(/[-_a-z0-9]+/i).join
 
