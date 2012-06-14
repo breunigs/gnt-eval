@@ -70,8 +70,10 @@ class LSF
       req.error!
     end
     # Net::HTTP always returns ASCII-8BIT encoding although the webpage
-    # is delivered in UTF-8. Simply force the encoding and hope it works.
-    @@cache_http[url] = req.body.force_encoding("utf-8").gsub(/\s+/, " ")
+    # is delivered in UTF-8. Try to read encoding from the headers and
+    # use that.
+    enc = req.get_fields("content-type").join.match(/charset=([a-z0-9-]+)/i)
+    @@cache_http[url] = req.body.force_encoding(enc).gsub(/\s+/, " ")
     #File.open("/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, ""), 'w') {|f| f.write(@@cache_http[url]) }
 
     @@cache_http[url]
