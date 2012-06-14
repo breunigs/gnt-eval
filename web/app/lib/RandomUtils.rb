@@ -3,7 +3,6 @@
 require 'enumerator'
 require 'tmpdir'
 require 'rubygems'
-require 'work_queue'
 
 cdir = File.dirname(File.realdirpath(__FILE__))
 require File.join(cdir, "../../config", "seee_config.rb")
@@ -444,4 +443,12 @@ def guess_gender(firstname)
   return :male if m.include?(name)
   return :female if f.include?(name)
   :unknown
+end
+
+# Find out path of Ruby executable that runs this file
+# via http://stackoverflow.com/questions/2814077
+def ruby_interpreter_path
+  File.join(RbConfig::CONFIG["bindir"],
+    RbConfig::CONFIG["RUBY_INSTALL_NAME"] +
+    RbConfig::CONFIG["EXEEXT"])
 end
