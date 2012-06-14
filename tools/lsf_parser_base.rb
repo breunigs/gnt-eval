@@ -576,7 +576,7 @@ class LSF
       end
       profs = profs.collect { |p| p.last }.uniq.join(", ")
       [box, d.name, d.type, d.lang[0..2], profs]
-    end.compact
+    end.compact.uniq
 
     ERB.new(RT.load_tex("../table")).result(binding)
   end
