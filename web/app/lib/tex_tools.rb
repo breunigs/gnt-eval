@@ -119,7 +119,7 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
   File.open(tmp, 'w') {|f| f.write(tex_code) }
 
   if tex_to_pdf(tmp) and File.exists?(tmp)
-    File.makedirs(File.dirname(pdf_path))
+    FileUtils.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
     puts
     puts "Done, have a look at #{pdf_path}"

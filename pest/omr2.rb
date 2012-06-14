@@ -494,7 +494,7 @@ class PESTOmr < PESTDatabaseTools
       debug "  " + File.basename(file)
       return @test_mode # don't move the sheet if in test_mode
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
-      File.makedirs(dir)
+      FileUtils.makedirs(dir)
       File.move(file, File.join(dir, File.basename(file)))
       return
     end

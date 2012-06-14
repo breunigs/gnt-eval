@@ -3,7 +3,7 @@
 namespace :images do
   desc "(3) Run the scan script to import pages to #{simplify_path(SCfp[:scanned_pages_dir])}"
   task :scan do
-    File.makedirs(SCfp[:scanned_pages_dir])
+    FileUtils.makedirs(SCfp[:scanned_pages_dir])
     Dir.chdir(SCfp[:scanned_pages_dir]) do
       system(SCc[:scan])
     end
@@ -16,7 +16,7 @@ namespace :images do
       d = {}
       puts "No directory given, using default one: #{simplify_path(SCfp[:scanned_pages_dir])}"
       d[:directory] = SCfp[:scanned_pages_dir]
-      File.makedirs(d[:directory])
+      FileUtils.makedirs(d[:directory])
     end
 
     # abort if the directory of choice does not exist for some reason
@@ -44,13 +44,13 @@ namespace :images do
 
           if zbar_result.nil? || (not CourseProf.exists?(barcode))
             puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
-            File.makedirs(File.join(sort_path, "bizarre"))
+            FileUtils.makedirs(File.join(sort_path, "bizarre"))
             File.move(f, File.join(sort_path, "bizarre"))
           else
             form = CourseProf.find(barcode).course.form.id.to_s + '_' +
               CourseProf.find(barcode).course.language.to_s
 
-            File.makedirs(File.join(sort_path, form))
+            FileUtils.makedirs(File.join(sort_path, form))
             File.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
           end
 

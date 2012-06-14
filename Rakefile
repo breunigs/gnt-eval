@@ -29,7 +29,7 @@ SCfp = Seee::Config.file_paths unless defined?(SCfp)
 def make_sample_sheet(form, lang)
   # this is hardcoded throughout the project
   dir = "tmp/sample_sheets/"
-  File.makedirs(dir)
+  FileUtils.makedirs(dir)
   filename = "#{dir}sample_#{form.id}#{lang.to_s.empty? ? "" : "_#{lang}"}"
 
   form_misses_files = !File.exist?(filename+'.pdf') || !File.exist?(filename+'.yaml')
