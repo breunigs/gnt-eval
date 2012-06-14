@@ -4,7 +4,6 @@ require File.dirname(__FILE__) + "/../lib/ext_requirements.rb"
 require 'net/http'
 require 'rexml/document'
 
-GNT_ROOT = File.dirname(__FILE__) + "/.." unless defined?(GNT_ROOT)
 RT = ResultTools.instance unless defined?(RT)
 
 # About the term ID:
