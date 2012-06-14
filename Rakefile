@@ -87,15 +87,15 @@ namespace :misc do
     # if you change stuff here, also adjust rakefiles/import.rb
     require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     puts "Finding IDs…"
-    search = ["Mathematik und Informatik", "Fakultät für Physik und Astronomie"]
+    search = ["Mathematik und Informatik", "Physik und Astronomie"]
     mathe, physik = LSF.find_certain_roots(search)
 
     @dir = "tmp/lsfparse/"
-    File.makedirs(@dir)
+    FileUtils.makedirs(@dir)
 
     def run(name, url)
       cmd = "cd '#{@dir}' && "
-      cmd << "../../tools/lsf_parser_api.rb #{name} '#{url}' "
+      cmd << "#{ruby_interpreter_path} ../../tools/lsf_parser_api.rb #{name} '#{url}' "
       cmd << "> #{name}.log"
       `#{cmd}`
     end
