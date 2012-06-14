@@ -1,10 +1,12 @@
 # encoding: utf-8
 
-require "fileutils"
-require "pp"
+autoload :FileUtils, "fileutils"
+autoload :PP, "pp"
+autoload :YAML, "yaml"
+autoload :RbConfig, "rbconfig"
+autoload :WorkQueue, "work_queue"
 
-
-cdir = File.dirname(File.realdirpath(__FILE__))
-require(File.join(cdir, '../../app/lib', 'result_tools.rb'))
-require(File.join(cdir, '../../app/lib', 'AbstractForm.rb'))
-require(File.join(cdir, '../../app/lib', 'FunkyTeXBits.rb'))
+# The file is in web/app/libs. However, it only contains a module; not
+# a class. Because Rails won’t autoload modules, we require it here
+# once manually, so the module becomes available.
+require "FunkyTeXBits"

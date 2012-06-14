@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
 
-require 'rubygems'
-require 'action_mailer'
-require './web/config/boot.rb'
 require './lib/ext_requirements.rb'
-require './lib/RandomUtils.rb'
-
-require 'pp'
-require 'yaml'
-
-# needed for image manipulations
-require 'RMagick'
-require 'fileutils'
+Bundler.require(:rakefiles)
 
 include Magick
 
