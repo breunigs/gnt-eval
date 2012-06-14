@@ -75,7 +75,7 @@ class LSF
     # is delivered in UTF-8. Try to read encoding from the headers and
     # use that.
     enc = req.get_fields("content-type").join.match(/charset=([a-z0-9-]+)/i)
-    @@cache_http[url] = req.body.force_encoding(enc).gsub(/\s+/, " ")
+    @@cache_http[url] = req.body.force_encoding(enc[1]).gsub(/\s+/, " ")
     #File.open("/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, ""), 'w') {|f| f.write(@@cache_http[url]) }
 
     @@cache_http[url]
@@ -547,6 +547,7 @@ class LSF
   # set in Seee (compares titles). Tries to extract data from seee and
   # fill it in, if possible.
   def self.print_final_tex(data)
+    data = data.dup
     LSF.connect_rails
     # find courses in active semesters
     cs = Semester.currently_active.map { |s| s.courses }.flatten
@@ -561,6 +562,7 @@ class LSF
 
   # prints all given lectures into a list.
   def self.print_pre_tex(input)
+    input = input.dup
     # sort be type, then by name
     input.sort! { |x,y| x.type+x.name <=> y.type+y.name }
     intro = 'Kreuze zu evaluierende Veranstaltungen. Streiche solche, die nicht evaluiert werden sollen. Achte besonders auf automatisch Gekreuzte. Erstellung: \the\day.\the\month.\the\year'

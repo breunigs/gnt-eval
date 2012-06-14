@@ -39,6 +39,7 @@ if term.nil? || rootid.nil? || term == 0 || rootid == 0 || name.nil? || name.emp
 end
 
 data = LSF.get_tree(rootid)
+data.freeze
 
 LSF.get_file("lsf_parser_#{name}_kummerkasten.yaml", true).puts LSF.print_yaml_kummerkasten(data, "#{name}")
 LSF.get_file("lsf_parser_#{name}_sws.txt", true).puts LSF.print_sws_sheet(data)
