@@ -1,14 +1,8 @@
 # encoding: utf-8
 
+require File.dirname(__FILE__) + "/../lib/ext_requirements.rb"
 require 'net/http'
-require 'pp'
-require 'rubygems'
-require 'date'
 require 'rexml/document'
-require 'csv'
-require 'fastercsv'
-require File.dirname(__FILE__) + "/../lib/result_tools.rb"
-require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
 
 GNT_ROOT = File.dirname(__FILE__) + "/.." unless defined?(GNT_ROOT)
 RT = ResultTools.instance unless defined?(RT)
@@ -589,7 +583,7 @@ class LSF
 
 
   def self.print_allmighty_csv(data)
-    s = FasterCSV.generate({:headers => true}) do |csv|
+    s = CSV.generate({:headers => true}) do |csv|
       csv << ["id", "titel", "zeiten", "räume", "art", "fakultät-id", "erwartete Teilnehmer", "sws", "prof", "profmail",  "akad. grad", "anrede", "vorname", "nachname"]
       data.each do |d|
         profs = d.profs.flatten.uniq unless d.profs.nil?
@@ -607,7 +601,7 @@ class LSF
   end
 
   def self.print_zuv_eval_csv(data)
-    s = FasterCSV.generate({:headers => true}) do |csv|
+    s = CSV.generate({:headers => true}) do |csv|
       csv << ["Funktion", "Anrede", "Titel", "Vorname", "Nachname", "E-Mail-Adresse", "Lehrveranstatlung: Name/Titel", "Lehrveranstaltungskennung laut LSF", "Lehrveranstaltungsort(e)", "Hier können Sie eintragen: 1) Von welcher studienorganisatorischen Einheit wird die Lehrveranstaltung angeboten (relevant bei Import / Export)? 2) Für welchen / welche Studiengänge wird die LV angeboten?", "Lehrveranstaltungsart", "erwartete Teilnehmer / benötigte Fragebögen", "weitere/Sekundär-Dozenten", "Sprache", "veranschlagte SWS", "Leistungspunkte", "Modulzugehörigkeit (zu welchem Modul gehört die LV? Ggf. Kürzel angeben) --> ggf. bei Studiengang mit eintragen?", "Rhythmus (Blockveranstaltung oder wöchentlich)", "Wochentag", "Zeit (Uhrzeit)", "Dauer (von bis)", "Präsenzveranstaltung oder Moodle-Kurs / E-Learning", "Pflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Wahlpflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Semester", "Studienjahr"]
       data.each do |d|
         profs = d.profs.flatten.uniq unless d.profs.nil?
