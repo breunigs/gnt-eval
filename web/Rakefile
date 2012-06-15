@@ -7,13 +7,11 @@ require File.expand_path('../config/application', __FILE__)
 Seee::Application.load_tasks
 
 namespace :cache do
-  desc "Removes all non-versioned files in the public folder"
+  desc "Removes all untracked files in the public folder"
   task :clear do
     Dir.chdir(File.join(File.dirname(__FILE__), 'public')) do
-      files = %x[git ls-files --others --ignored --exclude-standard].split("\n")
-      files.reject! { |f| f.start_with?("assets/") }
-      files.each { |f| File.delete(f) }
-      puts "Deleted #{files.size} files."
+      # removes all ignored as well as uncommited files in this folder
+      `git clean -df`
     end
   end
 end
