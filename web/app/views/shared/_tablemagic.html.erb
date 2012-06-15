@@ -10,11 +10,12 @@
 <% clear=%(<a href="#" onclick="var f=$('#filterfield'); f.val(''); f.trigger('change'); return false;" class="button">Clear</a>).html_safe %>
 
 <% if defined?(search) && search %>
-  <%= form_tag request.path, :method => 'get' do %>
+  <%= form_tag request.path, :method => 'get', :class => "singleline" do %>
     <%= text_field_tag :search, params[:search],
           :placeholder => "Filter…",
           :type => "search",
-          :id => "filterfield"
+          :id => "filterfield",
+          :style => "margin-right:.2rem"
       %>
     <% if params[:search] %>
       <a href="<%=request.path%>" class="button">Clear</a>
