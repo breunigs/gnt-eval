@@ -10,8 +10,10 @@ namespace :cache do
   desc "Removes all untracked files in the public folder"
   task :clear do
     Dir.chdir(File.join(File.dirname(__FILE__), 'public')) do
-      # removes all ignored as well as uncommited files in this folder
+      # removes all uncommited files in this folder
       `git clean -df`
+      # removes ignored files in this folder
+      `git clean -dfX`
     end
   end
 end
