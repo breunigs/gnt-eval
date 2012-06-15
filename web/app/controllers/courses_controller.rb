@@ -143,7 +143,7 @@ class CoursesController < ApplicationController
   def update
     @course = Course.find(params[:id])
     kill_caches @course
-    expire_fragment("courses_#{params[:id]}") if @course.summary != params[:course][:summary]
+    expire_fragment("preview_courses_#{params[:id]}") if @course.summary != params[:course][:summary]
 
     respond_to do |format|
       checks = form_lang_combo_valid? && !critical_changes?(@course)
@@ -174,7 +174,7 @@ class CoursesController < ApplicationController
     @course = Course.find(params[:id])
     kill_caches @course
     # expire preview cache as well
-    expire_fragment("courses_#{params[:id]}")
+    expire_fragment("preview_courses_#{params[:id]}")
 
     unless @course.critical?
       begin
