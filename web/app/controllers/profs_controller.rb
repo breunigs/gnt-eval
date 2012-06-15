@@ -43,7 +43,7 @@ class ProfsController < ApplicationController
   # POST /profs.xml
   def create
     @prof = Prof.new(params[:prof])
-    kill_caches @prof
+    kill_caches
 
     respond_to do |format|
       if @prof.save
@@ -96,7 +96,7 @@ class ProfsController < ApplicationController
     logger.info "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
     expire_page :action => "index"
     expire_page :action => "new"
-    expire_page :action => "edit", :id => prof
+    expire_page(:action => "edit", :id => prof) if prof
 
     # the list of profs is shown on both new and show pages, therefore
     # these need to be expired, regardless which prof changed
@@ -107,13 +107,5 @@ class ProfsController < ApplicationController
 
     # courses#index shows the prof as well
     expire_page :controller => "courses", :action => "index"
-
-    # courses#edit pages show the name of the prof, so only update
-    # courses with that prof.
-    return unless prof
-    prof.courses.each do |c|
-      logger.info "Expiring courses#edit for #{c.title}"
-      expire_page :controller => "courses", :action => "edit", :id => c
-    end
   end
 end
