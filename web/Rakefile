@@ -9,11 +9,11 @@ Seee::Application.load_tasks
 namespace :cache do
   desc "Removes all untracked files in the public folder"
   task :clear do
-    Dir.chdir(File.join(File.dirname(__FILE__), 'public')) do
-      # removes all uncommited files in this folder
-      `git clean -df`
-      # removes ignored files in this folder
-      `git clean -dfX`
+    Dir.glob(File.join(File.dirname(__FILE__), 'public/**/*.html')) do |f|
+      # skip tracked files
+      `git ls-files "#{f}" --error-unmatch 2> /dev/null`
+      next if $?.exitstatus == 0
+      File.delete(f)
     end
   end
 end
