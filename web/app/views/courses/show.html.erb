@@ -35,8 +35,11 @@
 </div>
 
 <div>
-<%= render "shared/preview_big", :text => @course.summary %>
-<%= link_to 'Show preview in full', preview_course_path(@course), :class => "button" %>
+  <h3><%=latex_logo%> Preview</h3>
+  <div class="preview">
+    <%= render "shared/preview", :text => @course.summary %>
+  </div>
+  <%= link_to 'Show preview in full', preview_course_path(@course), :class => "button" %>
 </div>
 
 
