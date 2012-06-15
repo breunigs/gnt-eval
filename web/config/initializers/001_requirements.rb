@@ -7,6 +7,7 @@ autoload :RbConfig, "rbconfig"
 autoload :WorkQueue, "work_queue"
 autoload :CSV, "csv"
 autoload :Date, "date"
+autoload :AbstractForm, "AbstractForm"
 
 # The file is in web/app/libs. However, it only contains a module; not
 # a class. Because Rails won’t autoload modules, we require it here
