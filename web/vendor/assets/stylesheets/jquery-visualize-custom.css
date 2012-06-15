@@ -22,10 +22,6 @@
   z-index: 100;
 }
 
-.visualize-labels-x {
-}
-
-
 .visualize-pie .visualize-labels {
   position: absolute;
   top: 1rem;
@@ -37,6 +33,10 @@
   padding-right: 0.5rem;
 }
 
+
+.visualize-labels-y li span.label {
+  margin-top:-.75rem !important; /* half of its font size plus some */
+}
 
 .visualize-labels-y li span.line {
   border-style: solid;

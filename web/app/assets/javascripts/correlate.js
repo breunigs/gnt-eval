@@ -65,6 +65,7 @@ function getData(elem) {
 
       result.html(tbl);
       result.children('table').visualize({height: 200});
+      fixYBarPosition(result);
       // inject toggle link
       $("<a onclick=\"toggleRelativeAbsolute(this);\">Values are in percent. Click to make them absolute.</a>").insertAfter(result.children('table'));
 
@@ -82,8 +83,25 @@ function toggleRelativeAbsolute(l) {
   var f = table.data("content") == "percent" ? "value" : "percent";
   table.find("td").each(function(index, td) { $(td).html($(td).data(f)); } );
   table.data("content", f);
-  l.siblings(".visualize").trigger('visualizeRefresh');
+  fixYBarPosition(l.siblings(".visualize").trigger('visualizeRefresh'));
   l.html(f == "percent" ? "Values are in percent. Click to make them absolute." : "Values are absolute numbers. Click to calculate percentage per column.");
+}
+
+// Bar position is off by some pixels due to their weird method of
+// calculating it. Fix it here.
+function fixYBarPosition(parent) {
+  parent.find(".visualize-labels-y").each(function(ind, graph) {
+    var height = null;
+    var maxVal = null;
+    $(graph).children("li").each(function(ind, li) {
+      var num = $(li).children(".label").html();
+      if(height == null) {
+        height = $(li).parent().parent().find("canvas").height();
+        maxVal = num;
+      }
+      $(li).attr("style", "bottom: "+(num/maxVal*height)+"px");
+    });
+  });
 }
 
 // creates a new question box if required (i.e. if the last one has an
