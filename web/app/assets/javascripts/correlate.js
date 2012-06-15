@@ -64,7 +64,7 @@ function getData(elem) {
       var old = result.height();
 
       result.html(tbl);
-      result.children('table').visualize({height: 200,  parseDirection: "y"});
+      result.children('table').visualize({height: 200});
       // inject toggle link
       $("<a onclick=\"toggleRelativeAbsolute(this);\">Values are in percent. Click to make them absolute.</a>").insertAfter(result.children('table'));
 
