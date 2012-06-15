@@ -11,6 +11,7 @@ namespace :cache do
   task :clear do
     Dir.chdir(File.join(File.dirname(__FILE__), 'public')) do
       files = %x[git ls-files --others --ignored --exclude-standard].split("\n")
+      files.reject! { |f| f.start_with?("assets/") }
       files.each { |f| File.delete(f) }
       puts "Deleted #{files.size} files."
     end
