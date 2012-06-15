@@ -286,7 +286,9 @@ class CoursesController < ApplicationController
     false
   end
 
-  caches_page :index, :new, :show, :edit, :preview
+  # Can’t cache index because it has searching via query string but the
+  # page cache ignores it.
+  caches_page :new, :show, :edit, :preview
   def kill_caches(course = nil)
     logger.info "="*50
 
@@ -311,4 +313,3 @@ class CoursesController < ApplicationController
     expire_page :controller => "tutors", :action => "index"
   end
 end
-
