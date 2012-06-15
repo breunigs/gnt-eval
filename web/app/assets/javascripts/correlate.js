@@ -35,7 +35,7 @@ function getData(elem) {
   ajax[elem.index] = $.ajax(url)
     .fail(function(data) { result.html("<span class=\"error\">("+data.status+") "+data.responseText+"</span>"); })
     .done(function(data) {
-      var tbl = "<table><thead><tr><td></td>";
+      var tbl = "<table data-content=\"percent\"><thead><tr><td></td>";
       var any_group = null;
       $.each(data, function(group, answers) {
         tbl += "<th scope=\"col\">"+group+"</th>";
@@ -43,25 +43,47 @@ function getData(elem) {
       });
 
       tbl += "</tr></thead><tbody>";
+
+      // add up votes per column so we can calculate percentage
+      var sums = {};
+      $.each(data, function(group, answers) {
+        var sum = 0;
+        $.each(answers, function(key, val) { sum += val; });
+        sums[group] = sum;
+      });
+
       $.each($.keys(data[any_group]), function(ind, a) {
         tbl += "<tr><th scope=\"row\">"+a+"</th>";
         $.each(data, function(group, answers) {
-          tbl += "<td>"+answers[a]+"</td>";
+          var p = (answers[a]/sums[group]*100).toFixed(1);
+          tbl += "<td data-value=\""+answers[a]+"\" data-percent=\""+p+"\">"+p+"</td>";
         });
         tbl += "</tr>";
       });
       tbl += "</tbody></table>";
-
       var old = result.height();
 
       result.html(tbl);
-      result.children('table').visualize({height: 200});
+      result.children('table').visualize({height: 200,  parseDirection: "y"});
+      // inject toggle link
+      $("<a onclick=\"toggleRelativeAbsolute(this);\">Values are in percent. Click to make them absolute.</a>").insertAfter(result.children('table'));
+
       result.hide().css("height", "auto");
       var inc = result.height() - old;
       result.css("height", old+"px").show().animate({
         height: ('+=' + inc)
       });
     });
+}
+
+function toggleRelativeAbsolute(l) {
+  l = $(l);
+  var table = l.siblings("table");
+  var f = table.data("content") == "percent" ? "value" : "percent";
+  table.find("td").each(function(index, td) { $(td).html($(td).data(f)); } );
+  table.data("content", f);
+  l.siblings(".visualize").trigger('visualizeRefresh');
+  l.html(f == "percent" ? "Values are in percent. Click to make them absolute." : "Values are absolute numbers. Click to calculate percentage per column.");
 }
 
 // creates a new question box if required (i.e. if the last one has an
