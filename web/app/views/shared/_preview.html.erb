@@ -7,7 +7,7 @@
 
 
 
-<% cache("#{params[:controller]}_#{params[:id]}") do %>
+<% cache("preview_#{params[:controller]}_#{params[:id]}") do %>
   <% failed, exitcodes, error, base64 = texpreview(text) %>
 
   <% if failed || base64.nil? %>
