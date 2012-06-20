@@ -8,7 +8,7 @@
 require "rubygems"
 require "text"
 
-FRIENDS_PATH = "#{GNT_ROOT}/tmp/friends/" unless defined?(FRIENDS_PATH)
+FRIENDS_PATH = File.expand_path("#{GNT_ROOT}/tmp/friends/") unless defined?(FRIENDS_PATH)
 
 class Friends
   TF_PATH = FRIENDS_PATH + "true_friends.txt"

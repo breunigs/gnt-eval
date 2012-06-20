@@ -2,6 +2,8 @@
 
 require 'rubygems'
 require 'date'
+# need rails connection
+require "#{GNT_ROOT}/web/config/environment"
 
 class String
   # convert “surname, firstname” to “firstname surname” and remove
@@ -34,9 +36,9 @@ class LaierCSV
   def self.data
     require 'csv'
     data = {}
-    Dir.glob(IMPORT_PATH + "*.csv") do |csv|\
+    Dir.glob(IMPORT_PATH + "*.csv") do |csv|
       puts "Processing CSV #{simplify_path(csv)}"
-      CSV.open(csv, 'r') do |row|
+      CSV.foreach(csv, 'r') do |row|
 	next if row[0].nil? # lecture
 	next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
 
@@ -143,8 +145,12 @@ namespace :misc do
     # (the Rails Model)
     def names_to_profs(names, lsf_data)
       names.map do |l|
-	name = l.split(" ")
-	p = Prof.find_by_firstname_and_surname(name.first, name.last)
+	name = l.gsub(/[^a-z]+/i, " ").split(" ")
+	if name.size >= 2 # assume we have a first and last name
+	  p = Prof.find_by_firstname_and_surname(name.first, name.last)
+	else
+	  p = Prof.find_by_surname(name.last)
+	end
 	next p if p
 	# okay, so we couldn’t find a match in our database. Let’s see
 	# if we can find it in lect.profs, so we can automatically add
@@ -180,8 +186,11 @@ namespace :misc do
 	    p.save
 	    next p
 	  else
-	    p = Prof.find(pid)
-	    redo if p.nil?
+	    p = Prof.find(action)
+	    if p.nil?
+	      puts "Could not find prof with id=#{action}. Try again."
+	      redo
+	    end
 	    next p
 	end
       end
@@ -203,17 +212,17 @@ namespace :misc do
     require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     LSF.set_debug = false
 
-    FRIENDS_PATH=IMPORT_PATH
-    require "#{GNT_ROOT}/lib/friends.rb"
+    #~ FRIENDS_PATH=IMPORT_PATH
+    #~ require "#{GNT_ROOT}/lib/friends.rb"
     friends = nil
     work_queue.enqueue_b { friends = Friends.new }
 
     puts "Gathering data:"
     # get information about tutors, student count, … ###################
     data = []
-    work_queue.enqueue_b { data[0] = MuesliYAML.data }
-    work_queue.enqueue_b { data[1] = LaierCSV.data }
-    work_queue.enqueue_b { data[2] = UebungenDotPhysik.data }
+    work_queue.enqueue_b { data[0] = MuesliYAML.data; "MuesliYAML OK" }
+    work_queue.enqueue_b { data[1] = LaierCSV.data; "LaierCSV OK" }
+    work_queue.enqueue_b { data[2] = UebungenDotPhysik.data; "UebungenDotPhysik OK" }
 
     # get information about what’s in seee #############################
     # courses will be added to the last semester currently active.
@@ -236,20 +245,21 @@ namespace :misc do
     work_queue.join
 
     # load LSF data ####################################################
-    search = ["Mathematik und Informatik", "Fakultät für Physik und Astronomie"]
+    search = ["Mathematik und Informatik", "Physik und Astronomie"]
     maths, physics = LSF.find_certain_roots(search)
 
     # Convert the URLs to actual data
-    physics = []
     work_queue.enqueue_b do
       puts "Loading physics LSF tree…"
       term, rootid = LSF.set_term_and_root(physics[:url])
       physics = LSF.get_tree(rootid)
+      puts "LSF Physics OK"
     end
     work_queue.enqueue_b do
       puts "Loading maths LSF tree…"
       term, rootid = LSF.set_term_and_root(maths[:url])
       maths = LSF.get_tree(rootid)
+      puts "LSF Maths OK"
     end
 
     # wait for data ####################################################
@@ -273,10 +283,11 @@ namespace :misc do
 
       # collect lists and merge similar entries. Then try to find them
       # in Seee.
+
       lects = lect.profs.flatten.uniq.map { |p| "#{p.first} #{p.last}" }
       lects += dat.map { |d| d[:lecturer] }.flatten.compact
       lects = friends.uniq_sim(lects)
-      lects = names_to_profs(lects, lect)
+      lects = names_to_profs(lects, lect).uniq.compact
 
       # collect lists and merge similar
       tutors = dat.map { |d| d[:tutors] }.flatten.compact
@@ -329,7 +340,7 @@ namespace :misc do
       puts "Tutors:    #{tutors.join(", ")}"
       puts "Faculty:   #{fac.longname} (guessed)"
       puts
-      next unless get_user_yesno("Add the lecture with this data?")
+      redo unless get_user_yesno("Add the lecture with this data?")
 
       # well, add it to seee ###########################################
       begin
