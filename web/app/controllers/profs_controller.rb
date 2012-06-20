@@ -89,7 +89,9 @@ class ProfsController < ApplicationController
     end
   end
 
-  caches_page :index, :new, :edit
+  # Can’t cache index because then apache will serve the cached variant
+  # when submitting the new-prof form
+  caches_page :new, :edit
   private
   def kill_caches(prof = nil)
     logger.info "="*50
