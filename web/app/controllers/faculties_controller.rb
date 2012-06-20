@@ -89,7 +89,7 @@ class FacultiesController < ApplicationController
     end
   end
 
-  caches_page :index, :new, :edit
+  #caches_page :index, :new, :edit
   private
   def kill_caches(faculty = nil)
     logger.info "="*50

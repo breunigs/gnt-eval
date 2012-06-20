@@ -116,7 +116,7 @@ class FormsController < ApplicationController
     end
   end
 
-  caches_page :index, :show, :new, :edit
+  #caches_page :index, :show, :new, :edit
   private
   def kill_caches(form = nil)
     logger.info "="*50

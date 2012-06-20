@@ -110,7 +110,7 @@ class TutorsController < ApplicationController
     end
   end
 
-  caches_page :index, :show, :edit, :preview
+  #caches_page :index, :show, :edit, :preview
 
   private
   def kill_caches(tutor = nil)
