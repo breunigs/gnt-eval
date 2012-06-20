@@ -307,7 +307,9 @@ class CoursesController < ApplicationController
 
     course.tutors.each do |t|
       logger.info "Expiring tutors#show for #{t.abbr_name}"
-      expire_page :controller => "tutors", :action => "show", :id => t.id
+      # tutor is now subpage of courses, needs to be adjusted before
+      # enabling caching again FIXME
+      #expire_page :controller => "tutors", :action => "show", :id => t.id
     end
     logger.info "Expiring tutors#index"
     expire_page :controller => "tutors", :action => "index"
