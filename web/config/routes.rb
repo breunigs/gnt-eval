@@ -15,7 +15,7 @@ Seee::Application.routes.draw do
     get "/tutors/:id/preview" => "tutors#preview"
     member do
       post "/add_prof" => "courses#add_prof"
-      match "/drop_prof" => "courses#drop_prof"
+      delete "/drop_prof" => "courses#drop_prof"
       get "/preview" => "courses#preview"
       get "/correlate" => "courses#correlate"
     end
