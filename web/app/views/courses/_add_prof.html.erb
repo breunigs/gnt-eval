@@ -10,7 +10,7 @@
 <script>
   $(document).ready(function() {
     $("form#add_prof").submit(function(e) {
-      if(!$("form#add_prof courses_profs").val()) {
+      if(!$("form#add_prof .combobox").val()) {
         $("form#add_prof input.ui-autocomplete-input").focus();
         e.preventDefault();
       }
