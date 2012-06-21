@@ -89,6 +89,11 @@ class UebungenDotPhysik
   URL_LECTURE_LIST = "#{URL_BASE}/liste.php?lang=en"
   URL_READ_LECTURE = "#{URL_BASE}/liste.php?lang=en&vorl="
 
+  def self.fix_enc(txt)
+    return txt unless txt.is_a?(String)
+    txt.force_encoding("iso-8859-15").encode("utf-8")
+  end
+
   # Gathers all data from uebungen.physik and returns them as array of
   # hashes.
   def self.data
@@ -112,7 +117,7 @@ class UebungenDotPhysik
     @@brows.get(URL_LECTURE_LIST) do |page|
       code = page.content.compress_whitespace
       reg  = code.scan(/<a href=\'liste\.php\?vorl=([0-9]+)\' title=\'authentification needed\' >&lt;show group list/)
-      return reg.map { |r| r[0] }.compact
+      return reg.map { |r| UebungenDotPhysik.fix_enc(r[0]) }.compact
     end
   end
 
@@ -133,8 +138,11 @@ class UebungenDotPhysik
       tutors = tuts.map { |t| t[0].cleanup_name }.compact
       tutors.reject! { |t| t.empty? }
 
-      return { :title => title, :lecturer => lect,
+      data = { :title => title, :lecturer => lect,
 	      :students => students, :tutors => tutors }
+      data_fixed = {}
+      data.each { |k, v| data_fixed[k] = UebungenDotPhysik.fix_enc(v) }
+      return data_fixed
     end
   end
 end
@@ -199,7 +207,6 @@ namespace :misc do
 
 
     IMPORT_PATH = "#{GNT_ROOT}/tmp/import/"
-
     puts
     puts "Before running this task, please ensure the following:"
     puts "* internet connection works"
