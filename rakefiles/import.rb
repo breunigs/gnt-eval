@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'date'
+require 'mechanize'
 # need rails connection
 require "#{GNT_ROOT}/web/config/environment"
 
@@ -93,11 +94,11 @@ class UebungenDotPhysik
   def self.data
     puts "Loading UebungenDotPhysik…"
     require 'mechanize'
-    @@brows ||= WWW::Mechanize.new
+    @@brows ||= Mechanize.new
     # Fix crappy charset detections. We can do this because we know what
     # encoding the page is in.
-    WWW::Mechanize::Util::CODE_DIC[:SJIS] = "ISO-8859-1"
-    WWW::Mechanize::Util::CODE_DIC[:EUC] = "ISO-8859-1"
+    Mechanize::Util::CODE_DIC[:SJIS] = "ISO-8859-1"
+    Mechanize::Util::CODE_DIC[:EUC] = "ISO-8859-1"
     @@brows.read_timeout = 30
 
     ids = UebungenDotPhysik.find_lecture_ids
