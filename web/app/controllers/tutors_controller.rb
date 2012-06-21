@@ -114,11 +114,11 @@ class TutorsController < ApplicationController
 
   private
   def kill_caches(tutor = nil)
-    logger.info "="*50
-    logger.info "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
-    expire_page :action => "index"
-    expire_page :action => "show", :id => tutor
-    expire_page :action => "preview", :id => tutor
-    expire_page :action => "edit", :id => tutor
+    #~ logger.info "="*50
+    #~ logger.info "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
+    #~ expire_page :action => "index"
+    #~ expire_page :action => "show", :id => tutor
+    #~ expire_page :action => "preview", :id => tutor
+    #~ expire_page :action => "edit", :id => tutor
   end
 end
