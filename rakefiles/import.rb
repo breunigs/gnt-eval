@@ -261,12 +261,14 @@ namespace :misc do
       puts "Loading physics LSF tree…"
       term, rootid = LSF.set_term_and_root(physics[:url])
       physics = LSF.get_tree(rootid)
+      physics.sort! { |x,y| x.type+x.name <=> y.type+y.name }
       puts "LSF Physics OK"
     end
     work_queue.enqueue_b do
       puts "Loading maths LSF tree…"
       term, rootid = LSF.set_term_and_root(maths[:url])
       maths = LSF.get_tree(rootid)
+      maths.sort! { |x,y| x.type+x.name <=> y.type+y.name }
       puts "LSF Maths OK"
     end
 
