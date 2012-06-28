@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-require 'pp'
-
 class CourseProfsController < ApplicationController
   def print
     @cp = CourseProf.find(params[:id])
@@ -28,9 +26,9 @@ class CourseProfsController < ApplicationController
       `#{p}`
 
       if $?.exitstatus == 0
-	flash[:notice] = "Printing job has been submitted. Most likely, the printer will output your sheets soon."
+        flash[:notice] = "Printing job has been submitted. Most likely, the printer will output your sheets soon."
       else
-	flash[:error] = "Printing did not work. There is nothing you can do about it. Call for help."
+        flash[:error] = "Printing did not work. There is nothing you can do about it. Call for help."
       end
 
       # run once again, so all newly created files are accessible by
@@ -44,4 +42,3 @@ class CourseProfsController < ApplicationController
     redirect_to(@cp.course)
   end
 end
-
