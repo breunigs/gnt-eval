@@ -34,7 +34,7 @@ is_new = !is_edit
     </table>
 
     <div class="button-group">
-      <%= f.submit (is_edit ? "Update and Preview #{@form.name}" : "Save and Preview"), :disable_with => "Saving&hellip;".html_safe, :class => "button primary" %>
+      <%= f.submit (is_edit ? "Update and Preview #{@form.name}" : "Save and Preview"), :disable_with => "Saving…", :class => "button primary" %>
       <%= link_to "Discard and Preview #{@form.name}", @form, :class => "button" unless is_new %>
       <%= link_to "Discard and show all forms", forms_path, :class => "button" %>
     </div>

@@ -24,7 +24,7 @@ class Tutor < ActiveRecord::Base
   def evaluate
     I18n.locale = course.language
 
-    b << RT.load_tex_definitions
+    b = RT.load_tex_definitions
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << course.eval_lecture_head
 

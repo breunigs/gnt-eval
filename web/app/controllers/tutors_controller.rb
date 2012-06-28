@@ -120,7 +120,7 @@ class TutorsController < ApplicationController
 
     unless render_tex(tex_code, path, true, true)
       flash[:error] = 'Couldn’t render TeX due to some errors. Have a look at the log file to find out why.'
-      redirect_to redirect_to([@tutor.course, @tutor])
+      redirect_to [@tutor.course, @tutor]
       return
     end
     send_file path, :type => "application/pdf", :x_sendfile => true
