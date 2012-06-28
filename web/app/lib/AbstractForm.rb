@@ -219,7 +219,7 @@ class Question
   # true.
   def get_answers(language = I18n.locale)
     return [] if boxes.nil? || boxes.empty?
-    boxes.collect { |x| x.any_text(language) }
+    boxes.collect { |x| x ? x.any_text(language) : nil }
   end
 
   # question itself in appropriate language and gender
