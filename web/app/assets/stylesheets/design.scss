@@ -333,18 +333,19 @@ span.error {
   color:red;
 }
 
-a, .hold_button input {
+a, .hold_button:not(.hold_button_form_compat) input {
   color:#FF3636;
   text-decoration:none;
   background:transparent;
   cursor:pointer;
   &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
+    border: 0;
     border-bottom:1px dotted #FF3636;
     text-shadow: 0 0 0.05rem rgba(0, 0, 0, 0.1);
   }
 }
 
-.hold_button input {
+.hold_button:not(.hold_button_form_compat) input {
   border:0;
   border-bottom:1px dotted transparent;
   display:inline;
@@ -353,6 +354,10 @@ a, .hold_button input {
   padding:0;
   min-width:0;
   border-radius:0;
+}
+
+.hold_button_form_compat {
+  float:left;
 }
 
 .ui-datepicker {
