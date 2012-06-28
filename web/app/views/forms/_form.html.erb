@@ -62,7 +62,7 @@ is_new = !is_edit
     document.getElementById('result').value = err.toString();
   }*/
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES).html_safe %>;
-  var x = new FormEditor();
+  var x = FormEditor.getInstance();
 </script>
 
 <div>
