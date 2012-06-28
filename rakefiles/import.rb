@@ -22,13 +22,6 @@ class String
   def cleanup_name!
     self.replace(self.cleanup_name)
   end
-
-  # returns given text in UTF-8 encoding
-  def utf8_enc(from = "ISO-8859-1")
-    $iconv ||= {}
-    $iconv[from] ||= Iconv.new('UTF-8', from)
-    $iconv[from].iconv(self + ' ')[0..-2]
-  end
 end
 
 class LaierCSV
