@@ -123,7 +123,7 @@ class TutorsController < ApplicationController
       redirect_to [@tutor.course, @tutor]
       return
     end
-    send_file path, :type => "application/pdf", :x_sendfile => true
+    send_file path, :type => "application/pdf"
     File.delete(path)
   end
 end
