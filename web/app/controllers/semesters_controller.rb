@@ -89,38 +89,4 @@ class SemestersController < ApplicationController
       format.xml  { head :ok }
     end
   end
-
-  #caches_page :index, :edit, :new
-  private
-  def killall_caches
-    logger.info "="*50
-    logger.info "Expiring all caches"
-    expire_page(:action => "index")
-    expire_page(:action => "new")
-    expire_page(:action => "edit")
-
-    expire_page(:controller => "tutors", :action => "index")
-    expire_page(:controller => "tutors", :action => "show")
-    expire_page(:controller => "tutors", :action => "edit")
-    expire_page(:controller => "tutors", :action => "preview")
-
-    expire_page(:controller => "forms", :action => "index")
-    expire_page(:controller => "forms", :action => "show")
-    expire_page(:controller => "forms", :action => "new")
-    expire_page(:controller => "forms", :action => "edit")
-
-    expire_page(:controller => "courses", :action => "index")
-    expire_page(:controller => "courses", :action => "show")
-    expire_page(:controller => "courses", :action => "new")
-    expire_page(:controller => "courses", :action => "edit")
-    expire_page(:controller => "courses", :action => "preview")
-
-    expire_page(:controller => "profs", :action => "index")
-    expire_page(:controller => "profs", :action => "new")
-    expire_page(:controller => "profs", :action => "edit")
-
-    expire_page(:controller => "faculties", :action => "index")
-    expire_page(:controller => "faculties", :action => "new")
-    expire_page(:controller => "faculties", :action => "edit")
-  end
 end

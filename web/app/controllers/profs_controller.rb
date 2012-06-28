@@ -88,26 +88,4 @@ class ProfsController < ApplicationController
       format.xml  { head :ok }
     end
   end
-
-  # Can’t cache index because then apache will serve the cached variant
-  # when submitting the new-prof form
-  #caches_page :new, :edit
-  private
-  def kill_caches(prof = nil)
-    logger.info "="*50
-    logger.info "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
-    expire_page :action => "index"
-    expire_page :action => "new"
-    expire_page(:action => "edit", :id => prof) if prof
-
-    # the list of profs is shown on both new and show pages, therefore
-    # these need to be expired, regardless which prof changed
-    expire_page :controller => "courses", :action => "new"
-    Course.find(:all).each do |c|
-      expire_page :controller => "courses", :action => "edit", :id => c
-    end
-
-    # courses#index shows the prof as well
-    expire_page :controller => "courses", :action => "index"
-  end
 end

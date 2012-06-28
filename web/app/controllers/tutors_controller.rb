@@ -109,16 +109,4 @@ class TutorsController < ApplicationController
       format.xml  { head :ok }
     end
   end
-
-  #caches_page :index, :show, :edit, :preview
-
-  private
-  def kill_caches(tutor = nil)
-    #~ logger.info "="*50
-    #~ logger.info "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
-    #~ expire_page :action => "index"
-    #~ expire_page :action => "show", :id => tutor
-    #~ expire_page :action => "preview", :id => tutor
-    #~ expire_page :action => "edit", :id => tutor
-  end
 end

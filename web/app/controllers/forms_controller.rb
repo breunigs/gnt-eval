@@ -115,37 +115,4 @@ class FormsController < ApplicationController
       format.xml  { head :ok }
     end
   end
-
-  #caches_page :index, :show, :new, :edit
-  private
-  def kill_caches(form = nil)
-    logger.info "="*50
-    logger.info "Expiring form caches" + (form ? " for #{form.title}" : "")
-    expire_page :action => "index"
-    expire_page :action => "new"
-    if form
-      expire_page :action => "show", :id => form
-      expire_page :action => "edit", :id => form
-      $loaded_yaml_sheets[form.id] = nil if $loaded_yaml_sheets
-    end
-
-    # need to expire all edit+new pages, in case a form was added
-    if defined? Course && !Course.nil?
-      Course.find(:all) do |c|
-        logger.info "Expiring courses#edit+new caches for #{c.title}"
-        expire_page :controller => "courses", :action => "edit", :id => c
-        expire_page :controller => "courses", :action => "new", :id => c
-      end
-    end
-
-    return unless form
-    form.courses.each do |c|
-      logger.info "Expiring courses#show caches for #{c.title}"
-      expire_page :controller => "courses", :action => "show", :id => c
-      c.profs.each do |p|
-        logger.info "Expiring profs#edit for #{p.surname}"
-        expire_page :controller => "profs", :action => "edit", :id => p
-      end
-    end
-  end
 end

@@ -199,11 +199,6 @@ class CoursesController < ApplicationController
       @course.profs.delete(@prof)
     end
 
-    # kill caches and update the deleted prof’s page as well (not
-    # catched by kill_caches)
-    kill_caches @course
-    expire_page :controller => "profs", :action => "show", :id => @prof
-
     respond_to do |format|
       flash[:error] = "Course was critical and therefore prof #{@prof.fullname} has been kept." if @course.critical?
       format.html { redirect_to(@course) }
@@ -284,34 +279,5 @@ class CoursesController < ApplicationController
     return true if f.has_language?(l)
     flash[:error] = "There’s no language “#{l}” for form “#{f.name}”"
     false
-  end
-
-  # Can’t cache index because it has searching via query string but the
-  # page cache ignores it.
-  #caches_page :new, :show, :edit, :preview
-  def kill_caches(course = nil)
-    logger.info "="*50
-
-    expire_page :action => "index"
-
-    return unless course
-    expire_page :action => "edit", :id => course
-    expire_page :action => "preview", :id => course
-    expire_page :action => "show", :id => course
-
-    # course title and form are listed on the prof’s page.
-    course.profs.each do |p|
-      logger.info "Expiring profs#show for #{p.surname}"
-      expire_page :controller => "profs", :action => "show", :id => p.id
-    end
-
-    course.tutors.each do |t|
-      logger.info "Expiring tutors#show for #{t.abbr_name}"
-      # tutor is now subpage of courses, needs to be adjusted before
-      # enabling caching again FIXME
-      #expire_page :controller => "tutors", :action => "show", :id => t.id
-    end
-    logger.info "Expiring tutors#index"
-    expire_page :controller => "tutors", :action => "index"
   end
 end

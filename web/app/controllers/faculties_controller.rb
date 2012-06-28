@@ -88,28 +88,4 @@ class FacultiesController < ApplicationController
       format.xml  { head :ok }
     end
   end
-
-  #caches_page :index, :new, :edit
-  private
-  def kill_caches(faculty = nil)
-    logger.info "="*50
-    logger.info "Expiring faculty caches" + (faculty ? " for #{faculty.longname}" : "")
-    expire_page :action => "index"
-    expire_page :action => "new"
-    expire_page :action => "edit", :id => faculty
-
-    expire_page :controller => "courses", :action => "index"
-    expire_page :controller => "courses", :action => "new"
-    # need to expire all edit/new pages, in case a faculty was added
-    Course.find(:all).each do |c|
-      logger.info "Expiring courses#new+edit for #{c.title}"
-      expire_page :controller => "courses", :action => "edit", :id => c
-    end
-
-    return unless faculty
-    faculty.courses.each do |c|
-      logger.info "Expiring courses#show for #{c.title}"
-      expire_page :controller => "courses", :action => "show", :id => c
-    end
-  end
 end

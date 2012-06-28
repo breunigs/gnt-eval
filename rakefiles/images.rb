@@ -93,9 +93,6 @@ namespace :images do
     cp = SCc[:cp_comment_image_directory]
     mkdir = SCc[:mkdir_comment_image_directory]
 
-    expire_course_cache = []
-    expire_tutor_cache = []
-
     Semester.currently_active.each do |sem|
       system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}\"")
       path=File.join(File.dirname(__FILE__), "tmp/images")
@@ -163,12 +160,10 @@ namespace :images do
 
 	  p = Pic.new
 	  p.tutor_id = tutors[tut_num-1].id
-	  expire_tutor_cache << tutors[tut_num-1]
 	else # files for the course/prof. Should be split up. FIXME.
 	  next if cpics.any? { |x| x.basename == bname }
 	  p = CPic.new
 	  p.course_prof = course_prof
-	  expire_course_cache << course_prof.course
 	end
 	p.basename = bname
 	# let rails know about this comment
@@ -178,11 +173,6 @@ namespace :images do
 	print_progress(curr+1, allfiles.size)
       end # Dir glob
     end # Semester.each
-
-    # FIXME
-    #puts "Expiring caches for courses#edit and tutors#edit"
-    #expire_course_cache.each { |c| expire_page :controller => "courses", :action => "edit", :id => c }
-    #expire_tutor_cache.each { |t| expire_page :controller => "tutors", :action => "edit", :id => t }
 
     puts
     puts "Done."
