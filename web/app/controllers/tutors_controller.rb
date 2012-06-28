@@ -62,8 +62,6 @@ class TutorsController < ApplicationController
       end
     end
 
-    kill_caches
-
     respond_to do |format|
       if errors.empty?
         flash[:notice] = 'Tutor was successfully created.'
@@ -78,7 +76,6 @@ class TutorsController < ApplicationController
   # PUT /tutors/1.xml
   def update
     @tutor = Tutor.find(params[:id])
-    kill_caches @tutor
     expire_fragment("tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
 
     respond_to do |format|
@@ -98,7 +95,6 @@ class TutorsController < ApplicationController
   def destroy
     @tutor = Tutor.find(params[:id])
 
-    kill_caches @tutor
     # expire preview cache as well
     expire_fragment("tutors_#{params[:id]}")
     @tutor.destroy unless @tutor.critical?

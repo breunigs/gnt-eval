@@ -42,7 +42,6 @@ class SemestersController < ApplicationController
   # POST /semesters
   # POST /semesters.xml
   def create
-    killall_caches
     @semester = Semester.new(params[:semester])
 
     respond_to do |format|
@@ -60,7 +59,6 @@ class SemestersController < ApplicationController
   # PUT /semesters/1
   # PUT /semesters/1.xml
   def update
-    killall_caches
     @semester = Semester.find(params[:id])
 
     respond_to do |format|
@@ -78,7 +76,6 @@ class SemestersController < ApplicationController
   # DELETE /semesters/1
   # DELETE /semesters/1.xml
   def destroy
-    killall_caches
     @semester = Semester.find(params[:id])
     d = @semester.critical? || @semester.courses.any?
     @semester.destroy unless d

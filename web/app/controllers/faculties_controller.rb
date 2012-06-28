@@ -43,7 +43,6 @@ class FacultiesController < ApplicationController
   # POST /faculties.xml
   def create
     @faculty = Faculty.new(params[:faculty])
-    kill_caches @faculty
 
     respond_to do |format|
       if @faculty.save
@@ -61,7 +60,6 @@ class FacultiesController < ApplicationController
   # PUT /faculties/1.xml
   def update
     @faculty = Faculty.find(params[:id])
-    kill_caches @faculty
 
     respond_to do |format|
       if @faculty.update_attributes(params[:faculty])
@@ -80,7 +78,6 @@ class FacultiesController < ApplicationController
   def destroy
     @faculty = Faculty.find(params[:id])
     @faculty.destroy unless @faculty.critical?
-    kill_caches @faculty
 
     respond_to do |format|
       flash[:error] = 'Faculty was critical and has therefore not been destroyed.' if @faculty.critical?

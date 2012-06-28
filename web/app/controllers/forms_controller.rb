@@ -44,8 +44,6 @@ class FormsController < ApplicationController
   def create
     @form = Form.new(params[:form])
 
-    kill_caches
-
     respond_to do |format|
       if @form.save
         flash[:notice] = 'Form was successfully created.'
@@ -61,7 +59,6 @@ class FormsController < ApplicationController
   # PUT /forms/1
   def update
     @form = Form.find(params[:id])
-    kill_caches @form
 
     if @form.critical?
       flash[:error] = 'Form was critical and has therefore not been updated.'
@@ -78,8 +75,6 @@ class FormsController < ApplicationController
   def destroy
     @form = Form.find(params[:id])
     @form.destroy unless @form.critical?
-
-    kill_caches @form
 
     respond_to do |format|
       flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?

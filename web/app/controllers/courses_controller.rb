@@ -129,7 +129,6 @@ class CoursesController < ApplicationController
   # POST /courses.xml
   def create
     @course = Course.new(params[:course])
-    kill_caches
 
     respond_to do |format|
       if form_lang_combo_valid? && @course.save
@@ -148,7 +147,6 @@ class CoursesController < ApplicationController
   # PUT /courses/1.xml
   def update
     @course = Course.find(params[:id])
-    kill_caches @course
     expire_fragment("preview_courses_#{params[:id]}") if @course.summary != params[:course][:summary]
 
     respond_to do |format|
@@ -178,7 +176,6 @@ class CoursesController < ApplicationController
   # DELETE /courses/1.xml
   def destroy
     @course = Course.find(params[:id])
-    kill_caches @course
     # expire preview cache as well
     expire_fragment("preview_courses_#{params[:id]}")
 
@@ -217,10 +214,6 @@ class CoursesController < ApplicationController
       @course = Course.find(params[:id])
       @prof = Prof.find(params[:courses][:profs])
       @course.profs << @prof
-
-      # kill caches after the prof is being added, so that the new prof
-      # will get an updated page
-      kill_caches @course
 
       respond_to do |format|
         format.html { redirect_to(@course) }

@@ -43,7 +43,6 @@ class ProfsController < ApplicationController
   # POST /profs.xml
   def create
     @prof = Prof.new(params[:prof])
-    kill_caches
 
     respond_to do |format|
       if @prof.save
@@ -61,7 +60,6 @@ class ProfsController < ApplicationController
   # PUT /profs/1.xml
   def update
     @prof = Prof.find(params[:id])
-    kill_caches @prof
     respond_to do |format|
       if @prof.update_attributes(params[:prof])
         flash[:notice] = "Prof '#{@prof.firstname} #{@prof.surname}' was successfully updated."
@@ -79,8 +77,6 @@ class ProfsController < ApplicationController
   def destroy
     @prof = Prof.find(params[:id])
     @prof.destroy unless @prof.critical?
-
-    kill_caches @prof
 
     respond_to do |format|
       flash[:error] = 'Prof was critical and has therefore not been destroyed.' if @prof.critical?
