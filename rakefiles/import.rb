@@ -130,6 +130,7 @@ class UebungenDotPhysik
       tuts = code.scan(/<li><a href=\'teilnehmer\.php\?gid=[0-9]+\'><b>(?:.*?)<\/b><\/a> \((.*?)\) <br>/)
       tutors = tuts.map { |t| t[0].cleanup_name }.compact
       tutors.reject! { |t| t.empty? }
+      tutors.map! { |t| UebungenDotPhysik.fix_enc(t) }
 
       data = { :title => title, :lecturer => lect,
 	      :students => students, :tutors => tutors }
