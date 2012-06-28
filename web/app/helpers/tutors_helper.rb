@@ -12,7 +12,7 @@ module TutorsHelper
   end
 
   def tutor_result_pdf_link
-    link_to "⬇ result.pdf", course_tutor_result_pdf_path(@tutor.course, @tutor), :class => "button"
+    render 'shared/hold_button', :url => course_tutor_result_pdf_path(@tutor.course, @tutor), :name => "⬇ result.pdf (slow)", :id => "resultpdf", :button => true
   end
 
   def comment_image_link
