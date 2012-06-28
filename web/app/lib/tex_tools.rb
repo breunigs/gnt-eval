@@ -123,8 +123,10 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
     puts
     puts "Done, have a look at #{pdf_path}"
+    return true
   else
     puts "Rendering your TeX Code failed."
+    return false
   end
 end
 
