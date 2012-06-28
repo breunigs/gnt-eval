@@ -20,6 +20,44 @@ class Tutor < ActiveRecord::Base
     course.critical? || course.returned_sheets > 0
   end
 
+  # Evaluates this tutor only.
+  def evaluate
+    I18n.locale = course.language
+
+    b << RT.load_tex_definitions
+    b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
+    b << course.eval_lecture_head
+
+    if returned_sheets <= SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+      return b
+    end
+
+    # walk all questions, one section at a time. Simplified version of
+    # the same loop in courses.rb#evaluate. Only one tutor is relevant
+    # here.
+    form.sections.each do |section|
+      questions = Array.new(section.questions)
+      # walk all questions in this section
+      while !questions.empty?
+        # find all questions in this sections until repeat_for changes
+        repeat_for = questions.first.repeat_for
+        block = []
+        while !questions.empty? && questions.first.repeat_for == repeat_for
+          block << questions.shift
+        end
+
+        # now evaluate that block of questions
+        if repeat_for == :tutor
+          s = section.any_title
+          b << eval_block(block, s)
+        end
+      end
+    end
+
+    return b
+  end
+
   def eval_block(questions, section)
     b = RT.include_form_variables(self)
     # may be used to reference a specific tutor. For example, the tutor_

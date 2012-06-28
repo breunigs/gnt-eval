@@ -1,6 +1,6 @@
 <div>
   <h2>Showing <%=@tutor.abbr_name%></h2>
-  <div class="button-group"><%=tutor_edit_link + tutor_return_link %></div>
+  <div class="button-group"><%=tutor_edit_link + tutor_result_pdf_link + tutor_return_link %></div>
   <br/>
   <br/>
 
@@ -21,6 +21,6 @@
 <div>
   <div class="button-group">
     <%= link_to 'Show preview in full', { :action => 'preview', :id => @tutor}, :class => "button primary" %>
-    <%=tutor_edit_link + tutor_return_link %>
+    <%=tutor_edit_link + tutor_result_pdf_link + tutor_return_link %>
   </div>
 </div>

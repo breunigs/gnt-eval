@@ -4,11 +4,15 @@ module TutorsHelper
   include FunkyTeXBits
 
   def tutor_edit_link
-    link_to "Edit '#{@tutor.abbr_name}'", edit_course_tutor_path(@tutor.course, @tutor), :class => "button"
+    link_to "✎ Edit '#{@tutor.abbr_name}'", edit_course_tutor_path(@tutor.course, @tutor), :class => "button"
   end
 
   def tutor_return_link
-    link_to "Return to '#{@tutor.course.title}'", @tutor.course, :class => "button"
+    link_to "⤶ Return to '#{@tutor.course.title}'", @tutor.course, :class => "button"
+  end
+
+  def tutor_result_pdf_link
+    link_to "⬇ result.pdf", course_tutor_result_pdf_path(@tutor.course, @tutor), :class => "button"
   end
 
   def comment_image_link

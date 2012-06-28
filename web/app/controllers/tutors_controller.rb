@@ -105,4 +105,25 @@ class TutorsController < ApplicationController
       format.xml  { head :ok }
     end
   end
+
+  def result_pdf
+    @tutor = Tutor.find(params[:id])
+    if @tutor.nil?
+      flash[:error] = 'No tutor with this ID has been found'
+      redirect_to tutors_path
+      return
+    end
+
+    pdf_path = temp_dir("tutor_result_pdf")
+    path = pdf_path + "/tutor_eval_#{@tutor.id}.pdf"
+    tex_code = @tutor.evaluate
+
+    unless render_tex(tex_code, path, true, true)
+      flash[:error] = 'Couldn’t render TeX due to some errors. Have a look at the log file to find out why.'
+      redirect_to redirect_to([@tutor.course, @tutor])
+      return
+    end
+    send_file path, :type => "application/pdf", :x_sendfile => true
+    File.delete(path)
+  end
 end

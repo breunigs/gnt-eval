@@ -12,7 +12,8 @@ Seee::Application.routes.draw do
   match "/tutors" => "tutors#index"
   resources :courses do
     resources :tutors
-    get "/tutors/:id/preview" => "tutors#preview"
+    get "/tutors/:id/preview" => "tutors#preview", :as => "tutor_preview"
+    get "/tutors/:id/result_pdf" => "tutors#result_pdf", :as => "tutor_result_pdf"
     member do
       post "/add_prof" => "courses#add_prof"
       delete "/drop_prof" => "courses#drop_prof"
