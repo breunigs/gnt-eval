@@ -19,16 +19,22 @@ class CoursesController < ApplicationController
     cond = "semester_id IN (?)"
     vals = view_context.get_selected_semesters.map { |s| s.id }
 
-    # filter by search term. If none given, search will return all
-    # courses that match the additional filter criteria.
-    @courses = Course.search(params[:search], [:profs, :faculty], [cond], [vals], [:faculty_id, :title])
+    # filter by search term. Provide it as additional array, so the table
+    # may hide entries instead of not showing them at all. This allows
+    # javascript filtering, even if a query was submitted via HTTP.
+    if params[:search]
+      @matches = Course.search(params[:search], [:profs, :faculty], [cond], [vals], [:faculty_id, :title])
 
-    # if a search was performed and there is exactly one result go to it
-    # directly instead of listing it
-    if params[:search] && @courses.size == 1
-      redirect_to(@courses.first)
-      return
+      # if a search was performed and there is exactly one result go to it
+      # directly instead of listing it
+      if @matches.size == 1
+        redirect_to(@matches.first)
+        return
+      end
     end
+
+    # find all courses
+    @courses = Course.search(nil, [:profs, :faculty], [cond], [vals], [:faculty_id, :title])
 
     # otherwise, render list of courses
     respond_to do |format|

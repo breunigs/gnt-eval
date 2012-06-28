@@ -14,7 +14,7 @@
     </thead>
     <tbody>
       <% @courses.each do |course| %>
-        <tr>
+        <tr<%=@matched && !@matched.include?(course) ? %( style="display:none") : "" %>>
           <td><%= link_to course.title.truncate(50), course, :title => course.title %></td>
           <td><%=course.students || "MISSING" %></td>
           <td><%=course.evaluator %></td>
