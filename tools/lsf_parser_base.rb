@@ -102,7 +102,6 @@ class LSF
     s = SEARCH_URL.gsub("LECTURE", lecture)
     s.gsub!("SURNAME", prof)
     s.gsub!("TERM", LSF.guess_term)
-
     lect_ids = load_url(s).scan(/publishid=([0-9]+)&/).flatten
     lects = lect_ids.map { |l| [*LSF.get_lecture(l)] }
     # remove all lectures whose skip attribute is set to true
@@ -347,7 +346,7 @@ class LSF
     term_summer = Date.new(y, 3, 1)..Date.new(y, 8, 31)
     term_winter_newyear = Date.new(y, 1, 1)..Date.new(y, 3, 1)
 
-    summer = term_summer.include?(DateTime.now)
+    summer = term_summer.include?(Date.today)
     # if we’re in winter term, but already celebrated new years…
     y -= 1 if !summer && term_winter_newyear.include?(DateTime.now)
     "#{y}#{summer ? 1 : 2}"
