@@ -590,7 +590,7 @@ class AbstractForm
         b << "\n"
         sect_open = true
         s.questions.each do |q|
-          quest = q.to_tex(lang, gender)
+          quest = q.to_tex(lang, :both)
           # need to remove line breaks at the end to avoid spacing issues
           b << (sect_open ? quest.strip : quest)
           b << "\n}\n\n" if sect_open
