@@ -63,6 +63,7 @@ is_new = !is_edit
   }*/
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES).html_safe %>;
   var x = FormEditor.getInstance();
+  x.setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>);
 </script>
 
 <div>
