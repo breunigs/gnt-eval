@@ -1,5 +1,10 @@
 # encoding: utf-8
 
+# always recording metadata allows us to show the task list from within
+# the default task, speeding up "rake" which is used more often than
+# the actual rake tasks.
+Rake::TaskManager.record_task_metadata = true
+
 require './web/config/ext_requirements.rb'
 Bundler.require(:rakefiles)
 
@@ -74,7 +79,9 @@ require './custom_build/build.rb'
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
-  system("rake -sT")
+  Rake::application.options.show_tasks = :tasks
+  Rake::application.options.show_task_pattern = //
+  Rake::application.display_tasks_and_comments
 end
 
 namespace :misc do
