@@ -6,9 +6,7 @@
 Rake::TaskManager.record_task_metadata = true
 
 require './web/config/ext_requirements.rb'
-Bundler.require(:rakefiles)
-
-include Magick
+Bundler.setup(:rakefiles)
 
 require 'rake/clean'
 CLEAN.include('tmp/**/*.log', 'tmp/**/*.out', 'tmp/**/*.aux',
