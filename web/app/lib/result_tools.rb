@@ -11,7 +11,7 @@ require "singleton"
 require "dbi"
 
 cdir = File.dirname(__FILE__)
-require File.join(File.dirname(__FILE__), "../../config", "seee_config.rb")
+require File.join(cdir, "../../config", "seee_config.rb")
 
 class ResultTools
   # only allow one instance of this class
