@@ -54,7 +54,10 @@ def make_sample_sheet(form, lang)
 
   puts "Wrote #{filename}.tex"
   tex_to_pdf("#{filename}.tex", true)
+  lines_posout = %x{wc -l #{filename}.posout}.split.first.to_i
   `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+  lines_yaml = %x{wc -l #{filename}.yaml}.split.first.to_i
+  raise "Converting error: # lines of posout and yaml differ." if lines_yaml != lines_posout
   filename
 end
 
