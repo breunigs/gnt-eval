@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 # PEST
 # Praktisches Evaluations ScripT
@@ -36,4 +37,3 @@ ARGV.each do |file|
     f.write newfile
     f.close
 end
-
