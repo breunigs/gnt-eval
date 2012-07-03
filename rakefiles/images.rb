@@ -45,13 +45,13 @@ namespace :images do
           if zbar_result.nil? || (not CourseProf.exists?(barcode))
             puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
             FileUtils.makedirs(File.join(sort_path, "bizarre"))
-            File.move(f, File.join(sort_path, "bizarre"))
+            FileUtils.move(f, File.join(sort_path, "bizarre"))
           else
             form = CourseProf.find(barcode).course.form.id.to_s + '_' +
               CourseProf.find(barcode).course.language.to_s
 
             FileUtils.makedirs(File.join(sort_path, form))
-            File.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
+            FileUtils.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
           end
 
           curr += 1
