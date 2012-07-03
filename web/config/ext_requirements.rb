@@ -32,9 +32,13 @@ reqs = []
 reqs << File.join(cdir, "initializers/001_requirements.rb")
 reqs << File.join(cdir, "initializers/002_constants.rb")
 reqs += Dir.glob(File.join(cdir, "../app/lib/*.rb"))
-reqs += Dir.glob(File.join(cdir, "../app/models/*.rb"))
 
 reqs.uniq.each do |d|
   next if d.end_with?(File.basename(__FILE__))
   require d
+end
+
+# autoload models instead
+Dir.glob(File.join(cdir, "../app/models/*.rb")).each do |model|
+  autoload File.basename(model, ".rb").classify, model
 end
