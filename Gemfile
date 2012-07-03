@@ -56,7 +56,6 @@ gem "dbd-sqlite3"
 group :rakefiles do
   gem "mechanize" # only used in rakefiles/import.rb
   gem "text" # only used in rakefiles/import.rb via lib/friends.rb
-  gem "rmagick", :require => "RMagick"
 end
 
 # gems required for OMR
