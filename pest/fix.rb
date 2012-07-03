@@ -33,7 +33,7 @@ require 'gtk2'
 require 'tempfile'
 require 'yaml'
 require 'pp'
-require 'ftools'
+require 'fileutils'
 
 cdir = File.dirname(__FILE__)
 

@@ -25,7 +25,7 @@ require 'rubygems'
 require 'optparse'
 require 'yaml'
 require 'pp'
-require 'ftools'
+require 'fileutils'
 require 'tempfile'
 
 require cdir + '/helper.misc.rb' # also loads rmagick
