@@ -1,10 +1,6 @@
 # encoding: utf-8
 
-require 'rubygems'
-require 'date'
-require 'mechanize'
-# need rails connection
-require "#{GNT_ROOT}/web/config/environment"
+autoload :Date, "date"
 
 class String
   # convert “surname, firstname” to “firstname surname” and remove
