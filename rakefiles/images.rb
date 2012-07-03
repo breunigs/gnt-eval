@@ -193,7 +193,7 @@ namespace :images do
         target = File.join(SCfp[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")
         next if File.exists?(target)
         file = make_sample_sheet(form, lang)
-        `mv -f "#{file}.yaml" "#{target}"`
+        FileUtils.move("#{file}.yaml", target)
       end
     end
   end

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
 require './web/config/ext_requirements.rb'
 Bundler.require(:rakefiles)
