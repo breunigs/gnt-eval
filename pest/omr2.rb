@@ -203,15 +203,15 @@ class PESTOmr < PESTDatabaseTools
     else # single choice question
       case checked.size
         # only one checkbox remains, so go for it
-        when 1: checked.first.choice
-        when 0: # no checkboxes. We're officially desperate now. Let’s
-                # try again with lower standards.
+        when 1 then checked.first.choice
+        when 0 then # no checkboxes. We're officially desperate now. Let’s
+                    # try again with lower standards.
           barely = question.boxes.select { |x| x.is_barely_checked? }
           case barely.size
-            when 1: barely.first.choice # one barely checked, take it
+            when 1 then barely.first.choice # one barely checked, take it
             # no barely checked either. If there are any overfull ones,
             # ask the user; otherwise the question really wasn’t answered
-            when 0: ((question.boxes.any? { |x| x.is_overfull? }) ? ANSW_FAIL : ANSW_NONE)
+            when 0 then ((question.boxes.any? { |x| x.is_overfull? }) ? ANSW_FAIL : ANSW_NONE)
             else    ANSW_FAIL # at least two boxes are barely checked, ask user
           end
         else ANSW_FAIL # at least two boxes are checked, ask user
