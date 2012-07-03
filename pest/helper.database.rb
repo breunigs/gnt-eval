@@ -5,7 +5,7 @@
 
 cdir = File.dirname(__FILE__)
 require cdir + '/helper.misc.rb'
-require cdir + '/../lib/result_tools.rb'
+require cdir + '/../web/app/lib/result_tools.rb'
 
 class PESTDatabaseTools
   RT = ResultTools.instance
@@ -20,10 +20,10 @@ class PESTDatabaseTools
   def list_available_tables
     tables = []
     x = case Seee::Config.external_database[:dbi_handler].downcase
-      when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table'"
-      when "mysql":   "SHOW TABLES"
+      when "sqlite3" then "SELECT name FROM sqlite_master WHERE type='table'"
+      when "mysql"   then "SHOW TABLES"
       # via http://bytes.com/topic/postgresql/answers/172978-sql-command-list-tables#post672429
-      when "pg":      "select c.relname FROM pg_catalog.pg_class c
+      when "pg"      then "select c.relname FROM pg_catalog.pg_class c
   LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
   WHERE c.relkind IN ('r','') AND n.nspname NOT IN ('pg_catalog', 'pg_toast')
   AND pg_catalog.pg_table_is_visible(c.oid);"

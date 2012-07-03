@@ -27,6 +27,7 @@ require 'yaml'
 require 'pp'
 require 'fileutils'
 require 'tempfile'
+require "unicode_utils"
 
 require cdir + '/helper.misc.rb' # also loads rmagick
 
@@ -36,9 +37,9 @@ require cdir + '/helper.drawing.rb'
 require cdir + '/helper.constants.rb'
 require cdir + '/helper.image.rb'
 
-require cdir + '/../lib/AbstractForm.rb'
+require cdir + '/../web/app/lib/AbstractForm.rb'
 require cdir + '/helper.AbstractFormExtended.rb'
-require cdir + '/../lib/RandomUtils.rb'
+require cdir + '/../web/app/lib/RandomUtils.rb'
 
 # Profiler. Uncomment code at the end of this file, too.
 #~ require 'ruby-prof'
@@ -730,8 +731,10 @@ class PESTOmr < PESTDatabaseTools
         opts.on( '-h', '--help', 'Display this screen' ) { puts opts; exit }
       end
       opt.parse!
-    rescue
+    rescue Exception => e
       puts "Parsing arguments didn't work. Please check your commandline is correct."
+      puts "Error given:"
+      puts e
       puts
       opt.parse(["-h"]) if !@path || !@omrsheet
       exit

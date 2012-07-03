@@ -15,7 +15,7 @@ cdir = File.dirname(__FILE__)
 # been built. We avoid starting rails (which is slow) by manually
 # defining RAILS_ROOT because we know where it is relative to this file.
 RAILS_ROOT = "#{cdir}/../web" unless defined?(RAILS_ROOT)
-class Rails
+module Rails
   def self.root
     RAILS_ROOT
   end
