@@ -34,6 +34,6 @@ ARGV.each do |file|
   end
   f.close
   f = File.open(file.gsub(/posout$/, "yaml"), "w+")
-  f.write newfile#.join
+  f.write newfile.join
   f.close
 end
