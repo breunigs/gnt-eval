@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-autoload :Date, "date"
-
 class String
   # convert “surname, firstname” to “firstname surname” and remove
   # titles
