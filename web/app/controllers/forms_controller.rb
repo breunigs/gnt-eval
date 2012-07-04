@@ -64,6 +64,7 @@ class FormsController < ApplicationController
       flash[:error] = 'Form was critical and has therefore not been updated.'
       redirect_to(@form)
     elsif @form.update_attributes(params[:form])
+      $loaded_yaml_sheets[params[:id]] = nil
       redirect_to @form, notice: 'Form was successfully updated.'
     else
       render :action => "edit"
@@ -74,7 +75,10 @@ class FormsController < ApplicationController
   # DELETE /forms/1.xml
   def destroy
     @form = Form.find(params[:id])
-    @form.destroy unless @form.critical?
+    unless @form.critical?
+      @form.destroy
+      $loaded_yaml_sheets[params[:id]] = nil
+    end
 
     respond_to do |format|
       flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
