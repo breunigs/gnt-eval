@@ -216,6 +216,23 @@ class ResultTools
     v # return the result; or nil if an error occurred
   end
 
+  # works the same as custom_query but never returns a result.
+  def custom_query_no_result(query, values = [])
+    raise "values parameter must be an array." unless values.is_a?(Array)
+    check_query(query, values)
+    q = @dbh.prepare(query)
+    begin
+      q.execute(*values.flatten)
+    rescue DBI::DatabaseError => e
+      warn ""
+      warn "Query:  #{query}"
+      warn "Values: #{values.join(", ")}"
+      raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}). Query was: #{query}"
+    ensure
+      q.finish
+    end
+  end
+
   # initializes a database connection. Since this class includes the
   # singleton mixin, only one connection will be opened per Ruby
   # instance.

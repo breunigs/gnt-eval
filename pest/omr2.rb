@@ -555,8 +555,8 @@ class PESTOmr < PESTDatabaseTools
     # don't write to DB in test mode
     return if @test_mode
     begin
-      RT.custom_query("DELETE FROM #{yaml.db_table} WHERE path = ?", [filename])
-      RT.custom_query(q, vals)
+      RT.custom_query_no_result("DELETE FROM #{yaml.db_table} WHERE path = ?", [filename])
+      RT.custom_query_no_result(q, vals)
     rescue DBI::DatabaseError => e
       debug "Failed to insert #{File.basename(filename)} into database."
       debug q
