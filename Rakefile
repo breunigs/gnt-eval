@@ -5,7 +5,7 @@
 # the actual rake tasks.
 Rake::TaskManager.record_task_metadata = true
 
-require './web/config/ext_requirements.rb'
+require './web/config/environment.rb'
 Bundler.setup(:rakefiles)
 
 require 'rake/clean'
