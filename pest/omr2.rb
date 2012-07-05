@@ -591,7 +591,7 @@ class PESTOmr < PESTDatabaseTools
 
     oldsize = files.size
     RT.custom_query("SELECT path FROM #{db_table}").each do |row|
-      files -= row
+      files -= row["path"]
     end
     if oldsize != files.size
       debug "  WARNING: #{oldsize-files.size} files already exist and have been skipped."

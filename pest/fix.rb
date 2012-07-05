@@ -27,35 +27,16 @@
 SUPPORTED_TYPES = ["square"]
 
 # includes #############################################################
-require 'base64'
-require 'rubygems'
-require 'gtk2'
-require 'tempfile'
-require 'yaml'
-require 'pp'
-require 'fileutils'
-
 cdir = File.dirname(__FILE__)
-
-# This allows loading the custom ImageMagick/RMagick version if it has
-# been built. We avoid starting rails (which is slow) by manually
-# defining RAILS_ROOT because we know where it is relative to this file.
-RAILS_ROOT = "#{cdir}/../web"
-class Rails
-  def self.root
-    RAILS_ROOT
-  end
-end
-
-require cdir + '/../web/config/initializers/seee_config.rb'
-require Seee::Config.file_paths[:rmagick]
+require cdir + '/../web/config/ext_requirements.rb'
+Bundler.require(:pest)
 
 require File.join(cdir, 'helper.boxtools.rb')
 require File.join(cdir, 'helper.database.rb')
 require File.join(cdir, 'helper.constants.rb')
 require File.join(cdir, 'helper.misc.rb')
 
-require File.join(cdir, './../lib/rails_requirements.rb')
+
 require File.join(cdir, 'helper.AbstractFormExtended.rb')
 
 
@@ -133,7 +114,7 @@ class PESTFix < PESTDatabaseTools
     debug "Loading current value from DB"
     table = @current_question["table"]
     x = RT.custom_query("SELECT #{current_db_column} FROM #{table} WHERE path = ?", [current_path], true)
-    @current_db_value = x[0].to_i
+    @current_db_value = x[current_db_column].to_i
   end
 
   # stores the given value for the current question in the DB and calls
@@ -145,7 +126,7 @@ class PESTFix < PESTDatabaseTools
       debug nil, "db_save"
       table = @current_question["table"]
       field = @current_question["question"].db_column
-      RT.custom_query("UPDATE #{table} SET #{field} = ? WHERE path = ?",
+      RT.custom_query_no_result("UPDATE #{table} SET #{field} = ? WHERE path = ?",
                                                   [value, current_path])
       debug "Set DB value to #{value}", "db_save"
 
@@ -177,8 +158,7 @@ class PESTFix < PESTDatabaseTools
   # loads the value stored in the DB for the given question
   def db_value_for_question(q)
     col = q["question"].db_column
-    RT.custom_query("SELECT #{col} FROM #{q["table"]} WHERE path = ?",
-      [q["path"]], true)[col]
+    RT.custom_query("SELECT #{col} FROM #{q["table"]} WHERE path = ?", [q["path"]], true)[col]
   end
 
   # Undo will first view the question without making any changes if it
@@ -216,23 +196,23 @@ class PESTFix < PESTDatabaseTools
       res = RT.custom_query(q)
       res.each do |q|
         # skip all files that have already been processed
-        next if @all_processed_paths.include?(q[0])
-        @all_processed_paths << q[0]
-        form = Marshal.load(Base64.decode64(q[1]))
+        next if @all_processed_paths.include?(q["path"])
+        @all_processed_paths << q["path"]
+        form = Marshal.load(Base64.decode64(q["abstract_form"]))
         # use the database result to check if a question is failed.
         # AbstractForm is never changed, so already fixed questions need
         # to be excluded.
-        form.questions.select { |qq| q[qq.db_column] == -1 }.each do |qq|
-          ident = "#{q[0]}_#{qq.db_column}"
+        form.questions.select { |qq| q[qq.db_column].to_i == -1 }.each do |qq|
+          ident = "#{q["path"]}_#{qq.db_column}"
           # skip existing entries
           next unless @all_failed_questions.assoc(ident).nil?
           data = {}
-          data["path"] = q[0]
+          data["path"] = q["path"]
           data["table"] = t
-          data["question"] = qq
           form.pages.each_with_index do |p,i|
             data["page"] = i if p.questions.include?(qq)
           end
+          data["question"] = qq
           @all_failed_questions << [ident, data]
           new_questions += 1
         end
@@ -255,7 +235,7 @@ class PESTFix < PESTDatabaseTools
     find_all_failed_questions
     @all_failed_questions.each do |q|
       # skip questions that are not failed anymore
-      next unless db_value_for_question(q[1]) == -1
+      next unless db_value_for_question(q[1]).to_i == -1
 
       debug "Found failed question"
       self.current_question = q[1]
@@ -291,7 +271,7 @@ class PESTFix < PESTDatabaseTools
       # only add tables if they exist AND have an abstract_form column
       begin
         form = RT.custom_query("SELECT abstract_form FROM #{t}", [], true)
-        form = Marshal.load(Base64.decode64(form[0]))
+        form = Marshal.load(Base64.decode64(form["abstract_form"]))
         valid_fields = form.questions.collect do |q|
           SUPPORTED_TYPES.include?(q.type) ? q.db_column : nil
         end
@@ -626,7 +606,7 @@ class PESTFix < PESTDatabaseTools
 
   # Loads the image at given path into memory
   def load_image_from_disk(path)
-    return if @load_image_from_disk == path
+    return true if @load_image_from_disk == path
     @load_image_from_disk = path
     debug "Loading image at #{path}", "loading_img"
     # Destroy old image
@@ -640,15 +620,10 @@ class PESTFix < PESTDatabaseTools
       # application. It provides no info for the user what
       # went wrong, but that shouldn't happen.
       debug "ERROR: Image File not found: " + path
-      @orig = Magick::ImageList.new
-      @doc.pages.size.times do
-        @orig << Magick::Image.new(2480, 3507) {
-          self.background_color = 'grey'
-        }
-        @dpifix = 1
-      end
+      return false
     end
     debug "Loaded image", "loading_img"
+    true
   end
 
   # This does most of the work related to generating the image. It
@@ -660,7 +635,7 @@ class PESTFix < PESTDatabaseTools
     q = current_question["question"]
     debug nil, "render_image"
 
-    load_image_from_disk(current_path)
+    return unless load_image_from_disk(current_path)
     x, y, width, height = calculateBounds(q.boxes, q, @noChoiceDrawWidth)
 
     imgid = Math::min(@orig.length-1, current_question["page"])
@@ -721,8 +696,8 @@ class PESTFix < PESTDatabaseTools
     debug nil, "img2screen"
     gc = @window.style.fg_gc(@area.state)
 
-    maxw = Float.induced_from(@area.window.size[0])
-    maxh = Float.induced_from(@area.window.size[1])
+    maxw = @area.window.size[0].to_f
+    maxh = @area.window.size[1].to_f
 
     imgw = @pixbuf.width
     imgh = @pixbuf.height

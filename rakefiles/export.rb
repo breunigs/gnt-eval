@@ -124,7 +124,7 @@ namespace :results do
       qry << " GROUP BY barcode, #{tutor_col}"
       qry << " HAVING COUNT(*) >= #{Seee::Config.settings[:minimum_sheets_required]}"
       qry << ") AS tbl ORDER BY #{cols.map{|c|"#{c}_avg"}.join("+")} ASC"
-      data += RT.custom_query(qry)
+      data += RT.custom_query(qry).values
     end
     # convert barcode + tutor id to tutor’s name
     data.map! do |d|
@@ -348,7 +348,7 @@ namespace :results do
 
     # WHOLE DATA #######################################################
     puts "Running query: " + qry
-    data = RT.custom_query(qry)
+    data = RT.custom_query(qry).values
     lines = []
 
     # add metadata

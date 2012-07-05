@@ -100,7 +100,7 @@ class ResultTools
     # exclude invalid values
     sql << "AND 0 < #{column} AND #{column} < 99"
     r = custom_query(sql, where_hash.values, true)
-    return r[:count], r[:avg], r[:stddev]
+    return r["count"], r["avg"], r["stddev"]
   end
 
   # Counts the amount of rows for the given hash. It is processed in the
@@ -137,7 +137,7 @@ class ResultTools
       return custom_query(sql, where_hash.values, false)
     else
       r = custom_query(sql, where_hash.values, true)
-      return r[:count]
+      return r["count"]
     end
   end
 
@@ -154,7 +154,7 @@ class ResultTools
     clause = hash_to_where_clause(where_hash)
     return -1 if clause.nil?
     qry = "SELECT DISTINCT #{correlate_by} FROM #{table} WHERE #{clause}"
-    answ = custom_query(qry, where_hash.values).keys
+    answ = custom_query(qry, where_hash.values)
     if combine_no_answers && answ.include?(99)
       answ << 0 unless answ.include?(0)
       answ.delete(99)
@@ -185,9 +185,10 @@ class ResultTools
   end
 
   # runs a custom query against the result-database. Returns the all
-  # results as an array of DBI::Row and instantly finishes the statement.
+  # results as an array of hashes and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values. If
-  # first_row is set to true, “LIMIT 1” will be added automatically.
+  # first_row is set to true, “LIMIT 1” will be added automatically and
+  # the hash will be returned directely.
   def custom_query(query, values = [], first_row = false)
     raise "values parameter must be an array." unless values.is_a?(Array)
     query << " LIMIT 1" if first_row
@@ -196,13 +197,11 @@ class ResultTools
     begin
       q.execute(*values.flatten)
       if first_row
-        v = q.fetch
+        v = q.fetch_hash
       else
-        v = {}
-        # fetch_all is broken and returns the first result multiple
-        # times when using group_by. Work around using loop.
-        while h = q.fetch do
-          v[h[0]] = h[1]
+        v = []
+        while h = q.fetch_hash do
+          v << h
         end
       end
     rescue DBI::DatabaseError => e
