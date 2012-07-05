@@ -63,7 +63,7 @@ class PESTOmr < PESTDatabaseTools
       # TeX stores the box’s coordinates near its bottom right corner.
       # This translation is static and thus different to the one introduced
       # by imperfect scanning. Positive values move the box left/top.
-      moveleft, movetop = 45, 44
+      moveleft, movetop = 45, 47
     else
       # if the last box is a textbox, adjust some values so the textbox
       # can be checked. For now, only checked/unchecked is supported.
@@ -591,7 +591,7 @@ class PESTOmr < PESTDatabaseTools
 
     oldsize = files.size
     RT.custom_query("SELECT path FROM #{db_table}").each do |row|
-      files -= row["path"]
+      files.delete(row["path"])
     end
     if oldsize != files.size
       debug "  WARNING: #{oldsize-files.size} files already exist and have been skipped."
@@ -785,7 +785,6 @@ class PESTOmr < PESTDatabaseTools
 
   # Splits the given file and reports the status of each sub-process.
   def delegate_work(files)
-    debug "Owning certain software, #{@cores} sheets at a time"
     splitFiles = files.chunk(@cores)
 
     cmd = " -p " + @path.gsub(/(?=\s)/, "\\")
@@ -800,7 +799,7 @@ class PESTOmr < PESTDatabaseTools
     splitFiles.each_with_index do |f, corecount|
       next if f.empty?
 
-      tmp = Tempfile.new("pest-omr-status-#{corecount}").path
+      tmp = Tempfile.new("pest-omr-status-#{corecount}", "seee").path
       tmpfiles << tmp
 
       list = ""
@@ -843,6 +842,7 @@ class PESTOmr < PESTDatabaseTools
       STDOUT.flush
       sleep 1
     end
+    tmpfiles.each { |t| File.delete(t) }
     puts
     debug "Done."
   end
