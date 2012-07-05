@@ -63,11 +63,11 @@ class PESTOmr < PESTDatabaseTools
       # TeX stores the box’s coordinates near its bottom right corner.
       # This translation is static and thus different to the one introduced
       # by imperfect scanning. Positive values move the box left/top.
-      moveleft, movetop = 53, 41
+      moveleft, movetop = 45, 44
     else
       # if the last box is a textbox, adjust some values so the textbox
       # can be checked. For now, only checked/unchecked is supported.
-      moveleft, movetop = 1, 67
+      moveleft, movetop = -10, 67
       box.height = 40
     end
 
