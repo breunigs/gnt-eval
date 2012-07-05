@@ -799,7 +799,9 @@ class PESTOmr < PESTDatabaseTools
     splitFiles.each_with_index do |f, corecount|
       next if f.empty?
 
-      tmp = Tempfile.new("pest-omr-status-#{corecount}", "seee").path
+      cachedir = Seee::Config.file_paths[:cache_tmp_dir]
+      FileUtils.makedirs(cachedir)
+      tmp = Tempfile.new("pest-omr-status-#{corecount}", cachedir).path
       tmpfiles << tmp
 
       list = ""
@@ -820,6 +822,8 @@ class PESTOmr < PESTDatabaseTools
       debug "All threads stopped. Exiting."
       STDOUT.flush
       exit
+    ensure
+      tmpfiles.each { |t| File.delete(t) }
     end
     exit_codes
   end
@@ -828,7 +832,7 @@ class PESTOmr < PESTDatabaseTools
   # Returns once all tmpfiles are deleted
   def print_progress(tmpfiles)
     last_length = 0
-    while Thread.list.length > 1
+    while Thread.list.length >= 1
       tmpfiles.reject! { |x| !File.exists?(x) }
       print "\r" + " "*last_length + "\r"
       last_length = 0
@@ -842,7 +846,6 @@ class PESTOmr < PESTDatabaseTools
       STDOUT.flush
       sleep 1
     end
-    tmpfiles.each { |t| File.delete(t) }
     puts
     debug "Done."
   end
