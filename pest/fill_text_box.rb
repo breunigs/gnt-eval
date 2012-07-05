@@ -5,11 +5,8 @@ require 'pp'
 require 'base64'
 
 cdir = File.dirname(__FILE__)
-require cdir + '/helper.AbstractFormExtended.rb'
-require cdir + '/../web/config/boot'
-require cdir + '/../web/config/ext_requirements.rb'
+require cdir + '/../web/config/environment.rb'
 
-RT = ResultTools.instance
 SCap = Seee::Config.application_paths
 
 answ = {}
@@ -37,7 +34,7 @@ Semester.currently_active.each do |semester|
       txt_col = "#{col}_text"
 
       sql = "SELECT abstract_form, path FROM #{table} "
-      sql << "WHERE #{col} = ? AND #{txt_col} = \"\""
+      sql << %(WHERE #{col} = ? AND #{txt_col} = "")
       rows = RT.custom_query(sql, [quest.boxes.count])
 
       answ[col] ||= {}
