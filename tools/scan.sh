@@ -10,10 +10,10 @@ if [ "$1" = "" ]; then
 	while  [ 1 ]; do
 		count=$(ls -1 | wc -l)
 		final=$(( $count * 2 + 1 ))
+		# --rollerdeskew=yes     # inactive for now to test if scanner performs better
 		scanadf \
 			--buffermode=yes \
 			--stapledetect=yes \
-			--rollerdeskew=yes \
 			--df-length=yes \
 			--df-thickness=yes \
 			-x 210 \
