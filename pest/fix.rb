@@ -118,7 +118,8 @@ class PESTFix < PESTDatabaseTools
   end
 
   # stores the given value for the current question in the DB and calls
-  # all necessary screen-update function
+  # all necessary screen-update function. Also prints what OMR thinks
+  # about this checkbox (i.e. empty, checked, overfull)
   def current_db_value=(value)
     return if @current_db_value == value
     @current_db_value = value.to_i
@@ -130,8 +131,19 @@ class PESTFix < PESTDatabaseTools
                                                   [value, current_path])
       debug "Set DB value to #{value}", "db_save"
 
+      box_stat = nil
+      @current_question["question"].boxes.each do |b|
+        if current_db_value == b.choice.to_i
+          box_stat = "empty"
+          box_stat = "checked" if b.is_checked?
+          box_stat = "barely checked" if b.is_barely_checked?
+          box_stat = "overfull" if b.is_overfull?
+        end
+      end
+      box_stat = "OMR thinks this checkbox is #{box_stat}." if box_stat
+
       @statusbar.pop 1
-      @statusbar.push 1, "Setting value to #{value}"
+      @statusbar.push 1, "Setting value to #{value}. #{box_stat}"
     end
     t2 = Thread.new { render_image }
 
@@ -183,6 +195,11 @@ class PESTFix < PESTDatabaseTools
     File.move(current_path, biz)
   end
 
+  # Opens the currently shown sheet in an external viewer
+  def open_in_viewer
+    fork { exec "#{Seee::Config.application_paths[:pdf_viewer]} \"#{current_path}\"" }
+  end
+
   # will go through all available databases and collect all failed
   # questions and add them to @all_failed_questions. It does not remove
   # existing entries in the variable.
@@ -226,6 +243,8 @@ class PESTFix < PESTDatabaseTools
   # have not yet been fixed
   def find_failed_question
     return unless @find_fail.sensitive?
+    @statusbar.pop 1 # remove old "setting value to" messages
+
     # Deactivate while searching
     @find_fail.set_sensitive(false)
 
@@ -365,13 +384,13 @@ class PESTFix < PESTDatabaseTools
     @undo_btn.signal_connect "clicked" do undo end
 
     @quest_prev = Gtk::ToolButton.new(Gtk::Stock::GOTO_TOP)
-    @quest_prev.set_label "Prev. Question"
+    @quest_prev.set_label "Previous"
     @quest_prev.set_tooltip_text "View the Previous Question (CTRL + UP ARROW) (PAGE UP)"
     @quest_prev.signal_connect "clicked" do select_prev_question end
     @quest_prev.set_sensitive(false)
 
     @quest_next = Gtk::ToolButton.new(Gtk::Stock::GOTO_BOTTOM)
-    @quest_next.set_label "Next Question"
+    @quest_next.set_label "Next"
     @quest_next.set_tooltip_text "View the Next Question (CTRL + DOWN ARROW) (PAGE DOWN)"
     @quest_next.signal_connect "clicked" do select_next_question end
     @quest_next.set_sensitive(false)
@@ -389,14 +408,19 @@ class PESTFix < PESTDatabaseTools
     @answr_next.set_sensitive(false)
 
     @find_fail = Gtk::ToolButton.new(Gtk::Stock::FIND)
-    @find_fail.set_label "Find Failed Question"
+    @find_fail.set_label "Find Failed"
     @find_fail.set_tooltip_text "Finds an Improperly Answered Question (ENTER)"
     @find_fail.signal_connect "clicked" do find_failed_question end
 
     @mark_as_bizarre = Gtk::ToolButton.new(Gtk::Stock::NO)
-    @mark_as_bizarre.set_label "Mark file bizarr"
+    @mark_as_bizarre.set_label "Mark File Bizarr"
     @mark_as_bizarre.set_tooltip_text "Mark the current file as bizarre, i.e. if it's scanned incorrectly."
     @mark_as_bizarre.signal_connect "clicked" do mark_as_bizarre end
+
+    @open_in_viewer = Gtk::ToolButton.new(Gtk::Stock::SELECT_ALL)
+    @open_in_viewer.set_label "View File"
+    @open_in_viewer.set_tooltip_text "Open the currently shown sheet in an external viewer."
+    @open_in_viewer.signal_connect "clicked" do open_in_viewer end
 
     quit = Gtk::ToolButton.new(Gtk::Stock::QUIT)
     quit.set_tooltip_text "Exits the Application (CTRL + Q)"
@@ -408,18 +432,16 @@ class PESTFix < PESTDatabaseTools
     toolbar = Gtk::Toolbar.new
     toolbar.set_toolbar_style Gtk::Toolbar::Style::BOTH
     c = -1
+    toolbar.insert((c+=1), @find_fail)
     toolbar.insert((c+=1), @undo_btn)
+    toolbar.insert((c+=1), @open_in_viewer)
     toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), @quest_prev)
     toolbar.insert((c+=1), @quest_next)
-    toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), @answr_prev)
     toolbar.insert((c+=1), @answr_next)
     toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
-    toolbar.insert((c+=1), @find_fail)
-    toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), @mark_as_bizarre)
-    toolbar.insert((c+=1), Gtk::SeparatorToolItem.new)
     toolbar.insert((c+=1), quit)
 
     space = Gtk::ToolItem.new.add(Gtk::VBox.new false, 2)
@@ -586,6 +608,7 @@ class PESTFix < PESTDatabaseTools
 
     @undo_btn.set_sensitive(!@undo.empty?)
     @mark_as_bizarre.set_sensitive(!current_question.nil?)
+    @open_in_viewer.set_sensitive(!current_question.nil?)
   end
 
   # popups a gtk message dialog with the given title and text
@@ -652,6 +675,7 @@ class PESTFix < PESTDatabaseTools
     draw.stroke(color)
     draw.fill_opacity(0.4)
     draw.rectangle(1, 1, @noChoiceDrawWidth, @noChoiceDrawWidth)
+
 
     # Draw the colored boxes
     q.boxes.each do |b|
