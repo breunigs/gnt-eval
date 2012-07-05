@@ -7,6 +7,8 @@ namespace :images do
     Dir.chdir(SCfp[:scanned_pages_dir]) do
       system(SCc[:scan])
     end
+    puts
+    puts "Next recommended step: rake images:sortandalign"
   end
 
   desc "(4) Sort scanned images by barcode (#{simplify_path(SCfp[:scanned_pages_dir])} → #{simplify_path(SCfp[:sorted_pages_dir])})"
@@ -62,6 +64,9 @@ namespace :images do
       puts
       puts "Done!"
     end # else
+
+    puts
+    puts "Next recommended step: rake images:omr"
   end
 
   desc "(5) Evaluates all sheets in #{simplify_path(SCfp[:sorted_pages_dir])}"
@@ -73,18 +78,26 @@ namespace :images do
       bn = File.basename(f, ".yaml")
       system(%(./pest/omr2.rb -s "#{f}" -p "#{p}/#{bn}" -c #{number_of_processors}))
     end
+
+    puts
+    puts "Next recommended step: rake images:correct"
   end
 
   desc "(6) Correct invalid sheets"
   task :correct do
     forms = Semester.currently_active.map { |s| s.forms }.flatten
     tables = forms.collect { |form| form.db_table }
-    exec("./pest/fix.rb #{tables.join(" ")}")
+    system("./pest/fix.rb #{tables.join(" ")}")
+
+    puts
+    puts "Next recommended step: rake images:fill_text_box"
   end
 
   desc "(7) Fill in small text boxes (not comments)"
   task :fill_text_box do
-    exec("./pest/fill_text_box.rb")
+    system("./pest/fill_text_box.rb")
+    puts
+    puts "Next recommended step: rake images:insertcomments"
   end
 
   desc "(8) make handwritten comments known to the web-UI (i.e. find JPGs in #{simplify_path(SCfp[:sorted_pages_dir])})"
