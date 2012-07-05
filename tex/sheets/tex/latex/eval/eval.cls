@@ -222,12 +222,19 @@
   }
 }
 
+\def\SaveLastIsTextBoxInfo{%
+  % Note: the actual value is not required anymore, as long as all
+  % following scripts handle that last textbox a little differently.
+  \ifthenelse{\boolean{lastIsTextbox}}{\wPosout{uu last_is_textbox: 123456}}{}
+}
+
 % writes the posout information for multiple choice questions give the database prefix
 % as first option and the amount of boxes as second.
 % The letters (a, b, c, ..., (noansw)) will be added automatically
 \newcounter{multiCounter}
 \def\SaveMultiInfo[#1][#2]{%
   \wPosout{u - !ruby/object:Question}
+  \SaveLastIsTextBoxInfo
   \wPosout{uu type: square}
   \wPosout{uu db_column: }
   \setcounter{multiCounter}{0}
@@ -243,6 +250,7 @@
 % writes the posout information for single choice questions
 \def\SaveNormalInfo[#1]{%
   \wPosout{u - !ruby/object:Question}
+  \SaveLastIsTextBoxInfo
   \wPosout{uu type: square}
   \wPosout{uu db_column: #1}
   \wPosout{uu boxes:}
