@@ -153,12 +153,12 @@ namespace :images do
           end
 
           if tut_num.nil?
-            warn "\nouldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+            warn "\n\nCouldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
             next
           end
 
           if tut_num == 0
-            warn "\nCouldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+            warn "\n\nCouldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
             next
           end
 
@@ -166,7 +166,7 @@ namespace :images do
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
 
           if tut_num > tutors.count
-            warn "Couldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
+            warn "\n\nCouldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
             next
           end
 
@@ -188,6 +188,9 @@ namespace :images do
 
     puts
     puts "Done."
+    puts
+    puts "Next recommended step: Type all comments in the web interface."
+    puts "After that, the commands in the “rake results:*” group should help you."
   end
 
   # find forms for current semester and extract variables from the
