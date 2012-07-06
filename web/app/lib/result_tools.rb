@@ -158,7 +158,7 @@ class ResultTools
     clause = hash_to_where_clause(where_hash)
     return -1 if clause.nil?
     qry = "SELECT DISTINCT #{correlate_by} FROM #{table} WHERE #{clause}"
-    answ = custom_query(qry, where_hash.values)
+    answ = custom_query(qry, where_hash.values).map { |row| row[correlate_by].to_i }
     if combine_no_answers && answ.include?(99)
       answ << 0 unless answ.include?(0)
       answ.delete(99)
