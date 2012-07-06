@@ -88,13 +88,17 @@ def find_barcode(filename)
     exit 1
   end
   zbar = Seee::Config.commands[:zbar]
-
+  zbar_d = Seee::Config.commands[:zbar_desperate]
   r = `#{zbar} "#{filename}"`
-  if not r.empty?
-    return r.strip.match(/^([0-9]+)/)[1].to_i
-  else
-    return nil
+  begin
+    return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
+  rescue
+    r = `#{zbar_d} "#{filename}"`
+    begin
+      return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
+    rescue; end
   end
+  return nil
 end
 
 

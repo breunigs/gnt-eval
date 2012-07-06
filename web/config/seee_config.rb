@@ -184,10 +184,16 @@ module Seee
 
       :pdflatex => "TEXMFHOME=#{@@file_paths[:texmfdir]} #{@@application_paths[:pdflatex]}",
 
-      :xelatex => "#{@@application_paths[:xelatex]} -halt-on-error -file-line-error -interaction=nonstopmode"
+      :xelatex => "#{@@application_paths[:xelatex]} -halt-on-error -file-line-error -interaction=nonstopmode",
+
+      # disable unused barcodes and disable scanning in x-direction to speed up processing.
+      :zbar => "#{@@application_paths[:zbar]} --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 --set x-density=0 "
     }
 
     @@commands.merge!({
+      # scan every line to hopefully find more barcodes
+      :zbar_desperate => " --set y-density=1 ",
+
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
       # -draftmode: doesn't create PDF, which speeds up TeX. Still does
@@ -195,9 +201,7 @@ module Seee
       # -interaction=nonstopmode prevents from asking for stuff on the
       #             console which regularily occurs for missing packages
       :pdflatex_fast => "#{@@commands[:pdflatex]} -halt-on-error -file-line-error -draftmode -interaction=nonstopmode",
-      :pdflatex_real => "#{@@commands[:pdflatex]} -halt-on-error -file-line-error",
-      # disable unused barcodes and disable scanning in x-direction to speed up processing.
-      :zbar => "#{@@application_paths[:zbar]} --set ean13.disable=1 --set upce.disable=1 --set isbn10.disable=1 --set upca.disable=1 --set isbn13.disable=1 --set i25.disable=1 --set code39.disable=1 --set code128.disable=1 --set y-density=4 --set x-density=0 "
+      :pdflatex_real => "#{@@commands[:pdflatex]} -halt-on-error -file-line-error"
     })
 
     # fall back to application_paths if a command
