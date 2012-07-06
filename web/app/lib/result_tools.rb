@@ -137,7 +137,7 @@ class ResultTools
       return custom_query(sql, where_hash.values, false)
     else
       r = custom_query(sql, where_hash.values, true)
-      return r["count"]
+      return r["count"].to_i
     end
   end
 
