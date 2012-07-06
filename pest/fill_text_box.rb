@@ -6,6 +6,7 @@ require 'base64'
 
 cdir = File.dirname(__FILE__)
 require cdir + '/../web/config/environment.rb'
+require cdir + '/helper.AbstractFormExtended.rb'
 
 SCap = Seee::Config.application_paths
 
@@ -16,6 +17,8 @@ tmp_path = "#{temp_dir}/fill_text_box.jpg"
 
 Semester.currently_active.each do |semester|
   semester.forms.each do |source_form|
+    puts "Proccessing #{source_form.name}"
+
     table = source_form.db_table
     unless RT.table_exists?(table)
       warn "#{semester.title} | #{source_form.name}’s table #{table} " \
@@ -26,16 +29,19 @@ Semester.currently_active.each do |semester|
 
     source_form.questions.each do |quest|
       next unless quest.last_is_textbox?
+      puts "  Question: #{quest.text}"
       # now we have a question which has a textbox.
       page = source_form.pages.find { |p| p.questions.include?(quest) }
       page_index = source_form.pages.index(page)
+      puts "  on page: #{page_index}"
 
       col = quest.db_column
       txt_col = "#{col}_text"
 
       sql = "SELECT abstract_form, path FROM #{table} "
-      sql << %(WHERE #{col} = ? AND #{txt_col} = "")
+      sql << %(WHERE #{col} = ? AND (#{txt_col} = "" OR #{txt_col} IS NULL))
       rows = RT.custom_query(sql, [quest.boxes.count])
+
 
       answ[col] ||= {}
 
