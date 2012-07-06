@@ -837,13 +837,13 @@ class PESTOmr < PESTDatabaseTools
   # Returns once all tmpfiles are deleted
   def print_progress(tmpfiles)
     last_length = 0
-    while Thread.list.length >= 1
+    while Thread.list.length > 1
       tmpf = tmpfiles.dup
       tmpf.reject! { |x| !File.exists?(x) }
       print "\r" + " "*last_length + "\r"
       last_length = 0
       tmpf.each_with_index do |x, i|
-        dat = `tail -n 1 #{x}`.strip
+        dat = `tail -n 1 #{x} 2> /dev/null`.strip
         dat = dat.ljust([dat.length+7, 50].max) if i < tmpf.size - 1
         print dat
         last_length += dat.length
