@@ -261,7 +261,7 @@ class Question
   # export a single question to tex (used for creating the forms)
   def to_tex(lang = I18n.locale, gender = :both)
     s = ""
-    qq = text(lang, gender) # FIXME, lecturer’s name is currently broken
+    qq = text(lang, :both) # FIXME, lecturer’s name is currently broken
     case @type
       when "text_wholepage" then
         # don't need to do anything for that
@@ -590,7 +590,7 @@ class AbstractForm
         b << "\n"
         sect_open = true
         s.questions.each do |q|
-          quest = q.to_tex(lang, :both)
+          quest = q.to_tex(lang, gender)
           # need to remove line breaks at the end to avoid spacing issues
           b << (sect_open ? quest.strip : quest)
           b << "\n}\n\n" if sect_open
