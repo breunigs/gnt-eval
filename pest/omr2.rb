@@ -135,6 +135,7 @@ class PESTOmr < PESTDatabaseTools
       x, y = search_square_box(img_id, box)
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
+        @soft_error += 1
         debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
               " db_column=#{question.db_column} in #{@currentFile}"
         debug "Assuming there is no box and no choice was made."
@@ -460,9 +461,15 @@ class PESTOmr < PESTDatabaseTools
     debug("  Loaded Image", "loading_image") if @verbose
 
     # do the hard work
+    @soft_error = 0
     locate_corners
     supplement_missing_corners unless @cancelProcessing
     process_questions unless @cancelProcessing
+    # if there are many soft errors, like not found text boxes, mark the
+    # sheet bizarr. Likely the base sheet with position information does
+    # not fit.
+    @cancelProcessing = true if @soft_error >= 10
+
 
     # Draw debugging image with thresholds, selected fields, etc.
     if @debug
@@ -493,11 +500,11 @@ class PESTOmr < PESTDatabaseTools
 
     if @cancelProcessing
       debug "  Something went wrong while recognizing this sheet."
-      debug "  " + File.basename(file)
-      return @test_mode # don't move the sheet if in test_mode
+      return if @test_mode # don't move the sheet if in test_mode
+      debug "  Moving #{File.basename(file)} to bizarre"
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
       FileUtils.makedirs(dir)
-      File.move(file, File.join(dir, File.basename(file)))
+      FileUtils.move(file, File.join(dir, File.basename(file)))
       return
     end
 
@@ -594,7 +601,7 @@ class PESTOmr < PESTDatabaseTools
       files.delete(row["path"])
     end
     if oldsize != files.size
-      debug "  WARNING: #{oldsize-files.size} files already exist and have been skipped."
+      debug "Skipping #{oldsize-files.size} already processed files."
     end
 
     files
@@ -801,13 +808,13 @@ class PESTOmr < PESTDatabaseTools
 
       cachedir = Seee::Config.file_paths[:cache_tmp_dir]
       FileUtils.makedirs(cachedir)
-      tmp = Tempfile.new("pest-omr-status-#{corecount}", cachedir).path
+      tmp = Tempfile.new("pest-omr-status-#{corecount}--", cachedir).path
       tmpfiles << tmp
 
       list = ""
       f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
-      threads << Thread.new do
-        `ruby #{File.dirname(__FILE__)}/omr2.rb #{cmd} #{list} > #{tmp}`
+      threads << Thread.new(tmp) do |log_path|
+        `ruby #{File.dirname(__FILE__)}/omr2.rb #{cmd} #{list} > #{log_path}`
         exit_codes[corecount] = $?.exitstatus
       end
     end
@@ -822,8 +829,6 @@ class PESTOmr < PESTDatabaseTools
       debug "All threads stopped. Exiting."
       STDOUT.flush
       exit
-    ensure
-      tmpfiles.each { |t| File.delete(t) }
     end
     exit_codes
   end
@@ -833,12 +838,13 @@ class PESTOmr < PESTDatabaseTools
   def print_progress(tmpfiles)
     last_length = 0
     while Thread.list.length >= 1
-      tmpfiles.reject! { |x| !File.exists?(x) }
+      tmpf = tmpfiles.dup
+      tmpf.reject! { |x| !File.exists?(x) }
       print "\r" + " "*last_length + "\r"
       last_length = 0
-      tmpfiles.each_with_index do |x, i|
+      tmpf.each_with_index do |x, i|
         dat = `tail -n 1 #{x}`.strip
-        dat = dat.ljust([dat.length+10, 60].max) if i < tmpfiles.size - 1
+        dat = dat.ljust([dat.length+7, 50].max) if i < tmpf.size - 1
         print dat
         last_length += dat.length
       end
