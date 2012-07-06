@@ -7,7 +7,7 @@
 }
 <%
   a = answ.delete_if { |k,v| v <= 0 || !k.is_a?(String) }.keys
-  raise if a.empty?
+  raise "No answers have been given" if a.empty?
   a.sort! { |x,y| answ[x] <=> answ[y] }
   short_answ = a.map do |x|
     if x.size > 40

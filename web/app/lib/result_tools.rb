@@ -100,7 +100,7 @@ class ResultTools
     # exclude invalid values
     sql << "AND 0 < #{column} AND #{column} < 99"
     r = custom_query(sql, where_hash.values, true)
-    return r["count"], r["avg"], r["stddev"]
+    return r["count"].to_i, r["avg"].to_f, r["stddev"].to_f
   end
 
   # Counts the amount of rows for the given hash. It is processed in the
@@ -134,7 +134,11 @@ class ResultTools
     sql << clause
     if group && group.is_a?(String)
       sql << " GROUP BY #{group} "
-      return custom_query(sql, where_hash.values, false)
+      r = {}
+      custom_query(sql, where_hash.values, false).each do |row|
+        r[row["value"].to_i ] = row["count"].to_i
+      end
+      return r
     else
       r = custom_query(sql, where_hash.values, true)
       return r["count"].to_i
