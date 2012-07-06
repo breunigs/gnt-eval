@@ -192,7 +192,7 @@ module Seee
 
     @@commands.merge!({
       # scan every line to hopefully find more barcodes
-      :zbar_desperate => " --set y-density=1 ",
+      :zbar_desperate => "#{@@commands[:zbar]} --set y-density=1 ",
 
       # -halt-on-error: stops TeX after the first error
       # -file-line-error: displays file and line where the error occured
