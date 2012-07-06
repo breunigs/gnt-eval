@@ -58,7 +58,7 @@ else
 end
 
 # only command options have been given, but no files. Use default.
-if poss.empty? 
+if poss.empty?
   poss = Dir.glob("#{GNT_ROOT}/tmp/forms/*pcs.pdf")
 end
 
@@ -153,7 +153,7 @@ forms_sorted.each do |file, data|
   cover =  "lpr            -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
   print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
   banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
-  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{GNT_ROOT}/tmp/howtos/howto_#{h}.pdf\"" }
+  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
     system(cover) if File.exists?(cover_file)
     howtos.each { |h| system(h) }
