@@ -505,6 +505,7 @@ class PESTOmr < PESTDatabaseTools
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
       FileUtils.makedirs(dir)
       FileUtils.move(file, File.join(dir, File.basename(file)))
+      `rm "#{file.gsub(/\.tif$/, "*")}"` # remove comments and similar
       return
     end
 
