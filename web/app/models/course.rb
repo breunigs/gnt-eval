@@ -247,7 +247,7 @@ class Course < ActiveRecord::Base
   end
 
   def dir_friendly_title
-    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9\-_]/i,'')
+    title.strip.gsub(/\s+/,'_').gsub(/[^a-z0-9\-_]/i,'')
   end
 
   private
