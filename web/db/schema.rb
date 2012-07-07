@@ -11,13 +11,14 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120125093410) do
+ActiveRecord::Schema.define(:version => 20120707182829) do
 
   create_table "c_pics", :force => true do |t|
     t.string   "basename"
     t.integer  "course_prof_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "source"
   end
 
   create_table "course_profs", :force => true do |t|
@@ -60,9 +61,9 @@ ActiveRecord::Schema.define(:version => 20120125093410) do
   create_table "pics", :force => true do |t|
     t.integer  "tutor_id"
     t.string   "basename"
-    t.boolean  "has_lower"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "source"
   end
 
   create_table "profs", :force => true do |t|
