@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-# -*- coding: utf-8 -*-
-
 namespace :results do
   # This is a helper function that will create the result PDF file for a
   # given semester and faculty_id in the specified directory.
