@@ -83,6 +83,53 @@ namespace :images do
     puts "Next recommended step: rake images:correct"
   end
 
+  desc "Try to find empty sheets."
+  task :find_empty_sheets do
+    checks = 5
+    puts "This simple heuristic checks if there are less than"
+    puts "#{checks} checkmarks. If there are, the sheet is presented"
+    puts "to you so you can decide to throw it out or not."
+    all_sql = []
+    tables = []
+    Semester.currently_active.map { |s| s.forms }.flatten.each do |form|
+      tables << form.db_table
+      sql = "SELECT path FROM #{form.db_table} WHERE #{checks} > (0 "
+      form.questions.map do |q|
+        next unless ["square", "tutor_table"].include?(q.type)
+        if q.single?
+          sql << "\n+ IF(#{q.db_column} > 0, 1, 0)"
+        else
+          q.db_column.each { |col| sql << "\n+ IF(#{col} > 0, 1, 0)" }
+          sql << "\n+ IF(#{q.db_column.find_common_start+"noansw"} > 0, 1, 0)" if q.no_answer?
+        end
+      end
+      sql << "\n)"
+      all_sql << sql
+    end
+    paths = RT.custom_query(all_sql.join(" UNION ")).map { |row| row["path"] }
+    tmp_path = "#{temp_dir}/is_this_sheet_empty.tif"
+    paths.each do |p|
+      FileUtils.ln_s(p, tmp_path, :force => true)
+      fork { exec "#{SCap[:pdf_viewer]} \"#{tmp_path}\" 2>1 &> /dev/null" }
+      puts "\n\n\n"
+      puts "Image: #{p}"
+      print "Delete sheet from disk and database? [y/N] "
+      answ = STDIN.gets.strip.downcase
+      next if answ == "n" or answ == ""
+      redo if answ != "y"
+      # delete sheet
+      puts "Deleting in DB…"
+      tables.each do |table|
+        RT.custom_query_no_result("DELETE FROM #{table} WHERE path = ?", [p])
+      end
+      puts "From disk…"
+      FileUtils.rm(p, :force => true) # try to delete, but don’t report errors
+    end
+    # cleanup
+    FileUtils.rm(tmp_path, :force => true)
+    puts "Done. All empty sheets have been removed."
+  end
+
   desc "(6) Correct invalid sheets"
   task :correct do
     forms = Semester.currently_active.map { |s| s.forms }.flatten
