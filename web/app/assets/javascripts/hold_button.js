@@ -41,5 +41,8 @@ $(document).ready(function() {
       if(t) clearTimeout(t);
       t = setTimeout(exe, 1000);
     }
+    var clear = function () { clearTimeout(t); }
+    elem.onmouseup = clear;
+    elem.onmouseout = clear;
   });
 });
