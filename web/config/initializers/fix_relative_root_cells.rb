@@ -10,10 +10,9 @@ module ActionDispatch
             def url_for(options = {})
                 options[:script_name] = ENV['RAILS_RELATIVE_URL_ROOT'] if options.kind_of?(Hash)
                 options = Base.relative_url_root.to_s + options if
-                options.kind_of?(String) and options.starts_with?('/')
+                    options.kind_of?(String) and options.starts_with?('/')
                 url_for__ptsroot__(options)
             end
         end
     end
 end
-
