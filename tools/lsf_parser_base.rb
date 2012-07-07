@@ -453,7 +453,7 @@ class LSFLecture
   def hash; id end
 
   def eval_always?
-    self.type == "Grundvorlesung" || self.type == "Kursvorlesung"
+    self.type == "Grundvorlesung" || self.type == "Kursvorlesung" || self.name =~ /Programmierkurs/i
   end
 end
 
@@ -464,7 +464,7 @@ class String
   # define some stoptypes that we do not want to include
   def is_stop_type?
     cmp = self.downcase
-    ["übung", "praktikum", "kolloquium", "hauptseminar", "colloquium", \
+    ["übung", "kolloquium", "hauptseminar", "colloquium", \
       "prüfung", "oberseminar"].include?(cmp)
   end
 
