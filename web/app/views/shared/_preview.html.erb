@@ -13,7 +13,7 @@
   <% if failed || base64.nil? %>
     <span class="error">An error occurred while rendering the preview. Most likely, you have a typo in the TeX code somewhere. Scroll down to see what TeX has to say about this.</span><br/><br/>
     EXIT CODES: <%= exitcodes.join(", ") %>
-    <br/><pre><%= error %></pre>
+    <br/><div><%= error.html_safe %></div>
   <% end %>
 
   <% if !base64.nil? && base64.empty? %>

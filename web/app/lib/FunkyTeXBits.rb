@@ -109,7 +109,7 @@ module FunkyTeXBits
     e = error.split("\n" + path[0..77], 2)
     error = "\n" + path[0..77] + e.last if e.size == 2
     # highlight likely TeX errors
-    error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"error\">\\0</span>")
+    error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"red\">\\0</span>")
 
     return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64
   end
