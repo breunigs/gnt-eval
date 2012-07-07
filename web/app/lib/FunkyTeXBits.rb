@@ -106,6 +106,7 @@ module FunkyTeXBits
 
     # beautify error output. If there’s a TeX error it will remove the
     # stuff TeX prints before it encounters the error.
+    error.encode!('UTF-8', 'UTF-8', :invalid => :replace)
     e = error.split("\n" + path[0..77], 2)
     error = "\n" + path[0..77] + e.last if e.size == 2
     # highlight likely TeX errors
