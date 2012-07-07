@@ -111,7 +111,7 @@ class ResultTools
   # If a db column is given as 3rd argument, will group by that db
   # column and return multiple results. The format is a hash of
   # { value => count }
-  def count(table, where_hash = {}, group = nil)
+  def count(table, where_hash = {}, group = nil, skip_null = true)
     return -1 unless report_valid_name?(table)
     return table.uniq.collect {|t| count(t, where_hash, group) }.sum \
       if table.is_a?(Array)
@@ -136,6 +136,7 @@ class ResultTools
       sql << " GROUP BY #{group} "
       r = {}
       custom_query(sql, where_hash.values, false).each do |row|
+        next if skip_null && row["value"].nil?
         r[row["value"].to_i ] = row["count"].to_i
       end
       return r
