@@ -28,11 +28,12 @@
   <div class="group">
     <h3>Scanned comments</h3>
     <div class="commentview">
-      <% for p in @tutor.pics %>
-        <figure><span><img src="<%=comment_image_link %>/<%=@course.semester.dirfriendly_title + '/' + p.basename %>"></span></figure>
+      <% @tutor.pics.each do |p| %>
+        <%= render "shared/comment_pic", :course => @course, :pic => p %>
       <% end %>
       <span class="end">end of comments</span>
     </div>
+    Hint: if comments are cut off, click-and-hold for one second to download the original sheet.
   </div>
 
   <div class="group">

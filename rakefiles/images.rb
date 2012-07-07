@@ -158,9 +158,9 @@ namespace :images do
 
       # find all existing images for courses/profs and tutors
       bcs = sem.barcodes
-      cpics = CPic.find(:all, :conditions => { :course_prof_id => bcs })
+      cpics = CPic.where(:course_prof_id => bcs).map { |t| t.basename }
       tids = sem.courses.map { |c| c.tutors.map { |t| t.id } }
-      tpics = Pic.find(:all, :conditions => { :tutor_id => tids })
+      tpics = Pic.where(:tutor_id => tids).map { |t| t.basename }
 
       # find all tables that include a tutor chooser
       forms = sem.forms.find_all { |form| form.include_question_type?("tutor_table") }
@@ -170,6 +170,8 @@ namespace :images do
       allfiles = Dir.glob(File.join(SCfp[:sorted_pages_dir], '**/*.jpg'))
       allfiles.each_with_index do |f, curr|
         bname = File.basename(f)
+        next if bname =~ /_DEBUG/
+        source = f.sub(/_[^_]+$/, "") + ".tif"
         barcode = find_barcode_from_path(f)
 
         if barcode == 0
@@ -185,16 +187,13 @@ namespace :images do
 
         p = nil
         # tutor comments, place them under each tutor
-        if f.downcase.end_with?("ucomment.jpg")
+        if f.downcase.end_with?("_ucomment.jpg")
           # skip existing images
-          next if tpics.any? { |x| x.basename == bname }
+          next if tpics.include?(bname)
           # find tutor id
           tut_num = nil
           tables.each do |table, column|
-            # remove everything after the last underscore and add .tif to
-            # find the original image
-            path = f.sub(/_[^_]+$/, "") + ".tif"
-            data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
+            data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [source], true)
             tut_num = data[column].to_i if data
             break if tut_num
           end
@@ -220,15 +219,16 @@ namespace :images do
           p = Pic.new
           p.tutor_id = tutors[tut_num-1].id
         else # files for the course/prof. Should be split up. FIXME.
-          next if cpics.any? { |x| x.basename == bname }
+          next if cpics.include?(bname)
           p = CPic.new
           p.course_prof = course_prof
         end
         p.basename = bname
+        p.source = source
         # let rails know about this comment
         p.save
         # move comment to correct location
-        system("#{cp} \"#{f}\" \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}/\"")
+        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dirFriendlyName))
         print_progress(curr+1, allfiles.size)
       end # Dir glob
     end # Semester.each

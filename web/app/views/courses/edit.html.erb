@@ -93,12 +93,13 @@
 
         <span>for <%=cp.prof.fullname %>:</span>
         <% cp.c_pics.each do |p| %>
-          <figure><span><img src="<%=comment_image_link %>/<%=@course.semester.dirfriendly_title + '/' + p.basename %>" /></span></figure>
+          <%= render "shared/comment_pic", :course => @course, :pic => p %>
         <% end %>
         <br/>
       <% end %>
       <span class="end">end of comments</span>
     </div>
+    Hint: if comments are cut off, click-and-hold for one second to download the original sheet.
   </div>
 
   <div class="group">

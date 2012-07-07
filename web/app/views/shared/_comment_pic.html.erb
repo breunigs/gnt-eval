@@ -1,0 +1,7 @@
+<% path = pic.is_a?(CPic) ? download_cpic_url(pic) : download_pic_url(pic) %>
+
+<figure>
+  <%= (pic.source ? %(<span data-url="#{path}" class="hold">) : %(<span>)).html_safe %>
+    <img src="<%=comment_image_link %>/<%= course.semester.dirfriendly_title + '/' + pic.basename %>" />
+  </span>
+</figure>

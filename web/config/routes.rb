@@ -33,4 +33,8 @@ Seee::Application.routes.draw do
   root :to => "courses#index"
 
   post "/course_profs/:id/print" => "course_profs#print", :as => :print_course_prof
+
+  # comment image source pass throughs
+  get "/pics/:id/download" => "pics#download", :as => :download_pic
+  get "/cpics/:id/download" => "cpics#download", :as => :download_cpic
 end

@@ -380,12 +380,6 @@ class PESTOmr < PESTDatabaseTools
     newh = [h + expand + (y-newy), PAGE_HEIGHT].min
     img = @ilist[img_id].crop(0, newy, PAGE_WIDTH, newh, true).minify
 
-    # add text about where to find the original file
-    @draw[999] = Magick::Draw.new
-    @draw[999].pointsize = 9*@dpifix
-    draw_solid_box!(999, [0,0], [PAGE_WIDTH/2, 7], "white")
-    draw_text!(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
-    @draw[999].draw(img)
     # write out file
     img.write filename
     img.destroy!
