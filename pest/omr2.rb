@@ -370,17 +370,16 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # Saves a given area (in form of a boxes array) for the current image.
-  def save_text_image(img_id, save_as, boxes, use_page_width = true)
+  def save_text_image(img_id, save_as, boxes, expand = 30)
     return if save_as.nil? || save_as.empty?
     debug("    Saving Comment Image: #{save_as}", "save_image") if @verbose
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
     x, y, w, h = calculateBounds(boxes)
-    if use_page_width
-      img = @ilist[img_id].crop(0, y, PAGE_WIDTH, h, true).minify
-    else
-      img = @ilist[img_id].crop(x, y, w, h, true).minify
-    end
+    newy = [y - expand, 0].max
+    newh = [h + expand + (y-newy), PAGE_HEIGHT].min
+    img = @ilist[img_id].crop(0, newy, PAGE_WIDTH, newh, true).minify
+
     # add text about where to find the original file
     @draw[999] = Magick::Draw.new
     @draw[999].pointsize = 9*@dpifix
