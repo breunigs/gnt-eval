@@ -28,7 +28,7 @@ class Tutor < ActiveRecord::Base
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << course.eval_lecture_head
 
-    if returned_sheets <= SCs[:minimum_sheets_required]
+    if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
       return b
     end
