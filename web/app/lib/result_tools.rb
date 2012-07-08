@@ -137,7 +137,8 @@ class ResultTools
       r = {}
       custom_query(sql, where_hash.values, false).each do |row|
         next if skip_null && row["value"].nil?
-        r[row["value"].to_i ] = row["count"].to_i
+        v = row["value"] =~ /^[0-9]+$/ ? row["value"].to_i : row["value"]
+        r[v] = row["count"].to_i
       end
       return r
     else
