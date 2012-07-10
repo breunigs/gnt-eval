@@ -12,7 +12,7 @@ namespace :results do
     return if f.nil? || s.nil?
 
     filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
-    filename << '_' << s.dirFriendlyName
+    filename << '_' << s.dir_friendly_title
     filename << '_' << (I18n.tainted? ? "mixed" : I18n.default_locale).to_s
     filename << '.tex'
 
@@ -101,7 +101,7 @@ namespace :results do
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
     c = Course.find(a.course_id)
-    filename = c.dir_friendly_title << '_' << c.semester.dirFriendlyName << '.pdf'
+    filename = c.dir_friendly_title << '_' << c.semester.dir_friendly_title << '.pdf'
     render_tex(c.evaluate(true), dirname + filename, false)
   end
 

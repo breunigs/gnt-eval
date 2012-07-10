@@ -153,7 +153,7 @@ namespace :images do
     mkdir = SCc[:mkdir_comment_image_directory]
 
     Semester.currently_active.each do |sem|
-      system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}\"")
+      system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dir_friendly_title}\"")
       path=File.join(File.dirname(__FILE__), "tmp/images")
 
       # find all existing images for courses/profs and tutors
@@ -228,7 +228,7 @@ namespace :images do
         # let rails know about this comment
         p.save
         # move comment to correct location
-        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dirFriendlyName))
+        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title))
         print_progress(curr+1, allfiles.size)
       end # Dir glob
     end # Semester.each
