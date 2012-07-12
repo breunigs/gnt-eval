@@ -2,6 +2,6 @@
 
 <figure>
   <%= (pic.source ? %(<span data-url="#{path}" class="hold">) : %(<span>)).html_safe %>
-    <img src="<%=comment_image_link %>/<%= course.semester.dirfriendly_title + '/' + pic.basename %>" />
+    <img src="<%=comment_image_link %>/<%= course.semester.dir_friendly_title + '/' + pic.basename %>" />
   </span>
 </figure>
