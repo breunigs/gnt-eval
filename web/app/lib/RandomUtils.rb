@@ -112,6 +112,11 @@ def find_barcode_from_path(path)
 end
 
 class Array
+  def vector_diff(other)
+    raise "Arrays have different dimensions" if self.size != other.size
+    (0..(self.size-1)).map { |i| self[i]-other[i] }
+  end
+
   # Shorthand to see if any of the entries are nil
   def any_nil?
     self.any? { |e| e.nil? }
@@ -455,4 +460,15 @@ def ruby_interpreter_path
   File.join(RbConfig::CONFIG["bindir"],
     RbConfig::CONFIG["RUBY_INSTALL_NAME"] +
     RbConfig::CONFIG["EXEEXT"])
+end
+
+if ENV['TESTING']
+  require 'test/unit'
+  require "unicode_utils"
+
+  class TestArray < Test::Unit::TestCase
+    def test_vector_diff
+      assert_equal([1,2,3].vector_diff([1,2,3]), [0,0,0])
+    end
+  end
 end
