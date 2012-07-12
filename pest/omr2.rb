@@ -493,7 +493,7 @@ class PESTOmr < PESTDatabaseTools
 
     if @cancelProcessing
       debug "  Something went wrong while recognizing this sheet."
-      return if @test_mode # don't move the sheet if in test_mode
+      return if @test_mode || @debug # don't move the sheet in test/debug
       debug "  Moving #{File.basename(file)} to bizarre"
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
       FileUtils.makedirs(dir)
