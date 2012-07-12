@@ -112,6 +112,16 @@ def find_barcode_from_path(path)
 end
 
 class Array
+  def dot_product(other)
+    raise "Arrays have different dimensions" if self.size != other.size
+    (0..(self.size-1)).map { |i| self[i]*other[i] }.inject(:+)
+  end
+
+  # calculates the eucledian norm of the difference between two vectors
+  def eucledian_norm
+    Math::sqrt(self.map { |a| a**2 }.inject(:+))
+  end
+
   def vector_diff(other)
     raise "Arrays have different dimensions" if self.size != other.size
     (0..(self.size-1)).map { |i| self[i]-other[i] }
@@ -467,6 +477,14 @@ if ENV['TESTING']
   require "unicode_utils"
 
   class TestArray < Test::Unit::TestCase
+    def test_dot_product
+      assert_equal([1,2,3].dot_product([-7, 8, 9]), 36)
+    end
+
+    def test_eucledian_norm
+      assert_equal([1,2,3].eucledian_norm, Math::sqrt(1**2+2**2+3**2))
+    end
+
     def test_vector_diff
       assert_equal([1,2,3].vector_diff([1,2,3]), [0,0,0])
     end
