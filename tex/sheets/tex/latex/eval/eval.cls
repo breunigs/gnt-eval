@@ -13,6 +13,7 @@
 \RequirePackage{bophook}
 \RequirePackage{calc}
 \RequirePackage{color}
+\RequirePackage{colortbl}
 \RequirePackage{geometry}
 \RequirePackage{graphicx}
 \RequirePackage{ifthen}
@@ -117,6 +118,10 @@
 \setlength\parindent{0pt}
 
 \definecolor{gray}{rgb}{.88,.88,.88}
+\definecolor{darkgray}{rgb}{.6,.6,.6}
+
+% overwrite color of the horizontal lines
+\arrayrulecolor{darkgray}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % common functions to write out data, headers, checkboxes, ...
