@@ -79,7 +79,7 @@ class ResultTools
       # SQL standard as implemented by… nobody
       else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
     end
-    sth = @dbh.prepare(qry)
+    sth = dbh.prepare(qry)
     sth.execute(table)
     r = sth.fetch
     sth.finish
@@ -199,7 +199,7 @@ class ResultTools
     raise "values parameter must be an array." unless values.is_a?(Array)
     query << " LIMIT 1" if first_row
     check_query(query, values)
-    q = @dbh.prepare(query)
+    q = dbh.prepare(query)
     begin
       q.execute(*values.flatten)
       if first_row
@@ -225,7 +225,7 @@ class ResultTools
   def custom_query_no_result(query, values = [])
     raise "values parameter must be an array." unless values.is_a?(Array)
     check_query(query, values)
-    q = @dbh.prepare(query)
+    q = dbh.prepare(query)
     begin
       q.execute(*values.flatten)
     rescue DBI::DatabaseError => e
@@ -242,7 +242,6 @@ class ResultTools
   # singleton mixin, only one connection will be opened per Ruby
   # instance.
   def initialize
-    reconnect_to_database
     @tex = {}
   end
 
@@ -261,6 +260,13 @@ class ResultTools
       debug "Have a look at seee_config.rb to correct the settings."
       exit 1
     end
+  end
+
+  # returns the database handle. Use this insteady of directly accessing
+  # @dbh, so connect on demand works.
+  def dbh
+    reconnect_to_database if @dbh.nil? || !@dbh.connected?
+    @dbh
   end
 
   # evaluates a given question with the sheets matching special_where.
