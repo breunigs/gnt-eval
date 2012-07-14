@@ -34,10 +34,13 @@ FormEditor.getInstance = function() {
 FormEditor.prototype.setLanguages = function(langs) {
   // get languages from default text box unless given. It is assumed that
   // this is a user action, therefore warn if removing languages.
-  if(!langs) {
+  if(!langs)
     langs = $.trim($("#availableLanguages").val()).split(/\s+/);
-    var removedLangs = $(this.getLanguagesFromDom()).not(langs);
-    var rls = Array.prototype.join.call(removedLangs, ", "));
+
+  var removedLangs = $(this.getLanguagesFromDom()).not(langs);
+
+  if(!langs) {
+    var rls = Array.prototype.join.call(removedLangs, ", ");
     var strng = "You are about to remove these language(s): "+rls+". Continue?";
     if(removedLangs.length > 0 && !confirm(strng))
       return false; // stop, because user doesn’t want to remove langs
@@ -53,6 +56,30 @@ FormEditor.prototype.setLanguages = function(langs) {
   }
   this.languages = newLangs;
   $("#availableLanguages").val(this.languages.join(" ").replace(/:/g, ""));
+  // find translation groups
+  $(".language").parent().each(function(ind, transGroup) {
+    var l = newLangs.slice();
+    var path = "";
+    $(transGroup).children(".language").each(function(ind, langGroup) {
+      var lang = $(langGroup).children("span, label").html();
+      var index = l.indexOf(lang);
+      if(index >= 0) {
+        l.splice(index, 1); // ack language is available in dom
+      } else {
+        console.log("removing lang " + lang);
+        console.log($(langGroup).parent());
+        $(langGroup).remove(); // remove superfluous lang
+
+      }
+      console.log("wt");
+    });
+    // add missing languages to dom
+    $.each(l, function(ind, lang) {
+      var sis = FormEditor.getInstance();
+      sis.generatedHtml = "";
+      sis.createLangTextBox(path, lang);
+    });
+  });
 }
 
 FormEditor.prototype.append = function(content) {
@@ -211,11 +238,15 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
 };
 
 FormEditor.prototype.genderizePath = function(path, caller) {
+  this.log("Genderizing Path: " + path);
   this.updateDataFromDom();
 
   // generate new object
   var oldText = this.getPath(path);
   var genderized = { ":male": oldText, ":female": oldText, ":both": oldText};
+
+  this.log(oldText);
+  this.log(genderized);
 
   // inject new object
   this.setPath(this.data, path, genderized);
@@ -313,25 +344,34 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
     if(!this.translationsHaveGendering(texts))
       this.createActionLink("FormEditor.getInstance().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
     for(var lang in texts) {
-      var newPath = path+"/"+lang;
       this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
       if(typeof(texts[lang] ) == "string") {
-        this.openGroup("language");
-        this.createTextBox(newPath, lang);
-        this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"/"+lang+"\", this)", "Genderize »");
-        this.closeGroup();
+        this.createLangTextBox(path, lang);
       } else {
-        this.createHeading(newPath, "language");
-        this.createActionLink("FormEditor.getInstance().ungenderizePath(\""+path+"/"+lang+"\", this)", "« no gender");
-        this.createTextBox(newPath + "/:both", "neutral", true);
-        this.createTextBox(newPath + "/:female", "female", true);
-        this.createTextBox(newPath + "/:male", "male", true);
-        this.closeHeading();
+        this.createLangTextBoxGenderized(path, lang);
       }
     }
     this.closeHeading();
   }
   this.closeGroup();
+};
+
+FormEditor.prototype.createLangTextBox = function(path, lang) {
+  var path = path+"/"+lang;
+  this.openGroup("language");
+  this.createTextBox(path, lang);
+  this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »");
+  this.closeGroup();
+};
+
+FormEditor.prototype.createLangTextBoxGenderized = function(path, lang) {
+  var path = path+"/"+lang;
+  this.createHeading(path, "language");
+  this.createActionLink("FormEditor.getInstance().ungenderizePath(\""+path+"\", this)", "« no gender");
+  this.createTextBox(path + "/:both", "neutral", true);
+  this.createTextBox(path + "/:female", "female", true);
+  this.createTextBox(path + "/:male", "male", true);
+  this.closeHeading();
 };
 
 // creates a textbox for a single value that is not translatable.
