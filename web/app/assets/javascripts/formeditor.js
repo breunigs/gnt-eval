@@ -34,12 +34,13 @@ FormEditor.getInstance = function() {
 FormEditor.prototype.setLanguages = function(langs) {
   // get languages from default text box unless given. It is assumed that
   // this is a user action, therefore warn if removing languages.
-  if(!langs)
+  var automated = langs ? true : false;
+  if(!automated)
     langs = $.trim($("#availableLanguages").val()).split(/\s+/);
 
   var removedLangs = $(this.getLanguagesFromDom()).not(langs);
 
-  if(!langs) {
+  if(!automated) {
     var rls = Array.prototype.join.call(removedLangs, ", ");
     var strng = "You are about to remove these language(s): "+rls+". Continue?";
     if(removedLangs.length > 0 && !confirm(strng))
@@ -58,26 +59,24 @@ FormEditor.prototype.setLanguages = function(langs) {
   $("#availableLanguages").val(this.languages.join(" ").replace(/:/g, ""));
   // find translation groups
   $(".language").parent().each(function(ind, transGroup) {
+    var path = $(transGroup).attr("title");
     var l = newLangs.slice();
-    var path = "";
     $(transGroup).children(".language").each(function(ind, langGroup) {
       var lang = $(langGroup).children("span, label").html();
       var index = l.indexOf(lang);
       if(index >= 0) {
         l.splice(index, 1); // ack language is available in dom
       } else {
-        console.log("removing lang " + lang);
-        console.log($(langGroup).parent());
         $(langGroup).remove(); // remove superfluous lang
-
       }
-      console.log("wt");
     });
     // add missing languages to dom
     $.each(l, function(ind, lang) {
       var sis = FormEditor.getInstance();
+      sis.setPath(sis.data, path + "/" + lang, "");
       sis.generatedHtml = "";
       sis.createLangTextBox(path, lang);
+      $(transGroup).append(sis.generatedHtml);
     });
   });
 }
@@ -215,7 +214,7 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
   this.updateDataFromDom();
 
   var warn = this.groupHasDifferentInputTexts($(caller).parent());
-  if(warn && !confirm("The translated texts differ. Do you want to continue and only keep the neutral one?"))
+  if(warn && !confirm("The translated texts differ. Keep only one?"))
     return false;
 
   // Try to get the English text first, if available. If it isn’t,
@@ -296,7 +295,7 @@ FormEditor.prototype.dom2yaml = function() {
 FormEditor.prototype.createHeading = function(path, cssClasses) {
   var last = path.split("/").pop();
   cssClasses = cssClasses ? cssClasses : "";
-  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent">');
+  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent" title="'+path+'">');
 };
 
 FormEditor.prototype.closeHeading = function(path) {
