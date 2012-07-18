@@ -23,7 +23,7 @@ function FormEditor() {
   this.invalidData = false;
   this.generatedHtml = "";
 
-  this.parseAbstractForm(this.data, "");
+  this.parseAbstractForm(this.data);
 }
 
 FormEditor.getInstance = function() {
@@ -56,7 +56,15 @@ FormEditor.prototype.setLanguages = function(langs) {
     newLangs.push(langs[id].length == 2 ? ":" + langs[id] : langs[id]);
   }
   this.languages = newLangs;
+
   $("#availableLanguages").val(this.languages.join(" ").replace(/:/g, ""));
+
+  // don't do removals/inserts on automated updates. These should only
+  // occur once at the start and all fields should already sport the
+  // correct languages.
+  if(automated)
+    return;
+
   // find translation groups
   $(".language").parent().each(function(ind, transGroup) {
     var path = $(transGroup).attr("title");
@@ -89,9 +97,11 @@ FormEditor.prototype.getPath = function(path) {
   var l = path.split("/");
   this.assert("" == l.shift(), "Invalid path given. Must start with /. Given: " + path);
   var r = this.data;
+  var pathok = "";
   for(var x in l) {
     r = r[l[x]];
-    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path);
+    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path + "  Path correct for: " + pathok);
+    pathok += "/" + l[x];
   }
   return r;
 };
@@ -125,7 +135,9 @@ FormEditor.prototype.getLanguagesFromDom = function() {
 };
 
 
-FormEditor.prototype.parseAbstractForm = function(data, path) {
+FormEditor.prototype.parseAbstractForm = function(data) {
+  var path = "";
+
   this.assert(data["rubyobject"] == "AbstractForm", "First entry of data is not an AbstractForm. Either the form is broken or the data subset passed is not an AbstractForm.");
 
   this.createLanguageControlBox();
@@ -142,16 +154,47 @@ FormEditor.prototype.parseAbstractForm = function(data, path) {
     this.assert($.inArray(ATTRIBUTES["AbstractForm"].x), "The given data subset contains an unknown attribute for AbstractForm: " + x + ".");
 
     this.createTranslateableTextBox(path + "/" + x, x);
-    //~ else
   }
 
   // handle pages here
+  for(var x in this.data["pages"]) {
+    var page = this.data["pages"][x];
+    this.parsePage(page, path + "/pages/" + x);
+  }
 
   this.createActionLink("FormEditor.getInstance().dom2yaml();", "dom 2 yaml");
 
-  //this.log(this.generatedHtml);
   this.root.append(this.generatedHtml);
   this.dom2yaml();
+};
+
+FormEditor.prototype.parsePage = function(page, path) {
+  for(var y in ATTRIBUTES["Page"]) {
+    var attr = ATTRIBUTES["Page"][y];
+    this.createTranslateableTextBox(path + "/" + attr, attr);
+  }
+  var sections = page["sections"];
+  for(var sect in sections) {
+    var section = sections[sect];
+    this.parseSection(section, path + "/sections/" + sect);
+  }
+};
+
+FormEditor.prototype.parseSection = function(section, path) {
+  for(var y in ATTRIBUTES["Section"]) {
+    var attr = ATTRIBUTES["Section"][y];
+    this.createTranslateableTextBox(path + "/" + attr, attr);
+  }
+  var questions = section["questions"];
+  for(var quest in questions) {
+    this.parseQuestion(questions[quest], path + "/questions/" + quest);
+  }
+};
+
+FormEditor.prototype.parseQuestion = function(question, path) {
+  this.createTextBox(path + "/db_column", "db_column", true);
+  this.createTextBox(path + "/visualizer", "visualizer", true);
+  this.createTranslateableTextBox(path + "/qtext", "qtext");
 };
 
 FormEditor.prototype.setPath = function(obj, path, value) {
@@ -410,9 +453,14 @@ FormEditor.prototype.log = function(strng) {
   if(window.console) console.log(strng);
 };
 
+FormEditor.prototype.trace = function() {
+  if(window.console) console.trace();
+}
+
 FormEditor.prototype.assert = function(expression, message) {
   if (!expression) {
     this.invalidData = true;
+    this.trace();
     throw(message);
   }
 };

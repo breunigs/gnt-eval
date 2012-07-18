@@ -42,9 +42,6 @@ class Box
   # special value for easier LaTeX sheet generation, e.g. square or comment
   attr_accessor :type
 
-  # if this is a comment field, we need to know its height
-  attr_accessor :height
-
   def initialize(c, t)
     @choice = c
     @text = t
@@ -318,6 +315,8 @@ end
 # groups questions of the same type or of the same category together
 # and prints a header into the questionnaire and into the results
 class Section
+  ATTRIBUTES = :title
+
   attr_accessor :title
 
   attr_writer :questions
@@ -348,6 +347,7 @@ end
 
 # this is really just needed for tex and OMR
 class Page
+  ATTRIBUTES = :tex_at_top, :tex_at_bottom
 
   # list of sections on that page
   attr_accessor :sections
