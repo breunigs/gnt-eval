@@ -169,6 +169,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 };
 
 FormEditor.prototype.parsePage = function(page, path) {
+  this.createHiddenBox(path+"/rubyobject", "Page");
   for(var y in ATTRIBUTES["Page"]) {
     var attr = ATTRIBUTES["Page"][y];
     this.createTranslateableTextBox(path + "/" + attr, attr);
@@ -181,6 +182,7 @@ FormEditor.prototype.parsePage = function(page, path) {
 };
 
 FormEditor.prototype.parseSection = function(section, path) {
+  this.createHiddenBox(path+"/rubyobject", "Section");
   for(var y in ATTRIBUTES["Section"]) {
     var attr = ATTRIBUTES["Section"][y];
     this.createTranslateableTextBox(path + "/" + attr, attr);
@@ -192,6 +194,7 @@ FormEditor.prototype.parseSection = function(section, path) {
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
+  this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTextBox(path + "/db_column", "db_column", true);
   this.createTextBox(path + "/visualizer", "visualizer", true);
   this.createTranslateableTextBox(path + "/qtext", "qtext");
@@ -201,8 +204,13 @@ FormEditor.prototype.setPath = function(obj, path, value) {
   $.each(path.split("/").reverse(), function(ind, elem) {
     if(elem == "") return;
     var v = value;
-    value = {};
-    value[elem] = v;
+    if(elem.match(/^[0-9]+$/)) { // it’s an array
+      value = [];
+      value[parseInt(elem)] = v;
+    } else { // it’s a hash
+      value = {};
+      value[elem] = v;
+    }
   });
   return $.extend(true, obj, value);
 };
@@ -435,6 +443,10 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
   this.append('<input type="text" title="'+path+'" id="'+id+'" value="'+this.getPath(path)+'"/>');
 
   if(group) this.closeGroup();
+};
+
+FormEditor.prototype.createHiddenBox = function(path, value) {
+  this.append('<input type="hidden" title="'+path+'" value="'+value+'"/>');
 };
 
 // retrieves the value from the source textarea, parses it into a JS
