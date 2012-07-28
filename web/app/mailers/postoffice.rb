@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-DEBUG_MAILTO_ADDRESS = "SOME_DEBUG_MAIL_ADDRESS"
+DEBUG_MAILTO_ADDRESS = "bruno@mathphys.fsk.uni-heidelberg.de"
 
 class Postoffice < ActionMailer::Base
   default :from     => Seee::Config.settings[:standard_mail_from],
