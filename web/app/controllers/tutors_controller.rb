@@ -76,7 +76,7 @@ class TutorsController < ApplicationController
   # PUT /tutors/1.xml
   def update
     @tutor = Tutor.find(params[:id])
-    expire_fragment("tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
+    expire_fragment("preview_tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
 
     respond_to do |format|
       if @tutor.update_attributes(params[:tutor])
@@ -96,7 +96,7 @@ class TutorsController < ApplicationController
     @tutor = Tutor.find(params[:id])
 
     # expire preview cache as well
-    expire_fragment("tutors_#{params[:id]}")
+    expire_fragment("preview_tutors_#{params[:id]}")
     @tutor.destroy unless @tutor.critical?
 
     respond_to do |format|

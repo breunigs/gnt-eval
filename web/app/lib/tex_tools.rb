@@ -73,15 +73,15 @@ class String
     msg << "Unexpanded “&”?" if self.match("\\&")
     msg << "Deprecated quotation mark use?" if self.match("\"`")
     msg << "Deprecated quotation mark use?" if self.match("\"'")
-    msg << "Underline mustn't be used. Ever." if self.match("\\underline")
+    msg << "Underline mustn't be used. Ever." if self.match(/\\underline/)
     msg << "Unescaped %-signs?" if self.match(/[^\\]%/)
 
     begs = self.scan(/\\begin\{[a-z]+?\}/)
     ends = self.scan(/\\end\{[a-z]+?\}/)
     if  begs.count != ends.count
-	msg << "\\begin and \\end count differs. This is what has been found:"
-	msg << "\tBegins: #{begs.join("\t")}"
-	msg << "\tEnds:   #{ends.join("\t")}"
+      msg << "\\begin and \\end count differs. This is what has been found:"
+      msg << "\tBegins: #{begs.join("\t")}"
+      msg << "\tEnds:   #{ends.join("\t")}"
     end
 
     msg.collect { |x| "\t" + x }.join("\n")

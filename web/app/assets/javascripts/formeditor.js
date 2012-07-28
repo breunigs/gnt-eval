@@ -23,7 +23,7 @@ function FormEditor() {
   this.invalidData = false;
   this.generatedHtml = "";
 
-  this.parseAbstractForm(this.data, "");
+  this.parseAbstractForm(this.data);
 }
 
 FormEditor.getInstance = function() {
@@ -34,10 +34,14 @@ FormEditor.getInstance = function() {
 FormEditor.prototype.setLanguages = function(langs) {
   // get languages from default text box unless given. It is assumed that
   // this is a user action, therefore warn if removing languages.
-  if(!langs) {
+  var automated = langs ? true : false;
+  if(!automated)
     langs = $.trim($("#availableLanguages").val()).split(/\s+/);
-    var removedLangs = $(this.getLanguagesFromDom()).not(langs);
-    var rls = Array.prototype.join.call(removedLangs, ", "));
+
+  var removedLangs = $(this.getLanguagesFromDom()).not(langs);
+
+  if(!automated) {
+    var rls = Array.prototype.join.call(removedLangs, ", ");
     var strng = "You are about to remove these language(s): "+rls+". Continue?";
     if(removedLangs.length > 0 && !confirm(strng))
       return false; // stop, because user doesn’t want to remove langs
@@ -52,7 +56,37 @@ FormEditor.prototype.setLanguages = function(langs) {
     newLangs.push(langs[id].length == 2 ? ":" + langs[id] : langs[id]);
   }
   this.languages = newLangs;
+
   $("#availableLanguages").val(this.languages.join(" ").replace(/:/g, ""));
+
+  // don't do removals/inserts on automated updates. These should only
+  // occur once at the start and all fields should already sport the
+  // correct languages.
+  if(automated)
+    return;
+
+  // find translation groups
+  $(".language").parent().each(function(ind, transGroup) {
+    var path = $(transGroup).attr("title");
+    var l = newLangs.slice();
+    $(transGroup).children(".language").each(function(ind, langGroup) {
+      var lang = $(langGroup).children("span, label").html();
+      var index = l.indexOf(lang);
+      if(index >= 0) {
+        l.splice(index, 1); // ack language is available in dom
+      } else {
+        $(langGroup).remove(); // remove superfluous lang
+      }
+    });
+    // add missing languages to dom
+    $.each(l, function(ind, lang) {
+      var sis = FormEditor.getInstance();
+      sis.setPath(sis.data, path + "/" + lang, "");
+      sis.generatedHtml = "";
+      sis.createLangTextBox(path, lang);
+      $(transGroup).append(sis.generatedHtml);
+    });
+  });
 }
 
 FormEditor.prototype.append = function(content) {
@@ -63,9 +97,11 @@ FormEditor.prototype.getPath = function(path) {
   var l = path.split("/");
   this.assert("" == l.shift(), "Invalid path given. Must start with /. Given: " + path);
   var r = this.data;
+  var pathok = "";
   for(var x in l) {
     r = r[l[x]];
-    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path);
+    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path + "  Path correct for: " + pathok);
+    pathok += "/" + l[x];
   }
   return r;
 };
@@ -99,7 +135,9 @@ FormEditor.prototype.getLanguagesFromDom = function() {
 };
 
 
-FormEditor.prototype.parseAbstractForm = function(data, path) {
+FormEditor.prototype.parseAbstractForm = function(data) {
+  var path = "";
+
   this.assert(data["rubyobject"] == "AbstractForm", "First entry of data is not an AbstractForm. Either the form is broken or the data subset passed is not an AbstractForm.");
 
   this.createLanguageControlBox();
@@ -116,24 +154,63 @@ FormEditor.prototype.parseAbstractForm = function(data, path) {
     this.assert($.inArray(ATTRIBUTES["AbstractForm"].x), "The given data subset contains an unknown attribute for AbstractForm: " + x + ".");
 
     this.createTranslateableTextBox(path + "/" + x, x);
-    //~ else
   }
 
   // handle pages here
+  for(var x in this.data["pages"]) {
+    var page = this.data["pages"][x];
+    this.parsePage(page, path + "/pages/" + x);
+  }
 
   this.createActionLink("FormEditor.getInstance().dom2yaml();", "dom 2 yaml");
 
-  //this.log(this.generatedHtml);
   this.root.append(this.generatedHtml);
   this.dom2yaml();
+};
+
+FormEditor.prototype.parsePage = function(page, path) {
+  this.createHiddenBox(path+"/rubyobject", "Page");
+  for(var y in ATTRIBUTES["Page"]) {
+    var attr = ATTRIBUTES["Page"][y];
+    this.createTranslateableTextBox(path + "/" + attr, attr);
+  }
+  var sections = page["sections"];
+  for(var sect in sections) {
+    var section = sections[sect];
+    this.parseSection(section, path + "/sections/" + sect);
+  }
+};
+
+FormEditor.prototype.parseSection = function(section, path) {
+  this.createHiddenBox(path+"/rubyobject", "Section");
+  for(var y in ATTRIBUTES["Section"]) {
+    var attr = ATTRIBUTES["Section"][y];
+    this.createTranslateableTextBox(path + "/" + attr, attr);
+  }
+  var questions = section["questions"];
+  for(var quest in questions) {
+    this.parseQuestion(questions[quest], path + "/questions/" + quest);
+  }
+};
+
+FormEditor.prototype.parseQuestion = function(question, path) {
+  this.createHiddenBox(path+"/rubyobject", "Question");
+  this.createTextBox(path + "/db_column", "db_column", true);
+  this.createTextBox(path + "/visualizer", "visualizer", true);
+  this.createTranslateableTextBox(path + "/qtext", "qtext");
 };
 
 FormEditor.prototype.setPath = function(obj, path, value) {
   $.each(path.split("/").reverse(), function(ind, elem) {
     if(elem == "") return;
     var v = value;
-    value = {};
-    value[elem] = v;
+    if(elem.match(/^[0-9]+$/)) { // it’s an array
+      value = [];
+      value[parseInt(elem)] = v;
+    } else { // it’s a hash
+      value = {};
+      value[elem] = v;
+    }
   });
   return $.extend(true, obj, value);
 };
@@ -188,7 +265,7 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
   this.updateDataFromDom();
 
   var warn = this.groupHasDifferentInputTexts($(caller).parent());
-  if(warn && !confirm("The translated texts differ. Do you want to continue and only keep the neutral one?"))
+  if(warn && !confirm("The translated texts differ. Keep only one?"))
     return false;
 
   // Try to get the English text first, if available. If it isn’t,
@@ -211,11 +288,15 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
 };
 
 FormEditor.prototype.genderizePath = function(path, caller) {
+  this.log("Genderizing Path: " + path);
   this.updateDataFromDom();
 
   // generate new object
   var oldText = this.getPath(path);
   var genderized = { ":male": oldText, ":female": oldText, ":both": oldText};
+
+  this.log(oldText);
+  this.log(genderized);
 
   // inject new object
   this.setPath(this.data, path, genderized);
@@ -265,7 +346,7 @@ FormEditor.prototype.dom2yaml = function() {
 FormEditor.prototype.createHeading = function(path, cssClasses) {
   var last = path.split("/").pop();
   cssClasses = cssClasses ? cssClasses : "";
-  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent">');
+  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent" title="'+path+'">');
 };
 
 FormEditor.prototype.closeHeading = function(path) {
@@ -313,25 +394,34 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
     if(!this.translationsHaveGendering(texts))
       this.createActionLink("FormEditor.getInstance().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
     for(var lang in texts) {
-      var newPath = path+"/"+lang;
       this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
       if(typeof(texts[lang] ) == "string") {
-        this.openGroup("language");
-        this.createTextBox(newPath, lang);
-        this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"/"+lang+"\", this)", "Genderize »");
-        this.closeGroup();
+        this.createLangTextBox(path, lang);
       } else {
-        this.createHeading(newPath, "language");
-        this.createActionLink("FormEditor.getInstance().ungenderizePath(\""+path+"/"+lang+"\", this)", "« no gender");
-        this.createTextBox(newPath + "/:both", "neutral", true);
-        this.createTextBox(newPath + "/:female", "female", true);
-        this.createTextBox(newPath + "/:male", "male", true);
-        this.closeHeading();
+        this.createLangTextBoxGenderized(path, lang);
       }
     }
     this.closeHeading();
   }
   this.closeGroup();
+};
+
+FormEditor.prototype.createLangTextBox = function(path, lang) {
+  var path = path+"/"+lang;
+  this.openGroup("language");
+  this.createTextBox(path, lang);
+  this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »");
+  this.closeGroup();
+};
+
+FormEditor.prototype.createLangTextBoxGenderized = function(path, lang) {
+  var path = path+"/"+lang;
+  this.createHeading(path, "language");
+  this.createActionLink("FormEditor.getInstance().ungenderizePath(\""+path+"\", this)", "« no gender");
+  this.createTextBox(path + "/:both", "neutral", true);
+  this.createTextBox(path + "/:female", "female", true);
+  this.createTextBox(path + "/:male", "male", true);
+  this.closeHeading();
 };
 
 // creates a textbox for a single value that is not translatable.
@@ -355,6 +445,10 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
   if(group) this.closeGroup();
 };
 
+FormEditor.prototype.createHiddenBox = function(path, value) {
+  this.append('<input type="hidden" title="'+path+'" value="'+value+'"/>');
+};
+
 // retrieves the value from the source textarea, parses it into a JS
 // object and returns it.
 FormEditor.prototype.getValue = function() {
@@ -371,9 +465,14 @@ FormEditor.prototype.log = function(strng) {
   if(window.console) console.log(strng);
 };
 
+FormEditor.prototype.trace = function() {
+  if(window.console) console.trace();
+}
+
 FormEditor.prototype.assert = function(expression, message) {
   if (!expression) {
     this.invalidData = true;
+    this.trace();
     throw(message);
   }
 };

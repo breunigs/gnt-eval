@@ -370,23 +370,16 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # Saves a given area (in form of a boxes array) for the current image.
-  def save_text_image(img_id, save_as, boxes, use_page_width = true)
+  def save_text_image(img_id, save_as, boxes, expand = 30)
     return if save_as.nil? || save_as.empty?
     debug("    Saving Comment Image: #{save_as}", "save_image") if @verbose
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
     x, y, w, h = calculateBounds(boxes)
-    if use_page_width
-      img = @ilist[img_id].crop(0, y, PAGE_WIDTH, h, true).minify
-    else
-      img = @ilist[img_id].crop(x, y, w, h, true).minify
-    end
-    # add text about where to find the original file
-    @draw[999] = Magick::Draw.new
-    @draw[999].pointsize = 9*@dpifix
-    draw_solid_box!(999, [0,0], [PAGE_WIDTH/2, 7], "white")
-    draw_text!(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
-    @draw[999].draw(img)
+    newy = [y - expand, 0].max
+    newh = [h + expand + (y-newy), PAGE_HEIGHT].min
+    img = @ilist[img_id].crop(0, newy, PAGE_WIDTH, newh, true).minify
+
     # write out file
     img.write filename
     img.destroy!
@@ -500,7 +493,7 @@ class PESTOmr < PESTDatabaseTools
 
     if @cancelProcessing
       debug "  Something went wrong while recognizing this sheet."
-      return if @test_mode # don't move the sheet if in test_mode
+      return if @test_mode || @debug # don't move the sheet in test/debug
       debug "  Moving #{File.basename(file)} to bizarre"
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
       FileUtils.makedirs(dir)

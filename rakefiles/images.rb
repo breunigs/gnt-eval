@@ -83,6 +83,53 @@ namespace :images do
     puts "Next recommended step: rake images:correct"
   end
 
+  desc "Try to find empty sheets."
+  task :find_empty_sheets do
+    checks = 5
+    puts "This simple heuristic checks if there are less than"
+    puts "#{checks} checkmarks. If there are, the sheet is presented"
+    puts "to you so you can decide to throw it out or not."
+    all_sql = []
+    tables = []
+    Semester.currently_active.map { |s| s.forms }.flatten.each do |form|
+      tables << form.db_table
+      sql = "SELECT path FROM #{form.db_table} WHERE #{checks} > (0 "
+      form.questions.map do |q|
+        next unless ["square", "tutor_table"].include?(q.type)
+        if q.single?
+          sql << "\n+ IF(#{q.db_column} > 0, 1, 0)"
+        else
+          q.db_column.each { |col| sql << "\n+ IF(#{col} > 0, 1, 0)" }
+          sql << "\n+ IF(#{q.db_column.find_common_start+"noansw"} > 0, 1, 0)" if q.no_answer?
+        end
+      end
+      sql << "\n)"
+      all_sql << sql
+    end
+    paths = RT.custom_query(all_sql.join(" UNION ")).map { |row| row["path"] }
+    tmp_path = "#{temp_dir}/is_this_sheet_empty.tif"
+    paths.each do |p|
+      FileUtils.ln_s(p, tmp_path, :force => true)
+      fork { exec "#{SCap[:pdf_viewer]} \"#{tmp_path}\" 2>1 &> /dev/null" }
+      puts "\n\n\n"
+      puts "Image: #{p}"
+      print "Delete sheet from disk and database? [y/N] "
+      answ = STDIN.gets.strip.downcase
+      next if answ == "n" or answ == ""
+      redo if answ != "y"
+      # delete sheet
+      puts "Deleting in DB…"
+      tables.each do |table|
+        RT.custom_query_no_result("DELETE FROM #{table} WHERE path = ?", [p])
+      end
+      puts "From disk…"
+      FileUtils.rm(p, :force => true) # try to delete, but don’t report errors
+    end
+    # cleanup
+    FileUtils.rm(tmp_path, :force => true)
+    puts "Done. All empty sheets have been removed."
+  end
+
   desc "(6) Correct invalid sheets"
   task :correct do
     forms = Semester.currently_active.map { |s| s.forms }.flatten
@@ -106,14 +153,14 @@ namespace :images do
     mkdir = SCc[:mkdir_comment_image_directory]
 
     Semester.currently_active.each do |sem|
-      system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}\"")
+      system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dir_friendly_title}\"")
       path=File.join(File.dirname(__FILE__), "tmp/images")
 
       # find all existing images for courses/profs and tutors
       bcs = sem.barcodes
-      cpics = CPic.find(:all, :conditions => { :course_prof_id => bcs })
+      cpics = CPic.where(:course_prof_id => bcs).map { |t| t.basename }
       tids = sem.courses.map { |c| c.tutors.map { |t| t.id } }
-      tpics = Pic.find(:all, :conditions => { :tutor_id => tids })
+      tpics = Pic.where(:tutor_id => tids).map { |t| t.basename }
 
       # find all tables that include a tutor chooser
       forms = sem.forms.find_all { |form| form.include_question_type?("tutor_table") }
@@ -123,6 +170,8 @@ namespace :images do
       allfiles = Dir.glob(File.join(SCfp[:sorted_pages_dir], '**/*.jpg'))
       allfiles.each_with_index do |f, curr|
         bname = File.basename(f)
+        next if bname =~ /_DEBUG/
+        source = f.sub(/_[^_]+$/, "") + ".tif"
         barcode = find_barcode_from_path(f)
 
         if barcode == 0
@@ -138,27 +187,24 @@ namespace :images do
 
         p = nil
         # tutor comments, place them under each tutor
-        if f.downcase.end_with?("ucomment.jpg")
+        if f.downcase.end_with?("_ucomment.jpg")
           # skip existing images
-          next if tpics.any? { |x| x.basename == bname }
+          next if tpics.include?(bname)
           # find tutor id
           tut_num = nil
           tables.each do |table, column|
-            # remove everything after the last underscore and add .tif to
-            # find the original image
-            path = f.sub(/_[^_]+$/, "") + ".tif"
-            data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [path], true)
+            data = RT.custom_query("SELECT #{column} FROM #{table} WHERE path = ?", [source], true)
             tut_num = data[column].to_i if data
             break if tut_num
           end
 
           if tut_num.nil?
-            warn "\nouldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
+            warn "\n\nCouldn’t find any record in the results database for #{bname}. Cannot match tutor image. Skipping.\n"
             next
           end
 
           if tut_num == 0
-            warn "\nCouldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
+            warn "\n\nCouldn’t add tutor image #{bname}, because no tutor was chosen (or marked invalid). Skipping.\n"
             next
           end
 
@@ -166,28 +212,32 @@ namespace :images do
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
 
           if tut_num > tutors.count
-            warn "Couldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
+            warn "\n\nCouldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
             next
           end
 
           p = Pic.new
           p.tutor_id = tutors[tut_num-1].id
         else # files for the course/prof. Should be split up. FIXME.
-          next if cpics.any? { |x| x.basename == bname }
+          next if cpics.include?(bname)
           p = CPic.new
           p.course_prof = course_prof
         end
         p.basename = bname
+        p.source = source
         # let rails know about this comment
         p.save
         # move comment to correct location
-        system("#{cp} \"#{f}\" \"#{SCfp[:comment_images_public_dir]}/#{sem.dirFriendlyName}/\"")
+        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title))
         print_progress(curr+1, allfiles.size)
       end # Dir glob
     end # Semester.each
 
     puts
     puts "Done."
+    puts
+    puts "Next recommended step: Type all comments in the web interface."
+    puts "After that, the commands in the “rake results:*” group should help you."
   end
 
   # find forms for current semester and extract variables from the

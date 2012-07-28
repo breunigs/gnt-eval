@@ -74,12 +74,8 @@ class Semester < ActiveRecord::Base
   def critical?
     critical
   end
-
-  def dirFriendlyName
-    title.gsub(' ', '_').gsub('/', '_')
-  end
-
-  def dirfriendly_title
-    dirFriendlyName
+  
+  def dir_friendly_title
+    ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
   end
 end

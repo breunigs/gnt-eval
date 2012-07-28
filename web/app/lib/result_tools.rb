@@ -79,7 +79,7 @@ class ResultTools
       # SQL standard as implemented by… nobody
       else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
     end
-    sth = @dbh.prepare(qry)
+    sth = dbh.prepare(qry)
     sth.execute(table)
     r = sth.fetch
     sth.finish
@@ -100,7 +100,7 @@ class ResultTools
     # exclude invalid values
     sql << "AND 0 < #{column} AND #{column} < 99"
     r = custom_query(sql, where_hash.values, true)
-    return r["count"], r["avg"], r["stddev"]
+    return r["count"].to_i, r["avg"].to_f, r["stddev"].to_f
   end
 
   # Counts the amount of rows for the given hash. It is processed in the
@@ -111,7 +111,7 @@ class ResultTools
   # If a db column is given as 3rd argument, will group by that db
   # column and return multiple results. The format is a hash of
   # { value => count }
-  def count(table, where_hash = {}, group = nil)
+  def count(table, where_hash = {}, group = nil, skip_null = true)
     return -1 unless report_valid_name?(table)
     return table.uniq.collect {|t| count(t, where_hash, group) }.sum \
       if table.is_a?(Array)
@@ -134,7 +134,13 @@ class ResultTools
     sql << clause
     if group && group.is_a?(String)
       sql << " GROUP BY #{group} "
-      return custom_query(sql, where_hash.values, false)
+      r = {}
+      custom_query(sql, where_hash.values, false).each do |row|
+        next if skip_null && row["value"].nil?
+        v = row["value"] =~ /^[0-9]+$/ ? row["value"].to_i : row["value"]
+        r[v] = row["count"].to_i
+      end
+      return r
     else
       r = custom_query(sql, where_hash.values, true)
       return r["count"].to_i
@@ -154,7 +160,7 @@ class ResultTools
     clause = hash_to_where_clause(where_hash)
     return -1 if clause.nil?
     qry = "SELECT DISTINCT #{correlate_by} FROM #{table} WHERE #{clause}"
-    answ = custom_query(qry, where_hash.values)
+    answ = custom_query(qry, where_hash.values).map { |row| row[correlate_by].to_i }
     if combine_no_answers && answ.include?(99)
       answ << 0 unless answ.include?(0)
       answ.delete(99)
@@ -193,7 +199,7 @@ class ResultTools
     raise "values parameter must be an array." unless values.is_a?(Array)
     query << " LIMIT 1" if first_row
     check_query(query, values)
-    q = @dbh.prepare(query)
+    q = dbh.prepare(query)
     begin
       q.execute(*values.flatten)
       if first_row
@@ -219,7 +225,7 @@ class ResultTools
   def custom_query_no_result(query, values = [])
     raise "values parameter must be an array." unless values.is_a?(Array)
     check_query(query, values)
-    q = @dbh.prepare(query)
+    q = dbh.prepare(query)
     begin
       q.execute(*values.flatten)
     rescue DBI::DatabaseError => e
@@ -236,7 +242,6 @@ class ResultTools
   # singleton mixin, only one connection will be opened per Ruby
   # instance.
   def initialize
-    reconnect_to_database
     @tex = {}
   end
 
@@ -255,6 +260,13 @@ class ResultTools
       debug "Have a look at seee_config.rb to correct the settings."
       exit 1
     end
+  end
+
+  # returns the database handle. Use this insteady of directly accessing
+  # @dbh, so connect on demand works.
+  def dbh
+    reconnect_to_database if @dbh.nil? || !@dbh.connected?
+    @dbh
   end
 
   # evaluates a given question with the sheets matching special_where.

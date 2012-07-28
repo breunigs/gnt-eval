@@ -61,7 +61,13 @@ is_new = !is_edit
   } catch (err) {
     document.getElementById('result').value = err.toString();
   }*/
-  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(:AbstractForm => AbstractForm::ATTRIBUTES).html_safe %>;
+  <%
+    attr = {}
+    attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
+    attr[:Page] = [Page::ATTRIBUTES].flatten
+    attr[:Section] = [Section::ATTRIBUTES].flatten
+  %>
+  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
   var x = FormEditor.getInstance();
   x.setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>);
 </script>

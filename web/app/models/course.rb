@@ -202,7 +202,7 @@ class Course < ActiveRecord::Base
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
 
-    if returned_sheets <= SCs[:minimum_sheets_required]
+    if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
       if single
         b << RT.sample_sheets_and_footer([form])
@@ -247,7 +247,7 @@ class Course < ActiveRecord::Base
   end
 
   def dir_friendly_title
-    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9\-_]/i,'')
+    ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
   end
 
   private

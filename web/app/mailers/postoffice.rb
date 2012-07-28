@@ -40,14 +40,16 @@ class Postoffice < ActionMailer::Base
   end
 
   # verschickt die eval, will faculty_links ist array mit
-  # faculty_links[faculty] =
+  # faculty_links[faculty_id] =
   # 'http://mathphys.fsk.uni-heidelberg.de/~eval/.uieduie/Ich_bin_das_richtige_file.pdf'
   def evalverschickung(course_id, faculty_links)
     c = Course.find(course_id)
+    
+    raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
     @title = c.title
     @anrede = prof_address(c)
-    @link = faculty_links[c.faculty] + '#nameddest=' + course_id.to_s
+    @link = faculty_links[c.faculty.id] + '#nameddest=' + course_id.to_s
 
     subject = 'Ergebnisse der diessemestrigen Veranstaltungsumfrage'
     to = c.profs.collect{ |p| p.email }
@@ -62,13 +64,15 @@ class Postoffice < ActionMailer::Base
   def single_evalverschickung(course_id, faculty_links, path = "")
     c = Course.find(course_id)
 
+    raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
+
     @title = c.title
     @anrede = prof_address(c)
-    @link = faculty_links[c.faculty]
+    @link = faculty_links[c.faculty.id]
 
     # guess the correct path
     if path.empty?
-      filename = c.dir_friendly_title << '_' << c.semester.dirFriendlyName << '.pdf'
+      filename = c.dir_friendly_title << '_' << c.semester.dir_friendly_title << '.pdf'
       path = File.join(Rails.root, '../tmp/results/singles/', filename)
     end
 

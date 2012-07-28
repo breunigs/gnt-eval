@@ -1,10 +1,10 @@
 # encoding: utf-8
 
 namespace :results do
-  # accepts array of semester IDs and returns array of valid forms for
-  # that semester
-  def get_forms_for_semesters(sems)
-    forms = sems.collect { |s| Semester.find_by_id(s).forms }.flatten
+  # accepts array of term IDs and returns array of valid forms for
+  # that term
+  def get_forms_for_terms(terms)
+    forms = terms.collect { |s| Semester.find_by_id(s).forms }.flatten
     forms.select { |f| f.abstract_form_valid? }
   end
 
@@ -15,22 +15,22 @@ namespace :results do
     Hash[forms.collect { |f| [f.db_table, f.name] }]
   end
 
-  # gets the semester(s) from the user, if it isn’t defined in the user
-  # input or not valid. Exists if no semester is chosen.
-  def ask_semester(user_input)
-    print_head "Semester"
-    puts "Choose semester to export:"
+  # gets the term(s) from the user, if it isn’t defined in the user
+  # input or not valid. Exists if no term is chosen.
+  def ask_term(user_input)
+    print_head "Term"
+    puts "Choose term to export:"
     Semester.all.each do |s|
       puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
     end
-    sems = get_or_fake_user_input(Semester.all.collect{|x|x.id}, user_input)
+    terms = get_or_fake_user_input(Semester.all.collect{|x|x.id}, user_input)
     puts
     puts
-    if sems.empty?
-      puts "no semester(s) chosen. Exiting."
+    if terms.empty?
+      puts "no term(s) chosen. Exiting."
       exit 0
     end
-    sems
+    terms
   end
 
   # Asks the user which faculties to include. Exits if no choice is
@@ -62,9 +62,9 @@ namespace :results do
     faculty = ask_faculty(nil)
     faculty_barcodes = faculty.map { |f| f.barcodes }.flatten
 
-    sems = ask_semester(nil)
+    terms = ask_term(nil)
     # reject forms without tutors
-    forms = get_forms_for_semesters(sems).select { |f| f.get_tutor_question }
+    forms = get_forms_for_terms(terms).select { |f| f.get_tutor_question }
 
     # step one: find tutor questions for each form, only allow single
     fq = Hash[forms.collect do |f|
@@ -124,11 +124,12 @@ namespace :results do
       qry << " GROUP BY barcode, #{tutor_col}"
       qry << " HAVING COUNT(*) >= #{Seee::Config.settings[:minimum_sheets_required]}"
       qry << ") AS tbl ORDER BY #{cols.map{|c|"#{c}_avg"}.join("+")} ASC"
-      data += RT.custom_query(qry).values
+      data += RT.custom_query(qry)
     end
     # convert barcode + tutor id to tutor’s name
     data.map! do |d|
-      barcode, tutor_id, count = d.shift(3)
+      d = d.values
+      barcode, tutor_id, count = d.shift(3).map { |s| s.to_i }
       c = CourseProf.find_by_id(barcode)
       next if c.nil?
       t = c.course.tutors[tutor_id-1]
@@ -147,8 +148,8 @@ namespace :results do
     intro << 'It\'s recommended to \emph{not} use this list. '
     intro << 'If you want to use this list for ranking, please visit your nearest suicide booth immediately. '
     intro << '\# counts handed in sheets; ignores abstentions and invalid answers. Therefore \# is only a rough indicator of how valid the next columns are. '
-    intro << 'Columns are in the format AVG (STDDEV). '
-    intro << 'Values are rounded to one decimal place. '
+    intro << 'Columns are in the format AVG (STDDEV) over the position of the checkbox. The leftmost checkbox is encoded with 1. '
+    intro << 'Assuming all leftmost boxes relate to “good”, then low AVGs indicate good tutors. '
     intro << 'The list is sort of sorted. '
 
     landscape = true
@@ -167,7 +168,6 @@ namespace :results do
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
     require "rubygems"
-    require "fastercsv"
     require "base64"
     # restore data if available
     a = a.base64_data.nil? ? {} : Marshal.load(Base64.decode64(a.base64_data))
@@ -182,20 +182,21 @@ namespace :results do
     puts "much effort and is error prone. If you do, good luck."
     puts
     puts "NOTE: Data will be exported depending on selected database"
-    puts "tables. The semester selector is just a convenience function"
+    puts "tables. The term selector is just a convenience function"
     puts "so you don't have to choose between many tables. Then again,"
-    puts "if you put more than one semester in a single table you have"
+    puts "if you put more than one term in a single table you have"
     puts "graver problems anyway…"
     puts
     puts "Be aware that ALL data will be exported. It’s up to you to"
     puts "protect the participant’s anonymity if applicable."
     puts
     puts
+
     # select faculty to export
     faculty = ask_faculty(a[:faculty])
 
-    # select semester to limit list of tables
-    sems = get_semester(a[:sems])
+    # select term to limit list of tables
+    terms = ask_term(a[:terms])
 
     ## collect some data which will be required later
     # stores which tables exist
@@ -211,7 +212,7 @@ namespace :results do
     ident = {}
     # stores if a certain DB has a tutor table as well as its name
     tutor_col = {}
-    sems.each do |sem|
+    terms.each do |sem|
       sem = Semester.find_by_id(sem)
       dbs += sem.forms.collect { |f| f.db_table }.uniq
       title += sem.forms.collect do |f|
@@ -231,7 +232,8 @@ namespace :results do
     puts "======"
     puts "Choose which tables you want to export. Valid ones are:"
     puts title.join("\n")
-    dbs = get_or_fake_user_input(dbs, a[:dbs])
+    dbs_sel = get_or_fake_user_input(dbs, a[:dbs])
+    dbs = dbs_sel.any? ? dbs_sel : dbs
 
     # only collect identifiers for tables that were selected
     forms = Form.all.select do |f|
@@ -309,7 +311,8 @@ namespace :results do
     end
     qry = qry.join(" UNION ALL ")
     # add the question text to each question header as well
-    fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
+    # fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
+    fullheader = header.clone
 
     puts
     puts "========"
@@ -317,7 +320,7 @@ namespace :results do
     puts "========"
     puts "Which of the following meta data do you want to include?"
     meta = { "path" => "(local) path to the processed image",
-      "barcode" => "uniq id for this semester+lecture+prof",
+      "barcode" => "uniq id for this term+lecture+prof",
       "table" => "table where this sheet is stored",
       "lecture" => "name of the lecture",
       "sheet" => "name of the sheet used to evaluate this lecture",
@@ -326,7 +329,7 @@ namespace :results do
       "profmail" => "e-mail adress of the lecturer",
       "profgender" => "gender of prof. m=male, f=female, o=other",
       "tutor" => "name of tutor, if available",
-      "semester" => "abbreviation of semester",
+      "term" => "abbreviation of term",
       "NONE" => "If you are absolutely sure you do not need any meta data" }
     meta.sort.each { |k,v| puts "#{k.ljust(10)}: #{v}" }
     meta = get_or_fake_user_input(meta.keys, a[:meta])
@@ -348,26 +351,27 @@ namespace :results do
 
     # WHOLE DATA #######################################################
     puts "Running query: " + qry
-    data = RT.custom_query(qry).values
+    data = RT.custom_query(qry)
     lines = []
 
     # add metadata
     data.each do |d|
+      d = d.values
       barcode, tutnum, path, table = *d.shift(4)
       cp = CourseProf.find_by_id(barcode)
       line = []
       meta.each do |m|
         case m
-              when "path"       then line << path
-              when "barcode"    then line << barcode
-              when "table"      then line << table
-              when "lecture"    then line << cp.course.title
-              when "lang"       then line << cp.course.language
-              when "sheet"      then line << cp.course.form.name
-              when "semester"   then line << cp.course.semester.title
-              when "prof"       then line << cp.prof.fullname
-              when "profmail"   then line << cp.prof.email
-              when "profgender" then line << cp.prof.gender.to_s[0..0]
+          when "path"       then line << path
+          when "barcode"    then line << barcode
+          when "table"      then line << table
+          when "lecture"    then line << cp.course.title
+          when "lang"       then line << cp.course.language
+          when "sheet"      then line << cp.course.form.name
+          when "term"       then line << cp.course.semester.title
+          when "prof"       then line << cp.prof.fullname
+          when "profmail"   then line << cp.prof.email
+          when "profgender" then line << cp.prof.gender.to_s[0..0]
           when "tutor"
             if tutnum-1 >=0 && tutnum-1 < cp.course.tutors.size
               line << cp.course.tutors[tutnum-1].abbr_name
@@ -382,16 +386,16 @@ namespace :results do
         question = form.get_question(col)
         next unless question # will fail for _text questions
         boxes = question.boxes
-        if boxes.any? { |b| b.any_text.nil? || b.any_text.empty? }
+        if boxes.any? { |b| b.nil? || b.any_text.blank? }
           line << d[ind]
         else
           # reduce count by one if the last one is a textbox to include
           # the text field instead of “others”
           cnt = question.last_is_textbox? ? boxes.count-1 : boxes.count
-          line << case(d[ind])
-            when -2..0 then ""
+          line << case(d[ind].to_i)
+            when -2..0 then "."
             when 99 then "NOT SPECIFIED"
-            when 1..cnt then boxes[d[ind]-1].any_text.strip_common_tex
+            when 1..cnt then boxes[d[ind].to_i-1].any_text.strip_common_tex
             else (question.last_is_textbox? ? d[ind+1] : "ERROR")
           end
         end
@@ -405,7 +409,7 @@ namespace :results do
     file = "tmp/export/#{now}.csv"
     puts "Writing CSV"
     opt = {:headers => true, :write_headers => true}
-    FasterCSV.open(file, "wb", opt) do |csv|
+    CSV.open(file, "wb", opt) do |csv|
       csv << fullheader.to_a
       lines.each { |l| csv << l }
     end
@@ -418,14 +422,6 @@ namespace :results do
     puts "============"
     puts "Done, have a look at " + "\"#{file}\"".bold
     puts
-    puts "It’s recommended to not use this for anything, because it’s clearly"
-    puts "a reduction to some random values that have no meaning."
-    puts "The leftmost field is encoded as 1 and the count increases by one"
-    puts "for each checkbox to the right. These values are averaged. Wrong"
-    puts "answers, e.g. two answers checked or none at all are not included"
-    puts "in the statistic. Adding a \"don’t know\" column for the user is"
-    puts "planned, but not yet included in the sheets."
-    puts
     puts
     puts "=============="
     puts "Automatization"
@@ -436,13 +432,13 @@ namespace :results do
       export[tbl] -= columns_text[tbl].map { |ct| ct + "_text" }
     end
 
-    data = {:sems => sems, :dbs => dbs, :cols => export,
+    data = {:terms => terms, :dbs => dbs, :cols => export,
               :meta => meta_store, :faculty => faculty.map { |f| f.id }}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
-    print "rake \"results:export["
+    print %(rake "results:export[)
     print Base64.encode64(Marshal.dump(data)).gsub(/\s/, "")
-    puts "\"]"
+    puts %(]")
     puts
     puts "If you want to automate this, you can build a hash similar"
     puts "to the following. You can omit data, which will then be asked"
@@ -453,11 +449,9 @@ namespace :results do
 
   desc "If the output style of the export feature does not suit you, you can use this tool to remap values."
   task :remap_export_data do
-    require "rubygems"
-    require "fastercsv"
-
     unless File.exists?("#{GNT_ROOT}/tmp/export/remap.txt")
       puts "Remap rule file does not exist in tmp/export/remap.txt."
+      puts "If you need an example, have a look at doc/export_remap_example.txt"
       puts "Exiting."
       exit 0
     end
@@ -491,7 +485,7 @@ namespace :results do
     }
     csvs = {}
     Dir.glob("#{GNT_ROOT}/tmp/export/*.csv") do |d|
-      csvs[d] = FasterCSV.table(d, opt)
+      csvs[d] = CSV.table(d, opt)
     end
     if csvs.empty?
       puts "No CSV files found in tmp/export. Exiting."

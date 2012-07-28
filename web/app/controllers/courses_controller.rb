@@ -147,7 +147,7 @@ class CoursesController < ApplicationController
   # PUT /courses/1.xml
   def update
     @course = Course.find(params[:id])
-    expire_fragment("preview_courses_#{params[:id]}") if @course.summary != params[:course][:summary]
+    expire_fragment("preview_courses_#{params[:id]}")
 
     respond_to do |format|
       checks = form_lang_combo_valid? && !critical_changes?(@course)
