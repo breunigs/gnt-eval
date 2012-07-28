@@ -11,6 +11,7 @@ v_central_degree          → Bachelor         → 1
 v_central_degree          → Master           → 2
 v_central_degree          → Kirchlicher Abschluss {(Ecclesiastical Degree)} → 3
 v_central_degree          → Staatsexamen \emph{excluding Lehramt} (State Examination \emph{excluding Civil \textls[-15]{Service Examination)}} → 4
+v_central_degree          → Staatsexamen \emph{excluding Lehramt} (State Examination \emph{excluding Civil {Service Examination)}} → 4
 v_central_degree          → Staatsexamen \emph{including Lehramt} (State Examination \emph{including Civil {Service Examination)}} → 5
 v_central_degree          → Diplom (Diploma) → 6
 v_central_degree          → Magister         → 7
