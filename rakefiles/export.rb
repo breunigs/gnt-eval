@@ -124,11 +124,12 @@ namespace :results do
       qry << " GROUP BY barcode, #{tutor_col}"
       qry << " HAVING COUNT(*) >= #{Seee::Config.settings[:minimum_sheets_required]}"
       qry << ") AS tbl ORDER BY #{cols.map{|c|"#{c}_avg"}.join("+")} ASC"
-      data += RT.custom_query(qry).values
+      data += RT.custom_query(qry)
     end
     # convert barcode + tutor id to tutor’s name
     data.map! do |d|
-      barcode, tutor_id, count = d.shift(3)
+      d = d.values
+      barcode, tutor_id, count = d.shift(3).map { |s| s.to_i }
       c = CourseProf.find_by_id(barcode)
       next if c.nil?
       t = c.course.tutors[tutor_id-1]
@@ -147,8 +148,8 @@ namespace :results do
     intro << 'It\'s recommended to \emph{not} use this list. '
     intro << 'If you want to use this list for ranking, please visit your nearest suicide booth immediately. '
     intro << '\# counts handed in sheets; ignores abstentions and invalid answers. Therefore \# is only a rough indicator of how valid the next columns are. '
-    intro << 'Columns are in the format AVG (STDDEV). '
-    intro << 'Values are rounded to one decimal place. '
+    intro << 'Columns are in the format AVG (STDDEV) over the position of the checkbox. The leftmost checkbox is encoded with 1. '
+    intro << 'Assuming all leftmost boxes relate to “good”, then low AVGs indicate good tutors. '
     intro << 'The list is sort of sorted. '
 
     landscape = true
