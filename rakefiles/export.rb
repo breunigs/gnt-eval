@@ -311,7 +311,7 @@ namespace :results do
     end
     qry = qry.join(" UNION ALL ")
     # add the question text to each question header as well
-    fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
+    # fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
     fullheader = header.clone
 
     puts
