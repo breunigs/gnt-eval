@@ -53,6 +53,33 @@ namespace :results do
     faculty
   end
 
+  # Adds the metadata given in meta to an array.
+  def add_metadata(meta, barcode, path = "", table = "", tutnum = 0)
+    cp = CourseProf.find_by_id(barcode)
+    line = []
+    meta.each do |m|
+      case m
+        when "path"       then line << path
+        when "barcode"    then line << barcode
+        when "table"      then line << table
+        when "lecture"    then line << cp.course.title
+        when "lang"       then line << cp.course.language
+        when "sheet"      then line << cp.course.form.name
+        when "term"       then line << cp.course.semester.title
+        when "prof"       then line << cp.prof.fullname
+        when "profmail"   then line << cp.prof.email
+        when "profgender" then line << cp.prof.gender.to_s[0..0]
+        when "tutor"
+          if tutnum-1 >=0 && tutnum-1 < cp.course.tutors.size
+            line << cp.course.tutors[tutnum-1].abbr_name
+          else
+            line << ""
+          end
+      end
+    end
+    line
+  end
+
   desc "Print list of tutors and user chosen fields"
   task :tutor_blacklist do |t, a|
     puts "This tool works on the assumption that two question asking"
@@ -212,13 +239,13 @@ namespace :results do
     ident = {}
     # stores if a certain DB has a tutor table as well as its name
     tutor_col = {}
-    terms.each do |sem|
-      sem = Semester.find_by_id(sem)
-      dbs += sem.forms.collect { |f| f.db_table }.uniq
-      title += sem.forms.collect do |f|
-        "#{f.db_table} (#{f.name}, #{sem.title})"
+    terms.each do |term|
+      term = Semester.find(term)
+      dbs += term.forms.collect { |f| f.db_table }.uniq
+      title += term.forms.collect do |f|
+        "#{f.db_table} (#{f.name}, #{term.title})"
       end.uniq
-      sem.forms.each do |f|
+      term.forms.each do |f|
         # collect which columns each table has
         columns[f.db_table] = f.questions.collect { |q| q.db_column }.flatten
         columns_text[f.db_table] = f.questions.collect do |q|
@@ -235,6 +262,13 @@ namespace :results do
     dbs_sel = get_or_fake_user_input(dbs, a[:dbs])
     dbs = dbs_sel.any? ? dbs_sel : dbs
 
+    columns.reject! { |db, cols| !dbs.include?(db) }
+    columns_text.reject! { |db, cols| !dbs.include?(db) }
+
+    # only allow columns that appear in all selected tables
+    columns = columns.values.inject(:"&")
+    columns_text = columns_text.values.inject(:"&")
+
     # only collect identifiers for tables that were selected
     forms = Form.all.select do |f|
       f.abstract_form_valid? && dbs.include?(f.db_table)
@@ -248,6 +282,7 @@ namespace :results do
     end
 
     forms.collect { |f| f.questions }.flatten.each do |q|
+      next unless (columns + columns_text).include?(q.db_column)
       # also collect which question text each *identifier* has. They are
       # later put into a single table, so the user should be aware if a
       # label has multiple meanings.
@@ -267,9 +302,8 @@ namespace :results do
     puts "========="
     puts "Questions"
     puts "========="
-    puts "Now select which questions you want to export. You have to do"
-    puts "this for each table. Here's a list of the meaning of each"
-    puts "identifier."
+    puts "Now select which questions you want to export. Only columns"
+    puts "that appear in all tables may be exported."
     puts
     puts "NOTE: If a label appears twice it means that its meaning or"
     puts "      question text differs for the selected forms. You probably"
@@ -281,38 +315,34 @@ namespace :results do
     end
     puts
     export = {}
-    dbs.each do |db|
-      puts
-      puts "Select columns for #{db}. Valid ones are:"
-      puts columns[db].join(" ")
-      export[db] = get_or_fake_user_input(columns[db], a[:cols].nil? ? nil : a[:cols][db])
-    end
-    allcols = export.values.flatten.uniq
 
-    valid_barcodes = faculty.collect { |f| f.barcodes }.flatten
+    puts
+    puts "Select columns. Valid ones are:"
+    puts columns.join(" ")
+    export = get_or_fake_user_input(columns, a[:cols].nil? ? nil : a[:cols])
+    # automatically add _text columns in the correct position
+    all = export.map { |c| columns_text.include?(c) ? [c, "#{c}_text"] : c }
+    all.flatten!
+
+    facs_bcs = faculty.collect { |f| f.barcodes }.flatten
+    terms_bcs = terms.collect { |t| Semester.find(t).barcodes }.flatten
+    valid_barcodes = facs_bcs & terms_bcs
+
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
-    header = nil
-    export.each do |db,cols|
-      extracols = allcols-export[db]
-      # first subquery defines order of columns, so only write header
-      # if not yet defined
-      header ||= cols + extracols
-      # automatically add _text columns
-      cols.map! { |c| columns_text[db].include?(c) ? [c, "#{c}_text"] : c }
-      cols.flatten!
-      cols = cols + (extracols.collect {|x| "\"\" AS #{x}"})
+    dbs.each do |db|
+
       if tutor_col[db]
-        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db} #{where}"
+        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{all.join(", ")} FROM #{db} #{where}"
       else
-        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{cols.join(", ")} FROM #{db} #{where}"
+        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{all.join(", ")} FROM #{db} #{where}"
       end
     end
     qry = qry.join(" UNION ALL ")
     # add the question text to each question header as well
-    # fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
-    fullheader = header.clone
+    header = export.clone
+    fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
 
     puts
     puts "========"
@@ -349,40 +379,20 @@ namespace :results do
     puts "Execution"
     puts "========="
 
-    # WHOLE DATA #######################################################
-    puts "Running query: " + qry
-    data = RT.custom_query(qry)
     lines = []
+    lines_stat = []
 
-    # add metadata
+    puts "Running data query… "# + qry
+    data = RT.custom_query(qry)
+
+    # add metadata and beautify output for the data CSV
     data.each do |d|
       d = d.values
       barcode, tutnum, path, table = *d.shift(4)
-      cp = CourseProf.find_by_id(barcode)
-      line = []
-      meta.each do |m|
-        case m
-          when "path"       then line << path
-          when "barcode"    then line << barcode
-          when "table"      then line << table
-          when "lecture"    then line << cp.course.title
-          when "lang"       then line << cp.course.language
-          when "sheet"      then line << cp.course.form.name
-          when "term"       then line << cp.course.semester.title
-          when "prof"       then line << cp.prof.fullname
-          when "profmail"   then line << cp.prof.email
-          when "profgender" then line << cp.prof.gender.to_s[0..0]
-          when "tutor"
-            if tutnum-1 >=0 && tutnum-1 < cp.course.tutors.size
-              line << cp.course.tutors[tutnum-1].abbr_name
-            else
-              line << ""
-            end
-        end
-      end
+      line = add_metadata(meta, barcode, path, table, tutnum)
 
       form = forms.find { |f| f.db_table == table }
-      export[table].each_with_index do |col, ind|
+      export.each_with_index do |col, ind|
         question = form.get_question(col)
         next unless question # will fail for _text questions
         boxes = question.boxes
@@ -403,15 +413,49 @@ namespace :results do
       lines << line
     end
 
+    puts "Running statistics…\n"
+    header_stat = meta.clone + ["returned sheets"]
+    looped_once = false
+    valid_barcodes.each do |bc|
+      cp = CourseProf.find(bc)
+      table = cp.form.db_table
+      line = add_metadata(meta, bc)
+      line << cp.returned_sheets
+      export.each_with_index do |col, ind|
+        question = cp.form.get_question(col)
+        if question.last_is_textbox?
+          unless looped_once
+            warn "Skipping question #{col} for statistics since it’s"
+            warn "partly free text (last field is textbox).\n"
+          end
+          next
+        end
+        histogram = RT.answer_histogram(table, question, bc)
+        sc, sa, ss = RT.count_avg_stddev(table, col, {:barcode => bc})
+        line += [sa, ss] + histogram.values
+        unless looped_once
+          header_stat += ["#{col} AVG", "#{col} STDDEV"]
+          header_stat += histogram.keys.map { |k| "#{col}: #{k}" }
+        end
+      end
+      looped_once = true
+      lines_stat << line
+    end
+
     # write data to CSV
+    puts "Writing CSV"
     `mkdir -p "tmp/export"`
     now = Time.now.strftime("%Y-%m-%d %H:%M")
-    file = "tmp/export/#{now}.csv"
-    puts "Writing CSV"
+    file_data = "tmp/export/#{now}_data.csv"
+    file_stat = "tmp/export/#{now}_stat.csv"
     opt = {:headers => true, :write_headers => true}
-    CSV.open(file, "wb", opt) do |csv|
+    CSV.open(file_data, "wb", opt) do |csv|
       csv << fullheader.to_a
       lines.each { |l| csv << l }
+    end
+    CSV.open(file_stat, "wb", opt) do |csv|
+      csv << header_stat
+      lines_stat.each { |l| csv << l }
     end
 
 
@@ -420,17 +464,14 @@ namespace :results do
     puts "============"
     puts "CSV exported"
     puts "============"
-    puts "Done, have a look at " + "\"#{file}\"".bold
+    puts "Done, have a look at " + %("#{file_data}").bold
+    puts "Also, if you know what you are doing see #{file_stat}."
     puts
     puts
     puts "=============="
     puts "Automatization"
     puts "=============="
     puts "If you want to run this query in the future, you can use:"
-    # remove any added _text columns
-    export.each do |tbl, cols|
-      export[tbl] -= columns_text[tbl].map { |ct| ct + "_text" }
-    end
 
     data = {:terms => terms, :dbs => dbs, :cols => export,
               :meta => meta_store, :faculty => faculty.map { |f| f.id }}
