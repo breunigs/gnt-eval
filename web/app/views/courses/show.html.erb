@@ -51,12 +51,14 @@
     <tr>
       <th>Name</th>
       <th>Mail</th>
+      <th>ID/Barcode</th>
       <th colspan="<%=@course.critical? ? 1 : 2%>">Actions</th>
     </tr>
     <% @course.course_profs.each do |cp| %>
     <tr>
       <td><%=link_to cp.prof.fullname, edit_prof_path(cp.prof) %></td>
       <td><%=cp.prof.email %></td>
+      <td><%=cp.id %></td>
       <td>
         <% if @course.returned_sheets? %>
           <%="Can’t print, has returned sheets."%>
