@@ -190,6 +190,32 @@ class ResultTools
     results
   end
 
+  # Returns a histogram of the answers given for a specific table and
+  # question. Table should be a string; the question a AbstractForm-
+  # Question-Class. Give a single integer barcode to get the results for
+  # one CourseProf or an array of integers for multiple ones. Set text_
+  # only to false if you /also/ want to get the result count by box
+  # index. Be careful when processing the output via TeX, as the text
+  # may contain commas and there are no guard braces. If absolute_numbers
+  # is false, then the percentage of each answer will be given. Otherwise
+  # raw numbers are returned.
+  def answer_histogram(table, question, barcode, text_only = true, absolute_numbers = false)
+    raise "Invalid barcode" unless barcode.is_a?(Integer) || barcode.is_a?(Array)
+    raise "Invalid question" unless question.is_a?(Question)
+    raise "Invalid table" unless table_exists?(table)
+    a = get_answer_counts(table, question, {:barcode => barcode})
+    a.reject! { |k, v| k.is_a?(Integer) } if text_only
+    unless absolute_numbers
+      # sum up amount of all answers; ignore integer based ones so
+      # answers aren’t counted multiple times
+      sum = 0.0; a.each { |k, v| sum += k.is_a?(Integer) ? 0 : v }
+      a = Hash[a.map {|k, v| [k, "#{v.to_f/sum*100.0}%"] }]
+    end
+
+    # removes guard braces inserted by get_anwer_counts
+    Hash[a.map {|k, v| [k.is_a?(String) ? k[1..-2] : k, v] }]
+  end
+
   # runs a custom query against the result-database. Returns the all
   # results as an array of hashes and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values. If
@@ -493,7 +519,7 @@ class ResultTools
 
       # correct the “last textbox” count from above
       answ[q.boxes.count] -= all
-      # guard against commas
+      # guard against commas (may cause problems when parsed in TeX)
       t = "{#{q.get_answers.last}}"
       answ[t] = answ[q.boxes.count] unless t.nil? || t.empty?
     end
