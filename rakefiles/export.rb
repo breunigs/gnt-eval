@@ -387,26 +387,25 @@ namespace :results do
 
     # add metadata and beautify output for the data CSV
     data.each do |d|
-      d = d.values
-      barcode, tutnum, path, table = *d.shift(4)
-      line = add_metadata(meta, barcode, path, table, tutnum)
+      line = add_metadata(meta, d["barcode"], d["path"], d["tbl"], d["tutor_id"])
 
-      form = forms.find { |f| f.db_table == table }
+      form = forms.find { |f| f.db_table == d["tbl"] }
       export.each_with_index do |col, ind|
         question = form.get_question(col)
         next unless question # will fail for _text questions
         boxes = question.boxes
+        val = d[question.db_column]
         if boxes.any? { |b| b.nil? || b.any_text.blank? }
-          line << d[ind]
+          line << val || "ERROR 1"
         else
           # reduce count by one if the last one is a textbox to include
           # the text field instead of “others”
           cnt = question.last_is_textbox? ? boxes.count-1 : boxes.count
-          line << case(d[ind].to_i)
+          line << case(val.to_i)
             when -2..0 then "."
             when 99 then "NOT SPECIFIED"
-            when 1..cnt then boxes[d[ind].to_i-1].any_text.strip_common_tex
-            else (question.last_is_textbox? ? d[ind+1] : "ERROR")
+            when 1..cnt then boxes[val.to_i-1].any_text.strip_common_tex
+            else (question.last_is_textbox? ? d[question.db_column + "_text"] : "ERROR 2")
           end
         end
       end
@@ -450,7 +449,7 @@ namespace :results do
     file_stat = "tmp/export/#{now}_stat.csv"
     opt = {:headers => true, :write_headers => true}
     CSV.open(file_data, "wb", opt) do |csv|
-      csv << fullheader.to_a
+      csv << header
       lines.each { |l| csv << l }
     end
     CSV.open(file_stat, "wb", opt) do |csv|
