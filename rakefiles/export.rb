@@ -331,12 +331,12 @@ namespace :results do
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
+    columns = all.any? ? (", " + all.join(", ")) : ""
     dbs.each do |db|
-
       if tutor_col[db]
-        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl, #{all.join(", ")} FROM #{db} #{where}"
+        qry << "SELECT barcode, #{tutor_col[db]}, path, '#{db}' AS tbl #{columns} FROM #{db} #{where}"
       else
-        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl, #{all.join(", ")} FROM #{db} #{where}"
+        qry << "SELECT barcode, '0' AS tutor_id, path, '#{db}' AS tbl #{columns} FROM #{db} #{where}"
       end
     end
     qry = qry.join(" UNION ALL ")
