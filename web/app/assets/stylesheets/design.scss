@@ -194,7 +194,7 @@ table {
    * This allows for table filtering where the even/odd are added via js.
    */
   tr:nth-child(2n+1):not(.odd):not(.even), .odd {
-    background:#fafafa;
+    background:#f2f2f2;
   }
 }
 
