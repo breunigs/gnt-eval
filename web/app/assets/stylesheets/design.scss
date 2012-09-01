@@ -34,6 +34,10 @@
   -webkit-box-sizing:content-box;
 }
 
+b, i, u {
+  color: inherit;
+}
+
 /* 1rem == 10px; See http://snook.ca/archives/html_and_css/font-size-with-rem */
 html {
   font-size: 62.5%;
