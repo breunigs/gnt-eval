@@ -13,11 +13,9 @@
 <body>
   <div>
     <div class="infobox">
-      <% if @curr_sem.nil? %>
+      <% if @curr_sem.nil? || @curr_sem.empty? %>
         <span class="warning">No active terms. Change the dates or create a new one.</span>
-      <% end %>
-
-      <% unless @curr_sem.nil? %>
+      <% else %>
         <b>active term</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
       <% end %>
 
