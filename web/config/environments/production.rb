@@ -56,7 +56,7 @@ Seee::Application.configure do
 
   # The following files are not included in the application.{css,js} files. List
   # them here so they get precompiled for production.
-  config.assets.precompile += %w(js-yaml.min.js json2yaml.js formeditor.js ace/*.js excanvas.js visualize.jQuery.js correlate.js aceify-textareas.js)
+  config.assets.precompile += %w(js-yaml.min.js json2yaml.js formeditor.js ace/*.js excanvas.js visualize.jQuery.js correlate.js aceify-textareas.js viewer_count.js)
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false

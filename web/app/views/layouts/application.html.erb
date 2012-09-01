@@ -9,8 +9,23 @@
   <%= yield(:script) %>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link href="<%=ENV['RAILS_RELATIVE_URL_ROOT'] || "" %>/favicon.ico" rel="icon" type="image/x-icon" />
+
+  <% if controller.action_name == "edit" %>
+    <script>
+      var   ping = "<%=  ping_path(params[:controller], params[:id], "PLACEHOLDER")%>";
+      var unping = "<%=unping_path(params[:controller], params[:id], "PLACEHOLDER")%>";
+    </script>
+    <%= javascript_include_tag("viewer_count") %>
+  <% end %>
 </head>
 <body>
+  <div id="darkened"></div>
+  <% if controller.action_name == "edit" %>
+    <noscript><div class="group warning">You have <b>disabled JavaScript</b>. You and others can’t be notified if they edit this page at the same time. This might lead to <b>collisions</b> as they are not handled in any way. User who hits the save button last wins.</div></noscript>
+
+    <div id="collision-warning" class="warning hidden">This page is currently opened more than once. This might lead to your changes being overwritten. If you opened this window just now, please close it. Otherwise talk to each other and solve this.</div>
+  <% end %>
+
   <div>
     <div class="infobox">
       <% if @curr_sem.nil? || @curr_sem.empty? %>

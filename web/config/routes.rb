@@ -22,8 +22,6 @@ Seee::Application.routes.draw do
     end
   end
 
-  #~ match 'exit' => 'sessions#destroy', :as => :tutor
-
   resources :profs
 
   resources :semesters do
@@ -37,4 +35,9 @@ Seee::Application.routes.draw do
   # comment image source pass throughs
   get "/pics/:id/download" => "pics#download", :as => :download_pic
   get "/cpics/:id/download" => "cpics#download", :as => :download_cpic
+
+
+  match "/:cont/:viewed_id/ping/" => "sessions#ping", :as => "viewer_count"
+  match "/:cont/:viewed_id/ping/:ident" => "sessions#ping", :as => "ping"
+  match "/:cont/:viewed_id/unping/:ident" => "sessions#unping", :as => "unping"
 end
