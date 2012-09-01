@@ -20,6 +20,17 @@
   background-image: -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
 }
 
+
+@mixin transition($transition) {
+  -ms-transition: $transition;
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  -webkit-transition: $transition;
+  transition: $transition;
+}
+
+
+
 * {
   padding:0;
   border:0;
