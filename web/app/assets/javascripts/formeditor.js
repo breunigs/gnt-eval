@@ -196,8 +196,20 @@ FormEditor.prototype.parseSection = function(section, path) {
 FormEditor.prototype.parseQuestion = function(question, path) {
   this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTextBox(path + "/db_column", "db_column", true);
-  this.createTextBox(path + "/visualizer", "visualizer", true);
+  var vis = ATTRIBUTES["Visualizers"][this.isQuestionMulti(path) ? "Multi" : "Single"];
+  this.createSelectBox(path + "/visualizer", "visualizer", vis, true);
   this.createTranslateableTextBox(path + "/qtext", "qtext");
+
+};
+
+FormEditor.prototypeParseBox = function(box, path) {
+
+};
+
+FormEditor.prototype.isQuestionMulti = function(path) {
+  var q = this.getPath(path);
+  this.assert(q["db_column"] != null, "Given path is either not a question or question doesn’t have a db_column. Path: " + path);
+  return $.isArray(q["db_column"]);
 };
 
 FormEditor.prototype.setPath = function(obj, path, value) {
@@ -447,6 +459,26 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
 
 FormEditor.prototype.createHiddenBox = function(path, value) {
   this.append('<input type="hidden" title="'+path+'" value="'+value+'"/>');
+};
+
+FormEditor.prototype.createSelectBox = function(path, label, list, group, cssClasses) {
+  if(path === undefined)
+    throw("Given path is invalid.");
+  if(label === undefined)
+    throw("Given label is invalid.");
+  if(list === undefined || list.length == 0)
+    throw("Given list must not be empty.");
+
+  // random id, see createTextBox
+  var id = path + "|" + Math.random();
+
+  if(group) this.openGroup(cssClasses);
+  this.append('<label for="'+id+'">'+label+'</label>');
+  this.getPath(path)
+  this.append('<select id="'+id+'">');
+  [this.append('<option value="'+item+'">'+item+'</option>') for each (item in list)];
+  this.append('</select>');
+ if(group) this.closeGroup();
 };
 
 // retrieves the value from the source textarea, parses it into a JS
