@@ -16,6 +16,16 @@ module Enumerable
   end
 end
 
+class Dir
+  # Works just like the normal glob but returns the filenames only
+  def self.glob_files(pattern, flags = nil)
+    (flags.nil? \
+      ? Dir.glob(pattern) \
+      : Dir.glob(pattern, flags) \
+    ).map { |f| File.basename(f) }
+  end
+end
+
 class Hash
   # abbreviation for self.fetch(key, 0)
   def foz(k)
@@ -495,6 +505,15 @@ if ENV['TESTING']
 
     def test_vector_diff
       assert_equal([1,2,3].vector_diff([1,2,3]), [0,0,0])
+    end
+  end
+
+  class TestDir < Test::Unit::TestCase
+    def test_glob_files
+      assert_equal(Dir.glob("*").size, Dir.glob_files("*").size)
+      # globbing the current directory should not result in different
+      # filenames
+      assert_equal(Dir.glob("*"), Dir.glob_files("*"))
     end
   end
 end
