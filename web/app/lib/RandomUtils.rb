@@ -476,6 +476,14 @@ if ENV['TESTING']
   require 'test/unit'
   require "unicode_utils"
 
+  class TestMethods < Test::Unit::TestCase
+    def test_guess_gender
+      assert_equal(guess_gender("oliver"), :male)
+      assert_equal(guess_gender("ReBeCcA"), :female)
+      assert_equal(guess_gender("GNT-Eval"), :unknown)
+    end
+  end
+
   class TestArray < Test::Unit::TestCase
     def test_dot_product
       assert_equal([1,2,3].dot_product([-7, 8, 9]), 36)
