@@ -68,7 +68,9 @@ is_new = !is_edit
     attr[:Section] = [Section::ATTRIBUTES].flatten
     attr[:Visualizers] = {}
     attr[:Visualizers][:Single] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_*.tex.erb"))
+    attr[:Visualizers][:Single].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
     attr[:Visualizers][:Multi] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "multi_*.tex.erb"))
+    attr[:Visualizers][:Multi].map! { |f| f.gsub(/^multi_|\.tex.erb$/, "") }
   %>
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
   var x = FormEditor.getInstance();

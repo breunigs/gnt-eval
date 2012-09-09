@@ -194,22 +194,40 @@ FormEditor.prototype.parseSection = function(section, path) {
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
+  var isMulti = this.isQuestionMulti(question);
+  // present the db_column as if it were a single choice question. Add
+  // _a, _b and so on later automatically
+  question["is_multi"] = isMulti;
+  if(isMulti) {
+    var c = question["db_column"][0];
+    question["db_column"] = c.substr(0, c.lastIndexOf("_"));
+  }
   this.createHiddenBox(path+"/rubyobject", "Question");
+  this.createSelectBox(path + "/is_multi", "is_multi", [true, false], true, "", "isMultiHasChanged");
   this.createTextBox(path + "/db_column", "db_column", true);
-  var vis = ATTRIBUTES["Visualizers"][this.isQuestionMulti(path) ? "Multi" : "Single"];
+  var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
   this.createSelectBox(path + "/visualizer", "visualizer", vis, true);
   this.createTranslateableTextBox(path + "/qtext", "qtext");
 
+};
+
+FormEditor.prototype.isMultiHasChanged = function(element) {
+  var path = $(element).attr("title");
+  var isMulti = element.value == "true";
+  var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
+  var visEl = document.getElementById(path.replace(/is_multi$/, "visualizer"));
+  var oldValue = visEl.value;
+  $(visEl).empty();
+  $(visEl).append(this.createOptionsForSelect(vis, oldValue));
 };
 
 FormEditor.prototypeParseBox = function(box, path) {
 
 };
 
-FormEditor.prototype.isQuestionMulti = function(path) {
-  var q = this.getPath(path);
-  this.assert(q["db_column"] != null, "Given path is either not a question or question doesn’t have a db_column. Path: " + path);
-  return $.isArray(q["db_column"]);
+FormEditor.prototype.isQuestionMulti = function(question) {
+  this.assert(question["db_column"] != null, "Was not given a question or it doesn’t have a db_column attribute.");
+  return $.isArray(question["db_column"]);
 };
 
 FormEditor.prototype.setPath = function(obj, path, value) {
@@ -450,7 +468,7 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
   // create unique ID for this element. It’s required for GUI uses only,
   // so we can add a random string to avoid collisions without storing
   // it for later.
-  var id = path + "|" + Math.random();
+  var id = path;// + "|" + Math.random(); FIXME: NEEDED?
   this.append('<label for="'+id+'">'+label+'</label>');
   this.append('<input type="text" title="'+path+'" id="'+id+'" value="'+this.getPath(path)+'"/>');
 
@@ -461,7 +479,7 @@ FormEditor.prototype.createHiddenBox = function(path, value) {
   this.append('<input type="hidden" title="'+path+'" value="'+value+'"/>');
 };
 
-FormEditor.prototype.createSelectBox = function(path, label, list, group, cssClasses) {
+FormEditor.prototype.createSelectBox = function(path, label, list, group, cssClasses, jsAction) {
   if(path === undefined)
     throw("Given path is invalid.");
   if(label === undefined)
@@ -470,15 +488,25 @@ FormEditor.prototype.createSelectBox = function(path, label, list, group, cssCla
     throw("Given list must not be empty.");
 
   // random id, see createTextBox
-  var id = path + "|" + Math.random();
+  var id = path;// + "|" + Math.random();  FIXME: NEEDED?
+  var value = this.getPath(path);
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+id+'">'+label+'</label>');
-  this.getPath(path)
-  this.append('<select id="'+id+'">');
-  [this.append('<option value="'+item+'">'+item+'</option>') for each (item in list)];
+  var act = (jsAction ? 'onchange="FormEditor.prototype.'+jsAction+'(this)"' : '');
+  this.append('<select id="'+id+'" title="'+path+'" '+act+'>');
+  this.append(this.createOptionsForSelect(list, value));
   this.append('</select>');
- if(group) this.closeGroup();
+  if(group) this.closeGroup();
+};
+
+FormEditor.prototype.createOptionsForSelect = function(list, selected) {
+  var s = "";
+  for each (item in list) {
+    var sel = (item == selected ? ' selected="selected"' : '');
+    s += '<option value="'+item+'"'+sel+'>'+item+'</option>';
+  }
+  return s;
 };
 
 // retrieves the value from the source textarea, parses it into a JS
