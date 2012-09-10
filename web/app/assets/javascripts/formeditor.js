@@ -67,7 +67,7 @@ FormEditor.prototype.setLanguages = function(langs) {
 
   // find translation groups
   $(".language").parent().each(function(ind, transGroup) {
-    var path = $(transGroup).attr("title");
+    var path = $(transGroup).attr("id");
     var l = newLangs.slice();
     $(transGroup).children(".language").each(function(ind, langGroup) {
       var lang = $(langGroup).children("span, label").html();
@@ -99,12 +99,16 @@ FormEditor.prototype.getPath = function(path) {
   var r = this.data;
   var pathok = "";
   for(var x in l) {
-    r = r[l[x]];
     this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path + "  Path correct for: " + pathok);
+    r = r[l[x]];
     pathok += "/" + l[x];
   }
   return r;
 };
+
+FormEditor.prototype.getDomObjFromPath = function(path) {
+  return $(document.getElementById(path));
+}
 
 FormEditor.prototype.getPathDepth = function(path) {
   return path.split("/").length - 1;
@@ -194,35 +198,58 @@ FormEditor.prototype.parseSection = function(section, path) {
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
+  this.createHiddenBox(path+"/rubyobject", "Question");
+  this.createTranslateableTextBox(path + "/qtext", "qtext");
   var isMulti = this.isQuestionMulti(question);
-  // present the db_column as if it were a single choice question. Add
-  // _a, _b and so on later automatically
-  question["is_multi"] = isMulti;
+  // TODO: fix how type works elsewhere and merge with multi-choice
+  question["type"] = isMulti ? "Multi" : (question["type"] == "square" ? "Single" : "Text");
+  question["repeat_for"] = question["repeat_for"] || "only_once";
   if(isMulti) {
     var c = question["db_column"][0];
     question["db_column"] = c.substr(0, c.lastIndexOf("_"));
   }
-  this.createHiddenBox(path+"/rubyobject", "Question");
-  this.createSelectBox(path + "/is_multi", "is_multi", [true, false], true, "", "isMultiHasChanged");
+
+  this.createSelectBox(path + "/type", "type", Object.keys(ATTRIBUTES["Visualizers"]), true, "", "questionTypeChanged");
   this.createTextBox(path + "/db_column", "db_column", true);
+  if(question["type"] == "Single") {
+    this.createHideAnswersBox(question, path);
+    this.createLastIsTextBox(question, path);
+  }
   var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
   this.createSelectBox(path + "/visualizer", "visualizer", vis, true);
-  this.createTranslateableTextBox(path + "/qtext", "qtext");
-
+  this.createSelectBox(path + "/repeat_for", "repeat_for", ["only_once", "lecturer", "tutor"], true);
 };
 
-FormEditor.prototype.isMultiHasChanged = function(element) {
-  var path = $(element).attr("title");
-  var isMulti = element.value == "true";
+FormEditor.prototype.questionTypeChanged = function(element) {
+  var path = $(element).attr("id").replace(/\/type$/, "");
+  var isMulti = element.value == "Multi";
   var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
-  var visEl = document.getElementById(path.replace(/is_multi$/, "visualizer"));
+  var visEl = document.getElementById(path + "/visualizer");
   var oldValue = visEl.value;
   $(visEl).empty();
   $(visEl).append(this.createOptionsForSelect(vis, oldValue));
+
+  if(element.value != "Single") {
+    this.getDomObjFromPath(path + "/hide_answers").parent().remove();
+    this.getDomObjFromPath(path + "/last_is_textbox").parent().remove();
+  } else {
+    this.updateDataFromDom();
+    var q = this.getPath(path);
+    this.generatedHtml = "";
+    this.createHideAnswersBox(q, path);
+    this.createLastIsTextBox(q, path);
+    this.getDomObjFromPath(path + "/db_column").after(this.generatedHtml);
+  }
 };
 
-FormEditor.prototypeParseBox = function(box, path) {
+FormEditor.prototype.createHideAnswersBox = function (question, path) {
+  question["hide_answers"] = question["hide_answers"] || false;
+  this.createCheckBox(path + "/hide_answers", "hide_answers", true);
+};
 
+FormEditor.prototype.createLastIsTextBox = function (question, path) {
+  question["last_is_textbox"] = question["last_is_textbox"] || 0;
+  this.createNumericBox(path + "/last_is_textbox", "last_is_textbox", true);
 };
 
 FormEditor.prototype.isQuestionMulti = function(question) {
@@ -356,7 +383,7 @@ FormEditor.prototype.ungenderizePath = function(path, caller) {
 FormEditor.prototype.getObjectFromDom = function() {
   var obj = {rubyobject: "AbstractForm"};
   $("#form_editor input").each(function(ind, elem) {
-    var path = $(elem).attr("title");
+    var path = $(elem).attr("id");
     if(!path || !path.match(/^\//))
       return true; // continue, as it’s a custom input element
 
@@ -376,7 +403,7 @@ FormEditor.prototype.dom2yaml = function() {
 FormEditor.prototype.createHeading = function(path, cssClasses) {
   var last = path.split("/").pop();
   cssClasses = cssClasses ? cssClasses : "";
-  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent" title="'+path+'">');
+  this.append('<div class="heading '+cssClasses+'"><span>'+last+'</span><div class="indent" id="'+path+'">');
 };
 
 FormEditor.prototype.closeHeading = function(path) {
@@ -461,22 +488,34 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
   if(label === undefined)
     throw("Given label is invalid.");
 
-  //this.assert(typeof(this.getPath(path)) == "string", "Content for textbox is not a string. Given path: " + path);
+  if(group) this.openGroup(cssClasses);
+  this.append('<label for="'+path+'">'+label+'</label>');
+  this.append('<input type="text" id="'+path+'" value="'+this.getPath(path)+'"/>');
+  if(group) this.closeGroup();
+};
+
+FormEditor.prototype.createNumericBox = function(path, label, group, cssClasses) {
+  if(path === undefined)
+    throw("Given path is invalid.");
+  if(label === undefined)
+    throw("Given label is invalid.");
 
   if(group) this.openGroup(cssClasses);
-
-  // create unique ID for this element. It’s required for GUI uses only,
-  // so we can add a random string to avoid collisions without storing
-  // it for later.
-  var id = path;// + "|" + Math.random(); FIXME: NEEDED?
-  this.append('<label for="'+id+'">'+label+'</label>');
-  this.append('<input type="text" title="'+path+'" id="'+id+'" value="'+this.getPath(path)+'"/>');
-
+  this.append('<label for="'+path+'">'+label+'</label>');
+  this.append('<input type="numeric" id="'+path+'" value="'+this.getPath(path)+'"/>');
   if(group) this.closeGroup();
 };
 
 FormEditor.prototype.createHiddenBox = function(path, value) {
-  this.append('<input type="hidden" title="'+path+'" value="'+value+'"/>');
+  this.append('<input type="hidden" id="'+path+'" value="'+value+'"/>');
+};
+
+FormEditor.prototype.createCheckBox = function(path, label, group, cssClasses) {
+  if(group) this.openGroup(cssClasses);
+  var c = this.getPath(path) ? 'checked="checked"' : '';
+  this.append('<label for="'+path+'">'+label+'</label>');
+  this.append('<input id="'+path+'" type="checkbox" value="true" '+c+'/>');
+  if(group) this.closeGroup();
 };
 
 FormEditor.prototype.createSelectBox = function(path, label, list, group, cssClasses, jsAction) {
@@ -487,14 +526,12 @@ FormEditor.prototype.createSelectBox = function(path, label, list, group, cssCla
   if(list === undefined || list.length == 0)
     throw("Given list must not be empty.");
 
-  // random id, see createTextBox
-  var id = path;// + "|" + Math.random();  FIXME: NEEDED?
   var value = this.getPath(path);
 
   if(group) this.openGroup(cssClasses);
-  this.append('<label for="'+id+'">'+label+'</label>');
+  this.append('<label for="'+path+'">'+label+'</label>');
   var act = (jsAction ? 'onchange="FormEditor.prototype.'+jsAction+'(this)"' : '');
-  this.append('<select id="'+id+'" title="'+path+'" '+act+'>');
+  this.append('<select id="'+path+'" '+act+'>');
   this.append(this.createOptionsForSelect(list, value));
   this.append('</select>');
   if(group) this.closeGroup();
