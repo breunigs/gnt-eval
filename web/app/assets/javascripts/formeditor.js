@@ -24,6 +24,8 @@ function FormEditor() {
   this.generatedHtml = "";
 
   this.parseAbstractForm(this.data);
+
+  $("[type=numeric]").numeric({ decimal: false, negative: false });
 }
 
 FormEditor.getInstance = function() {
@@ -211,13 +213,19 @@ FormEditor.prototype.parseQuestion = function(question, path) {
 
   this.createSelectBox(path + "/type", "type", Object.keys(ATTRIBUTES["Visualizers"]), true, "", "questionTypeChanged");
   this.createTextBox(path + "/db_column", "db_column", true);
-  if(question["type"] == "Single") {
-    this.createHideAnswersBox(question, path);
-    this.createLastIsTextBox(question, path);
-  }
+
+  // these boxes depend on the question type. They are created in HTML
+  // but may be hidden. Their values are discarded when generating the
+  // final YAML, but they are present in the JS-data structure.
+  this.createHideAnswersBox(question, path);
+  this.createLastIsTextBox(question, path);
+  this.createHeightBox(question, path);
+
   var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
   this.createSelectBox(path + "/visualizer", "visualizer", vis, true);
   this.createSelectBox(path + "/repeat_for", "repeat_for", ["only_once", "lecturer", "tutor"], true);
+
+  this.parseBoxes(question, path);
 };
 
 FormEditor.prototype.questionTypeChanged = function(element) {
@@ -229,27 +237,48 @@ FormEditor.prototype.questionTypeChanged = function(element) {
   $(visEl).empty();
   $(visEl).append(this.createOptionsForSelect(vis, oldValue));
 
-  if(element.value != "Single") {
-    this.getDomObjFromPath(path + "/hide_answers").parent().remove();
-    this.getDomObjFromPath(path + "/last_is_textbox").parent().remove();
+  if(element.value == "Single") {
+    this.getDomObjFromPath(path + "/hide_answers").parent().show();
+    this.getDomObjFromPath(path + "/last_is_textbox").parent().show();
   } else {
-    this.updateDataFromDom();
-    var q = this.getPath(path);
-    this.generatedHtml = "";
-    this.createHideAnswersBox(q, path);
-    this.createLastIsTextBox(q, path);
-    this.getDomObjFromPath(path + "/db_column").after(this.generatedHtml);
+    this.getDomObjFromPath(path + "/hide_answers").parent().hide();
+    this.getDomObjFromPath(path + "/last_is_textbox").parent().hide();
   }
+
+  if(element.value == "Text") {
+    this.getDomObjFromPath(path + "/height").parent().show();
+  } else {
+    this.getDomObjFromPath(path + "/height").parent().hide();
+  }
+};
+
+FormEditor.prototype.parseBoxes = function(question, path) {
+  this.openGroup("boxes");
+  for(var ind in question["boxes"]) {
+    var box = question["boxes"][ind];
+    box["text"] = box["text"] || "";
+    this.createHiddenBox(path+"/rubyobject", "Box");
+    this.createTranslateableTextBox(path + "/boxes/" + ind + "/text");
+  }
+  this.closeGroup();
 };
 
 FormEditor.prototype.createHideAnswersBox = function (question, path) {
   question["hide_answers"] = question["hide_answers"] || false;
-  this.createCheckBox(path + "/hide_answers", "hide_answers", true);
+  var hidden = question["type"] != "Single" ? "hidden" : "";
+  this.createCheckBox(path + "/hide_answers", "hide_answers", true, hidden);
 };
 
 FormEditor.prototype.createLastIsTextBox = function (question, path) {
   question["last_is_textbox"] = question["last_is_textbox"] || 0;
-  this.createNumericBox(path + "/last_is_textbox", "last_is_textbox", true);
+  var hidden = question["type"] != "Single" ? "hidden" : "";
+  this.createNumericBox(path + "/last_is_textbox", "last_is_textbox", true, hidden);
+};
+
+FormEditor.prototype.createHeightBox = function (question, path) {
+  question["height"] = question["height"] || 300;
+  var hidden = question["type"] != "Text" ? "hidden" : "";
+  this.createNumericBox(path + "/height", "height", true, hidden);
 };
 
 FormEditor.prototype.isQuestionMulti = function(question) {
@@ -410,10 +439,10 @@ FormEditor.prototype.closeHeading = function(path) {
   this.append("</div></div>");
 };
 
-FormEditor.prototype.createActionLink = function(action, name) {
+FormEditor.prototype.createActionLink = function(action, name, cssClasses) {
   if(action.indexOf('"') >= 0)
     action = "eval(unescape('"+escape(action)+"'))"; // work around quotation marks
-  this.append("<a onclick=\""+action+"\">"+name+"</a>");
+  this.append('<a class="'+cssClasses+'" onclick="'+action+'">'+name+'</a>');
 };
 
 FormEditor.prototype.openGroup = function(cssClasses) {
@@ -467,7 +496,7 @@ FormEditor.prototype.createLangTextBox = function(path, lang) {
   var path = path+"/"+lang;
   this.openGroup("language");
   this.createTextBox(path, lang);
-  this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »");
+  this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »", "genderize");
   this.closeGroup();
 };
 
@@ -502,7 +531,7 @@ FormEditor.prototype.createNumericBox = function(path, label, group, cssClasses)
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+path+'">'+label+'</label>');
-  this.append('<input type="numeric" id="'+path+'" value="'+this.getPath(path)+'"/>');
+  this.append('<input pattern="[0-9]*" type="numeric" id="'+path+'" value="'+this.getPath(path)+'"/>');
   if(group) this.closeGroup();
 };
 
@@ -539,9 +568,9 @@ FormEditor.prototype.createSelectBox = function(path, label, list, group, cssCla
 
 FormEditor.prototype.createOptionsForSelect = function(list, selected) {
   var s = "";
-  for each (item in list) {
-    var sel = (item == selected ? ' selected="selected"' : '');
-    s += '<option value="'+item+'"'+sel+'>'+item+'</option>';
+  for(ind in list) {
+    var sel = (list[ind] == selected ? ' selected="selected"' : '');
+    s += '<option value="'+list[ind]+'"'+sel+'>'+list[ind]+'</option>';
   }
   return s;
 };

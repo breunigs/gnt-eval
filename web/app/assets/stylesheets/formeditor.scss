@@ -30,4 +30,13 @@
     padding-left:1rem;
     margin-bottom:1rem;
   }
+
+  .hidden {
+    display: none;
+  }
+
+  /* don’t allow genderization for box descriptions */
+  .boxes .genderize {
+    display: none;
+  }
 }
