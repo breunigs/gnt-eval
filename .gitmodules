@@ -13,3 +13,6 @@
 [submodule "submodules/jquery-visualize"]
 	path = submodules/jquery-visualize
 	url = git://github.com/filamentgroup/jQuery-Visualize.git
+[submodule "submodules/jquery-plugins"]
+	path = submodules/jquery-plugins
+	url = git://github.com/SamWM/jQuery-Plugins.git
