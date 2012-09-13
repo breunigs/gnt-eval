@@ -96,14 +96,20 @@ jsyaml.addConstructor('!ruby/object:AbstractForm', constructRubyObject );
         var ele = obj[k];
         convert(ele, recurse);
         var type = getType(ele);
-        var name = normalizeString(k);
+        var name = normalizeString(k, true);
         if (type == 'null') {
           // don’t add, as we can simply emit null or nil values for
           // Rubyish-YAML.
           //console.log("Skipping value " + name + " because it’s null");
         } else if (type == 'string' || type == 'number' || type == 'boolean') {
-          name = (name == "rubyobject" ? '!ruby/object:' : name+': ');
-          if(recurse[0] == "AbstractForm") name = "--- " + name;
+          if(name == "rubyobject") {
+            name ='!ruby/object:';
+            // cut off quotation marks added by convertString
+            recurse[0] = recurse[0].slice(1, -1);
+            if(recurse[0] == 'AbstractForm') name = "--- " + name;
+          } else {
+            name = name + ': ';
+          }
           ret.push(name + recurse[0]);
         } else {
           ret.push(name + ': ');
@@ -115,9 +121,9 @@ jsyaml.addConstructor('!ruby/object:AbstractForm', constructRubyObject );
     }
   }
 
-  function normalizeString(str) {
+  function normalizeString(str, isKey) {
     // allow Ruby symbols to appear without quotes
-    if (str.match(/^:?\w+$/)) {
+    if (str.match(/^:?\w+$/) && isKey) {
       return str;
     } else {
       return JSON.stringify(str);
