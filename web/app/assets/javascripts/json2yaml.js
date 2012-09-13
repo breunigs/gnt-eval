@@ -11,7 +11,6 @@ function rubyObject(type, data) {
 }
 
 constructRubyObject = function constructRubyObject(node) {
-  //console.log(node.tag);
   if (node.constructor.id == "scalar")
     return new rubyObject(node.tag, null);
   return new rubyObject(node.tag, this.constructMapping(node, true));
@@ -78,13 +77,17 @@ jsyaml.addConstructor('!ruby/object:AbstractForm', constructRubyObject );
   }
 
   function convertArray(obj, ret) {
-    for (var i=0; i<obj.length; i++) {
-      var ele = obj[i];
-      var recurse = [];
-      convert(ele, recurse);
+    if(obj.length == 0) {
+      ret.push("[]");
+      } else {
+      for (var i=0; i<obj.length; i++) {
+        var ele = obj[i];
+        var recurse = [];
+        convert(ele, recurse);
 
-      for (var j=0; j<recurse.length; j++) {
-        ret.push((j == 0 ? "- " : spacing) + recurse[j]);
+        for (var j=0; j<recurse.length; j++) {
+          ret.push((j == 0 ? "- " : spacing) + recurse[j]);
+        }
       }
     }
   }
@@ -100,7 +103,6 @@ jsyaml.addConstructor('!ruby/object:AbstractForm', constructRubyObject );
         if (type == 'null') {
           // don’t add, as we can simply emit null or nil values for
           // Rubyish-YAML.
-          //console.log("Skipping value " + name + " because it’s null");
         } else if (type == 'string' || type == 'number' || type == 'boolean') {
           if(name == "rubyobject") {
             name ='!ruby/object:';

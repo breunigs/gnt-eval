@@ -101,8 +101,8 @@ FormEditor.prototype.getPath = function(path) {
   var r = this.data;
   var pathok = "";
   for(var x in l) {
-    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path + "  Path correct for: " + pathok);
     r = r[l[x]];
+    this.assert(r !== undefined, "Invalid path given. Element does not exist. Given path: "+path + "  Path correct for: " + pathok);
     pathok += "/" + l[x];
   }
   return r;
@@ -193,6 +193,9 @@ FormEditor.prototype.parseSection = function(section, path) {
     var attr = ATTRIBUTES["Section"][y];
     this.createTranslateableTextBox(path + "/" + attr, attr);
   }
+  section["answers"] = section["answers"] || [];
+  this.createTranslateableTextArea(path + "/answers");
+  //~ this.parseAnswers(section, path);
   var questions = section["questions"];
   for(var quest in questions) {
     this.parseQuestion(questions[quest], path + "/questions/" + quest);
@@ -204,7 +207,8 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.createTranslateableTextBox(path + "/qtext", "qtext");
   var isMulti = this.isQuestionMulti(question);
   // TODO: fix how type works elsewhere and merge with multi-choice
-  question["type"] = isMulti ? "Multi" : (question["type"] == "square" ? "Single" : "Text");
+  var typeTranslation = {"square": "Single", "tutor_table": "Tutor", "text": "Text" };
+  question["type"] = isMulti ? "Multi" : typeTranslation[question["type"]];
   question["repeat_for"] = question["repeat_for"] || "only_once";
   if(isMulti) {
     var c = question["db_column"][0];
@@ -221,7 +225,7 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.createLastIsTextBox(question, path);
   this.createHeightBox(question, path);
 
-  var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
+  var vis = ATTRIBUTES["Visualizers"][question["type"]];
   this.createSelectBox(path + "/visualizer", "visualizer", vis, true);
   this.createSelectBox(path + "/repeat_for", "repeat_for", ["only_once", "lecturer", "tutor"], true);
 
@@ -230,8 +234,8 @@ FormEditor.prototype.parseQuestion = function(question, path) {
 
 FormEditor.prototype.questionTypeChanged = function(element) {
   var path = $(element).attr("id").replace(/\/type$/, "");
-  var isMulti = element.value == "Multi";
-  var vis = ATTRIBUTES["Visualizers"][isMulti ? "Multi" : "Single"];
+  var vis = ATTRIBUTES["Visualizers"][element.value];
+  this.assert(vis, "Unsupported question type: " + element.value);
   var visEl = document.getElementById(path + "/visualizer");
   var oldValue = visEl.value;
   $(visEl).empty();
@@ -245,11 +249,15 @@ FormEditor.prototype.questionTypeChanged = function(element) {
     this.getDomObjFromPath(path + "/last_is_textbox").parent().hide();
   }
 
-  if(element.value == "Text") {
+  if(element.value == "Text")
     this.getDomObjFromPath(path + "/height").parent().show();
-  } else {
+  else
     this.getDomObjFromPath(path + "/height").parent().hide();
-  }
+
+  if(element.value == "Tutor" || element.value == "Text")
+    this.getDomObjFromPath(path + "/boxes/0/rubyobject").parent().hide();
+  else
+    this.getDomObjFromPath(path + "/boxes/0/rubyobject").parent().show();
 };
 
 FormEditor.prototype.parseBoxes = function(question, path) {
@@ -305,13 +313,13 @@ FormEditor.prototype.setPath = function(obj, path, value) {
 FormEditor.prototype.translatePath = function(path, caller) {
   this.updateDataFromDom();
 
+  var isTextArea = $(caller).parent().find("textarea").length > 0;
+
   // generate new object
   var oldText = this.getPath(path);
-  this.log(path);
-  this.log(oldText);
   var translated = { };
   $.each(this.languages, function(i, lang) {
-    translated[lang] = oldText;
+    translated[lang] = isTextArea ? oldText.split("\n") : oldText;
   });
 
   // inject new object
@@ -319,14 +327,17 @@ FormEditor.prototype.translatePath = function(path, caller) {
 
   // update dom
   this.generatedHtml = "";
-  this.createTranslateableTextBox(path);
+  if(isTextArea)
+    this.createTranslateableTextArea(path);
+  else
+    this.createTranslateableTextBox(path);
   $(caller).parent().parent().html(this.generatedHtml);
 };
 
 FormEditor.prototype.groupHasDifferentInputTexts = function(parent) {
   var warn = false;
   var txt = null;
-  $(parent).find("input").each(function(ind, elm) {
+  $(parent).find("input, textarea").each(function(ind, elm) {
     if(txt != $(elm).val() && txt != null) {
       warn = true;
       return false; // break
@@ -367,10 +378,15 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
     } catch(e) {}
   }
 
+  var isTextArea = $(caller).parent().find("textarea").length > 0;
+
   // inject new object
-  this.setPath(this.data, path, oldText);
+  this.setPath(this.data, path, isTextArea ? oldText.split("\n") : oldText);
   this.generatedHtml = "";
-  this.createTranslateableTextBox(path);
+  if(isTextArea)
+    this.createTranslateableTextArea(path);
+  else
+    this.createTranslateableTextBox(path);
   $(caller).closest(".meaningless_group").html(this.generatedHtml);
 };
 
@@ -412,16 +428,31 @@ FormEditor.prototype.ungenderizePath = function(path, caller) {
 
 FormEditor.prototype.getObjectFromDom = function() {
   var obj = {rubyobject: "AbstractForm"};
-  $("#form_editor input, #form_editor select").each(function(ind, elem) {
+  $("#form_editor input, #form_editor select, #form_editor textarea").each(function(ind, elem) {
     var path = $(elem).attr("id");
-    if(!path || !path.match(/^\//))
-      return true; // continue, as it’s a custom input element
+    var type = $(elem).attr("type");
+    // continue, as it’s a custom input element or it is hidden
+    if(!path || !path.match(/^\//) || (!$(elem).is(":visible") && type != "hidden"))
+      return true;
 
     var v = $(elem).val();
+    // convert values to their proper types
+    if(type == "checkbox") v = $(elem).is(":checked");
+    if(type == "numeric") v = parseFloat(v);
+    if($(elem).prop("tagName") == "TEXTAREA") {
+      if(v == "") return true;
+      v = v.split("\n");
+      for(var ind in v) {
+        if(v[ind] == "")
+          v[ind] = null;
+      }
+    }
 
     // skip these default values
     if(path.match(/\/last_is_textbox$/) && v == "0") return true;
     if(path.match(/\/boxes\/[0-9]+\/text$/) && v == "") return true;
+    if(path.match(/\/hide_answers$/) && !v) return true;
+    if(path.match(/\/repeat_for$/) && v == "only_once") return true;
 
     FormEditor.getInstance().setPath(obj, path, v);
   });
@@ -431,20 +462,28 @@ FormEditor.prototype.getObjectFromDom = function() {
   $.each(obj["pages"], function(ind, page) {
     $.each(page["sections"], function(ind, sect) {
       $.each(sect["questions"], function(ind, quest) {
-        var multi = false;
         switch(quest["type"]) {
-          case "Single": quest["type"] = "square";               break;
-          case "Multi":  quest["type"] = "square"; multi = true; break;
-          case "Text":   quest["type"] = "comment";              break;
-          default: throw("Unsupported question type: " + quest["type"]);
-        }
-
-        if(multi) {
-          var a = [];
-          for(var i = 0; i < quest["boxes"].length; i++) {
-            a[i] = quest["db_column"] + "_" + String.fromCharCode(97+i);
-          }
-          quest["db_column"] = a;
+          case "Single":
+            quest["type"] = "square";
+            break;
+          case "Multi":
+            quest["type"] = "square";
+            var a = [];
+            for(var i = 0; i < quest["boxes"].length; i++) {
+              a[i] = quest["db_column"] + "_" + String.fromCharCode(97+i);
+            }
+            quest["db_column"] = a;
+            break;
+          case "Text":
+            quest["type"] = "text";
+            quest["boxes"] = [];
+            break;
+          case "Tutor":
+            quest["type"] = "tutor_table";
+            quest["boxes"] = null;
+            break;
+          default:
+            throw("Unsupported question type: " + quest["type"]);
         }
       });
     });
@@ -499,8 +538,6 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
   var lang = [];
   var texts = this.getPath(path);
 
-  //this.log("Creating translateable textbox at: " + path + " " + name);
-
   this.openGroup();
   if(typeof(texts) == "string") {
     this.openGroup();
@@ -524,11 +561,44 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
   this.closeGroup();
 };
 
+// does not support genderization. Creates a textarea instead to allow
+// easy creation of an array.
+FormEditor.prototype.createTranslateableTextArea = function(path) {
+  var lang = [];
+  var texts = this.getPath(path);
+
+  this.openGroup();
+  if($.isArray(texts)) {
+    this.openGroup();
+    this.createTextArea(path, path.split("/").pop());
+    this.createActionLink("FormEditor.getInstance().translatePath(\""+path+"\", this)", "Translate »");
+    this.closeGroup();
+  } else {
+    this.createHeading(path);
+    this.createActionLink("FormEditor.getInstance().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
+    for(var lang in texts) {
+      this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
+      this.assert($.isArray(texts[lang]), "Text Areas only support arrays as input, but something else was given.");
+      this.createLangTextArea(path, lang);
+    }
+    this.closeHeading();
+  }
+  this.closeGroup();
+};
+
+
 FormEditor.prototype.createLangTextBox = function(path, lang) {
   var path = path+"/"+lang;
   this.openGroup("language");
   this.createTextBox(path, lang);
   this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »", "genderize");
+  this.closeGroup();
+};
+
+FormEditor.prototype.createLangTextArea = function(path, lang) {
+  var path = path+"/"+lang;
+  this.openGroup("language");
+  this.createTextArea(path, lang);
   this.closeGroup();
 };
 
@@ -554,6 +624,19 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
   this.append('<input type="text" id="'+path+'" value="'+this.getPath(path)+'"/>');
   if(group) this.closeGroup();
 };
+
+FormEditor.prototype.createTextArea = function(path, label, group, cssClasses) {
+  if(path === undefined)
+    throw("Given path is invalid.");
+  if(label === undefined)
+    throw("Given label is invalid.");
+
+  if(group) this.openGroup(cssClasses);
+  this.append('<label for="'+path+'">'+label+'</label>');
+  this.append('<textarea id="'+path+'">'+this.getPath(path).join("\n")+'</textarea>');
+  if(group) this.closeGroup();
+};
+
 
 FormEditor.prototype.createNumericBox = function(path, label, group, cssClasses) {
   if(path === undefined)
