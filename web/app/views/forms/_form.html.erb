@@ -69,6 +69,10 @@ is_new = !is_edit
     attr[:Visualizers] = {}
     attr[:Visualizers][:Single] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_*.tex.erb"))
     attr[:Visualizers][:Single].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
+    attr[:Visualizers][:Tutor] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_tutor_*.tex.erb"))
+    attr[:Visualizers][:Tutor].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
+    # TODO: this is another artifact of the weird type handling…
+    attr[:Visualizers][:Single] = attr[:Visualizers][:Single] - attr[:Visualizers][:Tutor]
     attr[:Visualizers][:Multi] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "multi_*.tex.erb"))
     attr[:Visualizers][:Multi].map! { |f| f.gsub(/^multi_|\.tex.erb$/, "") }
     attr[:Visualizers][:Text] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "comment_*.tex.erb"))
