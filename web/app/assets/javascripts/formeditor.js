@@ -255,10 +255,11 @@ FormEditor.prototype.questionTypeChanged = function(element) {
 FormEditor.prototype.parseBoxes = function(question, path) {
   this.openGroup("boxes");
   for(var ind in question["boxes"]) {
+    var bpath = path + "/boxes/" + ind;
     var box = question["boxes"][ind];
     box["text"] = box["text"] || "";
-    this.createHiddenBox(path+"/rubyobject", "Box");
-    this.createTranslateableTextBox(path + "/boxes/" + ind + "/text");
+    this.createHiddenBox(bpath + "/rubyobject", "Box");
+    this.createTranslateableTextBox(bpath + "/text");
   }
   this.closeGroup();
 };
@@ -411,12 +412,42 @@ FormEditor.prototype.ungenderizePath = function(path, caller) {
 
 FormEditor.prototype.getObjectFromDom = function() {
   var obj = {rubyobject: "AbstractForm"};
-  $("#form_editor input").each(function(ind, elem) {
+  $("#form_editor input, #form_editor select").each(function(ind, elem) {
     var path = $(elem).attr("id");
     if(!path || !path.match(/^\//))
       return true; // continue, as it’s a custom input element
 
-    FormEditor.getInstance().setPath(obj, path, $(elem).val());
+    var v = $(elem).val();
+
+    // skip these default values
+    if(path.match(/\/last_is_textbox$/) && v == "0") return true;
+    if(path.match(/\/boxes\/[0-9]+\/text$/) && v == "") return true;
+
+    FormEditor.getInstance().setPath(obj, path, v);
+  });
+
+  // post-processing required for correct type and db_column fields.
+  // should be removed once the type-field has been updated (TODO)
+  $.each(obj["pages"], function(ind, page) {
+    $.each(page["sections"], function(ind, sect) {
+      $.each(sect["questions"], function(ind, quest) {
+        var multi = false;
+        switch(quest["type"]) {
+          case "Single": quest["type"] = "square";               break;
+          case "Multi":  quest["type"] = "square"; multi = true; break;
+          case "Text":   quest["type"] = "comment";              break;
+          default: throw("Unsupported question type: " + quest["type"]);
+        }
+
+        if(multi) {
+          var a = [];
+          for(var i = 0; i < quest["boxes"].length; i++) {
+            a[i] = quest["db_column"] + "_" + String.fromCharCode(97+i);
+          }
+          quest["db_column"] = a;
+        }
+      });
+    });
   });
   return obj;
 };
@@ -440,6 +471,7 @@ FormEditor.prototype.closeHeading = function(path) {
 };
 
 FormEditor.prototype.createActionLink = function(action, name, cssClasses) {
+  cssClasses = cssClasses || "";
   if(action.indexOf('"') >= 0)
     action = "eval(unescape('"+escape(action)+"'))"; // work around quotation marks
   this.append('<a class="'+cssClasses+'" onclick="'+action+'">'+name+'</a>');
