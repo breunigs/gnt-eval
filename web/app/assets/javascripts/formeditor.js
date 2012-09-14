@@ -25,7 +25,11 @@ function FormEditor() {
 
   this.parseAbstractForm(this.data);
 
+  // numerical boxes are only hidden once created, so need to watch for
+  // changes
   $("[type=numeric]").numeric({ decimal: false, negative: false });
+
+  this.attachSectionHeadUpdater();
 }
 
 FormEditor.getInstance = function() {
@@ -33,7 +37,22 @@ FormEditor.getInstance = function() {
   return fe;
 };
 
+FormEditor.prototype.attachSectionHeadUpdater = function() {
+  var s = [];
+  // Selects the untranslated textboxes right after the section:
+  s[0] = ".section > div:first-of-type > input";
+  // Selects the first translated but ungenderized textbox
+  s[1] = ".section > div:first-of-type div.language:first-of-type > input";
+  // Selects the first translated + genderized textbox
+  s[2] = ".section > div:first-of-type div.language:first-of-type .indent > div:first-of-type > input";
 
+  $(document).on("change", s.join(", "), function(){
+    $(this).parents(".section").attr("data-title", $(this).val());
+  });
+
+  // run once for initialization
+  $(s.join(", ")).trigger("change");
+};
 
 FormEditor.prototype.setLanguages = function(langs) {
   // get languages from default text box unless given. It is assumed that

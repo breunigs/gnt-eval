@@ -1,11 +1,14 @@
 #form_editor {
   max-width:70rem;
+  counter-reset:section;
 
   label {
     display: inline-block;
-    width:5rem;
+    width:10rem;
     overflow:hidden;
     height:2.5rem;
+    line-height:2.5rem;
+    vertical-align:middle;
     white-space: nowrap;
   }
 
@@ -38,5 +41,37 @@
   /* don’t allow genderization for box descriptions */
   .boxes .genderize {
     display: none;
+  }
+
+  .page {
+    &:before {
+      content: "page break";
+      background:#ccc;
+      display:block;
+      font-weight:bold;
+      padding:1rem;
+      border-bottom:0.1rem solid #000;
+      margin-bottom:1rem;
+    }
+  }
+
+  .section {
+    counter-increment:section;
+    &:before {
+      margin-top:2rem;
+      content: "Section " counter(section) ": " attr(data-title);
+      display:block;
+      background:#eee;
+      border-bottom:0.1rem solid #aaa;
+      padding:1rem;
+      margin-bottom:1rem;
+    }
+  }
+
+  .heading > .heading {
+    border:1px solid red;
+    &:before {
+      content: "invalid headings!";
+    }
   }
 }
