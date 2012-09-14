@@ -175,6 +175,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 };
 
 FormEditor.prototype.parsePage = function(page, path) {
+  this.openGroup("page");
   this.createHiddenBox(path+"/rubyobject", "Page");
   for(var y in ATTRIBUTES["Page"]) {
     var attr = ATTRIBUTES["Page"][y];
@@ -185,6 +186,7 @@ FormEditor.prototype.parsePage = function(page, path) {
     var section = sections[sect];
     this.parseSection(section, path + "/sections/" + sect);
   }
+  this.closeGroup();
 };
 
 FormEditor.prototype.parseSection = function(section, path) {
@@ -331,7 +333,7 @@ FormEditor.prototype.translatePath = function(path, caller) {
     this.createTranslateableTextArea(path);
   else
     this.createTranslateableTextBox(path);
-  $(caller).parent().parent().html(this.generatedHtml);
+  $(caller).parent().html(this.generatedHtml);
 };
 
 FormEditor.prototype.groupHasDifferentInputTexts = function(parent) {
@@ -387,7 +389,7 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
     this.createTranslateableTextArea(path);
   else
     this.createTranslateableTextBox(path);
-  $(caller).closest(".meaningless_group").html(this.generatedHtml);
+  $(caller).closest(".heading").replaceWith(this.generatedHtml);
 };
 
 FormEditor.prototype.genderizePath = function(path, caller) {
@@ -423,7 +425,7 @@ FormEditor.prototype.ungenderizePath = function(path, caller) {
   path = path.split("/").slice(0, -1).join("/");
   this.generatedHtml = "";
   this.createTranslateableTextBox(path);
-  $(caller).closest(".meaningless_group").html(this.generatedHtml);
+  $(caller).closest(".heading:not(.language)").replaceWith(this.generatedHtml);
 };
 
 FormEditor.prototype.getObjectFromDom = function() {
@@ -518,7 +520,7 @@ FormEditor.prototype.createActionLink = function(action, name, cssClasses) {
 
 FormEditor.prototype.openGroup = function(cssClasses) {
   cssClasses = cssClasses ? cssClasses : "";
-  this.append('<div class="meaningless_group '+cssClasses+'">');
+  this.append('<div class="'+cssClasses+'">');
 };
 
 FormEditor.prototype.closeGroup = function() {
@@ -538,7 +540,6 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
   var lang = [];
   var texts = this.getPath(path);
 
-  this.openGroup();
   if(typeof(texts) == "string") {
     this.openGroup();
     this.createTextBox(path, path.split("/").pop());
@@ -558,7 +559,6 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
     }
     this.closeHeading();
   }
-  this.closeGroup();
 };
 
 // does not support genderization. Creates a textarea instead to allow
