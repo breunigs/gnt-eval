@@ -344,7 +344,7 @@ FormEditor.prototype.translatePath = function(path, caller) {
     this.createTranslateableTextArea(path);
   else
     this.createTranslateableTextBox(path);
-  $(caller).parent().html(this.generatedHtml);
+  $(caller).parent().replaceWith(this.generatedHtml);
 };
 
 FormEditor.prototype.groupHasDifferentInputTexts = function(parent) {
@@ -373,11 +373,12 @@ FormEditor.prototype.getAttributeByIndex = function(obj, index) {
 
 
 FormEditor.prototype.untranslatePath = function(path, caller) {
-  this.updateDataFromDom();
-
   var warn = this.groupHasDifferentInputTexts($(caller).parent());
   if(warn && !confirm("The translated texts differ. Keep only one?"))
     return false;
+
+
+  this.updateDataFromDom();
 
   // Try to get the English text first, if available. If it isn’t,
   // simply get the first string available.
@@ -417,14 +418,15 @@ FormEditor.prototype.genderizePath = function(path, caller) {
   path = path.split("/").slice(0, -1).join("/");
   this.generatedHtml = "";
   this.createTranslateableTextBox(path);
-  $(caller).parent().parent().parent().html(this.generatedHtml);
+  $(caller).closest(".heading:not(.language)").replaceWith(this.generatedHtml);
 };
 
 FormEditor.prototype.ungenderizePath = function(path, caller) {
-  this.updateDataFromDom();
   var warn = this.groupHasDifferentInputTexts($(caller).parent());
   if(warn && !confirm("The genderized texts differ. Do you want to continue and only keep the neutral one?"))
     return false;
+
+  this.updateDataFromDom();
 
   var oldText = this.getPath(path + "/:both");
   // inject new object
