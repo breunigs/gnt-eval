@@ -326,7 +326,10 @@ FormEditor.prototype.translatePath = function(path, caller) {
   var isTextArea = $(caller).parent().find("textarea").length > 0;
 
   // generate new object
-  var oldText = this.getPath(path);
+  var oldText = "";
+  try { // it may not exist, i.e. for empty boxes
+    oldText = this.getPath(path);
+  } catch(e) {}
   var translated = { };
   $.each(this.languages, function(i, lang) {
     translated[lang] = isTextArea ? oldText.split("\n") : oldText;
