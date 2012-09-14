@@ -33,6 +33,8 @@ FormEditor.getInstance = function() {
   return fe;
 };
 
+
+
 FormEditor.prototype.setLanguages = function(langs) {
   // get languages from default text box unless given. It is assumed that
   // this is a user action, therefore warn if removing languages.
@@ -70,6 +72,7 @@ FormEditor.prototype.setLanguages = function(langs) {
   // find translation groups
   $(".language").parent().each(function(ind, transGroup) {
     var path = $(transGroup).attr("id");
+    var isTextArea = $(transGroup).find("textarea").length > 0;
     var l = newLangs.slice();
     $(transGroup).children(".language").each(function(ind, langGroup) {
       var lang = $(langGroup).children("span, label").html();
@@ -83,9 +86,12 @@ FormEditor.prototype.setLanguages = function(langs) {
     // add missing languages to dom
     $.each(l, function(ind, lang) {
       var sis = FormEditor.getInstance();
-      sis.setPath(sis.data, path + "/" + lang, "");
+      sis.setPath(sis.data, path + "/" + lang, isTextArea ? [] : "");
       sis.generatedHtml = "";
-      sis.createLangTextBox(path, lang);
+      if(isTextArea)
+        sis.createLangTextArea(path, lang);
+      else
+        sis.createLangTextBox(path, lang);
       $(transGroup).append(sis.generatedHtml);
     });
   });
@@ -190,6 +196,7 @@ FormEditor.prototype.parsePage = function(page, path) {
 };
 
 FormEditor.prototype.parseSection = function(section, path) {
+  this.openGroup("section");
   this.createHiddenBox(path+"/rubyobject", "Section");
   for(var y in ATTRIBUTES["Section"]) {
     var attr = ATTRIBUTES["Section"][y];
@@ -202,6 +209,7 @@ FormEditor.prototype.parseSection = function(section, path) {
   for(var quest in questions) {
     this.parseQuestion(questions[quest], path + "/questions/" + quest);
   }
+  this.closeGroup();
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
@@ -393,15 +401,11 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
 };
 
 FormEditor.prototype.genderizePath = function(path, caller) {
-  this.log("Genderizing Path: " + path);
   this.updateDataFromDom();
 
   // generate new object
   var oldText = this.getPath(path);
   var genderized = { ":male": oldText, ":female": oldText, ":both": oldText};
-
-  this.log(oldText);
-  this.log(genderized);
 
   // inject new object
   this.setPath(this.data, path, genderized);
@@ -614,10 +618,8 @@ FormEditor.prototype.createLangTextBoxGenderized = function(path, lang) {
 
 // creates a textbox for a single value that is not translatable.
 FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
-  if(path === undefined)
-    throw("Given path is invalid.");
-  if(label === undefined)
-    throw("Given label is invalid.");
+  this.assert(path !== undefined, "Given path is invalid.");
+  this.assert(label !== undefined, "Given label is invalid.");
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+path+'">'+label+'</label>');
@@ -626,10 +628,10 @@ FormEditor.prototype.createTextBox = function(path, label, group, cssClasses) {
 };
 
 FormEditor.prototype.createTextArea = function(path, label, group, cssClasses) {
-  if(path === undefined)
-    throw("Given path is invalid.");
-  if(label === undefined)
-    throw("Given label is invalid.");
+  this.assert(path !== undefined, "Given path is invalid.");
+  this.assert(label !== undefined, "Given label is invalid.");
+  this.assert($.isArray(this.getPath(path)), "Textareas can only display arrays.");
+
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+path+'">'+label+'</label>');
@@ -639,10 +641,8 @@ FormEditor.prototype.createTextArea = function(path, label, group, cssClasses) {
 
 
 FormEditor.prototype.createNumericBox = function(path, label, group, cssClasses) {
-  if(path === undefined)
-    throw("Given path is invalid.");
-  if(label === undefined)
-    throw("Given label is invalid.");
+  this.assert(path !== undefined, "Given path is invalid.");
+  this.assert(label !== undefined, "Given label is invalid.");
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+path+'">'+label+'</label>');
@@ -655,6 +655,9 @@ FormEditor.prototype.createHiddenBox = function(path, value) {
 };
 
 FormEditor.prototype.createCheckBox = function(path, label, group, cssClasses) {
+  this.assert(path !== undefined, "Given path is invalid.");
+  this.assert(label !== undefined, "Given label is invalid.");
+
   if(group) this.openGroup(cssClasses);
   var c = this.getPath(path) ? 'checked="checked"' : '';
   this.append('<label for="'+path+'">'+label+'</label>');
@@ -663,12 +666,9 @@ FormEditor.prototype.createCheckBox = function(path, label, group, cssClasses) {
 };
 
 FormEditor.prototype.createSelectBox = function(path, label, list, group, cssClasses, jsAction) {
-  if(path === undefined)
-    throw("Given path is invalid.");
-  if(label === undefined)
-    throw("Given label is invalid.");
-  if(list === undefined || list.length == 0)
-    throw("Given list must not be empty.");
+  this.assert(path !== undefined, "Given path is invalid.");
+  this.assert(label !== undefined, "Given label is invalid.");
+  this.assert(list !== undefined && list.length >0, "Given list must not be empty.");
 
   var value = this.getPath(path);
 
