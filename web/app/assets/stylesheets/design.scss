@@ -355,9 +355,13 @@ a, .hold_button:not(.hold_button_form_compat) input {
   cursor:pointer;
   &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
     border: 0;
-    border-bottom:1px dotted #FF3636;
+    border-bottom:0.1rem dotted #FF3636;
     text-shadow: 0 0 0.05rem rgba(0, 0, 0, 0.1);
   }
+}
+
+a span {
+  color: inherit;
 }
 
 .hold_button:not(.hold_button_form_compat) input {

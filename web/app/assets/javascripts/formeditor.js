@@ -15,6 +15,9 @@ function FormEditor() {
     return arguments.callee.instance;
   arguments.callee.instance = this;
 
+  this.undoData = new Array();
+  this.redoData = new Array();
+  this.undoTmp = null;
   this.groupTagStack = new Array();
 
   this.source = $('#form_content');
@@ -33,21 +36,130 @@ function FormEditor() {
   this.attachCollapsers();
   $('#form_editor textarea').autosize();
 
+  // allow to cancel sort operations by htting esc
   $(document).keydown(function(event) {
     if(event.keyCode === $.ui.keyCode.ESCAPE) {
+      FormEditor.getInstance().undoTmp = null;
       $(".sortable-question").sortable("cancel");
     }
   });
 
+  this.makeQuestionsSortable();
+  this.checkSectionUpDownLinks();
+
+  this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
+
+  $(document).ready(function() {$("#form_tools").jScroll({speed : 0});});
+}
+
+FormEditor.prototype.makeQuestionsSortable = function() {
   $(".sortable-question").sortable({
     connectWith: ".sortable-question",
     placeholder: "sortable-question-placeholder",
     distance: 20,
-    handle: "a.move"
+    handle: "a.move",
+    start: function(event, ui) {
+      // undoTmp is set on mousedown in handle
+      // collapse all other questions
+      $(".section .collapsable:not(.closed) a.collapse").trigger("click");
+    },
+    beforeStop: function(event, ui) {
+      var dat = FormEditor.getInstance().undoTmp;
+      if(!dat) return; // probably event has been cancelled
+      var t = ui.item.find("h6").data("db-column");
+      FormEditor.getInstance().addUndoStep("moving question: " + t, dat);
+    }
   });
 
-  this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
-}
+  $(document).on("mousedown", "a.move", function() {
+    FormEditor.getInstance().undoTmp = $("#form_editor").html();
+  });
+};
+
+FormEditor.prototype.moveSectionUp = function(link) {
+  var allSect = $(".section");
+  var sect = $(link).parents(".section");
+  var pos = allSect.index(sect);
+  if(pos == 0) {
+    this.log("Section is already at the top");
+    return;
+  }
+  var t = "moving section up: " + sect.find("h5").data("title");
+  this.addUndoStep(t);
+  if($(allSect[pos-1]).is(":last-of-type")) {
+    // the previous section is the last in this page. Therefore place
+    // the section to be moved after that one, so it only changes the
+    // page.
+    this.log("moving section only across page break");
+    sect.insertAfter(allSect[pos-1]);
+  } else {
+    sect.insertBefore(allSect[pos-1]);
+  }
+  this.checkSectionUpDownLinks();
+};
+
+FormEditor.prototype.moveSectionDown = function(link) {
+  var allSect = $(".section");
+  var sect = $(link).parents(".section");
+  var pos = allSect.index(sect);
+  if(pos == allSect.length-1) {
+    this.log("Section is already at the bottom");
+    return;
+  }
+  var t = "moving section down: " + sect.find("h5").data("title");
+  this.addUndoStep(t);
+  if(!$(allSect[pos+1]).prev().hasClass("section")) {
+    // the next section is the first of a new page. Therefore place the
+    // section to be moved before that one, so it only changes the page
+    this.log("moving section only across page break");
+    sect.insertBefore(allSect[pos+1]);
+  } else {
+    sect.insertAfter(allSect[pos+1]);
+  }
+  this.checkSectionUpDownLinks();
+};
+
+FormEditor.prototype.undo = function() {
+  if(this.undoData.length==0) {
+    this.log("Cannot undo, as undo stack is empty");
+    return;
+  }
+  var step = this.undoData.pop();
+  this.redoData.push([step[0], $("#form_editor").html()]);
+  $("#form_editor").html(step[1]);
+  this.updateUndoRedoLinks();
+  this.makeQuestionsSortable();
+};
+
+FormEditor.prototype.redo = function() {
+  if(this.redoData.length==0) {
+    this.log("Cannot redo, as redo stack is empty");
+    return;
+  }
+  var step = this.redoData.pop();
+  this.undoData.push([step[0], $("#form_editor").html()]);
+  $("#form_editor").html(step[1]);
+  this.updateUndoRedoLinks();
+  this.makeQuestionsSortable();
+};
+
+FormEditor.prototype.updateUndoRedoLinks = function() {
+  $("#undo").toggleClass("disabled", this.undoData.length == 0);
+  $("#redo").toggleClass("disabled", this.redoData.length == 0);
+  if(this.undoData.length > 0)
+    $("#undo span").html(this.undoData.slice(-1)[0][0]);
+  if(this.redoData.length > 0)
+    $("#redo span").html(this.redoData.slice(-1)[0][0]);
+};
+
+FormEditor.prototype.addUndoStep = function(title, data) {
+  this.log("Adding undo step: " + title);
+  data = data || $("#form_editor").html();
+  this.redoData = new Array();
+  this.undoData.push([title, data]);
+  this.undoData = this.undoData.slice(-5);
+  this.updateUndoRedoLinks();
+};
 
 FormEditor.getInstance = function() {
   var fe = new FormEditor();
@@ -57,14 +169,14 @@ FormEditor.getInstance = function() {
 FormEditor.prototype.attachSectionHeadUpdater = function() {
   var s = [];
   // Selects the untranslated textboxes right after the section:
-  s[0] = ".section > div:first-of-type > div:nth-of-type(2) > input";
+  s[0] = ".section > div.collapsable > div:first-of-type > input";
   // Selects the first translated but ungenderized textbox
-  s[1] = ".section > div:first-of-type div.language:first-of-type > input";
+  s[1] = ".section > div.collapsable .language:first-of-type > input";
   // Selects the first translated + genderized textbox
-  s[2] = ".section > div:first-of-type div.language:first-of-type .indent > div:first-of-type > input";
+  s[2] = ".section > div.collapsable .language:first-of-type .indent > div:first-of-type > input";
 
   $(document).on("change", s.join(", "), function() {
-    var el = $(this).parents(".section");
+    var el = $(this).parents(".section").children("h5");
     el.attr("data-title", $(this).val());
     // work around webkit not updating the element even after data-attr
     // have been changed
@@ -78,14 +190,14 @@ FormEditor.prototype.attachSectionHeadUpdater = function() {
 FormEditor.prototype.attachQuestionHeadUpdater = function() {
   var s = [];
   // Selects the untranslated textboxes right after the section:
-  s[0] = ".question > div:nth-of-type(2) > input";
+  s[0] = ".question > div:first-of-type > input";
   // Selects the first translated but ungenderized textbox
-  s[1] = ".question > div:nth-of-type(2) div.language:first-of-type > input";
+  s[1] = ".question > div:first-of-type .language:first-of-type > input";
   // Selects the first translated + genderized textbox
-  s[2] = ".question > div:nth-of-type(2) div.language:first-of-type .indent > div:first-of-type > input";
+  s[2] = ".question > div:first-of-type .language:first-of-type .indent > div:first-of-type > input";
 
   $(document).on("change", s.join(", "), function(){
-    var el = $(this).parents(".question").children(".header");
+    var el = $(this).parents(".question").children("h6");
     el.attr("data-qtext", $(this).val().slice(0,45));
     // work around webkit not updating the element even after data-attr
     // have been changed
@@ -93,7 +205,7 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
   });
 
   $(document).on("change", ".question div.db_column input", function(){
-    var el = $(this).parents(".question").children(".header");
+    var el = $(this).parents(".question").children("h6");
     el.attr("data-db-column", $(this).val());
     // work around webkit not updating the element even after data-attr
     // have been changed
@@ -124,22 +236,27 @@ FormEditor.prototype.attachCollapsers = function() {
   });
 };
 
-FormEditor.prototype.setLanguages = function(langs) {
+FormEditor.prototype.checkSectionUpDownLinks = function() {
+  var allSect = $(".section h5");
+  allSect.find("a").css("visibility", "visible");
+  allSect.first().find("a.moveup").css("visibility", "hidden");
+  allSect.last().find("a.movedown").css("visibility", "hidden");
+};
+
+FormEditor.prototype.setLanguagesPopup = function() {
+  var dat = prompt("Enter languages this form should support. Use two-letter lang codes and separate them by spaces.", $("#availableLanguages").val());
+  if(!dat || dat == $("#availableLanguages").val()) return;
+  this.setLanguages(dat);
+};
+
+FormEditor.prototype.setLanguages = function(langs, automated) {
   // get languages from default text box unless given. It is assumed that
   // this is a user action, therefore warn if removing languages.
-  var automated = langs ? true : false;
-  if(!automated)
-    langs = $.trim($("#availableLanguages").val()).split(/\s+/);
+  var automated = automated || false;
+  if(!$.isArray(langs))
+    langs = langs.replace(/^\s+|\s+$/g, "").split(/\s+/);
 
-  var removedLangs = $(this.getLanguagesFromDom()).not(langs);
-
-  if(!automated) {
-    var rls = Array.prototype.join.call(removedLangs, ", ");
-    var strng = "You are about to remove these language(s): "+rls+". Continue?";
-    if(removedLangs.length > 0 && !confirm(strng))
-      return false; // stop, because user doesn’t want to remove langs
-  }
-
+  // check input is valid
   var newLangs = [];
   for(var id in langs) {
     if(!langs[id].match(/^:?[a-z][a-z]$/)) {
@@ -148,6 +265,19 @@ FormEditor.prototype.setLanguages = function(langs) {
     }
     newLangs.push(langs[id].length == 2 ? ":" + langs[id] : langs[id]);
   }
+
+  // warn when removing langs
+  var removedLangs = $(this.getLanguagesFromDom()).not(langs);
+  if(!automated) {
+    var rls = Array.prototype.join.call(removedLangs, ", ");
+    var strng = "You are about to remove these language(s): "+rls+". Continue?";
+    if(removedLangs.length > 0 && !confirm(strng))
+      return false; // stop, because user doesn’t want to remove langs
+  }
+
+  if(!automated)
+    this.addUndoStep("changing languages to: " + newLangs.join(", "));
+
   this.languages = newLangs;
 
   $("#availableLanguages").val(this.languages.join(" ").replace(/:/g, ""));
@@ -211,13 +341,9 @@ FormEditor.prototype.getPathDepth = function(path) {
   return path.split("/").length - 1;
 };
 
-FormEditor.prototype.createLanguageControlBox = function() {
-  this.openGroup();
+FormEditor.prototype.createAvailLangBox = function() {
   var langString = this.languages.join(" ").replace(/:/g, "");
-  this.append('<label for="availableLanguages">Langs</label>');
-  this.append('<input type="text" id="availableLanguages" value="'+langString+'">');
-  this.createActionLink("FormEditor.getInstance().setLanguages();", "Update Languages");
-  this.closeGroup();
+  this.createHiddenBox("availableLanguages", langString);
 };
 
 FormEditor.prototype.getLanguagesFromDom = function() {
@@ -241,8 +367,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 
   this.assert(data["rubyobject"] == "AbstractForm", "First entry of data is not an AbstractForm. Either the form is broken or the data subset passed is not an AbstractForm.");
 
-  this.createLanguageControlBox();
-
+  this.createAvailLangBox();
 
   this.createTextBox(path + "/db_table", "database table");
   this.append("<br/>");
@@ -257,13 +382,10 @@ FormEditor.prototype.parseAbstractForm = function(data) {
     this.createTranslateableTextBox(path + "/" + x, x);
   }
 
-  // handle pages here
   for(var x in this.data["pages"]) {
     var page = this.data["pages"][x];
     this.parsePage(page, path + "/pages/" + x);
   }
-
-  this.createActionLink("FormEditor.getInstance().dom2yaml();", "dom 2 yaml");
 
   this.root.append(this.generatedHtml);
   this.dom2yaml();
@@ -286,8 +408,14 @@ FormEditor.prototype.parsePage = function(page, path) {
 
 FormEditor.prototype.parseSection = function(section, path) {
   this.openGroup("section");
+  this.append('<h5 class="header">');
+  this.append('<a class="moveup" onclick="FormEditor.getInstance().moveSectionUp(this);" title="move section one block up">↑</a>');
+  this.append('<a class="movedown" onclick="FormEditor.getInstance().moveSectionDown(this);" title="move section one block down">↓</a>');
+  this.append('</h5>');
+
+
   this.openGroup("collapsable closed");
-  this.append('<div class="header">Section Header<a title="Collapse/Expand" class="collapse"></a></div>');
+  this.append('<h6 class="header">header details<a title="Collapse/Expand" class="collapse"></a></h6>');
   this.createHiddenBox(path+"/rubyobject", "Section");
   for(var y in ATTRIBUTES["Section"]) {
     var attr = ATTRIBUTES["Section"][y];
@@ -308,10 +436,10 @@ FormEditor.prototype.parseSection = function(section, path) {
 
 FormEditor.prototype.parseQuestion = function(question, path) {
   this.openGroup("question collapsable closed", "li");
-  this.append('<div class="header">');
+  this.append('<h6 class="header">');
   this.append('<a class="collapse" title="Collapse/Expand"></a>');
-  this.append('<a class="move" title="Move/Sort (use drag and drop)">⬍</a>');
-  this.append('</div>');
+  this.append('<a class="move" title="Move/Sort (use drag and drop; hit escape to cancel)">⬍</a>');
+  this.append('</h6>');
   this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTranslateableTextBox(path + "/qtext", "qtext");
   var isMulti = this.isQuestionMulti(question);
@@ -421,6 +549,8 @@ FormEditor.prototype.setPath = function(obj, path, value) {
 };
 
 FormEditor.prototype.translatePath = function(path, caller) {
+  this.addUndoStep("translating " + path);
+
   this.updateDataFromDom();
 
   var isTextArea = $(caller).parent().find("textarea").length > 0;
@@ -447,19 +577,6 @@ FormEditor.prototype.translatePath = function(path, caller) {
   $(caller).parent().replaceWith(this.generatedHtml);
 };
 
-FormEditor.prototype.groupHasDifferentInputTexts = function(parent) {
-  var warn = false;
-  var txt = null;
-  $(parent).find("input, textarea").each(function(ind, elm) {
-    if(txt != $(elm).val() && txt != null) {
-      warn = true;
-      return false; // break
-    }
-    txt = $(elm).val();
-  });
-  return warn;
-};
-
 FormEditor.prototype.getAttributeByIndex = function(obj, index) {
   var i = 0;
   for (var attr in obj) {
@@ -473,10 +590,7 @@ FormEditor.prototype.getAttributeByIndex = function(obj, index) {
 
 
 FormEditor.prototype.untranslatePath = function(path, caller) {
-  var warn = this.groupHasDifferentInputTexts($(caller).parent());
-  if(warn && !confirm("The translated texts differ. Keep only one?"))
-    return false;
-
+  this.addUndoStep("un-translating " + path);
 
   this.updateDataFromDom();
 
@@ -506,6 +620,7 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
 
 FormEditor.prototype.genderizePath = function(path, caller) {
   this.updateDataFromDom();
+  this.addUndoStep("genderizing " + path);
 
   // generate new object
   var oldText = this.getPath(path);
@@ -522,10 +637,7 @@ FormEditor.prototype.genderizePath = function(path, caller) {
 };
 
 FormEditor.prototype.ungenderizePath = function(path, caller) {
-  var warn = this.groupHasDifferentInputTexts($(caller).parent());
-  if(warn && !confirm("The genderized texts differ. Do you want to continue and only keep the neutral one?"))
-    return false;
-
+  this.addUndoStep("un-gendering " + path);
   this.updateDataFromDom();
 
   var oldText = this.getPath(path + "/:both");
@@ -825,3 +937,7 @@ FormEditor.prototype.assert = function(expression, message) {
     throw(message);
   }
 };
+
+function $F() {
+  return FormEditor.getInstance();
+}

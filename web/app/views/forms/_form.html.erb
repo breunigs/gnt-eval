@@ -2,6 +2,7 @@
 #render "shared/aceify_textareas", :mode => "json"
 content_for :script, javascript_include_tag("js-yaml.min")
 content_for :script, javascript_include_tag("json2yaml")
+content_for :script, javascript_include_tag("jquery.jscroll")
 content_for :script, javascript_include_tag("formeditor")
 is_edit = controller.action_name == "edit"
 is_new = !is_edit
@@ -49,8 +50,16 @@ is_new = !is_edit
 </div>
 
 <div>
-  <div id="form_editor">
+  <h3>Graphical Form Editor</h3>
 
+  <div id="form_editor"></div>
+
+  <div id="form_tools">
+    <h4>Tools</h4>
+    <a id="undo" class="disabled" onclick="$F().undo()">Undo <span></span></a>
+    <a id="redo" class="disabled" onclick="$F().redo()">Redo <span></span></a>
+    <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages</a>
+    <a id="dom2yaml" onclick="$F().dom2yaml()">DOM 2 YAML</a>
   </div>
 </div>
 
@@ -80,7 +89,7 @@ is_new = !is_edit
   %>
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
   var x = FormEditor.getInstance();
-  x.setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>);
+  x.setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
 </script>
 
 <div>

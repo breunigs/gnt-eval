@@ -9,11 +9,67 @@
 // keep height in sync with formeditor.js. grep this: CLOSEDHEIGHT
 $closed-height: 3.5rem;
 
+#form_tools {
+  float:right;
+  width:25rem;
+
+  a {
+    display:block;
+    border-bottom:0 !important;
+    padding:0.4rem;
+    max-height:3rem;
+    overflow:hidden;
+    font-weight:bold;
+
+    span {
+      font-weight:normal;
+    }
+
+    &.disabled {
+      cursor:not-allowed;
+      color:#999;
+
+      span {
+        display: none;
+      }
+    }
+
+    &:before {
+      font-size:3rem;
+      line-height:2rem;
+      float:left;
+      padding-top:0.2rem;
+      padding-right:3.3rem;
+      content: " ";
+    }
+  }
+
+  #redo:before {
+    content: "↷";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
+  #undo:before {
+    content: "↶";
+    padding-right:0.8rem;
+  }
+  #languages:before {
+    content: "‽";
+    padding-right:0.7rem;
+    padding-left:1.0rem;
+    font-weight:normal;
+  }
+}
+
 #form_editor {
-
-
-  max-width:70rem;
+  float:left;
+  width:70rem;
   counter-reset:section;
+  counter-reset:question;
+
+  h4, h5, h6 {
+    font-size:inherit;
+  }
 
   ol, ul {
     margin: 0;
@@ -36,6 +92,11 @@ $closed-height: 3.5rem;
   input {
     width:44rem;
     height:1.5rem;
+
+    &[type=checkbox] {
+      width: auto;
+      min-width: 0 !important;
+    }
   }
 
   textarea {
@@ -45,7 +106,8 @@ $closed-height: 3.5rem;
     padding-left:2rem;
     line-height:16px;
     resize: none;
-    overflow-x:auto;
+    white-space: nowrap;
+    overflow-x:auto !important;
     overflow-y:hidden;
 
     + a {
@@ -101,25 +163,29 @@ $closed-height: 3.5rem;
   }
 
   .section {
-/*
-
-*/
     counter-increment:section;
-    &:before {
+    h5 {
       margin-top:2rem;
-      content: "Section " counter(section) ": " attr(data-title);
+      &:before { content: "Section " counter(section) ": " attr(data-title); }
       display:block;
       background:#eee;
       border-bottom:0.1rem solid #aaa;
-      padding:1rem;
-      margin-bottom:1rem;
+      padding-left:1rem;
+      margin-bottom:0.4rem;
       font-weight:bold;
+      line-height:3.4rem;
+      height:3.4rem;
+
+      a {
+        font-weight:normal;
+      }
     }
+
   }
 
   .question {
     counter-increment:question;
-    .header {
+    > .header {
       &:before {
         content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
       }
@@ -142,6 +208,24 @@ $closed-height: 3.5rem;
     }
   }
 
+  .header a {
+    display:block;
+    float:right;
+    padding-left:0.5rem;
+    width:2rem;
+    height:inherit;
+    font-size:2rem;
+    overflow:hidden;
+    margin-left:0.5rem;
+    color:#F2CACD;
+    border:0 !important;
+    &:hover {
+      color:#FF3636;
+      text-shadow:none;
+      opacity:1;
+    }
+  }
+
   .collapsable {
     overflow: hidden;
 
@@ -154,23 +238,10 @@ $closed-height: 3.5rem;
       background:rgba(245,245,245,0.8);
       line-height:2.6rem;
       padding-left:0.5rem;
+      font-weight:normal;
+      font-size:inherit;
 
       a {
-        display:block;
-        float:right;
-        padding-left:0.5rem;
-        width:2rem;
-        height:2.4rem;
-        font-size:2rem;
-        overflow:hidden;
-        margin-left:0.5rem;
-
-        border:0.1rem solid #ddd;
-        &:hover {
-          border:0.1rem solid #ccc;
-          text-shadow:none;
-        }
-
         &.collapse:before { content: "↟"; }
         &.move { cursor: move }
       }
