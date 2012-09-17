@@ -6,10 +6,22 @@
   background: $normalbg, -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
 }
 
+// keep height in sync with formeditor.js. grep this: CLOSEDHEIGHT
+$closed-height: 3.5rem;
 
 #form_editor {
+
+
   max-width:70rem;
   counter-reset:section;
+
+  ol, ul {
+    margin: 0;
+    list-style-type: none;
+    li {
+      padding:0;
+    }
+  }
 
   label {
     display: inline-block;
@@ -29,7 +41,7 @@
   textarea {
     min-height:4rem;
     width:42.4rem;
-    @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.7rem);
+    @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.8rem);
     padding-left:2rem;
     line-height:16px;
     resize: none;
@@ -89,6 +101,9 @@
   }
 
   .section {
+/*
+
+*/
     counter-increment:section;
     &:before {
       margin-top:2rem;
@@ -104,43 +119,66 @@
 
   .question {
     counter-increment:question;
-    overflow: hidden;
     .header {
-      margin-top:0.5rem;
-      display:block;
-      padding:0.5rem;
-      margin-bottom:0.5rem;
-      white-space:nowrap;
-      height:1.6rem;
-      overflow: hidden;
-      background:#F7F7F7;
       &:before {
         content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
       }
+    }
+  }
+
+  .sortable-question-placeholder {
+    height: $closed-height - 2*1rem;
+    margin: 1rem 0;
+    margin-left:-2.1rem;
+    background-image: -ms-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -moz-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -o-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -webkit-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: linear-gradient(to right, #FFEC9E 0%, #FFFFFF 70%);
+    display:block;
+    &:last-of-type {
+      // fix flickering, not sure why this is required
+      margin-bottom:3rem;
+    }
+  }
+
+  .collapsable {
+    overflow: hidden;
+
+    .header {
+      margin-top:0.5rem;
+      display:block;
+      margin-bottom:0.5rem;
+      height:2.6rem;
+      overflow: hidden;
+      background:rgba(245,245,245,0.8);
+      line-height:2.6rem;
+      padding-left:0.5rem;
 
       a {
         display:block;
-        position:relative;
-        right:0;
-        top:-1.8rem;
-        left:67rem;
+        float:right;
         padding-left:0.5rem;
         width:2rem;
-        height:2rem;
+        height:2.4rem;
         font-size:2rem;
-        line-height:2rem;
-        &:before {content: "↟";}
-        border:0 !important;
-        background-color:#F7F7F7;
+        overflow:hidden;
+        margin-left:0.5rem;
+
+        border:0.1rem solid #ddd;
+        &:hover {
+          border:0.1rem solid #ccc;
+          text-shadow:none;
+        }
+
+        &.collapse:before { content: "↟"; }
+        &.move { cursor: move }
       }
     }
 
     &.closed {
-      // keep height in sync with formeditor.js. grep this: CLOSEDHEIGHT
-      height: 3.5rem;
-      .header a {
-        &:before {content: "↡";}
-      }
+      height: $closed-height;
+      .header a.collapse:before { content: "↡"; }
     }
   }
 

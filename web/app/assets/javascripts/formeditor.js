@@ -15,6 +15,7 @@ function FormEditor() {
     return arguments.callee.instance;
   arguments.callee.instance = this;
 
+  this.groupTagStack = new Array();
 
   this.source = $('#form_content');
   this.root = $('#form_editor');
@@ -25,14 +26,27 @@ function FormEditor() {
 
   this.parseAbstractForm(this.data);
 
-  // numerical boxes are only hidden once created, so need to watch for
-  // changes
   $("[type=numeric]").numeric({ decimal: false, negative: false });
 
   this.attachSectionHeadUpdater();
   this.attachQuestionHeadUpdater();
-  this.attachQuestionCollapser();
+  this.attachCollapsers();
   $('#form_editor textarea').autosize();
+
+  $(document).keydown(function(event) {
+    if(event.keyCode === $.ui.keyCode.ESCAPE) {
+      $(".sortable-question").sortable("cancel");
+    }
+  });
+
+  $(".sortable-question").sortable({
+    connectWith: ".sortable-question",
+    placeholder: "sortable-question-placeholder",
+    distance: 20,
+    handle: "a.move"
+  });
+
+  this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
 }
 
 FormEditor.getInstance = function() {
@@ -43,14 +57,18 @@ FormEditor.getInstance = function() {
 FormEditor.prototype.attachSectionHeadUpdater = function() {
   var s = [];
   // Selects the untranslated textboxes right after the section:
-  s[0] = ".section > div:first-of-type > input";
+  s[0] = ".section > div:first-of-type > div:nth-of-type(2) > input";
   // Selects the first translated but ungenderized textbox
   s[1] = ".section > div:first-of-type div.language:first-of-type > input";
   // Selects the first translated + genderized textbox
   s[2] = ".section > div:first-of-type div.language:first-of-type .indent > div:first-of-type > input";
 
-  $(document).on("change", s.join(", "), function(){
-    $(this).parents(".section").attr("data-title", $(this).val());
+  $(document).on("change", s.join(", "), function() {
+    var el = $(this).parents(".section");
+    el.attr("data-title", $(this).val());
+    // work around webkit not updating the element even after data-attr
+    // have been changed
+    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
   });
 
   // run once for initialization
@@ -67,11 +85,19 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
   s[2] = ".question > div:nth-of-type(2) div.language:first-of-type .indent > div:first-of-type > input";
 
   $(document).on("change", s.join(", "), function(){
-    $(this).parents(".question").children(".header").attr("data-qtext", $(this).val());
+    var el = $(this).parents(".question").children(".header");
+    el.attr("data-qtext", $(this).val().slice(0,45));
+    // work around webkit not updating the element even after data-attr
+    // have been changed
+    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
   });
 
   $(document).on("change", ".question div.db_column input", function(){
-    $(this).parents(".question").children(".header").attr("data-db-column", $(this).val());
+    var el = $(this).parents(".question").children(".header");
+    el.attr("data-db-column", $(this).val());
+    // work around webkit not updating the element even after data-attr
+    // have been changed
+    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
   });
 
   // run once for initialization
@@ -79,9 +105,9 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
   $(".question div.db_column input").trigger("change");
 };
 
-FormEditor.prototype.attachQuestionCollapser = function() {
-  $(document).on("click", ".question .header a", function(){
-    var el = $(this).parents(".question");
+FormEditor.prototype.attachCollapsers = function() {
+  $(document).on("click", ".collapsable .header a.collapse", function(){
+    var el = $(this).parents(".collapsable");
     if(el.hasClass("closed")) {
       // animate to old height first, then remove the fixed value so it
       // automatically adjusts to its contents. If the value isn’t
@@ -260,6 +286,8 @@ FormEditor.prototype.parsePage = function(page, path) {
 
 FormEditor.prototype.parseSection = function(section, path) {
   this.openGroup("section");
+  this.openGroup("collapsable closed");
+  this.append('<div class="header">Section Header<a title="Collapse/Expand" class="collapse"></a></div>');
   this.createHiddenBox(path+"/rubyobject", "Section");
   for(var y in ATTRIBUTES["Section"]) {
     var attr = ATTRIBUTES["Section"][y];
@@ -267,17 +295,23 @@ FormEditor.prototype.parseSection = function(section, path) {
   }
   section["answers"] = section["answers"] || [];
   this.createTranslateableTextArea(path + "/answers");
-  //~ this.parseAnswers(section, path);
+  this.closeGroup();
+
   var questions = section["questions"];
+  this.openGroup("sortable-question", "ol");
   for(var quest in questions) {
     this.parseQuestion(questions[quest], path + "/questions/" + quest);
   }
   this.closeGroup();
+  this.closeGroup();
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
-  this.openGroup("question closed");
-  this.append('<div class="header"><a title="Collapse/Expand"></a></div>');
+  this.openGroup("question collapsable closed", "li");
+  this.append('<div class="header">');
+  this.append('<a class="collapse" title="Collapse/Expand"></a>');
+  this.append('<a class="move" title="Move/Sort (use drag and drop)">⬍</a>');
+  this.append('</div>');
   this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTranslateableTextBox(path + "/qtext", "qtext");
   var isMulti = this.isQuestionMulti(question);
@@ -593,13 +627,16 @@ FormEditor.prototype.createActionLink = function(action, name, cssClasses) {
   this.append('<a class="'+cssClasses+'" onclick="'+action+'">'+name+'</a>');
 };
 
-FormEditor.prototype.openGroup = function(cssClasses) {
+FormEditor.prototype.openGroup = function(cssClasses, tag) {
+  tag = tag || "div"
+  this.groupTagStack.push(tag);
   cssClasses = cssClasses ? cssClasses : "";
-  this.append('<div class="'+cssClasses+'">');
+  this.append('<'+tag+' class="'+cssClasses+'">');
 };
 
 FormEditor.prototype.closeGroup = function() {
-  this.append("</div>");
+  this.assert(this.groupTagStack.length > 0, "Trying to close group which has not been opened.");
+  this.append("</"+ this.groupTagStack.pop() +">");
 };
 
 // Checks if at least one of the given translations has gendering
