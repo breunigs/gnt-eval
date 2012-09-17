@@ -7,31 +7,39 @@
     width:10rem;
     overflow:hidden;
     height:2.5rem;
-    line-height:2.5rem;
+    line-height:2.4rem;
     vertical-align:middle;
     white-space: nowrap;
   }
 
-  input {
-    width:40rem;
+  input, textarea {
+    width:44rem;
     height:1.5rem;
+  }
+
+  select {
+    width: 44rem + 0.8rem;
   }
 
   span {
     display:block;
-    font-weight:bold;
-/*
-    margin-top:1r em;
-*/
     margin-left:0.2rem;
   }
 
   .indent {
-    border-left:1px solid #ccc;
-    border-bottom:1px solid #ccc;
+    border-left:0.1rem solid #ccc;
+    border-bottom:0.1rem solid #ccc;
     margin-left:0.4rem;
     padding-left:1rem;
     margin-bottom:1rem;
+
+    label {
+      width:8.6rem - 0.1rem;
+    }
+
+    .indent label {
+      width:7.2rem - 0.2rem;
+    }
   }
 
   .hidden {
@@ -65,6 +73,49 @@
       border-bottom:0.1rem solid #aaa;
       padding:1rem;
       margin-bottom:1rem;
+      font-weight:bold;
+    }
+  }
+
+  .question {
+    counter-increment:question;
+    overflow: hidden;
+    .header {
+      margin-top:0.5rem;
+      display:block;
+      padding:0.5rem;
+      margin-bottom:0.5rem;
+      white-space:nowrap;
+      height:1.6rem;
+      overflow: hidden;
+      background:#F7F7F7;
+      &:before {
+        content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
+      }
+
+      a {
+        display:block;
+        position:relative;
+        right:0;
+        top:-1.8rem;
+        left:67rem;
+        padding-left:0.5rem;
+        width:2rem;
+        height:2rem;
+        font-size:2rem;
+        line-height:2rem;
+        &:before {content: "↟";}
+        border:0 !important;
+        background-color:#F7F7F7;
+      }
+    }
+
+    &.closed {
+      // keep height in sync with formeditor.js. grep this: CLOSEDHEIGHT
+      height: 3.5rem;
+      .header a {
+        &:before {content: "↡";}
+      }
     }
   }
 

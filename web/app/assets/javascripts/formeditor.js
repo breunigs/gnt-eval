@@ -30,6 +30,8 @@ function FormEditor() {
   $("[type=numeric]").numeric({ decimal: false, negative: false });
 
   this.attachSectionHeadUpdater();
+  this.attachQuestionHeadUpdater();
+  this.attachQuestionCollapser();
 }
 
 FormEditor.getInstance = function() {
@@ -52,6 +54,47 @@ FormEditor.prototype.attachSectionHeadUpdater = function() {
 
   // run once for initialization
   $(s.join(", ")).trigger("change");
+};
+
+FormEditor.prototype.attachQuestionHeadUpdater = function() {
+  var s = [];
+  // Selects the untranslated textboxes right after the section:
+  s[0] = ".question > div:nth-of-type(2) > input";
+  // Selects the first translated but ungenderized textbox
+  s[1] = ".question > div:nth-of-type(2) div.language:first-of-type > input";
+  // Selects the first translated + genderized textbox
+  s[2] = ".question > div:nth-of-type(2) div.language:first-of-type .indent > div:first-of-type > input";
+
+  $(document).on("change", s.join(", "), function(){
+    $(this).parents(".question").children(".header").attr("data-qtext", $(this).val());
+  });
+
+  $(document).on("change", ".question div.db_column input", function(){
+    $(this).parents(".question").children(".header").attr("data-db-column", $(this).val());
+  });
+
+  // run once for initialization
+  $(s.join(", ")).trigger("change");
+  $(".question div.db_column input").trigger("change");
+};
+
+FormEditor.prototype.attachQuestionCollapser = function() {
+  $(document).on("click", ".question .header a", function(){
+    var el = $(this).parents(".question");
+    if(el.hasClass("closed")) {
+      // animate to old height first, then remove the fixed value so it
+      // automatically adjusts to its contents. If the value isn’t
+      // present, just guess and hope no one notices.
+      el.animate({height: el.data("old-height") || "40rem"}, 500, function() {
+        el.removeClass("closed");
+        el.attr("style", "");
+      });
+    } else {
+      el.data("old-height", el.height());
+      // keep height in sync with formeditor.scss. grep this: CLOSEDHEIGHT
+      el.animate({height:"3.5rem"}, 500, function() { el.addClass("closed") });
+    }
+  });
 };
 
 FormEditor.prototype.setLanguages = function(langs) {
@@ -232,6 +275,8 @@ FormEditor.prototype.parseSection = function(section, path) {
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
+  this.openGroup("question closed");
+  this.append('<div class="header"><a title="Collapse/Expand"></a></div>');
   this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTranslateableTextBox(path + "/qtext", "qtext");
   var isMulti = this.isQuestionMulti(question);
@@ -245,7 +290,7 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   }
 
   this.createSelectBox(path + "/type", "type", Object.keys(ATTRIBUTES["Visualizers"]), true, "", "questionTypeChanged");
-  this.createTextBox(path + "/db_column", "db_column", true);
+  this.createTextBox(path + "/db_column", "db_column", true, "db_column");
 
   // these boxes depend on the question type. They are created in HTML
   // but may be hidden. Their values are discarded when generating the
@@ -259,6 +304,7 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.createSelectBox(path + "/repeat_for", "repeat_for", ["only_once", "lecturer", "tutor"], true);
 
   this.parseBoxes(question, path);
+  this.closeGroup();
 };
 
 FormEditor.prototype.questionTypeChanged = function(element) {
