@@ -32,6 +32,7 @@ function FormEditor() {
   this.attachSectionHeadUpdater();
   this.attachQuestionHeadUpdater();
   this.attachQuestionCollapser();
+  $('#form_editor textarea').autosize();
 }
 
 FormEditor.getInstance = function() {
@@ -705,7 +706,7 @@ FormEditor.prototype.createTextArea = function(path, label, group, cssClasses) {
 
   if(group) this.openGroup(cssClasses);
   this.append('<label for="'+path+'">'+label+'</label>');
-  this.append('<textarea id="'+path+'">'+this.getPath(path).join("\n")+'</textarea>');
+  this.append('<textarea wrap="off" id="'+path+'">'+this.getPath(path).join("\n")+'</textarea>');
   if(group) this.closeGroup();
 };
 

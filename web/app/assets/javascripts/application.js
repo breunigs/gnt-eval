@@ -21,3 +21,4 @@
 //= require jquery-ui-timepicker-addon
 //= require combobox
 //= require jquery.numeric
+//= require jquery.autosize

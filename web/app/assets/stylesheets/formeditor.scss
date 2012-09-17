@@ -1,3 +1,12 @@
+// applies background grandient to element for all browsers.
+@mixin addgradient($from, $to, $normalbg) {
+  background: $normalbg, -moz-linear-gradient($from, $to);
+  background: $normalbg, -o-linear-gradient($from, $to);
+  background: $normalbg, -ms-linear-gradient($from, $to);
+  background: $normalbg, -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
+}
+
+
 #form_editor {
   max-width:70rem;
   counter-reset:section;
@@ -12,9 +21,20 @@
     white-space: nowrap;
   }
 
-  input, textarea {
+  input {
     width:44rem;
     height:1.5rem;
+  }
+
+  textarea {
+    min-height:4rem;
+    width:42.4rem;
+    @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.7rem);
+    padding-left:2rem;
+    line-height:16px;
+    resize: none;
+    overflow-x:auto;
+    overflow-y:hidden;
   }
 
   select {
