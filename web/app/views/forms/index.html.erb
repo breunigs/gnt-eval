@@ -1,4 +1,7 @@
 <% current_forms = Semester.currently_active_forms.map { |f| f.title } %>
+<% curr_term ||= get_selected_semesters %>
+<% curr_term_titles = curr_term.map { |t| t.title }.join(", ") %>
+<% has_curr_term = curr_term && curr_term.size %>
 
 <div class="group">
   <h2>Available Forms</h2>
@@ -6,10 +9,10 @@
 
   <table>
     <tr>
-      <th>Semester</th>
+      <th>Term</th>
       <th>Name</th>
       <th>Table</th>
-      <th colspan="3">Actions</th>
+      <th colspan="<%=has_curr_term ? 3 : 2 %>">Actions</th>
       <th></th>
     </tr>
 
@@ -25,12 +28,19 @@
       <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
 
       <% if form.critical? %>
-        <td colspan="2" class="fade">Semester critical</td>
+        <td colspan="2" class="fade">Term critical</td>
       <% else %>
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
         <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
       <% end %>
-      <td><%= link_to 'Copy to current semester', :action => :copy_to_current, :id => form unless current_forms.include?(form.name) %></td>
+      <% if has_curr_term %>
+        <td>
+          <%= link_to("Copy to current term#{curr_term.size == 1 ? '' : 's'}", \
+                      {:action => :copy_to_current, :id => form}, \
+                      {:title => "Will be copied to: #{curr_term_titles}"}) \
+                unless current_forms.include?(form.name) %>
+        </td>
+      <% end %>
       <%= (not form.form_checks_out?) ? "<td>⚠ Form is invalid</td>".html_safe : ""%>
     </tr>
   <% end %>

@@ -29,7 +29,7 @@
   <div>
     <div class="infobox">
       <% if @curr_sem.nil? || @curr_sem.empty? %>
-        <span class="warning">No active terms. Change the dates or create a new one.</span>
+        <span class="warning">No active terms. Change the dates or <%= link_to "create a new one", new_semester_path %>.</span>
       <% else %>
         <b>active term</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
       <% end %>
