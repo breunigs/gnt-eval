@@ -2,7 +2,6 @@
 #render "shared/aceify_textareas", :mode => "json"
 content_for :script, javascript_include_tag("js-yaml.min")
 content_for :script, javascript_include_tag("json2yaml")
-content_for :script, javascript_include_tag("jquery.jscroll")
 content_for :script, javascript_include_tag("formeditor")
 is_edit = controller.action_name == "edit"
 is_new = !is_edit

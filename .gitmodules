@@ -19,6 +19,3 @@
 [submodule "submodules/jquery-autosize"]
 	path = submodules/jquery-autosize
 	url = git://github.com/jackmoore/autosize.git
-[submodule "submodules/jquery-jscroll"]
-	path = submodules/jquery-jscroll
-	url = git://github.com/wduffy/jScroll.git

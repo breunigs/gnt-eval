@@ -46,11 +46,25 @@ function FormEditor() {
 
   this.makeQuestionsSortable();
   this.checkSectionUpDownLinks();
+  this.fixToolBoxScrolling();
 
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
-
-  $(document).ready(function() {$("#form_tools").jScroll({speed : 0});});
 }
+
+FormEditor.prototype.fixToolBoxScrolling = function() {
+  // via http://stackoverflow.com/a/2468193, adjusted values for our
+  // case
+  var scrollerTopMargin = $("#form_tools").offset().top;
+  $(window).scroll(function() {
+    var c = $(window).scrollTop();
+    var d = $("#form_tools");
+    if (c > scrollerTopMargin) {
+      d.css({ position: "fixed", top: "0" , right: "2.1rem"  });
+    } else if (c <= scrollerTopMargin) {
+        d.css({ position: "relative", top: "",  right: "" });
+    }
+  });
+};
 
 FormEditor.prototype.makeQuestionsSortable = function() {
   $(".sortable-question").sortable({
