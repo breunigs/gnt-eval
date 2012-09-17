@@ -16,8 +16,8 @@
     width:10rem;
     overflow:hidden;
     height:2.5rem;
-    line-height:2.4rem;
-    vertical-align:middle;
+    line-height:2.2rem;
+    vertical-align:top;
     white-space: nowrap;
   }
 
@@ -35,6 +35,11 @@
     resize: none;
     overflow-x:auto;
     overflow-y:hidden;
+
+    + a {
+      line-height:2.2rem;
+      vertical-align:top;
+    }
   }
 
   select {
