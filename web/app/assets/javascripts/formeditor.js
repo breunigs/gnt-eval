@@ -729,7 +729,7 @@ FormEditor.prototype.questionTypeChanged = function(element) {
 };
 
 FormEditor.prototype.parseBoxes = function(question, path) {
-  this.openGroup("boxes");
+  this.createHeading(path + "/boxes");
   for(var ind in question["boxes"]) {
     var bpath = path + "/boxes/" + ind;
     var box = question["boxes"][ind];
@@ -737,7 +737,10 @@ FormEditor.prototype.parseBoxes = function(question, path) {
     this.createHiddenBox(bpath + "/rubyobject", "Box");
     this.createTranslateableTextBox(bpath + "/text");
   }
-  this.closeGroup();
+  this.createActionLink("$F().createNewBox(this)", "Create Additional Box");
+  this.append(" | ");
+  this.createActionLink("$F().removeLastBox(this)", "Remove Last Box");
+  this.closeHeading();
 };
 
 FormEditor.prototype.createHideAnswersBox = function (question, path) {
@@ -1010,12 +1013,12 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
   if(typeof(texts) == "string") {
     this.openGroup();
     this.createTextBox(path, path.split("/").pop());
-    this.createActionLink("FormEditor.getInstance().translatePath(\""+path+"\", this)", "Translate »");
+    this.createActionLink("$F().translatePath(\""+path+"\", this)", "Translate »");
     this.closeGroup();
   } else {
     this.createHeading(path);
     if(!this.translationsHaveGendering(texts))
-      this.createActionLink("FormEditor.getInstance().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
+      this.createActionLink("$F().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
     for(var lang in texts) {
       this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
       if(typeof(texts[lang] ) == "string") {
@@ -1038,11 +1041,11 @@ FormEditor.prototype.createTranslateableTextArea = function(path) {
   if($.isArray(texts)) {
     this.openGroup();
     this.createTextArea(path, path.split("/").pop());
-    this.createActionLink("FormEditor.getInstance().translatePath(\""+path+"\", this)", "Translate »");
+    this.createActionLink("$F().translatePath(\""+path+"\", this)", "Translate »");
     this.closeGroup();
   } else {
     this.createHeading(path);
-    this.createActionLink("FormEditor.getInstance().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
+    this.createActionLink("$F().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
     for(var lang in texts) {
       this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
       this.assert($.isArray(texts[lang]), "Text Areas only support arrays as input, but something else was given.");
@@ -1058,7 +1061,7 @@ FormEditor.prototype.createLangTextBox = function(path, lang) {
   var path = path+"/"+lang;
   this.openGroup("language");
   this.createTextBox(path, lang);
-  this.createActionLink("FormEditor.getInstance().genderizePath(\""+path+"\", this)", "Genderize »", "genderize");
+  this.createActionLink("$F().genderizePath(\""+path+"\", this)", "Genderize »", "genderize");
   this.closeGroup();
 };
 
@@ -1072,7 +1075,7 @@ FormEditor.prototype.createLangTextArea = function(path, lang) {
 FormEditor.prototype.createLangTextBoxGenderized = function(path, lang) {
   var path = path+"/"+lang;
   this.createHeading(path, "language");
-  this.createActionLink("FormEditor.getInstance().ungenderizePath(\""+path+"\", this)", "« no gender");
+  this.createActionLink("$F().ungenderizePath(\""+path+"\", this)", "« no gender");
   this.createTextBox(path + "/:both", "neutral", true);
   this.createTextBox(path + "/:female", "female", true);
   this.createTextBox(path + "/:male", "male", true);
