@@ -18,10 +18,11 @@ $closed-height: 3.5rem;
   a {
     display:block;
     border-bottom:0 !important;
-    padding:0.4rem;
-    max-height:3rem;
+    padding:0.4rem 0;
+    height:3rem;
     overflow:hidden;
     font-weight:bold;
+    width:25rem;
 
     span {
       font-weight:normal;
@@ -42,6 +43,7 @@ $closed-height: 3.5rem;
       float:left;
       padding-top:0.2rem;
       padding-right:3.3rem;
+      font-weight:normal;
       content: " ";
     }
   }
@@ -53,13 +55,36 @@ $closed-height: 3.5rem;
   }
   #undo:before {
     content: "↶";
-    padding-right:0.8rem;
+    padding-left:0.1rem;
+    padding-right:0.7rem;
   }
   #languages:before {
     content: "‽";
     padding-right:0.7rem;
     padding-left:1.0rem;
-    font-weight:normal;
+  }
+  #delete, #cancel-delete {
+    &:before {
+      content: "×";
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
+  }
+  #duplicate, #cancel-duplicate {
+    &:before {
+      content: "⎘";
+      font-size:2.6rem;
+      padding-left: 1rem;
+      padding-right: 0.7rem;
+    }
+  }
+  #sort, #cancel-sort {
+    &:before {
+      content: "⇅";
+      font-size:3rem;
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
   }
 }
 
@@ -127,6 +152,10 @@ $closed-height: 3.5rem;
     margin-left:0.2rem;
   }
 
+  .deleteTarget, .deleteTarget * {
+    cursor: crosshair !important;
+  }
+
   .indent {
     border-left:0.1rem solid #ccc;
     border-bottom:0.1rem solid #ccc;
@@ -166,6 +195,7 @@ $closed-height: 3.5rem;
 
   .section {
     counter-increment:section;
+    counter-reset:question;
     h5 {
       margin-top:2rem;
       &:before { content: "Section " counter(section) ": " attr(data-title); }
@@ -210,7 +240,7 @@ $closed-height: 3.5rem;
     }
   }
 
-  .header a {
+  .header a, a.delete {
     display:block;
     float:right;
     padding-left:0.5rem;
@@ -226,6 +256,12 @@ $closed-height: 3.5rem;
       text-shadow:none;
       opacity:1;
     }
+  }
+
+  .page > a.delete {
+    margin-top:-4rem;
+    width:3rem;
+    padding-right: 0.3rem;
   }
 
   .collapsable {

@@ -57,7 +57,17 @@ is_new = !is_edit
     <h4>Tools</h4>
     <a id="undo" class="disabled" onclick="$F().undo()">Undo <span></span></a>
     <a id="redo" class="disabled" onclick="$F().redo()">Redo <span></span></a>
-    <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages</a>
+
+    <a id="sort" onclick="$F().toggleSorting()">Enable Sorting <span>(Shows buttons for dragging or move up/down)</span></a>
+    <a id="cancel-sort" onclick="$F().toggleSorting()">Disable Sorting <span>(Hides buttons, order stays)</span></a>
+
+    <a id="delete" onclick="$F().toggleDeleting()">Enable Deleting <span>(Shows buttons that allow deletion)</span></a>
+    <a id="cancel-delete" onclick="$F().toggleDeleting()">Disable Deleting <span>(Hides buttons, nothing is restored)</span></a>
+
+    <a id="duplicate" onclick="$F().toggleDuplicating()">Enable Duplicating <span>(Shows buttons that allow duplication)</span></a>
+    <a id="cancel-duplicate" onclick="$F().toggleDuplicating()">Disable Duplicating <span>(Hides buttons, duplicates stay)</span></a>
+
+    <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
     <a id="dom2yaml" onclick="$F().dom2yaml()">DOM 2 YAML</a>
   </div>
 </div>

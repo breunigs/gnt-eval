@@ -44,12 +44,56 @@ function FormEditor() {
     }
   });
 
-  this.makeQuestionsSortable();
+  this.toggleSorting(false);
+  this.toggleDeleting(false);
+  this.toggleDuplicating(false);
   this.checkSectionUpDownLinks();
   this.fixToolBoxScrolling();
 
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
 }
+
+FormEditor.prototype.toggleSorting = function(enable) {
+  enable = enable === undefined || enable === null ? $("#sort").is(":visible") : enable;
+  if(enable) {
+    this.makeQuestionsSortable();
+    $("#sort").hide();
+    $(".move, .movedown, .moveup, #cancel-sort").show();
+  } else {
+    $(".sortable-question").sortable("disable");
+    $("#sort").show();
+    $(".move, .movedown, .moveup, #cancel-sort").hide();
+  }
+};
+
+FormEditor.prototype.toggleDeleting = function(enable) {
+  enable = enable === undefined || enable === null ? $("#delete").is(":visible") : enable;
+  if(enable) {
+    $("#delete").hide();
+    $(".delete, #cancel-delete").show();
+  } else {
+    $("#delete").show();
+    $(".delete, #cancel-delete").hide();
+  }
+};
+
+FormEditor.prototype.toggleDuplicating = function(enable) {
+  enable = enable === undefined || enable === null ? $("#duplicate").is(":visible") : enable;
+  if(enable) {
+    $("#duplicate").hide();
+    $(".duplicate, #cancel-duplicate").show();
+  } else {
+    $("#duplicate").show();
+    $(".duplicate, #cancel-duplicate").hide();
+  }
+};
+
+FormEditor.prototype.updateActionLinksToMatchTools = function() {
+  this.toggleSorting(!$("#sort").is(":visible"));
+  this.toggleDeleting(!$("#delete").is(":visible"));
+  this.toggleDuplicating(!$("#duplicate").is(":visible"));
+};
+
 
 FormEditor.prototype.fixToolBoxScrolling = function() {
   // via http://stackoverflow.com/a/2468193, adjusted values for our
@@ -88,6 +132,69 @@ FormEditor.prototype.makeQuestionsSortable = function() {
   $(document).on("mousedown", "a.move", function() {
     FormEditor.getInstance().undoTmp = $("#form_editor").html();
   });
+};
+
+FormEditor.prototype.deleteQuestion = function(link) {
+  var q = $(link).parents(".question");
+  this.addUndoStep("deleting question " + q.children("h6").data("db-column"));
+  q.replaceWith("");
+};
+
+FormEditor.prototype.deletePageBreak = function(link) {
+  var s = $(link).parents(".page");
+  var allPages = $(".page");
+  var pos = allPages.index(s);
+  if(pos == 0) {
+    alert("Can’t delete first page break (and don’t need to: it’s only there for data structure purposes but doesn’t really break page here)");
+    return;
+  }
+  this.addUndoStep("deleting page");
+  // append sections to previous page
+  allPages[pos-1].append(s.children(".section"));
+  // remove page
+  s.replaceWith("");
+  this.checkDuplicateIds();
+};
+
+FormEditor.prototype.deleteSection = function(link) {
+  var s = $(link).parents(".section");
+  this.addUndoStep("deleting section " + s.children("h5").data("title"));
+  s.replaceWith("");
+};
+
+FormEditor.prototype.duplicateQuestion = function(link) {
+  var q = $(link).parents(".question");
+  this.addUndoStep("duplicating question " + q.children("h6").data("db-column"));
+  this.duplicate(q, "Question", "questions");
+};
+
+FormEditor.prototype.duplicateSection = function(link) {
+  var s = $(link).parents(".section");
+  this.addUndoStep("duplicating section " + s.children("h5").data("title"));
+  this.duplicate(s, "Section", "sections");
+};
+
+FormEditor.prototype.duplicate = function(elm, type, pathGroup) {
+  var r = new RegExp("/" + pathGroup + "/([0-9]+)/");
+
+  // find new, not yet used id
+  var lastPath = elm.parent().find("[type=hidden][value="+type+"][id^='/']").last().attr("id").match(r);
+  var oldPath = "/" + pathGroup + "/" + lastPath[1] + "/";
+  var newPath = "/" + pathGroup + "/" + (parseInt(lastPath[1])+1) + "/";
+  var check = document.getElementById(lastPath[0].replace(oldPath, newPath));
+  this.assert(check === null, "Duplicating failed as there’s already a new element with that path");
+
+  // clone and update id/for attributes
+  var newElm = elm.clone();
+  newElm.find("[id^='/']").each(function(pos, elm) {
+    $(elm).attr("id", $(elm).attr("id").replace(r, newPath));
+  });
+  newElm.find("[for^='/']").each(function(pos, elm) {
+    $(elm).attr("for", $(elm).attr("for").replace(r, newPath));
+  });
+
+  newElm.insertAfter(elm);
+  this.checkDuplicateIds();
 };
 
 FormEditor.prototype.moveSectionUp = function(link) {
@@ -142,7 +249,7 @@ FormEditor.prototype.undo = function() {
   this.redoData.push([step[0], $("#form_editor").html()]);
   $("#form_editor").html(step[1]);
   this.updateUndoRedoLinks();
-  this.makeQuestionsSortable();
+  this.updateActionLinksToMatchTools();
 };
 
 FormEditor.prototype.redo = function() {
@@ -154,7 +261,7 @@ FormEditor.prototype.redo = function() {
   this.undoData.push([step[0], $("#form_editor").html()]);
   $("#form_editor").html(step[1]);
   this.updateUndoRedoLinks();
-  this.makeQuestionsSortable();
+  this.updateActionLinksToMatchTools();
 };
 
 FormEditor.prototype.updateUndoRedoLinks = function() {
@@ -165,6 +272,7 @@ FormEditor.prototype.updateUndoRedoLinks = function() {
   if(this.redoData.length > 0)
     $("#redo span").html(this.redoData.slice(-1)[0][0]);
 };
+
 
 FormEditor.prototype.addUndoStep = function(title, data) {
   this.log("Adding undo step: " + title);
@@ -212,7 +320,7 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
 
   $(document).on("change", s.join(", "), function(){
     var el = $(this).parents(".question").children("h6");
-    el.attr("data-qtext", $(this).val().slice(0,45));
+    el.attr("data-qtext", $(this).val().slice(0,40));
     // work around webkit not updating the element even after data-attr
     // have been changed
     if($.browser.webkit) el.replaceWith(el[0].outerHTML);
@@ -408,6 +516,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 FormEditor.prototype.parsePage = function(page, path) {
   this.openGroup("page");
   this.createHiddenBox(path+"/rubyobject", "Page");
+  this.append('<a class="delete" onclick="$F().deletePageBreak(this)" title="Delete Page Break" style="display: none;">⌫</a>');
   for(var y in ATTRIBUTES["Page"]) {
     var attr = ATTRIBUTES["Page"][y];
     this.createTranslateableTextBox(path + "/" + attr, attr);
@@ -423,8 +532,10 @@ FormEditor.prototype.parsePage = function(page, path) {
 FormEditor.prototype.parseSection = function(section, path) {
   this.openGroup("section");
   this.append('<h5 class="header">');
-  this.append('<a class="moveup" onclick="FormEditor.getInstance().moveSectionUp(this);" title="move section one block up">↑</a>');
-  this.append('<a class="movedown" onclick="FormEditor.getInstance().moveSectionDown(this);" title="move section one block down">↓</a>');
+  this.append('<a class="moveup" onclick="$F().moveSectionUp(this);" title="move section one block up">↑</a>');
+  this.append('<a class="movedown" onclick="$F().moveSectionDown(this);" title="move section one block down">↓</a>');
+  this.append('<a class="duplicate" title="Duplicate Section" onclick="$F().duplicateSection(this)">⎘</a>');
+  this.append('<a class="delete" title="Delete Section" onclick="$F().deleteSection(this)">×</a>');
   this.append('</h5>');
 
 
@@ -453,6 +564,8 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.append('<h6 class="header">');
   this.append('<a class="collapse" title="Collapse/Expand"></a>');
   this.append('<a class="move" title="Move/Sort (use drag and drop; hit escape to cancel)">⬍</a>');
+  this.append('<a class="duplicate" title="Duplicate Question" onclick="$F().duplicateQuestion(this)">⎘</a>');
+  this.append('<a class="delete" title="Delete Question" onclick="$F().deleteQuestion(this)">×</a>');
   this.append('</h6>');
   this.createHiddenBox(path+"/rubyobject", "Question");
   this.createTranslateableTextBox(path + "/qtext", "qtext");
@@ -695,9 +808,14 @@ FormEditor.prototype.getObjectFromDom = function() {
   });
 
   // post-processing required for correct type and db_column fields.
-  // should be removed once the type-field has been updated (TODO)
+  // should be removed once the type-field has been updated (TODO). Also
+  // removed "undefined" array entries which may appear due to original
+  // part being deleted.
+  obj["pages"] = obj["pages"].filter(function(){return true});
   $.each(obj["pages"], function(ind, page) {
+    page["sections"] = page["sections"].filter(function(){return true});
     $.each(page["sections"], function(ind, sect) {
+      sect["questions"] = sect["questions"].filter(function(){return true});
       $.each(sect["questions"], function(ind, quest) {
         switch(quest["type"]) {
           case "Single":
@@ -726,6 +844,14 @@ FormEditor.prototype.getObjectFromDom = function() {
     });
   });
   return obj;
+};
+
+FormEditor.prototype.checkDuplicateIds = function() {
+  var ids = [];
+  $('[id]').each(function(){
+    $F().assert(ids.indexOf(this.id) < 0, 'Multiple IDs #'+this.id);
+    ids.push(this.id);
+  });
 };
 
 FormEditor.prototype.updateDataFromDom = function() {
@@ -938,6 +1064,10 @@ FormEditor.prototype.getValue = function() {
 // log to Firebug and the like if available
 FormEditor.prototype.log = function(strng) {
   if(window.console) console.log(strng);
+};
+
+FormEditor.prototype.warn = function(strng) {
+  if(window.console) console.warn(strng);
 };
 
 FormEditor.prototype.trace = function() {
