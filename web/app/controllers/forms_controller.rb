@@ -23,6 +23,13 @@ class FormsController < ApplicationController
     end
   end
 
+  def preview
+    @form = Form.find(params[:id])
+    # this renders the small partial preview view only. shared/preview
+    # will invoke form_helpers.rb#texpreview.
+    render :partial => "shared/preview", :locals => {:text => nil}
+  end
+
   # GET /forms/new
   # GET /forms/new.xml
   def new

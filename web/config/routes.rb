@@ -4,6 +4,7 @@ Seee::Application.routes.draw do
   resources :forms do
     member do
       get "/copy_to_current" => "forms#copy_to_current"
+      get "/preview" => "forms#preview"
     end
   end
 

@@ -101,7 +101,7 @@ unless oosv.empty?
 <% end %>
 
 <a id="tex-image-preview"></a>
-<%= render "shared/preview_big", :text => nil %>
+<%= render "shared/preview_ajax", :preview_url => preview_form_path(@form) %>
 
 
 <div id="tex-code-preview">
