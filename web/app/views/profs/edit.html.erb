@@ -23,7 +23,7 @@
         @prof.course_profs.includes(:semester, :course, :form).order("semesters.id DESC, courses.title").each do |cp| %>
         <tr>
           <td><%=cp.course.semester.title %></td>
-          <td><%=link_to cp.course.form.name, cp.course.form %></td>
+          <td><%=link_to cp.course.form.name, cp.course.form if cp.course.form %></td>
           <td><%=cp.course.language %></td>
           <td><%=link_to cp.course.title, cp.course %></td>
         </tr>
