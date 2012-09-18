@@ -64,6 +64,8 @@ is_new = !is_edit
 
     <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
   </div>
+
+  <div id="form_preview"></div>
 </div>
 
 <script type="text/javascript">
@@ -75,6 +77,7 @@ is_new = !is_edit
   }*/
   <%
     attr = {}
+    attr[:PreviewUrl] = preview_form_path(@form)
     attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
     attr[:Page] = [Page::ATTRIBUTES].flatten
     attr[:Section] = [Section::ATTRIBUTES].flatten
