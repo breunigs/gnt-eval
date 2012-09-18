@@ -22,3 +22,4 @@
 //= require combobox
 //= require jquery.numeric
 //= require jquery.autosize
+//= require prevent-leaving-unsaved-form

@@ -59,6 +59,9 @@ $(document).ready(function() {
     txt.parents("form").submit(function() {
       txt.val(editor.getSession().getValue());
     });
+    editor.getSession().on('change', function(){
+      $formHasBeenEdited = true;
+    });
 
     // finally hide text area
     txt.hide();
