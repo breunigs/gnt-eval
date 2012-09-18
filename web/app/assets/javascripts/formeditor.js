@@ -33,6 +33,7 @@ function FormEditor() {
 
   this.attachSectionHeadUpdater();
   this.attachQuestionHeadUpdater();
+  this.attachChangeListenerForUndo();
   this.attachCollapsers();
   $('#form_editor textarea').autosize();
 
@@ -129,9 +130,13 @@ FormEditor.prototype.makeQuestionsSortable = function() {
     }
   });
 
-  $(document).on("mousedown", "a.move", function() {
-    FormEditor.getInstance().undoTmp = $("#form_editor").html();
+  $("#form_editor").on("mousedown", "a.move", function() {
+    $F().fillUndoTmp();
   });
+};
+
+FormEditor.prototype.fillUndoTmp = function() {
+  this.undoTmp = $("#form_editor").html();
 };
 
 FormEditor.prototype.deleteQuestion = function(link) {
@@ -288,6 +293,16 @@ FormEditor.getInstance = function() {
   return fe;
 };
 
+FormEditor.prototype.attachChangeListenerForUndo = function() {
+  var match = "#form_editor select, #form_editor input, #form_editor textarea";
+  $("#form_editor").on("focusin change", match, function(event) {
+    if(event.type == "focusin")
+      $F().fillUndoTmp();
+    else
+      $F().addUndoStep("changing " +  event.target.id, $F().undoTmp);
+  });
+};
+
 FormEditor.prototype.attachSectionHeadUpdater = function() {
   var s = [];
   // Selects the untranslated textboxes right after the section:
@@ -297,7 +312,7 @@ FormEditor.prototype.attachSectionHeadUpdater = function() {
   // Selects the first translated + genderized textbox
   s[2] = ".section > div.collapsable .language:first-of-type .indent > div:first-of-type > input";
 
-  $(document).on("change", s.join(", "), function() {
+  $("#form_editor").on("change", s.join(", "), function() {
     var el = $(this).parents(".section").children("h5");
     el.attr("data-title", $(this).val());
     // work around webkit not updating the element even after data-attr
@@ -318,7 +333,7 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
   // Selects the first translated + genderized textbox
   s[2] = ".question > div:first-of-type .language:first-of-type .indent > div:first-of-type > input";
 
-  $(document).on("change", s.join(", "), function(){
+  $("#form_editor").on("change", s.join(", "), function(){
     var el = $(this).parents(".question").children("h6");
     el.attr("data-qtext", $(this).val().slice(0,40));
     // work around webkit not updating the element even after data-attr
@@ -326,7 +341,7 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
     if($.browser.webkit) el.replaceWith(el[0].outerHTML);
   });
 
-  $(document).on("change", ".question div.db_column input", function(){
+  $("#form_editor").on("change", ".question div.db_column input", function(){
     var el = $(this).parents(".question").children("h6");
     el.attr("data-db-column", $(this).val());
     // work around webkit not updating the element even after data-attr
@@ -340,13 +355,13 @@ FormEditor.prototype.attachQuestionHeadUpdater = function() {
 };
 
 FormEditor.prototype.attachCollapsers = function() {
-  $(document).on("click", ".collapsable .header a.collapse", function(){
+  $("#form_editor").on("click", ".collapsable .header a.collapse", function(){
     var el = $(this).parents(".collapsable");
     if(el.hasClass("closed")) {
       // animate to old height first, then remove the fixed value so it
       // automatically adjusts to its contents. If the value isn’t
       // present, just guess and hope no one notices.
-      el.animate({height: el.data("old-height") || "40rem"}, 500, function() {
+      el.animate({height: el.data("old-height") || "35rem"}, 500, function() {
         el.removeClass("closed");
         el.attr("style", "");
       });
@@ -376,7 +391,7 @@ FormEditor.prototype.setLanguages = function(langs, automated) {
   // this is a user action, therefore warn if removing languages.
   var automated = automated || false;
   if(!$.isArray(langs))
-    langs = langs.replace(/^\s+|\s+$/g, "").split(/\s+/);
+    langs = $.trim(langs).split(/\s+/);
 
   // check input is valid
   var newLangs = [];
