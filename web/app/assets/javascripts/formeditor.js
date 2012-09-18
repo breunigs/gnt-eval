@@ -54,6 +54,52 @@ function FormEditor() {
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
 }
 
+FormEditor.prototype.save = function() {
+  if($("#save").hasClass("disabled")) return;
+  this.updateSaveButton(false);
+  setTimeout("$F().saveWorker();", 10);
+};
+
+FormEditor.prototype.saveWorker = function() {
+  var f = $("#form_content").parents("form");
+  this.dom2yaml();
+  $formHasBeenEditedLastState = $formHasBeenEdited;
+
+  // listen to ajax events
+  f.on('ajax:success',function(event, data, status, xhr){
+    if($formHasBeenEditedLastState == $formHasBeenEdited)
+      $formHasBeenEdited = 0; // no changes in the meantime
+
+    $F().log("Saving was successful.");
+    $F().updateSaveButton(true);
+  });
+  f.on('ajax:error',function(event, xhr, status, error) {
+    alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
+    $F().log("Saving failed: --------------------------------");
+    $F().log("Status:"); $F().log(status);
+    $F().log("Error:"); $F().log(error);
+    $F().log("XHR:"); $F().log(xhr);
+    $F().log("-----------------------------------------------");
+    $F().updateSaveButton(true);
+  });
+
+  // enable remote submit and request JSON version so no HTML has to be
+  // generated
+  f.attr("data-remote", "true");
+  f.attr("action", f.attr("action") + ".json");
+  f.submit();
+  f.removeAttr("data-remote");
+  f.attr("action", f.attr("action").slice(0,-5));
+};
+
+FormEditor.prototype.updateSaveButton = function(state) {
+  if(state) {
+    $("#save").removeClass("disabled").html("Save");
+  } else {
+    $("#save").addClass("disabled").html("Saving…");
+  }
+};
+
 FormEditor.prototype.toggleSorting = function(enable) {
   enable = enable === undefined || enable === null ? $("#sort").is(":visible") : enable;
   if(enable) {
@@ -281,6 +327,7 @@ FormEditor.prototype.updateUndoRedoLinks = function() {
 
 FormEditor.prototype.addUndoStep = function(title, data) {
   this.log("Adding undo step: " + title);
+  $formHasBeenEdited++;
   data = data || $("#form_editor").html();
   this.redoData = new Array();
   this.undoData.push([title, data]);
@@ -874,7 +921,7 @@ FormEditor.prototype.updateDataFromDom = function() {
 };
 
 FormEditor.prototype.dom2yaml = function() {
-  $("#result").html(json2yaml(this.getObjectFromDom()));
+  $("#form_content").html(json2yaml(this.getObjectFromDom()));
 };
 
 FormEditor.prototype.createHeading = function(path, cssClasses) {

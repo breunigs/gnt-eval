@@ -60,7 +60,7 @@ $(document).ready(function() {
       txt.val(editor.getSession().getValue());
     });
     editor.getSession().on('change', function(){
-      $formHasBeenEdited = true;
+      $formHasBeenEdited++;
     });
 
     // finally hide text area

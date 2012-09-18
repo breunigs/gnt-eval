@@ -23,6 +23,7 @@ $closed-height: 3.5rem;
     overflow:hidden;
     font-weight:bold;
     width:25rem;
+    margin-top:0.5rem !important;
 
     span {
       font-weight:normal;
@@ -48,6 +49,16 @@ $closed-height: 3.5rem;
     }
   }
 
+  #save:before {
+    content: "⛁";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
+  #preview:before {
+    content: "⎙";
+    padding-right:0.7rem;
+    padding-left:0.8rem;
+  }
   #redo:before {
     content: "↷";
     padding-right:0.3rem;

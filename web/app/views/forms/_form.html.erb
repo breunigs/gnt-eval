@@ -41,13 +41,6 @@ is_new = !is_edit
   </div>
 <% end %>
 
-
-<div>
-  <h3>js-yaml playground</h3>
-  Currently this is not impressive at all as it displays (nearly) the same text as above. However, it has been a proper JS-object in between which can be more easily used to create a form designer. Until that happens you can use it as a <b>debugger</b>.
-  <textarea readonly="readonly" id="result" style="width:100%;min-height:10em"></textarea>
-</div>
-
 <div>
   <h3>Graphical Form Editor</h3>
 
@@ -55,6 +48,8 @@ is_new = !is_edit
 
   <div id="form_tools">
     <h4>Tools</h4>
+    <a id="save" onclick="$F().save()">Save</a>
+    <a id="preview" onclick="$F().preview()">Preview</a>
     <a id="undo" class="disabled" onclick="$F().undo()">Undo <span></span></a>
     <a id="redo" class="disabled" onclick="$F().redo()">Redo <span></span></a>
 
@@ -68,7 +63,6 @@ is_new = !is_edit
     <a id="cancel-duplicate" onclick="$F().toggleDuplicating()">Disable Duplicating <span>(Hides buttons, duplicates stay)</span></a>
 
     <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
-    <a id="dom2yaml" onclick="$F().dom2yaml()">DOM 2 YAML</a>
   </div>
 </div>
 

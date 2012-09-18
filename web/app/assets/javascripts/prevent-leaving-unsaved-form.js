@@ -1,10 +1,10 @@
-var $formHasBeenEdited = false;
+var $formHasBeenEdited = 0;
 var $formIsBeingSubmitted = false;
 
 $(document).ready(function() {
   var m = "form[method='post'] input, form[method='post'] select, form[method='post'] textarea";
-  $(m).one("change", function() {
-    $formHasBeenEdited = true;
+  $(m).change(function() {
+    $formHasBeenEdited++;
   });
 
   $("form[method='post']").submit(function() {
@@ -19,7 +19,7 @@ $(window).bind('beforeunload', function() {
     return null;
   }
 
-  if($formHasBeenEdited)
+  if($formHasBeenEdited > 0)
     return 'Are you sure you want to leave?';
   else
     return null;

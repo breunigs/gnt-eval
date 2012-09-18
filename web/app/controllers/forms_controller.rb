@@ -60,14 +60,19 @@ class FormsController < ApplicationController
   def update
     @form = Form.find(params[:id])
 
-    if @form.critical?
-      flash[:error] = 'Form was critical and has therefore not been updated.'
-      redirect_to(@form)
-    elsif @form.update_attributes(params[:form])
-      $loaded_yaml_sheets[params[:id]] = nil
-      redirect_to @form, notice: 'Form was successfully updated.'
-    else
-      render :action => "edit"
+    respond_to do |format|
+      if @form.critical?
+        flash[:error] = 'Form was critical and has therefore not been updated.'
+        format.html { redirect_to(@form) }
+        format.json { render json: flash[:error], status: :unprocessable_entity }
+      elsif @form.update_attributes(params[:form])
+        $loaded_yaml_sheets[params[:id]] = nil
+        format.html { redirect_to @form, notice: 'Form was successfully updated.' }
+        format.json { head :no_content }
+      else
+        format.html { render :action => "edit" }
+        format.json { render json: @form.errors, status: :unprocessable_entity }
+      end
     end
   end
 
