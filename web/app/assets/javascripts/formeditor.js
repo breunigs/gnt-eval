@@ -66,21 +66,22 @@ FormEditor.prototype.saveWorker = function() {
   $formHasBeenEditedLastState = $formHasBeenEdited;
 
   // listen to ajax events
-  f.on('ajax:success',function(event, data, status, xhr){
-    if($formHasBeenEditedLastState == $formHasBeenEdited)
-      $formHasBeenEdited = 0; // no changes in the meantime
+  f.one('ajax:success ajax:error', function(event, data, status, xhr){
+    if(status == "success") {
+      if($formHasBeenEditedLastState == $formHasBeenEdited)
+        $formHasBeenEdited = 0; // no changes in the meantime
 
-    $F().log("Saving was successful.");
-    $F().updateSaveButton(true);
-  });
-  f.on('ajax:error',function(event, xhr, status, error) {
-    alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
-    $F().log("Saving failed: --------------------------------");
-    $F().log("Status:"); $F().log(status);
-    $F().log("Error:"); $F().log(error);
-    $F().log("XHR:"); $F().log(xhr);
-    $F().log("-----------------------------------------------");
-    $F().updateSaveButton(true);
+      $F().log("Saving was successful.");
+      $F().updateSaveButton(true);
+    } else {
+      // error argument order: event, xhr, status, error
+      alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
+      $F().log("Saving failed: --------------------------------");
+      $F().log("Error:"); $F().log(xhr);
+      $F().log("XHR:"); $F().log(data);
+      $F().log("-----------------------------------------------");
+      $F().updateSaveButton(true);
+    }
   });
 
   // enable remote submit and request JSON version so no HTML has to be
@@ -96,7 +97,7 @@ FormEditor.prototype.updateSaveButton = function(state) {
   if(state) {
     $("#save").removeClass("disabled").html("Save");
   } else {
-    $("#save").addClass("disabled").html("Saving…");
+    $("#save").addClass("disabled").html("Saving… <span>This might take a while</span>");
   }
 };
 
@@ -104,7 +105,7 @@ FormEditor.prototype.updatePreviewButton = function(state) {
   if(state) {
     $("#preview").removeClass("disabled").html("Preview");
   } else {
-    $("#preview").addClass("disabled").html("Previewing…");
+    $("#preview").addClass("disabled").html("Previewing… <span>This might take a while</span>");
   }
 };
 
@@ -360,10 +361,8 @@ FormEditor.prototype.redo = function() {
 FormEditor.prototype.updateUndoRedoLinks = function() {
   $("#undo").toggleClass("disabled", this.undoData.length == 0);
   $("#redo").toggleClass("disabled", this.redoData.length == 0);
-  if(this.undoData.length > 0)
-    $("#undo span").html(this.undoData.slice(-1)[0][0]);
-  if(this.redoData.length > 0)
-    $("#redo span").html(this.redoData.slice(-1)[0][0]);
+  $("#undo span").html(this.undoData.length == 0 ? "" : this.undoData.slice(-1)[0][0]);
+  $("#redo span").html(this.redoData.length == 0 ? "" : this.redoData.slice(-1)[0][0]);
 };
 
 

@@ -32,10 +32,6 @@ $closed-height: 3.5rem;
     &.disabled {
       cursor:not-allowed;
       color:#999;
-
-      span {
-        display: none;
-      }
     }
 
     &:before {
