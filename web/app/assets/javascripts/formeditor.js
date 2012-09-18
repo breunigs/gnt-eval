@@ -128,12 +128,12 @@ FormEditor.prototype.preview = function() {
       $("#form_preview").fadeOut("fast", function() {
         $("#form_preview").html("");
       });
-      $("#darkened").fadeOut();
+      $("#darkened2").fadeOut();
     });
 
     $("#form_preview").load(ATTRIBUTES["PreviewUrl"], function() {
       $("#form_preview").fadeIn();
-      $("#darkened").fadeIn();
+      $("#darkened2").fadeIn();
     });
   });
 
