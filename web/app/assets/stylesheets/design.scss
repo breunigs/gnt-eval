@@ -329,12 +329,12 @@ textarea {
 
 table.large_text_area {
   width: 100%;
-}
 
-table.large_text_area td > div, table.large_text_area td textarea {
-  width:100%;
-  min-height:250px;
-  min-height:25rem;
+  td > div.ace_editor, td textarea {
+    width:100%;
+    min-height:250px;
+    min-height:25rem;
+  }
 }
 
 .ace_editor {
