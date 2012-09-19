@@ -50,10 +50,10 @@ class FormsController < ApplicationController
       if @form.save
         flash[:notice] = 'Form was successfully created.'
         format.html { redirect_to(@form) }
-        format.xml  { render :xml => @form, :status => :created, :location => @form }
+        format.json { render :json => @form, :status => :created, :location => @form }
       else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @form.errors, :status => :unprocessable_entity }
+        format.json { render :json => @form.errors, :status => :unprocessable_entity }
       end
     end
   end

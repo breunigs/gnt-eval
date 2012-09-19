@@ -2,6 +2,7 @@
 FormEditor.prototype.save = function() {
   if($("#save").hasClass("disabled")) return;
   this.updateSaveButton(false);
+  this.log("Trying to save…");
   setTimeout("$F().saveWorker();", 10);
 };
 
@@ -19,13 +20,27 @@ FormEditor.prototype.saveWorker = function() {
       $F().log("Saving was successful.");
       $F().updateSaveButton(true);
     } else {
+      $F().updateSaveButton(true);
+      try {
+        // rails reported errors, note the user
+        if(data["status"] == 422) {
+          var s = "There are some errors in your input:\n";
+          var errs = JSON.parse(data["responseText"]);
+          $.each(errs, function(k, v) { s += "• "+k+": "+v+"\n" });
+          s += "Please fix them and try again.";
+          alert(s);
+          return;
+        }
+      } catch(e) { $F().log("Tried understanding the issue, but failed."); }
+
+
       // error argument order: event, xhr, status, error
       alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
       $F().log("Saving failed: --------------------------------");
+      $F().log("Status:"); $F().log(status);
       $F().log("Error:"); $F().log(xhr);
       $F().log("XHR:"); $F().log(data);
       $F().log("-----------------------------------------------");
-      $F().updateSaveButton(true);
     }
   });
 

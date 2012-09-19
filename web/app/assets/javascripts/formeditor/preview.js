@@ -9,10 +9,12 @@ FormEditor.prototype.updatePreviewButton = function(state) {
 
 FormEditor.prototype.preview = function() {
   if($("#preview").hasClass("disabled")) return;
-  this.updatePreviewButton(false);
 
-  if($formHasBeenEdited > 0 && !confirm("Preview requires the form to be saved first. Save form?"))
+  var needsSave = ATTRIBUTES["PreviewUrl"] == null || $formHasBeenEdited > 0;
+  if(needsSave && !confirm("Preview requires the form to be saved first. Save form?"))
     return;
+
+  this.updatePreviewButton(false);
 
   var f = $("#form_content").parents("form");
   f.one('ajax:success ajax:error', function(event, b, status, c) {
@@ -35,7 +37,7 @@ FormEditor.prototype.preview = function() {
     });
   });
 
-  if($formHasBeenEdited > 0)
+  if(needsSave)
     this.save();
   else
     f.trigger("ajax:success");

@@ -70,15 +70,9 @@ is_new = !is_edit
 </div>
 
 <script type="text/javascript">
-  /*try {
-    str = document.getElementById('form_content').value;
-    document.getElementById('result').value = json2yaml(jsyaml.load(str));
-  } catch (err) {
-    document.getElementById('result').value = err.toString();
-  }*/
   <%
     attr = {}
-    attr[:PreviewUrl] = preview_form_path(@form)
+    attr[:PreviewUrl] = @form.id ? preview_form_path(@form) : nil
     attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
     attr[:Page] = [Page::ATTRIBUTES].flatten
     attr[:Section] = [Section::ATTRIBUTES].flatten
