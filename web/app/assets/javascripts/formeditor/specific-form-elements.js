@@ -35,3 +35,51 @@ FormEditor.prototype.createAdditionalUserBox = function(link) {
   this.createUserBox(bpath);
   $(this.generatedHtml).insertBefore($(link).parent());
 }
+
+FormEditor.prototype.createAdditionalPage = function() {
+  this.addUndoStep("Create New Page");
+  this.updateDataFromDom();
+
+  var p = {};
+  $.each(ATTRIBUTES["Page"], function(ind, attr) {
+    p[attr] = "";
+  });
+
+  var path = "/pages/" + $(".page").length;
+
+  this.generatedHtml = "";
+
+  this.setPath(this.data, path, p);
+  this.parsePage(p, path);
+  $(this.generatedHtml).insertAfter($(".page").last());
+  //~ this.data["pages"].push(p);
+};
+
+
+FormEditor.prototype.createAdditionalSection = function(link) {
+  this.assert(link !== undefined, "No link given, unable to determine where to put new section.");
+  this.addUndoStep("Create New Section");
+
+  this.updateDataFromDom();
+
+  var s = {};
+  $.each(ATTRIBUTES["Section"], function(ind, attr) {
+    s[attr] = "";
+  });
+
+  // need to add it manually here, so it’s available in the path
+  s["answers"] = [];
+
+  var page = $(link).parents(".page");
+  var path = page.find("input[type=hidden][value=Page]").attr("id");
+  path = path.replace(/\/rubyobject$/, "") + "/sections/" + page.find(".section").length;
+
+  this.generatedHtml = "";
+
+  this.setPath(this.data, path, s);
+  this.parseSection(s, path);
+  page.append($(this.generatedHtml));
+
+  // new section is created with all tools enabled
+  this.updateActionLinksToMatchTools();
+};

@@ -69,8 +69,10 @@ FormEditor.prototype.getObjectFromDom = function() {
   // part being deleted.
   obj["pages"] = obj["pages"].filter(function(){return true});
   $.each(obj["pages"], function(ind, page) {
+    page["sections"] = page["sections"] || [];
     page["sections"] = page["sections"].filter(function(){return true});
     $.each(page["sections"], function(ind, sect) {
+      sect["questions"] = sect["questions"] || [];
       sect["questions"] = sect["questions"].filter(function(){return true});
       $.each(sect["questions"], function(ind, quest) {
         switch(quest["type"]) {

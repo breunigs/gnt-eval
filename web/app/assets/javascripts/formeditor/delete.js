@@ -11,13 +11,13 @@ FormEditor.prototype.toggleDeleting = function(enable) {
 
 FormEditor.prototype.deleteSection = function(link) {
   var s = $(link).parents(".section");
-  this.addUndoStep("deleting section " + s.children("h5").data("title"));
+  this.addUndoStep("deleting section " + s.children("h5").data("title") || "");
   s.replaceWith("");
 };
 
 FormEditor.prototype.deleteQuestion = function(link) {
   var q = $(link).parents(".question");
-  this.addUndoStep("deleting question " + q.children("h6").data("db-column"));
+  this.addUndoStep("deleting question " + q.children("h6").data("db-column") || "");
   q.replaceWith("");
 };
 

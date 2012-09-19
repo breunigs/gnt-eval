@@ -24,6 +24,10 @@ FormEditor.prototype.parseAbstractForm = function(data) {
     this.parsePage(page, path + "/pages/" + x);
   }
 
+  this.openGroup("", "span");
+  this.createActionLink("$F().createAdditionalPage()", "Create New Page (insert page break)");
+  this.closeGroup();
+
   this.root.append(this.generatedHtml);
   this.dom2yaml();
 };
@@ -41,6 +45,11 @@ FormEditor.prototype.parsePage = function(page, path) {
     var section = sections[sect];
     this.parseSection(section, path + "/sections/" + sect);
   }
+
+  this.openGroup("", "span");
+  this.createActionLink("$F().createAdditionalSection(this)", "Create New Section");
+  this.closeGroup();
+
   this.closeGroup();
 };
 
