@@ -103,7 +103,7 @@ FormEditor.prototype.questionTypeChanged = function(element) {
     this.getDomObjFromPath(path + "/height").parent().hide();
 
   if(element.value == "Tutor" || element.value == "Text")
-    this.getDomObjFromPath(path + "/boxes/0/rubyobject").parent().hide();
+    this.getDomObjFromPath(path + "/boxes").parent().hide();
   else
-    this.getDomObjFromPath(path + "/boxes/0/rubyobject").parent().show();
+    this.getDomObjFromPath(path + "/boxes").parent().show();
 };

@@ -114,16 +114,18 @@ FormEditor.prototype.parseQuestion = function(question, path) {
 
 
 FormEditor.prototype.parseBoxes = function(question, path) {
-  this.createHeading(path + "/boxes");
+  var show = question["type"] == "Single" || question["type"] == "Multi"
+  this.createHeading(path + "/boxes", (show ? "" : "hidden") + " boxes");
   for(var ind in question["boxes"]) {
     var bpath = path + "/boxes/" + ind;
     var box = question["boxes"][ind];
     box["text"] = box["text"] || "";
-    this.createHiddenBox(bpath + "/rubyobject", "Box");
-    this.createTranslateableTextBox(bpath + "/text");
+    this.createUserBox(bpath);
   }
-  this.createActionLink("$F().createNewBox(this)", "Create Additional Box");
+  this.openGroup("", "span");
+  this.createActionLink("$F().createAdditionalUserBox(this)", "Create Additional Box");
   this.append(" | ");
-  this.createActionLink("$F().removeLastBox(this)", "Remove Last Box");
+  this.createActionLink("$F().deleteLastBox(this)", "Delete Last Box");
+  this.closeGroup();
   this.closeHeading();
 };

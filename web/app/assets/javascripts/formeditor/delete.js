@@ -36,3 +36,14 @@ FormEditor.prototype.deletePageBreak = function(link) {
   s.replaceWith("");
   this.checkDuplicateIds();
 };
+
+FormEditor.prototype.deleteLastBox = function(link) {
+  if($(link).parent().siblings("input[type=hidden][value=Box]").length <= 2) {
+    alert("We strongly believe in freedom of choice and therefore cannot allow you to remove more boxes.");
+    return;
+  }
+  this.addUndoStep("deleting box in " + $(link).parents(".indent").attr("id"));
+  elms = $(link).parent().prevUntil("input[type=hidden][value=Box]");
+  elms.push(elms.prev());
+  elms.replaceWith();
+};
