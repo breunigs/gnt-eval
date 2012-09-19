@@ -47,19 +47,50 @@ function FormEditor() {
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
 }
 
-
+/* Run once function that makes the #form_tools element semi-fixed.
+ * Semi-fixed means it should never appear outside of its container
+ * while still staying on screen when the container is. */
 FormEditor.prototype.fixToolBoxScrolling = function() {
   // via http://stackoverflow.com/a/2468193, adjusted values for our
-  // case
-  var scrollerTopMargin = $("#form_tools").offset().top;
+  // case. Assume only vertical scrolling is possible (lines are to be
+  // seen has horizontal). Positions are absolute (relative to beginning
+  // of the page).
+  var box = $("#form_tools");
+  var cont = box.parent();
+
+  // position the top line of the semi-fixed box has. Needs to be
+  // detected here, because it changes if the element is set to fixed.
+  // Can therefore only assume it does not change -- i.e. the content
+  // before it keeps its height.
+  var boxTop = box.offset().top;
+  // position of the top line of the container. Since we must assume
+  // boxTop does not change, there’s no harm doing so here as well.
+  var contTop = cont.offset().top;
+
+  var boxHeight = box.height();
   $(window).scroll(function() {
-    var c = $(window).scrollTop();
-    var d = $("#form_tools");
-    if (c > scrollerTopMargin) {
-      d.css({ position: "fixed", top: "0" , right: "2.1rem"  });
-    } else if (c <= scrollerTopMargin) {
-        d.css({ position: "relative", top: "",  right: "" });
-    }
+    // top line of pixels visible
+    var visTop = $(window).scrollTop();
+    // position the bottom line of the container has. Assume height may
+    // change.
+    var contBot = contTop + cont.height();
+
+    // if the current scroll position is less than the top position of
+    // the box it means that there’s still space between the upper
+    // window border and box. I.e. if it were set to fixed, it would
+    // spill over the top of the container.
+    var hitContTop = visTop < boxTop;
+    // if the current scroll position plus the height of the box exceeds
+    // the position of the container, then the box would spill over the
+    // bottom of the container.
+    var hitContBottom = visTop+boxHeight > contBot;
+
+    if(hitContTop)
+      box.css({ position: "relative", top: "",  right: "" });
+    else if(hitContBottom)
+      box.css({ position: "absolute", top: contBot-boxHeight, right: "2.1rem" });
+    else
+      box.css({ position: "fixed", top: "0" , right: "2.1rem"  });
   });
 };
 
