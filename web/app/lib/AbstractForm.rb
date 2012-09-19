@@ -350,19 +350,20 @@ class Page
   ATTRIBUTES = :tex_at_top, :tex_at_bottom
 
   # list of sections on that page
-  attr_accessor :sections
+  attr_writer :sections
   attr_accessor :tex_at_top
   attr_accessor :tex_at_bottom
 
   def initialize(secs=[])
     @sections = secs
   end
+
+  def sections
+    @sections || []
+  end
+
   def questions
-    if @sections.nil?
-      @questions
-    else
-      @sections.collect {|s| s.questions}.flatten
-    end
+    sections.collect {|s| s.questions }.flatten
   end
 end
 
