@@ -30,15 +30,8 @@ class FormsController < ApplicationController
     render :partial => "shared/preview", :locals => {:text => nil}
   end
 
-  # GET /forms/new
-  # GET /forms/new.xml
   def new
     @form = Form.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @form }
-    end
   end
 
   # GET /forms/1/edit
