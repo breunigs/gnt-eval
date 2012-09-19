@@ -45,13 +45,21 @@ FormEditor.prototype.createAdditionalPage = function() {
     p[attr] = "";
   });
 
-  var path = "/pages/" + $(".page").length;
+  var path = "/pages/",
+      pos  = $(".page").length;
+  // ensure the chosen position does not yet exist in DOM. Deleting
+  // and duplicating does not ensure the IDs are in order without gaps.
+  while(document.getElementById(path + pos) !== null) { pos++; }
+  path += pos;
 
   this.generatedHtml = "";
 
   this.setPath(this.data, path, p);
   this.parsePage(p, path);
   $(this.generatedHtml).insertAfter($(".page").last());
+
+  this.checkDuplicateIds();
+  this.updateActionLinksToMatchTools();
 };
 
 
