@@ -13,7 +13,11 @@ $closed-height: 3.5rem;
   float:right;
   width:25rem;
   margin:0;
-  padding-top:1rem;
+  padding:1rem;
+
+  // only matters when the box overlaps the form. This may only happen
+  // if the browser window is made smaller after the initial load
+  background:#fff;
 
   a {
     display:block;
