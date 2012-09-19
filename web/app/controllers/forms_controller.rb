@@ -32,6 +32,8 @@ class FormsController < ApplicationController
 
   def new
     @form = Form.new
+    $emptyFormYaml ||= File.read(File.join(GNT_ROOT, "doc", "example_forms", "empty.yaml"))
+    @form.content = $emptyFormYaml
   end
 
   # GET /forms/1/edit

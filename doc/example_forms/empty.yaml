@@ -1,0 +1,31 @@
+# this form is empty except a few required values (those have been
+# filled with sensible defaults). This file is actually being used
+# when creating a new form in the web interface. It is being cached
+# on the first read, so you need to restart the server if you want
+# changes here being reflected.
+
+--- !ruby/object:AbstractForm
+db_table: ""
+texfoot: ""
+texhead: ""
+title: ""
+intro: ""
+lecturer_header: ""
+pages:
+- !ruby/object:Page
+  tex_at_top: ""
+  tex_at_bottom: ""
+  sections:
+  - !ruby/object:Section
+    title: ""
+    questions:
+    - !ruby/object:Question
+      type: square
+      visualizer: histogram
+      qtext: ""
+      db_column: ""
+      boxes:
+      - !ruby/object:Box
+        text: ""
+      - !ruby/object:Box
+        text: ""
