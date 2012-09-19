@@ -52,7 +52,6 @@ FormEditor.prototype.createAdditionalPage = function() {
   this.setPath(this.data, path, p);
   this.parsePage(p, path);
   $(this.generatedHtml).insertAfter($(".page").last());
-  //~ this.data["pages"].push(p);
 };
 
 
@@ -60,26 +59,88 @@ FormEditor.prototype.createAdditionalSection = function(link) {
   this.assert(link !== undefined, "No link given, unable to determine where to put new section.");
   this.addUndoStep("Create New Section");
 
-  this.updateDataFromDom();
+  // find path for new section
+  var page = $(link).parents(".page");
+  var path = page.find("input[type=hidden][value=Page]").attr("id");
+  path = path.replace(/\/rubyobject$/, "") + "/sections/";
+  var pos = page.find(".section").length;
+  // ensure the chosen position does not yet exist in DOM. Deleting
+  // and duplicating does not ensure the IDs are in order without gaps.
+  while(document.getElementById(path + pos) !== null) { pos++; }
+  path += pos;
+  this.log("Path for new section: " + path);
 
+
+  // generate new section and insert it into the data object
   var s = {};
   $.each(ATTRIBUTES["Section"], function(ind, attr) {
     s[attr] = "";
   });
-
   // need to add it manually here, so it’s available in the path
   s["answers"] = [];
-
-  var page = $(link).parents(".page");
-  var path = page.find("input[type=hidden][value=Page]").attr("id");
-  path = path.replace(/\/rubyobject$/, "") + "/sections/" + page.find(".section").length;
-
-  this.generatedHtml = "";
-
+  this.updateDataFromDom();
   this.setPath(this.data, path, s);
+
+  // render and inject into DOM
+  this.generatedHtml = "";
   this.parseSection(s, path);
-  page.append($(this.generatedHtml));
+  $(this.generatedHtml).insertBefore($(link).parent());
+  this.checkDuplicateIds();
 
   // new section is created with all tools enabled
   this.updateActionLinksToMatchTools();
+
+  // expand header details for convenience
+  this.getDomObjFromPath(path + "/rubyobject").parent().find("h6 .collapse").click();
+};
+
+
+FormEditor.prototype.createAdditionalQuestion = function(link) {
+  this.assert(link !== undefined, "No link given, unable to determine where to put new question.");
+  this.addUndoStep("Create New Question");
+
+  // find path for new section
+  var sect = $(link).parents(".section");
+  var path = sect.find("input[type=hidden][value=Section]").attr("id");
+  path = path.replace(/\/rubyobject$/, "") + "/questions/";
+  var pos = sect.find(".question").length;
+  // ensure the chosen position does not yet exist in DOM. Deleting
+  // and duplicating does not ensure the IDs are in order without gaps.
+  while(document.getElementById(path + pos) !== null) { pos++; }
+  path += pos;
+  this.log("Path for new question: " + path);
+
+  // generate new question and insert it into the data object
+  // questions don’t have generic attributes because the order matters
+  // and special ones are mixed in between. Therefore they are not
+  // handled via ATTRIBUTES in the original creation.
+  var q = {
+    "qtext":           "",
+    "db_column":       "",
+    "hide_answers":    0,
+    "height":          null,
+    "repeat_for":      null,
+    "last_is_textbox": null};
+  // TODO: replace with proper value once types have been modernized
+  q["type"] = "square";
+  // use sensible default here
+  q["visualizer"] = "histogram";
+  // start question with two empty boxes
+  var box = {"rubyobject": "Box", "text": ""};
+  q["boxes"] = [box, box];
+
+  this.updateDataFromDom();
+  this.setPath(this.data, path, q);
+
+  // render and inject into DOM
+  this.generatedHtml = "";
+  this.parseQuestion(q, path);
+  sect.find("ol").append($(this.generatedHtml));
+  this.checkDuplicateIds();
+
+  // new question is created with all tools enabled
+  this.updateActionLinksToMatchTools();
+
+  // auto expand for convenience
+  this.getDomObjFromPath(path + "/rubyobject").parents(".question").find(".collapse").click();
 };

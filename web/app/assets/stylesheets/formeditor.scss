@@ -268,6 +268,13 @@ $closed-height: 3.5rem;
     }
   }
 
+  // give new quest, new sect, new page links some room
+  .section, .page, & {
+    span:last-of-type {
+      margin-top:0.5rem;
+    }
+  }
+
   .sortable-question-placeholder {
     height: $closed-height - 2*1rem;
     margin: 1rem 0;

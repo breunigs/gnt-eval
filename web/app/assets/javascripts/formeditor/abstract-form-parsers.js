@@ -72,15 +72,20 @@ FormEditor.prototype.parseSection = function(section, path) {
   }
   section["answers"] = section["answers"] || [];
   this.createTranslateableTextArea(path + "/answers");
-  this.closeGroup();
+  this.closeGroup(); // header details
 
   var questions = section["questions"];
   this.openGroup("sortable-question", "ol");
   for(var quest in questions) {
     this.parseQuestion(questions[quest], path + "/questions/" + quest);
   }
+  this.closeGroup(); // ol for questions
+
+  this.openGroup("", "span");
+  this.createActionLink("$F().createAdditionalQuestion(this)", "Create New Question");
   this.closeGroup();
-  this.closeGroup();
+
+  this.closeGroup(); // section
 };
 
 FormEditor.prototype.parseQuestion = function(question, path) {
@@ -97,6 +102,8 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   // TODO: fix how type works elsewhere and merge with multi-choice
   var typeTranslation = {"square": "Single", "tutor_table": "Tutor", "text": "Text" };
   question["type"] = isMulti ? "Multi" : typeTranslation[question["type"]];
+  this.assert(question["type"] !== undefined, "Unsupported question type given.");
+
   question["repeat_for"] = question["repeat_for"] || "only_once";
   if(isMulti) {
     var c = question["db_column"][0];
