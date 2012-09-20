@@ -12,7 +12,7 @@ FormEditor.prototype.saveWorker = function() {
   $formHasBeenEditedLastState = $formHasBeenEdited;
 
   // listen to ajax events
-  f.one('ajax:success ajax:error', function(event, data, status, xhr){
+  f.one('ajax:success ajax:error', function(event, data, status, xhr) {
     if(status == "success") {
       if($formHasBeenEditedLastState == $formHasBeenEdited)
         $formHasBeenEdited = 0; // no changes in the meantime
@@ -46,10 +46,14 @@ FormEditor.prototype.saveWorker = function() {
 
   // enable remote submit and request JSON version so no HTML has to be
   // generated
-  f.attr("data-remote", "true");
+  f.data("remote", "true");
   f.attr("action", f.attr("action") + ".json");
   f.submit();
-  f.removeAttr("data-remote");
+  // NB: attr("data-remote") != data("remote"). If the actual HTML5
+  // data-remote attribute was set, we would need f.removeAttr before
+  // f.removeData in order to really remove the value. See:
+  // See http://stackoverflow.com/a/12504660/1684530
+  f.removeData("remote");
   f.attr("action", f.attr("action").slice(0,-5));
 };
 
