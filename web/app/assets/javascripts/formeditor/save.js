@@ -28,6 +28,7 @@ FormEditor.prototype.saveWorker = function() {
       $F().updateSaveButton(true);
     } else {
       $F().updateSaveButton(true);
+      var handeled = false;
       try {
         // rails reported errors, note the user
         if(data["status"] == 422) {
@@ -36,18 +37,22 @@ FormEditor.prototype.saveWorker = function() {
           $.each(errs, function(k, v) { s += "• "+k+": "+v+"\n" });
           s += "Please fix them and try again.";
           alert(s);
-          return;
+          handeled = true;
         }
       } catch(e) { $F().log("Tried understanding the issue, but failed."); }
 
+      if(!handeled) {
+        // error argument order: event, xhr, status, error
+        alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
+        $F().log("Saving failed: --------------------------------");
+        $F().log("Status:"); $F().log(status);
+        $F().log("Error:"); $F().log(xhr);
+        $F().log("XHR:"); $F().log(data);
+        $F().log("-----------------------------------------------");
+      }
 
-      // error argument order: event, xhr, status, error
-      alert("Saving failed. The status was: " + status + ". Maybe your backend is down? More information has been written to the console.");
-      $F().log("Saving failed: --------------------------------");
-      $F().log("Status:"); $F().log(status);
-      $F().log("Error:"); $F().log(xhr);
-      $F().log("XHR:"); $F().log(data);
-      $F().log("-----------------------------------------------");
+      // re-enable preview in case it issued the save command
+      $F().updatePreviewButton(true);
     }
   });
 

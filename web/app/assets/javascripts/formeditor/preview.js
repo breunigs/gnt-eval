@@ -17,12 +17,8 @@ FormEditor.prototype.preview = function() {
   this.updatePreviewButton(false);
 
   var f = $("#form_content").parents("form");
-  f.one('ajax:success ajax:error', function(event, b, status, c) {
-    if(status != "success" && !event.isTrigger) {
-      $F().warn("Status is " + status + ", aborting preview.");
-      return;
-    }
-
+  // fail is handled directly in save
+  f.one('ajax:success', function(event, b, status, c) {
     $("#form_preview").one("click", function() {
       $F().updatePreviewButton(true);
       $("#form_preview").fadeOut("fast", function() {
