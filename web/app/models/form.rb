@@ -7,6 +7,7 @@ class Form < ActiveRecord::Base
   belongs_to :semester, :inverse_of => :forms
   has_many :courses, :inverse_of => :form
   validates_presence_of :semester, :name, :content
+  validates_uniqueness_of :name, :scope => :semester_id
 
   alias_attribute :title, :name
 
