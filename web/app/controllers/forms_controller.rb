@@ -48,9 +48,21 @@ class FormsController < ApplicationController
 
     respond_to do |format|
       if @form.save
+        params[:id] = @form.id
         flash[:notice] = 'Form was successfully created.'
+
         format.html { redirect_to(@form) }
-        format.json { render :json => @form, :status => :created, :location => @form }
+        format.json {
+          form = render_to_string(:partial => "form_basic.html.erb", :locals => {:is_edit => true})
+          coll = render_to_string(:partial => "shared/collision_detection.html.erb")
+          render :json => {
+              :collision => coll,
+              :preview => preview_form_path(@form),
+              :form => form
+            },
+            :status => :created,
+            :location => @form
+        }
       else
         format.html { render :action => "new" }
         format.json { render :json => @form.errors, :status => :unprocessable_entity }

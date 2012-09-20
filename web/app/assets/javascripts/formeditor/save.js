@@ -17,6 +17,13 @@ FormEditor.prototype.saveWorker = function() {
       if($formHasBeenEditedLastState == $formHasBeenEdited)
         $formHasBeenEdited = 0; // no changes in the meantime
 
+      // replace new form with edit-style one
+      if($("#new_form").length) {
+        $("head").append($(data["collision"]));
+        $("#new_form").replaceWith($(data["form"]));
+        ATTRIBUTES["PreviewUrl"] = data["preview"];
+      }
+
       $F().log("Saving was successful.");
       $F().updateSaveButton(true);
     } else {
