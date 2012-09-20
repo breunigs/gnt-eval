@@ -20,8 +20,6 @@ function FormEditor() {
   this.undoTmp = null;
   this.groupTagStack = new Array();
 
-  this.source = $('#form_content');
-  this.root = $('#form_editor');
   this.languages = ["en"];
   this.data = this.getValue();
   this.invalidData = false;
@@ -45,6 +43,9 @@ function FormEditor() {
   this.fixToolBoxScrolling();
 
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
+
+  // hide original text edit box if form editor loaded successfully
+  $("#form_content").parents("tr").hide();
 }
 
 /* Run once function that makes the #form_tools element semi-fixed.

@@ -3,7 +3,7 @@
 // object and returns it.
 FormEditor.prototype.getValue = function() {
   try {
-    return jsyaml.load(this.source.val());
+    return jsyaml.load($('#form_content').val());
   } catch(err) {
     this.log("Error loading JS-YAML: " + err.message);
     this.invalidData = true;
@@ -23,7 +23,7 @@ FormEditor.prototype.dom2yaml = function() {
 // object and returns it.
 FormEditor.prototype.getValue = function() {
   try {
-    return jsyaml.load(this.source.val());
+    return jsyaml.load($('#form_content').val());
   } catch(err) {
     this.log("Error loading JS-YAML: " + err.message);
     this.invalidData = true;

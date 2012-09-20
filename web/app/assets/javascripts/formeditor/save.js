@@ -22,6 +22,8 @@ FormEditor.prototype.saveWorker = function() {
         $("head").append($(data["collision"]));
         $("#new_form").replaceWith($(data["form"]));
         ATTRIBUTES["PreviewUrl"] = data["preview"];
+        // hide original textbox again
+        $("#form_content").parents("tr").hide();
       }
 
       $F().log("Saving was successful.");
