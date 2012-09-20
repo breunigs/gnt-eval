@@ -128,7 +128,7 @@ FormEditor.prototype.createAdditionalQuestion = function(link) {
     "hide_answers":    0,
     "height":          null,
     "repeat_for":      null,
-    "last_is_textbox": null};
+    "last_is_textbox": 0};
   // TODO: replace with proper value once types have been modernized
   q["type"] = "square";
   // use sensible default here
