@@ -1,12 +1,11 @@
+/* Allow previewing the current form. First saves the current state and
+ * then ajax-requests the normal preview partial. */
 
-FormEditor.prototype.updatePreviewButton = function(state) {
-  if(state) {
-    $("#preview").removeClass("disabled").html("Preview");
-  } else {
-    $("#preview").addClass("disabled").html("Previewing… <span>This might take a while</span>");
-  }
-};
-
+/* @public
+ * attaches listener to the ajax success form event and either saves the
+ * form or simulates it. If saving fails, the save function re-enables
+ * the preview button. If saving worked, the normal preview page is
+ * being requested and injected into DOM once rendered. */
 FormEditor.prototype.preview = function() {
   if($("#preview").hasClass("disabled")) return;
 
@@ -37,4 +36,15 @@ FormEditor.prototype.preview = function() {
     this.save();
   else
     f.trigger("ajax:success");
+};
+
+/* @private
+ * Helper function that en- or disables the preview button depending on
+ * the given argument. Returns nothing */
+FormEditor.prototype.updatePreviewButton = function(state) {
+  if(state) {
+    $("#preview").removeClass("disabled").html("Preview");
+  } else {
+    $("#preview").addClass("disabled").html("Previewing… <span>This might take a while</span>");
+  }
 };

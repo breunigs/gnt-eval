@@ -1,4 +1,20 @@
+/* this file contains all necessary functions to allow the form to be
+ * saved without actually changing the page. It’s intended to not be
+ * blocked, even if the form has errors because creating a form is a lot
+ * of effort and we do not want to prevent saving unfinished work.
+ *
+ * The basic idea is to make the "remote" and let Rails code deal with
+ * the details. Also append .josn to the action URL so that we get data
+ * tailored to our case. If a form is edited, no values are required.
+ * New forms need to be changed to an "edit form" so that updating them
+ * again works properly (and some other stuff).
+ *
+ * We attach ajax listeners to the form in order to handle success or
+ * errors of the submit */
 
+/* @public
+ * Inits the ajax save action for the current forms. Returns nothing
+ * and does not block until the form is saved. */
 FormEditor.prototype.save = function() {
   if($("#save").hasClass("disabled")) return;
   this.updateSaveButton(false);
@@ -6,6 +22,10 @@ FormEditor.prototype.save = function() {
   setTimeout("$F().saveWorker();", 10);
 };
 
+/* @private
+ * Does the heavy lifing when saving, i.e. actually submitting and
+ * listening to ajax events. Alerts the user of errors if possible
+ * or prints information to console if not. */
 FormEditor.prototype.saveWorker = function() {
   var f = $("#form_content").parents("form");
   this.dom2yaml();
@@ -71,6 +91,9 @@ FormEditor.prototype.saveWorker = function() {
   f.attr("action", f.attr("action").slice(0,-5));
 };
 
+/* @private
+ * Helper function that en- or disables the save button depending on the
+ * given argument. Returns nothing */
 FormEditor.prototype.updateSaveButton = function(state) {
   if(state) {
     $("#save").removeClass("disabled").html("Save");
