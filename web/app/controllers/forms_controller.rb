@@ -80,7 +80,14 @@ class FormsController < ApplicationController
         format.html { redirect_to(@form) }
         format.json { render json: flash[:error], status: :unprocessable_entity }
       elsif @form.update_attributes(params[:form])
-        $loaded_yaml_sheets[params[:id]] = nil
+        expire_fragment("preview_forms_#{params[:id]}")
+
+        if $loaded_yaml_sheets.keys.any? { |k| k.is_a?(String) }
+          raise "$loaded_yaml_sheets only allows integer keys, but somewhere a string-key got added. Find out where, or you will run into a lot of stale caches."
+        end
+        logger.warn "\n\n\n\n\n\n"
+
+        $loaded_yaml_sheets[params[:id].to_i] = nil
         format.html { redirect_to @form, notice: 'Form was successfully updated.' }
         format.json { head :no_content }
       else
@@ -96,7 +103,7 @@ class FormsController < ApplicationController
     @form = Form.find(params[:id])
     unless @form.critical?
       @form.destroy
-      $loaded_yaml_sheets[params[:id]] = nil
+      $loaded_yaml_sheets[params[:id].to_i] = nil
     end
 
     respond_to do |format|

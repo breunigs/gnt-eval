@@ -25,17 +25,17 @@ class Form < ActiveRecord::Base
     # cache yaml files for speeeed
     $loaded_yaml_sheets ||= {}
     begin
-      $loaded_yaml_sheets[id] ||= YAML::load(content)
+      $loaded_yaml_sheets[id.to_i] ||= YAML::load(content)
     rescue Exception => e
       # Sheet does not appear to be a valid YAML. In this case the
       # value will be nil (and thus not an AbstractForm). This will
       # later be picked up as an invalid form.
-      $loaded_yaml_sheets[id] = e.message + "\n\n\n" + e.backtrace.join("\n")
+      $loaded_yaml_sheets[id.to_i] = e.message + "\n\n\n" + e.backtrace.join("\n")
       logger.warn "Given AbstractForm is invalid:"
-      logger.warn $loaded_yaml_sheets[id]
+      logger.warn $loaded_yaml_sheets[id.to_i]
       #~ logger.warn "\n\n\nGiven content was:\n#{content}"
     end
-    $loaded_yaml_sheets[id]
+    $loaded_yaml_sheets[id.to_i]
   end
 
   # pretty printing an AbstrctForm is a bit tricky
