@@ -64,18 +64,34 @@
 
 <% if @form.has_questions_without_visualizer? %>
   <div>
-    <h3>WARNING: questions without visualizer (defaults to empty)</h3>
+    <h3>WARNING: questions without visualizer</h3>
     <table>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <th>offending questions</th>
       </tr>
     <% @form.get_questions_without_visualizer.each do |q| %>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <td><%=q.text.strip_common_tex%></td>
       </tr>
     <% end %>
     </table>
   </div>
+<% end %>
+
+
+<% if @form.questions %>
+  <% empty_qtext = @form.questions.keep_if { |q| q.qtext.is_a?(Array) ? q.qtext.any? { |l| l.blank? } : q.qtext.blank? } %>
+  <% if empty_qtext.any? %>
+  <div>
+    <h3>WARNING: questions without question text</h3>
+    <p class="warning">The following questions have missing questions in at least one locale. If the db_column of that question is empty as well, it <i>might</i> be hard to find…</p>
+    <ul>
+    <% empty_qtext.each do |q| %>
+      <li><%=q.db_column.blank? ? "(db column empty)".html_safe : q.db_column%></li>
+    <% end %>
+    </ul>
+  </div>
+  <% end %>
 <% end %>
 
 <% oosv = @form.find_out_of_scope_variables
