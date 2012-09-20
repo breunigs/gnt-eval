@@ -40,6 +40,7 @@ function FormEditor() {
   this.toggleDeleting(false);
   this.toggleDuplicating(false);
   this.checkSectionUpDownLinks();
+  this.attachFormSubmit();
   $(document).ready(function() { $F().fixToolBoxScrolling(); });
 
   this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");

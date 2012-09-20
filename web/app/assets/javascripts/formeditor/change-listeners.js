@@ -107,3 +107,13 @@ FormEditor.prototype.questionTypeChanged = function(element) {
   else
     this.getDomObjFromPath(path + "/boxes").parent().show();
 };
+
+
+FormEditor.prototype.attachFormSubmit = function() {
+  $("body").on("submit", "form", function(ev) {
+    if($(this).find("#form_content").length == 0)
+      return;
+
+    $F().dom2yaml();
+  });
+};
