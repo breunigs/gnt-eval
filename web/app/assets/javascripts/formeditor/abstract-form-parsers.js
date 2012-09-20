@@ -4,7 +4,8 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 
   this.assert(data["rubyobject"] == "AbstractForm", "First entry of data is not an AbstractForm. Either the form is broken or the data subset passed is not an AbstractForm.");
 
-  this.createAvailLangBox();
+  var langString = this.languages.join(" ").replace(/:/g, "");
+  this.createHiddenBox("availableLanguages", langString);
 
   this.createTextBox(path + "/db_table", "database table");
   this.append("<br/>");
