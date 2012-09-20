@@ -72,7 +72,7 @@ module FormsHelper
     files = '"' + Dir.glob("#{path}*").join('" "') + '"'
     `rm -rf #{files}`
 
-    return exitcodes.total > 0, exitcodes, logger, base64
+    return exitcodes.total > 0, exitcodes, h(logger), base64
   end
 
   def texpreview(text = nil)
