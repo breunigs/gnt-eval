@@ -186,7 +186,7 @@ class Question
   end
 
   def last_is_textbox?
-    !@last_is_textbox.nil? && @last_is_textbox > 0
+    !@last_is_textbox.blank? && @last_is_textbox.to_i > 0
   end
 
   # returns false if hide_answers has set been to false or not been set
