@@ -57,6 +57,5 @@ is_new = !is_edit
     attr[:Visualizers][:Text].map! { |f| f.gsub(/^comment_|\.tex.erb$/, "") }
   %>
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
-  var x = FormEditor.getInstance();
-  x.setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
+  $F().setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
 </script>
