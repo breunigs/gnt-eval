@@ -28,11 +28,15 @@ FormEditor.prototype.duplicate = function(elm, type, pathGroup) {
   var r = new RegExp("/" + pathGroup + "/([0-9]+)/");
 
   // find new, not yet used id
-  var lastPath = elm.parent().find("[type=hidden][value="+type+"][id^='/']").last().attr("id").match(r);
-  var oldPath = "/" + pathGroup + "/" + lastPath[1] + "/";
-  var newPath = "/" + pathGroup + "/" + (parseInt(lastPath[1])+1) + "/";
-  var check = document.getElementById(lastPath[0].replace(oldPath, newPath));
-  this.assert(check === null, "Duplicating failed as there’s already a new element with that path");
+  var lastPath = elm.parent().find("[type=hidden][value="+type+"][id^='/']").last().attr("id").match(r),
+      oldPath = "/" + pathGroup + "/" + lastPath[1] + "/",
+      pos = parseInt(lastPath[1])+1;
+  while(true) {
+    newPath = "/" + pathGroup + "/" + pos + "/";
+    var check = document.getElementById(lastPath[0].replace(oldPath, newPath));
+    if(check === null) break;
+    pos++;
+  }
 
   // clone and update id/for attributes
   var newElm = elm.clone();
