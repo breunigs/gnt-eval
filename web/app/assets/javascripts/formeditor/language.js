@@ -66,14 +66,13 @@ FormEditor.prototype.setLanguages = function(langs, automated) {
     });
     // add missing languages to dom
     $.each(l, function(ind, lang) {
-      var sis = FormEditor.getInstance();
-      sis.setPath(sis.data, path + "/" + lang, isTextArea ? [] : "");
-      sis.generatedHtml = "";
+      $F().setPath(sis.data, path + "/" + lang, isTextArea ? [] : "");
+      $F().generatedHtml = "";
       if(isTextArea)
-        sis.createLangTextArea(path, lang);
+        $F().createLangTextArea(path, lang);
       else
-        sis.createLangTextBox(path, lang);
-      $(transGroup).append(sis.generatedHtml);
+        $F().createLangTextBox(path, lang);
+      $(transGroup).append($F().generatedHtml);
     });
   });
 }

@@ -140,7 +140,7 @@ FormEditor.prototype.getObjectFromDom = function() {
     if(path.match(/\/hide_answers$/) && !v) return true;
     if(path.match(/\/repeat_for$/) && v == "only_once") return true;
 
-    FormEditor.getInstance().setPath(obj, path, v);
+    $F().setPath(obj, path, v);
   });
 
   // post-processing required for correct type and db_column fields.

@@ -29,7 +29,7 @@ FormEditor.prototype.allowSortingCancelByEsc = function() {
   // allow to cancel sort operations by htting esc
   $(document).keydown(function(event) {
     if(event.keyCode === $.ui.keyCode.ESCAPE) {
-      FormEditor.getInstance().undoTmp = null;
+      $F().undoTmp = null;
       $(".sortable-question").sortable("cancel");
     }
   });
@@ -111,10 +111,10 @@ FormEditor.prototype.makeQuestionsSortable = function() {
       $(".section .collapsable:not(.closed) a.collapse").trigger("click");
     },
     beforeStop: function(event, ui) {
-      var dat = FormEditor.getInstance().undoTmp;
+      var dat = $F().undoTmp;
       if(!dat) return; // probably event has been cancelled
       var t = ui.item.find("h6").data("db-column");
-      FormEditor.getInstance().addUndoStep("moving question: " + t, dat);
+      $F().addUndoStep("moving question: " + t, dat);
     }
   });
 

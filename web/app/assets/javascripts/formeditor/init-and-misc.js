@@ -1,13 +1,31 @@
-$.extend({
-  unique : function(anArray) {
-   var result = [];
-   $.each(anArray, function(i,v){
-      if ($.inArray(v, result) == -1) result.push(v);
-   });
-   return result;
-  }
-});
-
+/* This is file contains the init function for the form editor as well
+ * as those methods that didn’t fit anywhere else.
+ *
+ * The form is stored as Ruby-fied YAML file, e.g. a question is not
+ * simply another array entry with many attributes but marked as an
+ * Ruby Question Object. That way the YAML file can be directly read
+ * into an Ruby object one can work with. Since YAML is easy to read
+ * for humans, it was chosen as good-enough way to edit forms before
+ * the form editor was created.
+ *
+ * To be actually able to create the form editor visible to the user,
+ * a Ruby-YAML → JS Object → DOM Elements conversion has to be made
+ * and the other way round for saving. The JS Object/JSON exists in
+ * the editor’s data variable but is only used as intermediate or of
+ * it’s convenient to store data there and then create the DOM from it.
+ *
+ * YAML → JS conversion is handled by JS-YAML. Since the AbstractForm
+ * and its subclasses are not part of the standard YAML specs, JS-YAML
+ * has been extended a bit. You can find that at the top of json2yaml.js
+ *
+ * JS → YAML conversion is handled by a modified version of JSON2YAML
+ * which is located at the bottom of json2yaml. The main hack is to
+ * treat common "rubyobject" named elements specifically so they appear
+ * as proper Ruby-YAML objects.
+ *
+ * JS/DOM conversions are handled in the FormEditor all over the place.
+ * Also adds links/buttons and style information to actually present the
+ * form to the user while processing. */
 
 function FormEditor() {
   // singleton, via http://stackoverflow.com/a/6876814
@@ -15,26 +33,26 @@ function FormEditor() {
     return arguments.callee.instance;
   arguments.callee.instance = this;
 
+  // default variables
   this.undoData = new Array();
   this.redoData = new Array();
   this.undoTmp = null;
   this.groupTagStack = new Array();
-
   this.languages = ["en"];
   this.data = this.getValue();
   this.invalidData = false;
   this.generatedHtml = "";
 
+  // parsing
   this.parseAbstractForm(this.data);
 
+  // listeners and other initial setup work
   $("[type=numeric]").numeric({ decimal: false, negative: false });
-
   this.attachSectionHeadUpdater();
   this.attachQuestionHeadUpdater();
   this.attachChangeListenerForUndo();
   this.attachCollapsers();
   $('#form_editor textarea').autosize();
-
   this.allowSortingCancelByEsc();
   this.toggleSorting(false);
   this.toggleDeleting(false);
@@ -49,7 +67,8 @@ function FormEditor() {
   $("#form_content").parents("tr").hide();
 }
 
-/* Run once function that makes the #form_tools element semi-fixed.
+/* @private
+ * Run once function that makes the #form_tools element semi-fixed.
  * Semi-fixed means it should never appear outside of its container
  * while still staying on screen when the container is. */
 FormEditor.prototype.fixToolBoxScrolling = function() {
@@ -96,41 +115,51 @@ FormEditor.prototype.fixToolBoxScrolling = function() {
   });
 };
 
-FormEditor.getInstance = function() {
-  var fe = new FormEditor();
-  return fe;
-};
-
+/* @public
+ * Shortcut to get the FormEditor’s instance. Creates a new one if it
+ * doesn’t exist yet. */
 function $F() {
-  return FormEditor.getInstance();
+  return new FormEditor();
 }
 
-
-
+/* @public
+ * @param Content to append to the FormEditor’s HTML storage string */
 FormEditor.prototype.append = function(content) {
   this.generatedHtml += content + "\n";
 };
 
-
+/* @public
+ * Determines if the given JS object is a multiple choice question.
+ * @param question JS object
+ * @return true, iff multiple choice question */
 FormEditor.prototype.isQuestionMulti = function(question) {
   this.assert(question["db_column"] != null, "Was not given a question or it doesn’t have a db_column attribute.");
   return $.isArray(question["db_column"]);
 };
 
 
-// log to Firebug and the like if available
+/* @public
+ * @param String to log, if console is available */
 FormEditor.prototype.log = function(strng) {
   if(window.console) console.log(strng);
 };
 
+/* @public
+ * @param String to warn, if console is available */
 FormEditor.prototype.warn = function(strng) {
   if(window.console) console.warn(strng);
 };
 
+/* @public
+ * Inserts a stacktrace in the console, if latter is available. */
 FormEditor.prototype.trace = function() {
   if(window.console) console.trace();
 }
 
+/* @public
+ * Asserts given expression is true, otherwise throws message.
+ * @param expression to check
+ * @param message to throw, if expression is not true */
 FormEditor.prototype.assert = function(expression, message) {
   if (!expression) {
     this.invalidData = true;
@@ -138,3 +167,14 @@ FormEditor.prototype.assert = function(expression, message) {
     throw(message);
   }
 };
+
+/* Extends jQuery’s array method to include a “unique” function. */
+$.extend({
+  unique : function(anArray) {
+   var result = [];
+   $.each(anArray, function(i,v){
+      if ($.inArray(v, result) == -1) result.push(v);
+   });
+   return result;
+  }
+});
