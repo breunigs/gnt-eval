@@ -30,7 +30,6 @@ FormEditor.prototype.parseAbstractForm = function(data) {
   this.closeGroup();
 
   $('#form_editor').append(this.generatedHtml);
-  this.dom2yaml();
 };
 
 FormEditor.prototype.parsePage = function(page, path) {
