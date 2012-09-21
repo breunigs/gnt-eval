@@ -165,7 +165,7 @@ FormEditor.prototype.untranslatePath = function(path, caller) {
    oldText = this.getPath(path + "/:en");
   } catch(e) {
     try {
-      oldText = this.getAttributeByIndex(this.getPath(path), 0);
+      oldText = this.getAnyElement(this.getPath(path));
       if(oldText == null) oldText = "";
     } catch(e) {}
   }

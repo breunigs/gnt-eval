@@ -1,4 +1,10 @@
+/* Contains functions that create the form elements for each Abstract
+ * Form object. They expect to be handed the data object they should
+ * work on. */
 
+/* @public
+ * Turns an AbstractForm from JS-Object into DOM elements
+ * @param whole AbstractForm JS Object */
 FormEditor.prototype.parseAbstractForm = function(data) {
   var path = "";
 
@@ -32,6 +38,10 @@ FormEditor.prototype.parseAbstractForm = function(data) {
   $('#form_editor').append(this.generatedHtml);
 };
 
+/* @public
+ * Turns a page from JS-Object into DOM elements
+ * @param page JS Object
+ * @param path the page is located at */
 FormEditor.prototype.parsePage = function(page, path) {
   this.openGroup("page");
   this.createHiddenBox(path+"/rubyobject", "Page");
@@ -53,6 +63,10 @@ FormEditor.prototype.parsePage = function(page, path) {
   this.closeGroup();
 };
 
+/* @public
+ * Turns a section from JS-Object into DOM elements
+ * @param section JS Object
+ * @param path the section is located at */
 FormEditor.prototype.parseSection = function(section, path) {
   this.openGroup("section");
   this.append('<h5 class="header">');
@@ -88,6 +102,10 @@ FormEditor.prototype.parseSection = function(section, path) {
   this.closeGroup(); // section
 };
 
+/* @public
+ * Turns a question from JS-Object into DOM elements
+ * @param question JS Object
+ * @param path the question is located at */
 FormEditor.prototype.parseQuestion = function(question, path) {
   this.openGroup("question collapsable closed", "li");
   this.append('<h6 class="header">');
@@ -128,7 +146,10 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.closeGroup();
 };
 
-
+/* @public
+ * Creates DOM elements for /all/ boxes of a given question.
+ * @param question JS Object
+ * @param path the question is located at */
 FormEditor.prototype.parseBoxes = function(question, path) {
   var show = question["type"] == "Single" || question["type"] == "Multi"
   this.createHeading(path + "/boxes", (show ? "" : "hidden") + " boxes");
