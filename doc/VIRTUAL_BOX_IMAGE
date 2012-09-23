@@ -40,8 +40,6 @@ http://www.virtualbox.org/manual/ch04.html#sharedfolders
 * Added the Rails Server for the Web Gui to Startup Applications in
   Applications → System Tools → Startup Applications using
   ---------------
-  gnome-terminal -e "bash -c 'cd /home/gnt-eval/gnt-eval/web && rails server || sleep 900'"
-  gnome-terminal -e "bash -c ' . $HOME/.rvm/scripts/rvm && cd /home/gnt-eval/gnt-eval/web && rails server || sleep 900'"
   gnome-terminal -e "bash -c 'cd /home/gnt-eval && source .rvm/scripts/rvm && cd gnt-eval/web && rails server || sleep 900'"
   ---------------
 
