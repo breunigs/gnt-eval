@@ -124,4 +124,4 @@ name:
       └────────┘
 
 Excellence is a reference to the [German Universities Excellence 
-Initiative]((https://en.wikipedia.org/wiki/German_Universities_Excellence_Initiative)
+Initiative](https://en.wikipedia.org/wiki/German_Universities_Excellence_Initiative)
