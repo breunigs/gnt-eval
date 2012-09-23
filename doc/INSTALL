@@ -1,14 +1,10 @@
-This manual was written using Ubuntu 10.10 installed into a virtual
-machine. It assumes you're familiar working with the command line and
-hacking source code. You can also download this VirtualBox image if you
-don't want to follow this guide. If you believe you’re pro enough,
-there’s a summary at the end of this guide which only list the commands
-without all that explanation blahblah.
+This manual was originally written using Ubuntu, but basically works the
+same for Debian and its derivates. It works for Debian Wheezy, Ubuntu
+and Linux Mint.
 
-Ubuntu settings:
-  Username:             gnt-eval
-  Password:             gnt-eval
-  computer's name:      gnt-eval
+If you just want to try G'n'T Eval you can download a VirtualBox image
+that has all required components pre-installed and automatically boots
+the Web GUI. Read more about it in doc/VIRTUAL_BOX_IMAGE.
 
 =================
 REQUIRED SOFTWARE
@@ -22,10 +18,11 @@ packages w/o special treatment
   bison
   build-essential
   curl
+  ghostscript
   git
-  gs
   libc6-dev
-  libmagick9-dev
+  libmagickcore-dev
+  libmagickwand-dev
   libmysqlclient-dev
   libpq-dev
   libreadline6
@@ -33,12 +30,14 @@ packages w/o special treatment
   libsqlite3-0
   libsqlite3-dev
   libssl-dev
+  libtool
   libxml2-dev
   libxslt-dev
   libyaml-dev
   libzbar0
   ncurses-dev
   openssl
+  pkg-config
   poppler-utils
   postgresql
   sqlite3
@@ -51,6 +50,15 @@ packages w/o special treatment
   ttf-thai-tlwg
   zlib1g
   zlib1g-dev
+
+
+If any of the packages cannot be found, please open a bug report at
+  https://github.com/breunigs/gnt-eval/issues/new
+To work around the issue, continue without that package and see if the
+installation complains about missing files. If it does, one can identify
+the missing package using apt-file:
+  sudo apt-get install apt-file && sudo apt-file update
+  apt-file search "some/missing/file.h"
 
 Database Backend
 ----------------
@@ -78,19 +86,18 @@ deal with this is called “RVM” (Ruby Version Manager) and essentially
 maintains independent versions of ruby as required.
 
 Usually these steps are sufficient to get RVM running:
-  bash -s stable < <( curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+  curl -L https://get.rvm.io | bash -s stable --ruby
 And add the following line at the end of your .bashrc, .zshrc, …
   [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
 To see if this worked open a new shell and type execute "rvm". If the
 command is not found, please refer to the manual at
-  http://rvm.beginrescueend.com/rvm/install/
+  https://rvm.io/rvm/install/
 
 Then we need to install ruby and its dependencies:
-  rvm pkg install openssl zlib
-  rvm install 1.9.3                                  --with-openssl-dir=$rvm_path/usr --with-readline-dir=$rvm_path/usr
+  rvm install 1.9.3
 and create a gemset, which will be seperate from your other system gems:
-  rvm 1.9.3
   rvm gemset create 'gnt-eval'
+  rvm 1.9.3@gnt-eval
 
 
 Image Processing
@@ -123,7 +130,10 @@ DOWNLOADING G'n'T
 =================
 
 For now, you can only clone the repository. To do so run:
-  git clone FIXME-URL-TO-GIT
+  git clone git://github.com/breunigs/gnt-eval.git gnt-eval
+
+Grab other projects that we depend on:
+  cd gnt-eval && git submodule update --init
 
 If you run this in a virtual machine, you can use the “Shared Folders”
 feature of VirtualBox to mount a directory from the host machine. First,
@@ -135,9 +145,7 @@ to mount the directory for this session or add it to the fstab file.
 FINISHING THE INSTALLATION
 ==========================
 
-Change into the newly created directory. RVM will likely ask you to
-confirm that the included .rvmrc is fine. Type 'yes' then press enter
-to trust G'n'T’s .rvmrc.
+Change into the newly created directory if you haven’t already.
 
 Run
   gem install bundler
@@ -305,13 +313,12 @@ FURTHER READING
 SUMMARY
 =======
 
-sudo apt-get install curl git autoconf barcode bison build-essential gs libc6-dev libmagick9-dev libmysqlclient-dev libpq-dev libreadline6 libreadline6-dev libsqlite3-0 libsqlite3-dev libssl-dev libxml2-dev libxslt-dev libyaml-dev libzbar0 ncurses-dev openssl postgresql sqlite3 texlive texlive-fonts-extra texlive-lang-german texlive-latex-extra texlive-xetex tex-gyre ttf-thai-tlwg zlib1g zlib1g-dev imagemagick librmagick-ruby poppler-utils
+sudo apt-get install curl git autoconf barcode bison build-essential ghostscript libc6-dev libmagickcore-dev libmagickwand-dev libmysqlclient-dev libpq-dev libreadline6 libreadline6-dev libsqlite3-0 libsqlite3-dev libssl-dev libtool libxml2-dev libxslt-dev libyaml-dev libzbar0 ncurses-dev openssl pkg-config postgresql sqlite3 texlive texlive-fonts-extra texlive-lang-german texlive-latex-extra texlive-xetex tex-gyre ttf-thai-tlwg zlib1g zlib1g-dev imagemagick librmagick-ruby poppler-utils
 
 Above command will take forever, wait until curl and git are installed,
 then continue without waiting for it to finish.
 
-bash -s stable < <( curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rv
-m-installer)
+curl -L https://get.rvm.io | bash -s stable
 
 Add this line at the end of .bashrc/.zshrc/etc.:
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm"
@@ -319,16 +326,16 @@ Add this line at the end of .bashrc/.zshrc/etc.:
 Open new shell
 
 rvm pkg install openssl
-rvm install 1.8.7-p334 --with-zlib-dir=/usr --with-openssl-dir=$HOME/.rvm/usr
-rvm 1.8.7-p334
+rvm install 1.9.3
 rvm gemset create 'gnt-eval'
+rvm 1.9.3@gnt-eval
 
-git clone http://FIXME seee
-cd seee
-yes[Enter]
+git clone git://github.com/breunigs/gnt-eval.git gnt-eval
+cd gnt-eval
+git submodule update --init
 
+gem install bundler
 bundle install
-update_rubygems
 
 See the detailed documentation above if bundle install fails.
 
@@ -345,30 +352,32 @@ createdb results
 exit
 
 cd web && rake db:migrate
-./script/server
+rails server
 
 Open new terminal
-cd seee
+cd gnt-eval
 
 x-www-browser http://localhost:3000&
 Add data in WWW-Browser, use forms from doc/example_forms
 
-rake pdf:howto
-rake pdf:forms
+rake misc:howtos
+rake forms:generate
 
-Print forms and evaluate.
+Print forms and evaluate. Read above if you can use rake forms:print.
+
 
 rake images:scan
       OR
 scan 300 DPI, b/w, two-page TIFs to tmp/scanned
 
-rake images:sortandaligm
-rake pest:omr
-rake pest:correct
+rake images:sortandalign
+rake images:omr
+rake images:correct
+rake images:fill_text_box
 rake images:insertcomments
 
 x-www-browser http://localhost:3000&
 Type comments for each course/tutor in web interface
 
-rake pdf:semester
-rake pdf:make_preliminary
+rake results:pdf_report
+rake results:make_preliminary
