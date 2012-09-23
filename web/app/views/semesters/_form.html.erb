@@ -1,0 +1,28 @@
+<%= render "shared/error_messages", :model => @semester %>
+
+<%= form_for(@semester) do |f| %>
+  <table>
+    <% for item in
+      [
+        ["Firstday",                      f.datepicker(:firstday, :dateFormat => "yy-mm-dd"), "required"],
+        ["Lastday",                       f.datepicker(:lastday,  :dateFormat => "yy-mm-dd"), "required"],
+        [f.label(:title),                 f.text_field(:title),                               "required"],
+        [f.label(:longtitle),             f.text_field(:longtitle),                           "required"],
+        [f.label(:critical, "Critical?"), f.check_box(:critical) + f.label(:critical, "the term is critical")]
+
+      ]
+    %>
+      <tr style="background: #<%= cycle('efefef', 'fff') %>">
+        <th><%= item.shift %></th>
+        <td><%= item.shift %></td>
+        <% for data in item do %> <td><%=h data %></td> <% end %>
+      </tr>
+    <% end %>
+  </table>
+
+  <p>
+    <% text = {"edit" => "Save Changes", "new" => "Create new #{controller.human_name}"}[controller.action_name] %>
+    <%= f.submit text, :disable_with => "Saving…", :class => "button primary" %>
+    <%= link_to 'Cancel', semesters_path, :class => "button" %>
+  </p>
+<% end %>

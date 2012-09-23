@@ -1,56 +1,34 @@
-<fieldset>
-  <h1>Editing <%=h @prof.fullname %></h1>
-  <%= error_messages_for :prof %>
+<div class="group">
+  <h2>Edit <%=h @prof.fullname %></h2>
+  <%= render "form", :submit_text => "Save changes" %>
+</div>
 
-  <%=  %>
-
-  <% form_for(@prof) do |f| %>
-    <table>
-      <% for item in
-        [
-          [f.label(:firstname), f.text_field(:firstname), "required"],
-          [f.label(:surname),   f.text_field(:surname),   "required"],
-          [f.label(:email),     f.text_field(:email)],
-          [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"]
-
-        ]
-      %>
-        <tr style="background: #<%= cycle('efefef', 'fff') %>">
-          <th><%= item.shift %></th>
-          <td><%= item.shift %></td>
-          <% for data in item do %> <td><%=h data %></td> <% end %>
-        </tr>
-      <% end %>
-    </table>
-
-    <p>
-      <%= f.submit "Update Prof", :disable_with => "Saving&hellip;" %>
-      <%= link_to 'Cancel', profs_path %>
-    </p>
-  <% end %>
-</fieldset>
-
-<fieldset>
-  <legend>courses associated with <%=h @prof.fullname %></legend>
+<div class="group">
+  <h2>Courses associated with <%=h @prof.fullname %></h2>
   <% if @prof.course_profs.empty? %>
     There are no associated courses.
   <% else %>
-    <table>
-      <tr>
-        <th>semester</th>
-        <th>form</th>
-        <th>lang</th>
-        <th>title</th>
-      </tr>
-    <% for cp in @prof.course_profs.sort { |x,y| s = y.course.semester.id <=> x.course.semester.id; (s == 0 ? x.course.title <=> y.course.title : s) } %>
-      <tr style="background: #<%= cycle('efefef', 'fff') %>">
-        <td><%=h cp.course.semester.title %></td>
-        <td><%= link_to cp.course.form.name, cp.course.form %></td>
-        <td><%=h cp.course.language %></td>
-        <td><%= link_to cp.course.title, cp.course %></td>
-      </tr>
-    <% end %>
+    <%= render "shared/tablemagic" %>
+    <table id="tablemagic" style="min-width:50em">
+      <thead>
+        <tr>
+          <th>Term</th>
+          <th>Form</th>
+          <th>Language</th>
+          <th>Title</th>
+        </tr>
+      </thead>
+      <tbody>
+      <%
+        @prof.course_profs.includes(:semester, :course, :form).order("semesters.id DESC, courses.title").each do |cp| %>
+        <tr>
+          <td><%=cp.course.semester.title %></td>
+          <td><%=link_to cp.course.form.name, cp.course.form if cp.course.form %></td>
+          <td><%=cp.course.language %></td>
+          <td><%=link_to cp.course.title, cp.course %></td>
+        </tr>
+      <% end %>
+      </tbody>
     </table>
   <% end %>
-</fieldset>
-
+</div>

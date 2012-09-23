@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddFormIdToCourses < ActiveRecord::Migration
   def self.up
     add_column :courses, :form_id, :integer

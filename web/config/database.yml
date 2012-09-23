@@ -31,7 +31,7 @@ production:
 test:
   adapter: sqlite3
   encoding: utf8
-  dbfile: db/test.db
+  database: db/test.db
 
 # Load configuration files from other directories.
 <% system_config = File.expand_path(system_config) %>
@@ -41,8 +41,3 @@ test:
 <% begin; user_config = File.expand_path(user_config) %>
 <%= IO.read(user_config) if File.exist?(user_config) %>
 <% rescue; end %>
-
-# If you get this error, it probably means that expand path failed
-# because either the path invalid (e.g. unescaped tildes that cannot be
-# expanded) or no home directory is set. The latter is usually true if
-# gnt-eval is run from Apache.

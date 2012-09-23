@@ -1,4 +1,4 @@
-require 'pp'
+# encoding: utf-8
 
 class CourseProfsController < ApplicationController
   def print
@@ -17,15 +17,18 @@ class CourseProfsController < ApplicationController
       make_pdf_for(@cp, pdf_path)
       # print!
       p = Seee::Config.application_paths[:print]
-      p << " --non-interactive \""
+      p << %( --simulate ) if ENV['RAILS_ENV'] == "test" # prevent actual printing in test mode
+      p << %( --non-interactive ")
       p << File.join(pdf_path, @cp.get_filename)
-      p << ".pdf\""
+      p << %(.pdf")
+      logger.debug "Command line used for printing:"
+      logger.debug p
       `#{p}`
 
       if $?.exitstatus == 0
-	flash[:notice] = "Printing job has been submitted. Most likely, the printer will output your sheets soon."
+        flash[:notice] = "Printing job has been submitted. Most likely, the printer will output your sheets soon."
       else
-	flash[:error] = "Printing did not work. There is nothing you can do about it. Call for help."
+        flash[:error] = "Printing did not work. There is nothing you can do about it. Call for help."
       end
 
       # run once again, so all newly created files are accessible by
@@ -39,4 +42,3 @@ class CourseProfsController < ApplicationController
     redirect_to(@cp.course)
   end
 end
-

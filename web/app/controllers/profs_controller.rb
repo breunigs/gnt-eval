@@ -1,8 +1,10 @@
+# encoding: utf-8
+
 class ProfsController < ApplicationController
   # GET /profs
   # GET /profs.xml
   def index
-    @profs = Prof.find(:all)
+    @profs = Prof.find(:all, :order => [:surname, :firstname])
 
     respond_to do |format|
       format.html # index.html.erb
@@ -41,7 +43,6 @@ class ProfsController < ApplicationController
   # POST /profs.xml
   def create
     @prof = Prof.new(params[:prof])
-    kill_caches @prof
 
     respond_to do |format|
       if @prof.save
@@ -59,7 +60,6 @@ class ProfsController < ApplicationController
   # PUT /profs/1.xml
   def update
     @prof = Prof.find(params[:id])
-    kill_caches @prof
     respond_to do |format|
       if @prof.update_attributes(params[:prof])
         flash[:notice] = "Prof '#{@prof.firstname} #{@prof.surname}' was successfully updated."
@@ -78,40 +78,10 @@ class ProfsController < ApplicationController
     @prof = Prof.find(params[:id])
     @prof.destroy unless @prof.critical?
 
-    kill_caches @prof
-
     respond_to do |format|
       flash[:error] = 'Prof was critical and has therefore not been destroyed.' if @prof.critical?
       format.html { redirect_to(profs_url) }
       format.xml  { head :ok }
-    end
-  end
-
-  caches_page :index, :new, :edit
-  private
-  def kill_caches(prof = nil)
-    puts "="*50
-    puts "Expiring prof caches" + (prof ? " for #{prof.surname}" : "")
-    expire_page :action => "index"
-    expire_page :action => "new"
-    expire_page :action => "edit", :id => prof
-
-    # the list of profs is shown on both new and show pages, therefore
-    # these need to be expired, regardless which prof changed
-    expire_page :controller => "courses", :action => "new"
-    Course.find(:all).each do |c|
-      expire_page :controller => "courses", :action => "edit", :id => c
-    end
-
-    # courses#index shows the prof as well
-    expire_page :controller => "courses", :action => "index"
-
-    # courses#edit pages show the name of the prof, so only update
-    # courses with that prof.
-    return unless prof
-    prof.courses.each do |c|
-      puts "Expiring courses#edit for #{c.title}"
-      expire_page :controller => "courses", :action => "edit", :id => c
     end
   end
 end

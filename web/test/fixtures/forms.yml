@@ -1,11 +1,112 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
-  semester: 
-  name: MyString
-  content: MyText
+someFormForST:
+  semester: :summerTerm
+  name: some Form
+  content: |
+    --- !ruby/object:AbstractForm
+    db_table: test_table
+    texfoot: ""
+    pages:
+    - !ruby/object:Page
+      sections:
+      - !ruby/object:Section
+        title:
+          :de: Allgemeine Fragen
+          :en: General Questions
+        questions:
+        - !ruby/object:Question
+          boxes:
+          - !ruby/object:Box
+            text: Bachelor
+          - !ruby/object:Box
+            text: Master
+            text: Magister
+          - !ruby/object:Box
+            text:
+              :de: Promotion
+              :en: "Ph.D."
+          - !ruby/object:Box
+            text:
+              :de: "Sonstiges"
+              :en: "others"
+          db_column: v_central_degree
+          visualizer: horizontal_bars
+          qtext:
+            :de: Mit welchem \emph{Abschlussziel} studieren Sie?
+            :en: Which \emph{degree} will you receive at the end of your studies?
+          type: square
 
-two:
-  semester: 
-  name: MyString
-  content: MyText
+someFormForWT:
+  semester: :winterTerm
+  name: some other form
+  content: |
+    --- !ruby/object:AbstractForm
+    db_table: test_table
+    texfoot: ""
+    pages:
+    - !ruby/object:Page
+      sections:
+      - !ruby/object:Section
+        title:
+          :de: Allgemeine Fragen
+          :en: General Questions
+        questions:
+        - !ruby/object:Question
+          boxes:
+          - !ruby/object:Box
+            text: Bachelor
+          - !ruby/object:Box
+            text: Master
+            text: Magister
+          - !ruby/object:Box
+            text:
+              :de: Promotion
+              :en: "Ph.D."
+          - !ruby/object:Box
+            text:
+              :de: "Sonstiges"
+              :en: "others"
+          db_column: v_central_degree
+          visualizer: horizontal_bars
+          qtext:
+            :de: Mit welchem \emph{Abschlussziel} studieren Sie?
+            :en: Which \emph{degree} will you receive at the end of your studies?
+          type: square
+
+someUnusedForm:
+  semester: :winterTerm
+  name: unused form
+  content: |
+    --- !ruby/object:AbstractForm
+    db_table: test_table
+    texfoot: ""
+    pages:
+    - !ruby/object:Page
+      sections:
+      - !ruby/object:Section
+        title:
+          :de: Allgemeine Fragen
+          :en: General Questions
+        questions:
+        - !ruby/object:Question
+          boxes:
+          - !ruby/object:Box
+            text: Bachelor
+          - !ruby/object:Box
+            text: Master
+            text: Magister
+          - !ruby/object:Box
+            text:
+              :de: Promotion
+              :en: "Ph.D."
+          - !ruby/object:Box
+            text:
+              :de: "Sonstiges"
+              :en: "others"
+          db_column: v_central_degree
+          visualizer: horizontal_bars
+          qtext:
+            :de: Mit welchem \emph{Abschlussziel} studieren Sie?
+            :en: Which \emph{degree} will you receive at the end of your studies?
+          type: square

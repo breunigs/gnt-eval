@@ -1,0 +1,21 @@
+[submodule "submodules/github-buttons"]
+	path = submodules/github-buttons
+	url = https://github.com/necolas/css3-github-buttons.git
+[submodule "submodules/table-filter"]
+	path = submodules/table-filter
+	url = git://github.com/gregwebs/jquery-uitablefilter.git
+[submodule "submodules/js-yaml"]
+	path = submodules/js-yaml
+	url = https://github.com/nodeca/js-yaml.git
+[submodule "submodules/jquery-timepicker"]
+	path = submodules/jquery-timepicker
+	url = https://github.com/trentrichardson/jQuery-Timepicker-Addon.git
+[submodule "submodules/jquery-visualize"]
+	path = submodules/jquery-visualize
+	url = git://github.com/filamentgroup/jQuery-Visualize.git
+[submodule "submodules/jquery-plugins"]
+	path = submodules/jquery-plugins
+	url = git://github.com/SamWM/jQuery-Plugins.git
+[submodule "submodules/jquery-autosize"]
+	path = submodules/jquery-autosize
+	url = git://github.com/jackmoore/autosize.git

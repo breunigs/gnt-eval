@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
 require 'erb'
 
 # A course has many professors, belongs to a semester and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
-  belongs_to :semester
-  belongs_to :faculty
-  belongs_to :form
-  has_many :course_profs
+  belongs_to :semester, :inverse_of => :courses
+  belongs_to :faculty, :inverse_of => :courses
+  belongs_to :form, :inverse_of => :courses
+  has_many :course_profs, :inverse_of => :course
   has_many :profs, :through => :course_profs
-  has_many :tutors
+  has_many :tutors, :inverse_of => :course
   validates_presence_of :semester_id, :title, :faculty, :language, :form
-  validates_numericality_of :students
+  validates_numericality_of :students, :allow_nil => true
 
   # finds all courses that contain all given keywords in their title.
   # The keywords must not appear in order. Only the first 10 keywords
@@ -22,27 +22,29 @@ class Course < ActiveRecord::Base
   # the inc variable. An array is expected. Use cond and vals to specify
   # additional search criteria. For example, to limit to certain
   # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
-  def self.search(term, inc = [], cond = [], vals = [])
-    return Course.filter(inc, cond, vals) if term.nil?
+  # You can also sort by passing an array of attributes to sorty by.
+  def self.search(term, inc = [], cond = [], vals = [], order = nil)
+    return Course.filter(inc, cond, vals, order) if term.nil?
     c = term.gsub(/[^a-z0-9-]/i, " ").split(/\s+/).map { |t| "%#{t}%" }[0..9]
-    return Course.filter(inc, cond, vals) if c.nil? || c.empty?
+    return Course.filter(inc, cond, vals, order) if c.nil? || c.empty?
     cols = ["evaluator", "title", "description", "profs.surname", "profs.firstname"]
     qry = case ActiveRecord::Base.configurations[Rails.env]['adapter']
-      when "mysql": "CONCAT_WS(' ', #{cols*","}) LIKE ?"
-      when "postgresql": "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
+      when /^mysql/     then "CONCAT_WS(' ', #{cols*","}) LIKE ?"
+      when "postgresql" then "ARRAY_TO_STRING(ARRAY[#{cols*","}], ' ')"
       # SQL standard as implemented by… nobody
       else "(#{cols.join(" || ' ' || ")}) LIKE ?"
     end
     cond += [qry]*c.size
     vals += c
-    Course.filter(inc, cond, vals)
+    Course.filter(inc, cond, vals, order)
   end
 
   # filters the courses by the given SQL-statement in cond and the
   # values corresponding to the ? in vals. Specify an array of classes
-  # to load as well in inc.
-  def self.filter(inc, cond, vals)
-    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals])
+  # to load as well in inc. Pass array of variables to sort by, if
+  # wished.
+  def self.filter(inc, cond, vals, order = nil)
+    Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals], :order => order)
   end
 
   # Create an alias for this rails variable
@@ -95,13 +97,20 @@ class Course < ActiveRecord::Base
 
   # lovely helper function: we want to guess the mail address of
   # evaluators from their name, simply by adding a standand mail
-  # domain to it
+  # domain to it. Returns comma separated list.
   def fs_contact_addresses
-    pre_format = fscontact.empty? ? evaluator : fscontact
+    fs_contact_addresses_array.join(',')
+  end
+
+  # lovely helper function: we want to guess the mail address of
+  # evaluators from their name, simply by adding a standand mail
+  # domain to it. Returns array
+  def fs_contact_addresses_array
+    pre_format = fscontact.blank? ? evaluator : fscontact
 
     pre_format.split(',').map do |a|
       (a =~ /@/ ) ? a : a + '@' + SCs[:standard_mail_domain]
-    end.join(',')
+    end
   end
 
   # Same as above, but do not include the default domain. Intended for
@@ -193,7 +202,7 @@ class Course < ActiveRecord::Base
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
 
-    if returned_sheets <= SCs[:minimum_sheets_required]
+    if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
       if single
         b << RT.sample_sheets_and_footer([form])
@@ -218,11 +227,11 @@ class Course < ActiveRecord::Base
         # repeat_for/belong_to value
         s = section.any_title
         case repeat_for
-          when :course:
+          when :course
             b << eval_block(block, s)
-          when :lecturer:
+          when :lecturer
             course_profs.each { |cp| b << cp.eval_block(block, s) }
-          when :tutor:
+          when :tutor
             tutors_sorted.each { |t| b << t.eval_block(block, s) }
           else
             raise "Unimplemented repeat_for type #{repeat_for}"
@@ -238,7 +247,7 @@ class Course < ActiveRecord::Base
   end
 
   def dir_friendly_title
-    title.strip.gsub(/\s+/,'_').gsub(/^[a-z0-9\-_]/i,'')
+    ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
   end
 
   private

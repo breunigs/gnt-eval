@@ -1,0 +1,39 @@
+input + button.ui-button {
+  border-left:0;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+  height:1.4rem;
+}
+
+input.ui-corner-left {
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+}
+
+input.ui-widget {
+  vertical-align:top;
+}
+
+/** limit height of drop down boxes **/
+.ui-menu {
+  max-height:150px;
+  max-height:15rem;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+
+/* fix placeholder color net being grey due to .ui-widget-content
+ * setting the text color */
+.ui-widget-content {
+  &::-webkit-input-placeholder {
+    color:#777;
+  }
+
+  &:-moz-placeholder {
+    color:#777;
+  }
+
+  &:-ms-input-placeholder {
+    color:#777;
+  }
+}

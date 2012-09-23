@@ -1,19 +1,28 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 require 'enumerator'
 require 'tmpdir'
 require 'rubygems'
-require 'work_queue'
 
-require File.join(File.dirname(__FILE__), "seee_config.rb")
-require File.join(File.dirname(__FILE__), "tex_tools.rb")
-
-Scc = Seee::Config.commands unless defined?(Scc)
+cdir = File.dirname(File.realdirpath(__FILE__))
+require File.join(cdir, "../../config", "seee_config.rb")
+require File.join(cdir, "tex_tools.rb")
 
 module Enumerable
   # finds duplicates in an Enum. As posted by user bshow on
   # http://snippets.dzone.com/posts/show/3838
   def get_duplicates
     inject({}) {|h,v| h[v]=h[v].to_i+1; h}.reject{|k,v| v==1}.keys
+  end
+end
+
+class Dir
+  # Works just like the normal glob but returns the filenames only
+  def self.glob_files(pattern, flags = nil)
+    (flags.nil? \
+      ? Dir.glob(pattern) \
+      : Dir.glob(pattern, flags) \
+    ).map { |f| File.basename(f) }
   end
 end
 
@@ -60,9 +69,9 @@ class String
     self
   end
 
-  # Make downcase support German umlauts
+  # Make downcase support unicode
   def downcase
-    self.tr 'A-ZÄÖÜ', 'a-zäöü'
+    UnicodeUtils.downcase(self)
   end
 
   # Capitalizes the first letter of the string and leaves all other
@@ -89,13 +98,17 @@ def find_barcode(filename)
     exit 1
   end
   zbar = Seee::Config.commands[:zbar]
-
+  zbar_d = Seee::Config.commands[:zbar_desperate]
   r = `#{zbar} "#{filename}"`
-  if not r.empty?
-    return r.strip.match(/^([0-9]+)/)[1].to_i
-  else
-    return nil
+  begin
+    return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
+  rescue
+    r = `#{zbar_d} "#{filename}"`
+    begin
+      return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
+    rescue; end
   end
+  return nil
 end
 
 
@@ -108,11 +121,33 @@ def find_barcode_from_path(path)
   bc[1]
 end
 
-# http://snippets.dzone.com/posts/show/3486
 class Array
+  def dot_product(other)
+    raise "Arrays have different dimensions" if self.size != other.size
+    (0..(self.size-1)).map { |i| self[i]*other[i] }.inject(:+)
+  end
+
+  # calculates the eucledian norm of the difference between two vectors
+  def eucledian_norm
+    Math::sqrt(self.map { |a| a**2 }.inject(:+))
+  end
+
+  def vector_diff(other)
+    raise "Arrays have different dimensions" if self.size != other.size
+    (0..(self.size-1)).map { |i| self[i]-other[i] }
+  end
+
+  # Shorthand to see if any of the entries are nil
+  def any_nil?
+    self.any? { |e| e.nil? }
+  end
+
+  # Splits array into equal arrays of given size. Example:
+  # [1,2,3,4,5].chunk(2) => [[1,2], [3,4], [5]]
+  # See http://snippets.dzone.com/posts/show/3486
   def chunk(pieces)
     q, r = length.divmod(pieces)
-    (0..pieces).map { |i| i * q + [r, i].min }.enum_cons(2).map { |a, b| slice(a...b) }
+    (0..pieces).map { |i| i * q + [r, i].min }.each_cons(2).map { |a, b| slice(a...b) }
   end
 
   # converts the values in the array to their value in % with 100% being
@@ -140,11 +175,6 @@ class Array
         return self.first.slice(0, k) if self.any? { |s| char != s[k] }
     end
     a.first
-  end
-
-  # calls String#strip_common_tex for each argument
-  def strip_common_tex
-    self.map { |x| x.to_s.strip_common_tex }
   end
 end
 
@@ -301,8 +331,8 @@ end
 # that path.
 def temp_dir(subdir = "")
   tmp = File.join(Seee::Config.file_paths[:cache_tmp_dir], subdir)
-  require 'ftools'
-  File.makedirs(tmp)
+  require 'fileutils'
+  FileUtils.makedirs(tmp)
   `chmod 0777 -R '#{tmp.gsub("'","\\'")}'  2> /dev/null`
   tmp
 end
@@ -323,9 +353,9 @@ end
 # question.
 def get_user_yesno(question, default = :y)
   opt = case default
-    when :y: " [Y/n]"
-    when :n: " [y/N]"
-    when :none: " [y/n]"
+    when :y    then " [Y/n]"
+    when :n    then " [y/N]"
+    when :none then " [y/n]"
     else raise "Invalid default answer option."
   end
   q = question
@@ -386,7 +416,7 @@ def get_or_fake_user_input(valid, fake)
   valid = valid.collect { |x| x.to_s } if valid.is_a? Array
   return get_user_input(valid) unless fake
   if valid.is_a? Array
-    return get_user_input(valid) unless (fake.is_a?(Array) && fake.all? { |x| valid.include?(x) }) || valid.include?(fake)
+    return get_user_input(valid) unless (fake.is_a?(Array) && fake.all? { |x| valid.include?(x.to_s) }) || valid.include?(fake)
   else
     return get_user_input(valid) unless fake =~ valid
   end
@@ -423,10 +453,8 @@ def guess_gender(firstname)
   return :unknown if firstname.empty?
   require 'net/http'
   require 'rubygems'
-  require 'asciify'
   name = firstname.downcase
-  letter = name.asciify[0..0]
-  base = "http://www.beliebte-vornamen.de/lexikon/#{letter}"
+  base = "http://www.beliebte-vornamen.de/lexikon/#{name[0..0]}"
   m = Net::HTTP.get(URI("#{base}-mann")).compress_whitespace.downcase
   f = Net::HTTP.get(URI("#{base}-frau")).compress_whitespace.downcase
   # find all names, and split variants separated by comma or slash
@@ -444,4 +472,48 @@ def guess_gender(firstname)
   return :male if m.include?(name)
   return :female if f.include?(name)
   :unknown
+end
+
+# Find out path of Ruby executable that runs this file
+# via http://stackoverflow.com/questions/2814077
+def ruby_interpreter_path
+  File.join(RbConfig::CONFIG["bindir"],
+    RbConfig::CONFIG["RUBY_INSTALL_NAME"] +
+    RbConfig::CONFIG["EXEEXT"])
+end
+
+if ENV['TESTING']
+  require 'test/unit'
+  require "unicode_utils"
+
+  class TestMethods < Test::Unit::TestCase
+    def test_guess_gender
+      assert_equal(guess_gender("oliver"), :male)
+      assert_equal(guess_gender("ReBeCcA"), :female)
+      assert_equal(guess_gender("GNT-Eval"), :unknown)
+    end
+  end
+
+  class TestArray < Test::Unit::TestCase
+    def test_dot_product
+      assert_equal([1,2,3].dot_product([-7, 8, 9]), 36)
+    end
+
+    def test_eucledian_norm
+      assert_equal([1,2,3].eucledian_norm, Math::sqrt(1**2+2**2+3**2))
+    end
+
+    def test_vector_diff
+      assert_equal([1,2,3].vector_diff([1,2,3]), [0,0,0])
+    end
+  end
+
+  class TestDir < Test::Unit::TestCase
+    def test_glob_files
+      assert_equal(Dir.glob("*").size, Dir.glob_files("*").size)
+      # globbing the current directory should not result in different
+      # filenames
+      assert_equal(Dir.glob("*"), Dir.glob_files("*"))
+    end
+  end
 end

@@ -1,7 +1,5 @@
-<% content_for :script, javascript_include_tag("hold_button") %>
-
-<form class="hold_button" method="post">
-  <input type="submit" id="<%=id%>" value="<%=name%>" disabled="disabled"/>
+<form title="This button is special. If you don’t know how to use it, then don’t." class="hold_button <%=defined?(button) && button ? "hold_button_form_compat" : ""%>" method="post">
+  <input type="submit" id="<%=id%>" value="<%=name%>" disabled="disabled" class="<%=defined?(button) && button ? "button" : ""%>"/>
   <script> hold_button(document.getElementById("<%=id%>"), 5, true, "<%=url%>"); </script>
   <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token%>" />
   <noscript>needs JS</noscript>

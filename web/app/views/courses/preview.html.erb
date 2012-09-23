@@ -1,8 +1,9 @@
-<%= render "shared/main_menu" %>
-<fieldset>
-  <h1>Previewing <%=@course.title %></h1>
-  <%= courseShowLink %>
-  <%= courseEditLink %>
-</fieldset>
+<div>
+  <h2>Previewing <%=@course.title %></h2>
+  <div class="button-group">
+    <%= courseShowLink %>
+    <%= courseEditLink %>
+  </div>
+</div>
 
-<%= render :partial => "shared/preview_big", :locals => {:text => @course.summary } %>
+<%= render "shared/preview_big", :text => @course.summary %>

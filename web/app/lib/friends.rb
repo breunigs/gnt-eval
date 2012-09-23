@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # contains Friends class which handles matching names similar to each
 # other. Define FRIENDS_PATH if you want to appear the true/false
 # friends files to appear elsewhere. The class is tailored for import,
@@ -6,7 +8,7 @@
 require "rubygems"
 require "text"
 
-FRIENDS_PATH = "#{GNT_ROOT}/tmp/friends/" unless defined?(FRIENDS_PATH)
+FRIENDS_PATH = File.expand_path("#{GNT_ROOT}/tmp/friends/") unless defined?(FRIENDS_PATH)
 
 class Friends
   TF_PATH = FRIENDS_PATH + "true_friends.txt"

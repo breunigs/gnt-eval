@@ -1,16 +1,18 @@
+# encoding: utf-8
+
 module FormsHelper
   def nav_links
     s = []
-    s << link_to("Edit #{@form.name}", edit_form_path(@form)) unless @form.critical?
-    s << link_to('Show rendered preview', "#tex-image-preview")
-    s << link_to('Show TeX-Code used for preview', "#tex-code-preview")
-    s << link_to('Show Ruby-fied form code', "#ruby-yaml-code")
-    s << link_to('List all available forms', forms_path)
-    s.join(" | ")
+    s << link_to("Edit #{@form.name}", edit_form_path(@form), :class => "button primary") unless @form.critical?
+    s << link_to('Show rendered preview', "#tex-image-preview", :class => "button")
+    s << link_to('Show TeX-Code used for preview', "#tex-code-preview", :class => "button")
+    s << link_to('Show Ruby-fied form code', "#ruby-yaml-code", :class => "button")
+    s << link_to('List all available forms', forms_path, :class => "button")
+    (%(<div class="button-group">#{s.join}</div>)).html_safe
   end
 
   def form_tex_code(form)
-    form.abstract_form_valid? ? form.abstract_form.to_tex : ""
+    form.abstract_form_valid? ? form.abstract_form.to_tex : nil
   end
 
   def render_preview
@@ -23,7 +25,7 @@ module FormsHelper
 
     name = Digest::SHA256.hexdigest(code)
     tmppath = File.join(temp_dir, "form_preview")
-    File.makedirs(tmppath)
+    FileUtils.makedirs(tmppath)
     path = File.join(tmppath, "form_#{@form.id}__#{name}")
 
     exitcodes = []
@@ -70,12 +72,12 @@ module FormsHelper
     files = '"' + Dir.glob("#{path}*").join('" "') + '"'
     `rm -rf #{files}`
 
-    return exitcodes.total > 0, exitcodes, logger.gsub("\n", "<br/>"), base64
+    return exitcodes.total > 0, exitcodes, h(logger), base64
   end
 
-  def texpreview(text)
+  def texpreview(text = nil)
     unless text.nil? || text.empty?
-      raise "Forms use their own render method and do not need text to be passed. Please replace by texpreview(nil)."
+      raise "Forms use their own render method and do not need text to be passed. Please replace by texpreview()."
     end
 
     return render_preview

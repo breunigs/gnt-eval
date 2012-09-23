@@ -1,4 +1,6 @@
-<fieldset>
-  <legend>LaTeX Preview</legend>
-  <%= render :partial => "shared/preview", :locals => {:text => text} %>
-</fieldset>
+<div>
+  <h3><%=latex_logo%> Preview</h3>
+  <div class="preview large">
+    <%= render "shared/preview", :text => text %>
+  </div>
+</div>

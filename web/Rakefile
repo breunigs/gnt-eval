@@ -1,10 +1,19 @@
+#!/usr/bin/env rake
 # Add your own tasks in files placed in lib/tasks ending in .rake,
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
-require(File.join(File.dirname(__FILE__), 'config', 'boot'))
+require File.expand_path('../config/application', __FILE__)
 
-require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
+Seee::Application.load_tasks
 
-require 'tasks/rails'
+namespace :cache do
+  desc "Removes all untracked files in the public folder"
+  task :clear do
+    Dir.glob(File.join(File.dirname(__FILE__), 'public/**/*.html')) do |f|
+      # skip tracked files
+      `git ls-files "#{f}" --error-unmatch 2> /dev/null`
+      next if $?.exitstatus == 0
+      File.delete(f)
+    end
+  end
+end

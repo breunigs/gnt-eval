@@ -1,0 +1,478 @@
+/* ensures the contents of the element will be cleared after the element.
+   Uses content:after rules. */
+@mixin clear-after {
+  &:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    overflow:hidden;
+    margin-bottom:-3px;
+    margin-bottom:-0.3rem;
+  }
+}
+
+// applies background grandient to element for all browsers.
+@mixin gradient($from, $to) {
+  background-image: -moz-linear-gradient($from, $to);
+  background-image: -o-linear-gradient($from, $to);
+  background-image: -ms-linear-gradient($from, $to);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
+}
+
+
+@mixin transition($transition) {
+  -ms-transition: $transition;
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  -webkit-transition: $transition;
+  transition: $transition;
+}
+
+
+
+* {
+  padding:0;
+  border:0;
+  outline:0;
+  margin:0;
+  color:#000;
+  outline-style: none;
+  // force the same box model on all elements. Just to be safe.
+  box-sizing:content-box;
+  -o-box-sizing:content-box;
+  -moz-box-sizing:content-box;
+  -webkit-box-sizing:content-box;
+}
+
+b, i, u {
+  color: inherit;
+}
+
+/* 1rem == 10px; See http://snook.ca/archives/html_and_css/font-size-with-rem */
+html {
+  font-size: 62.5%;
+}
+
+body {
+  background:transparent;
+  font-family:sans-serif;
+  font-size:1.3rem;
+}
+
+$group_border: 1px solid #aaa;
+$group_box_shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.2);
+
+body > div:first-of-type {
+  border-top:0;
+  margin-top:0;
+}
+
+h1 {
+  margin-bottom:10px;
+  margin-bottom:1rem;
+  font-size:250%;
+}
+
+h2 {
+  font-size:180%;
+  margin-bottom:5px;
+  margin-bottom:0.5rem;
+}
+
+h3 {
+  margin-bottom:3px;
+  margin-bottom:0.3rem;
+}
+
+.warning, .error, .info, .notice {
+  margin: 4px 0 4px 0;
+  margin: 0.4rem 0 0.4rem 0;
+  font-style:italic;
+  &:before {
+    float:left;
+    font-size: 300%;
+    margin-top: -5px;
+    margin-top: -0.5rem;
+    margin-right: 8px;
+    margin-right: 0.8rem;
+    font-style:normal;
+  }
+  @include clear-after;
+}
+
+.info, .notice {
+  color: #404DFF;
+  &:before {
+    content: "ℹ";
+  }
+}
+
+.warning {
+  color: #9F6000;
+  &:before {
+    content: "⚠";
+  }
+}
+
+.error {
+  color: #D8000C;
+  &:before {
+    content: "⚡";
+  }
+}
+
+.infobox {
+  float:right;
+  vertical-align:top;
+  max-width:350px;
+  max-width:35rem;
+  text-align:right;
+  .warning {
+
+    display:inline-block;
+    &:before {
+      float: right;
+      margin-left: 3px;
+      margin-left: 0.3rem;
+      margin-right: 0;
+    }
+  }
+}
+
+
+body > div, div.group {
+  padding:10px;
+  padding:1rem;
+  margin:10px;
+  margin:1rem;
+  background:#fff;
+  border: $group_border;
+  box-shadow: $group_box_shadow;
+  /* automatically add spacing for DIVs. Unless they form a button group
+   * or if they are the group’s first element. */
+  > div:not(.button-group):not(:first-of-type) {
+    margin-top:10px;
+    margin-top:1rem;
+  }
+
+  @include clear-after;
+}
+
+.hold_button input[disabled], .hold_button input[disabled]:hover {
+  text-decoration: line-through;
+}
+
+
+table {
+  margin-left:-1px; /* browsers insert 1px between thead/tbody and the table tag */
+  margin-bottom:10px;
+  margin-bottom:1rem;
+  margin-top:5px;
+  margin-top:0.5rem;
+
+  th {
+    text-align:left;
+    padding:2px;
+    padding:0.2rem;
+    background:transparent;
+    vertical-align:top;
+    line-height:21px;
+    line-height:2.1rem;
+  }
+  td {
+    padding:2px;
+    padding:0.2rem;
+    background:transparent;
+  }
+
+  thead tr {
+    background:#efefef !important;
+  }
+
+  /* automatically zebra stripe tables unless they have even/odd classes.
+   * This allows for table filtering where the even/odd are added via js.
+   */
+  tr:nth-child(2n+1):not(.odd):not(.even), .odd {
+    background:#f2f2f2;
+  }
+}
+
+ul, ol {
+  list-style-position:outside;
+  margin-left:1.4rem;
+  margin-top:3px;
+  margin-top:0.3rem;
+  li {
+    padding:2px;
+    padding:0.2rem;
+  }
+}
+
+.fade {
+  color:#777;
+}
+
+label {
+  padding:2px;
+  padding:0.2rem;
+  padding-right:4px;
+  padding-right:0.4rem;
+  display:inline-block;
+}
+
+input:not(.button), textarea, select {
+  background-color: #FBFBFB;
+  @include gradient(#FFFFFF, #FBFBFB);
+  border: 1px solid #D4D4D4;
+  border: 0.1rem solid #D4D4D4;
+  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 4px;
+  padding: 0.4rem;
+  height:14px;
+  height:1.4rem;
+  font-size:13px;
+  font-size:1.3rem;
+  min-width:250px;
+  min-width:25rem;
+  &:focus, &:active {
+    border:1px solid #999;
+  }
+}
+
+input[type=checkbox] + label {
+  cursor:pointer;
+}
+
+input + span.hint {
+  color:#777;
+  font: {
+    style:italic;
+    size:90%;
+  }
+  padding: 0.4px 0;
+  padding: 0.4rem 0;
+  display:block;
+}
+
+button {
+  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 4px !important;
+  padding: 0.4rem !important;
+  height:11px;
+  height:1.1rem;
+}
+
+td, th {
+  > label {
+    padding:0;
+  }
+}
+
+select {
+  min-width:260px;
+  min-width:26rem;
+  height:20px;
+  height:2rem;
+  padding:0;
+  padding-top:2px;
+  padding-top:0.2rem;
+  option {
+    padding:2px;
+    padding:0.2rem;
+    &:nth-child(2n+1) {
+      background:#fafafa;
+    }
+    &:nth-child(2n) {
+      background:#fff;
+    }
+    &[disabled] {
+      text-decoration: line-through;
+    }
+  }
+
+  optgroup {
+    font-weight:bold;
+    padding-top:10px;
+    padding-top:1rem;
+    background:#fff;
+  }
+}
+
+textarea {
+  min-height:100px;
+  min-height:10rem;
+}
+
+.field_with_errors {
+  input, textarea, select {
+    border:1px solid #FFB3B3;
+    box-shadow: 0 0 0.2rem rgba(255, 54, 54, 0.2);
+  }
+}
+
+::-webkit-input-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+:-moz-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+
+:-ms-input-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+
+table.large_text_area {
+  width: 100%;
+
+  td > div.ace_editor, td textarea {
+    width:100%;
+    min-height:250px;
+    min-height:25rem;
+  }
+}
+
+.ace_editor {
+  position:relative !important;
+  height: 340px;
+  width:100%;
+  border:1px solid #D9D7D7;
+}
+
+span.error {
+  color:red;
+}
+
+a, .hold_button:not(.hold_button_form_compat) input {
+  color:#FF3636;
+  text-decoration:none;
+  background:transparent;
+  cursor:pointer;
+  &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
+    border: 0;
+    border-bottom:0.1rem dotted #FF3636;
+    text-shadow: 0 0 0.05rem rgba(0, 0, 0, 0.1);
+  }
+}
+
+a span {
+  color: inherit;
+}
+
+.hold_button:not(.hold_button_form_compat) input {
+  border:0;
+  border-bottom:1px dotted transparent;
+  display:inline;
+  height:auto;
+  width:auto;
+  padding:0;
+  min-width:0;
+  border-radius:0;
+}
+
+.hold_button_form_compat {
+  float:left;
+}
+
+.ui-datepicker {
+  box-shadow: $group_box_shadow;
+}
+
+.preview {
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height:100px;
+  max-height:10rem;
+  margin:10px 0 5px 0;
+  margin:1rem 0 0.5rem 0;
+  padding-bottom:5px;
+  padding-bottom:0.5rem;
+
+  img:not(.no-shadow) {
+    border:1px solid #ccc;
+    padding:10px;
+    padding:1rem;
+    box-shadow: 0.1rem 0.1rem 0.2rem rgba(0,0,0, 0.2);
+  }
+
+  &.large {
+    max-height:none;
+  }
+}
+
+.loading {
+  white-space:pre;
+  font-family:monospace;
+}
+
+pre, div.pre {
+  width:100%;
+  overflow-x:hidden;
+  overflow-y:auto;
+  white-space: pre-wrap;
+  max-height:350px;
+  max-height:35rem;
+  border:1px solid #ccc;
+  padding:2px;
+  padding:0.2rem;
+}
+
+select.question {
+  margin-bottom:3px;
+  margin-bottom:0.3rem;
+}
+
+.singleline > * {
+  float:left;
+}
+
+.result table td {
+  text-align:right;
+}
+
+.red {
+  color:red;
+}
+
+#darkened, #darkened2 {
+  background:rgba(0,0,0, 0.1);
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1001; // ace-gutter has z-index 1000
+  margin:0;
+  pointer-events:none;
+  display:none;
+}
+
+#collision-warning {
+  border-top-left-radius: 0.5em;
+  border-bottom-left-radius: 0.5em;
+  width: 25em;
+  position: fixed;
+  top: 4em;
+  right:0em;
+  z-index: 1002;
+  border: 1px solid #333;
+  border-right:0;
+  text-align:justify;
+  cursor:pointer;
+  @include transition(right .4s ease-in-out);
+}
+
+#collision-warning.collapsed {
+  right:-23em;
+}
+
+#collision-warning.hidden {
+  pointer-events:none;
+  right:-27em;
+}

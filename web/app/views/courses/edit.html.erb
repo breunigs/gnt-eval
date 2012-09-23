@@ -1,36 +1,34 @@
-<%= render "shared/main_menu" %>
-<%= render :partial => "shared/aceify_textareas", :locals => {:line_offset => texpreview_header_offset }  %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
 
 <% # can’t change anything while critical, so don’t load JS %>
-<% unless @course.critical? %>
-<%= render :partial => "courses/form_lang_select" %>
-<% end %>
+<%= render "form_lang_select" unless @course.critical? %>
 
-<% form_for(@course) do |f| %>
-  <fieldset>
-    <h1>Editing course <%=h @course.title %></h1>
-    <%= error_messages_for :course %>
+<%= form_for(@course) do |f| %>
+  <%
+    links = %(<div class="button-group">)
+    links << (f.submit "Update and Preview", :disable_with => "Saving…", :class => "button primary")
+    links << (link_to "Discard and Preview", @course, :class => "button")
+    links << %(</div>)
+    links = links.html_safe
+  %>
 
-    <p>
-      <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %>
-      <%= link_to "Cancel", @course %>
-    </p>
-  </fieldset>
+  <div class="group">
+    <h2>Editing <%=@course.title %></h2>
+    <%= render "shared/error_messages", :model => @course %>
+    <%=links%>
+    <br style="clear:both"/>
 
-  <fieldset>
-    <legend>main details</legend>
-    <table>
-      <% for item in
-        [
-          [f.label(:semester_id),
+    <table style="float:left;min-width:50%;">
+      <tr><th colspan="3" style="font-size:120%">master data</th></tr>
+      <% [[f.label(:title),                             f.text_field(:title), "required"],
+          [f.label(:semester),
               if @course.critical?
                 "#{@course.semester.title} (can't change this while critical)"
               else
                 collection_select(:course, :semester_id, Semester.all.reverse, :id, :title, {:prompt => true})
               end, "required"],
-          [f.label(:title),                             f.text_field(:title), "required"],
-          [f.label(:students),                          f.text_field(:students), "required, numeric. If you absolutely must, use 999 for “don't know”"],
-          [f.label(:form_id),
+          [f.label(:faculty, :for=>"course_faculty_id"),collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"],
+          [f.label(:form),
               if @course.critical?
                 "#{@course.form.name} (can't change this while critical)"
               else
@@ -42,51 +40,69 @@
               else
                 collection_select(:course, :language, all_langs, :to_sym, :to_s)
               end, "required"],
-          [f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
-          [f.label(:fscontact, "FS Account OR Email"),  f.text_field(:fscontact), "may be omitted if “Evaluated by” is the account name"],
-          [f.label(:description),                       f.text_field(:description), "Multi-use field (date, status, etc.)"],
-          [f.label(:faculty_id),                        collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"],
-          [f.label(:note),                              f.text_field(:note), "Small note/hint to be added right below the headline in result.pdf"]
-        ]
-      %>
-        <tr style="background: #<%= cycle('efefef', 'fff') %>">
-          <th><%= item.shift %></th>
-          <td><%= item.shift %></td>
-          <% for data in item do %> <td><%=h data %></td> <% end %>
+          [f.label(:students),                          f.text_field(:students), "numeric"],
+          [f.label(:note),                              f.text_field(:note) + %(<span class="hint">Small note/hint to be added right below the headline in result.pdf</span>).html_safe]
+        ].each do |item| %>
+        <tr>
+          <th><%=item.shift%></th>
+          <td><%=item.shift%></td>
+          <td><%=item.shift%></td>
         </tr>
       <% end %>
     </table>
-  </fieldset>
 
-  <fieldset>
-    <legend>Comments</legend>
-    <p>(This is LaTeX-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, i.e. &#8222;Deutsch&#8220; or &#8220;English&#8221;)</p>
+    <table style="float:left;margin-left:2em;">
+      <tr><th colspan="2" style="font-size:120%">adminstrative data</th></tr>
+      <% [[f.label(:evaluator, "Evaluated by"),         f.text_field(:evaluator)],
+          [f.label(:fscontact, "Account Name OR Mail"),  f.text_field(:fscontact) + %(<span class="hint">may be omitted if “Evaluated by” is the account name</span>).html_safe],
+          [f.label(:description),                       f.text_field(:description) + %(<span class="hint">Multi-use field (date, status, etc.)</span>).html_safe]
+        ].each do |item| %>
+        <tr>
+          <th><%=item.shift%></th>
+          <td><%=item.shift%></td>
+        </tr>
+      <% end %>
+    </table>
+    <% content_for :script do %>
+      <script>
+        $(document).ready(function() {
+          $("#course_evaluator").bind("blur change keyup", function() {
+            var v = $(this).val().trim().toLowerCase();
+            var v = v.length == 0 ? "" : v + "@<%=j Seee::Config.settings[:standard_mail_domain]%>";
+            $("#course_fscontact").attr("placeholder", v);
+          }).blur();
+        });
+      </script>
+    <% end %>
+  </div>
+
+  <div class="group">
+    <h3>Comments</h3>
+    (This is <%=latex_logo%>-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, e.g. „Deutsch“ or “English”)<br/>
     <%= f.text_area(:summary, :style => 'width:99%')%>
-  </fieldset>
+  </div>
 
-  <fieldset>
-    <legend>Scanned comments</legend>
+  <div class="group">
+    <h3>Scanned comments</h3>
     <div class="commentview">
-      <% for cp in @course.course_profs %>
+      <% @course.course_profs.each do |cp| %>
         <% if cp.c_pics.empty? %>
           <span>NO COMMENTS for <%=h cp.prof.fullname %></span>
           <% next %>
         <% end %>
 
-        <span>for <%=h cp.prof.fullname %>:</span>
-        <% for p in cp.c_pics %>
-          <img style="border-left:2em solid #<%= cycle('efefef', 'bfbfbf') %>"
-            src="<%=h comment_image_link %>/<%=h @course.semester.dirfriendly_title + '/' + p.basename %>" />
-          <br/>
+        <span>for <%=cp.prof.fullname %>:</span>
+        <% cp.c_pics.each do |p| %>
+          <%= render "shared/comment_pic", :course => @course, :pic => p %>
         <% end %>
         <br/>
       <% end %>
-      <span style="background:#f00;color:#fff">end of comments</span>
+      <span class="end">end of comments</span>
     </div>
-  </fieldset>
+    Hint: if comments are cut off, click-and-hold for one second to download the original sheet.
+  </div>
 
-  <fieldset>
-    <%= f.submit "Update and Preview", :disable_with => "Saving&hellip;" %>
-    <%= link_to "Cancel", @course %>
-  </fieldset>
+  <div class="group">
+    <%=links%>
+  </div>
 <% end %>

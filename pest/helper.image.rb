@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Provides general features to work with the scanned images and the
 # associated YAML files. Offers the ability to detect rotation and
 # offset, as well as features to search for black areas in the sheet.
@@ -132,6 +134,27 @@ module PESTImageTools
     nil
   end
 
+  def corner_angle(page_num, where)
+    case where
+      when :tl
+        a = @corners[page_num][:tr].vector_diff(@corners[page_num][:tl])
+        b = @corners[page_num][:bl].vector_diff(@corners[page_num][:tl])
+      when :tr
+        a = @corners[page_num][:br].vector_diff(@corners[page_num][:tr])
+        b = @corners[page_num][:tl].vector_diff(@corners[page_num][:tr])
+      when :bl
+        a = @corners[page_num][:tl].vector_diff(@corners[page_num][:bl])
+        b = @corners[page_num][:br].vector_diff(@corners[page_num][:bl])
+      when :br
+        a = @corners[page_num][:tr].vector_diff(@corners[page_num][:br])
+        b = @corners[page_num][:bl].vector_diff(@corners[page_num][:br])
+      else
+        raise "Invalid position given."
+    end
+
+    return (Math::acos(a.dot_product(b) / (a.eucledian_norm * b.eucledian_norm)) / Math::PI * 180)
+  end
+
   # Tries to find the corners on each corner of the page and stores them
   # in @corners. Only adds a corner if both parts of it are found.
   def locate_corners
@@ -165,6 +188,23 @@ module PESTImageTools
       y = search(i, [-40-150, -1-150], [-40, -1], :up, 30, true, true)
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:br => [x,y]}) unless [x, y].any_nil?
+
+      len_l = (@corners[i][:bl][1] - @corners[i][:tl][1] - CORNER_HEIGHT).abs
+      len_r = (@corners[i][:br][1] - @corners[i][:tr][1] - CORNER_HEIGHT).abs
+      len_t = (@corners[i][:tr][0] - @corners[i][:tl][0] - CORNER_WIDTH).abs
+      len_b = (@corners[i][:br][0] - @corners[i][:bl][0] - CORNER_WIDTH).abs
+
+      # try to remove the corner which deviates very much from the
+      # expected position
+      c = nil
+      c = corner_angle(i, :tl) > corner_angle(i, :tr) ? :tr : :tl if len_t >= CORNER_DEVIATION
+      c = corner_angle(i, :bl) > corner_angle(i, :br) ? :br : :bl if len_b >= CORNER_DEVIATION
+      c = corner_angle(i, :tl) > corner_angle(i, :bl) ? :bl : :tl if len_l >= CORNER_DEVIATION
+      c = corner_angle(i, :tr) > corner_angle(i, :br) ? :br : :tr if len_r >= CORNER_DEVIATION
+      if c
+        debug("  Removing corner #{c} on page #{i} because it is so far off.") if @verbose
+        @corners[i][c] = [nil, nil]
+      end
 
       # Debug prints that have only limited use
       #draw_line(i, @corners[i][:tl], @corners[i][:br], "yellow")

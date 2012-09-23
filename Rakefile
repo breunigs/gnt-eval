@@ -1,19 +1,12 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
-require 'rubygems'
-require 'action_mailer'
-require 'web/config/boot'
-require 'web/lib/ext_requirements.rb'
-require 'web/lib/RandomUtils.rb'
+# always recording metadata allows us to show the task list from within
+# the default task, speeding up "rake" which is used more often than
+# the actual rake tasks.
+Rake::TaskManager.record_task_metadata = true
 
-require 'pp'
-require 'yaml'
-
-# needed for image manipulations
-require 'RMagick'
-require 'ftools'
-
-include Magick
+require './web/config/environment.rb'
+Bundler.setup(:rakefiles)
 
 require 'rake/clean'
 CLEAN.include('tmp/**/*.log', 'tmp/**/*.out', 'tmp/**/*.aux',
@@ -39,7 +32,7 @@ SCfp = Seee::Config.file_paths unless defined?(SCfp)
 def make_sample_sheet(form, lang)
   # this is hardcoded throughout the project
   dir = "tmp/sample_sheets/"
-  File.makedirs(dir)
+  FileUtils.makedirs(dir)
   filename = "#{dir}sample_#{form.id}#{lang.to_s.empty? ? "" : "_#{lang}"}"
 
   form_misses_files = !File.exist?(filename+'.pdf') || !File.exist?(filename+'.yaml')
@@ -64,24 +57,29 @@ def make_sample_sheet(form, lang)
 
   puts "Wrote #{filename}.tex"
   tex_to_pdf("#{filename}.tex", true)
+  lines_posout = %x{wc -l #{filename}.posout}.split.first.to_i
   `./pest/latexfix.rb "#{filename}.posout" && rm "#{filename}.posout"`
+  lines_yaml = %x{wc -l #{filename}.yaml}.split.first.to_i
+  raise "Converting error: # lines of posout and yaml differ." if lines_yaml != lines_posout
   filename
 end
 
 # load external rakefiles
-require 'rakefiles/export.rb'
-require 'rakefiles/forms.rb'
-require 'rakefiles/images.rb'
-require 'rakefiles/import.rb'
-require 'rakefiles/mail.rb'
-require 'rakefiles/omr-test-helper.rb'
-require 'rakefiles/results.rb'
-require 'custom_build/build.rb'
+require './rakefiles/export.rb'
+require './rakefiles/forms.rb'
+require './rakefiles/images.rb'
+require './rakefiles/import.rb'
+require './rakefiles/mail.rb'
+require './rakefiles/omr-test-helper.rb'
+require './rakefiles/results.rb'
+require './custom_build/build.rb'
 
 # automatically calls rake -T when no task is given
 task :default do
   puts "Choose your destiny:"
-  system("rake -sT")
+  Rake::application.options.show_tasks = :tasks
+  Rake::application.options.show_task_pattern = //
+  Rake::application.display_tasks_and_comments
 end
 
 namespace :misc do
@@ -97,15 +95,15 @@ namespace :misc do
     # if you change stuff here, also adjust rakefiles/import.rb
     require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     puts "Finding IDs…"
-    search = ["Mathematik und Informatik", "Fakultät für Physik und Astronomie"]
+    search = ["Mathematik und Informatik", "Physik und Astronomie"]
     mathe, physik = LSF.find_certain_roots(search)
 
     @dir = "tmp/lsfparse/"
-    File.makedirs(@dir)
+    FileUtils.makedirs(@dir)
 
     def run(name, url)
       cmd = "cd '#{@dir}' && "
-      cmd << "../../tools/lsf_parser_api.rb #{name} '#{url}' "
+      cmd << "#{ruby_interpreter_path} ../../tools/lsf_parser_api.rb #{name} '#{url}' "
       cmd << "> #{name}.log"
       `#{cmd}`
     end

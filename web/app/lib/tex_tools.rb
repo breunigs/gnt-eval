@@ -1,14 +1,22 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 # home to all TeX related tools that might be used in more than one
 # location.
 
 require 'erb'
 
 class String
+  # needs strange parameters so it accepts the multi part bytes.
+  # see http://www.ruby-forum.com/topic/183413
+  TO_ASCII_REGEX = Regexp.new '[\x80-\xff]', nil, 'n'
+
+  STRIP_ALL_TEX_REGEX = Regexp.new '\\\[a-z0-9]+(?:\[[^\]]*\])*((?:\{[^\}]*\})*)', nil
+  STRIP_UNESCAPED_BRACES = Regexp.new '([^\\\])[\{\}]+', nil
+
   # Removes all UTF8 chars and replaces them by underscores. Usually
   # required for LaTeX output.
   def to_ascii
-    self.gsub(/[\x80-\xff]/, "_")
+    self.gsub(TO_ASCII_REGEX, "_")
   end
 
   # escapes & _ # and % signs if not already done so
@@ -31,6 +39,18 @@ class String
     s = s.gsub(/\\mbox/, "")
     s = s.gsub(/\\textls\[-?[0-9]+\]/, "")
     s = s.gsub(/\\hspace\*?\{[^\}]+\}/, "")
+    s = s.gsub('\dots', '…').gsub('\ldots', "…")
+  end
+
+  # Tries to remove all TeX from the string. It will remove all commands
+  # that look like this:
+  # \command[optional]{output}   ⇒ output
+  def strip_all_tex
+    x = self.strip_common_tex
+    x = "X#{x}".gsub(/([^\\])%.*$/, "\\1")[1..-1]
+    x.gsub!('\%', '%')
+    x.gsub!(STRIP_ALL_TEX_REGEX, "\\1")
+    "X#{x}".gsub(STRIP_UNESCAPED_BRACES, "\\1")[1..-1]
   end
 
   # Fixes some often encountered errors in TeX Code.
@@ -53,21 +73,27 @@ class String
     msg << "Unexpanded “&”?" if self.match("\\&")
     msg << "Deprecated quotation mark use?" if self.match("\"`")
     msg << "Deprecated quotation mark use?" if self.match("\"'")
-    msg << "Underline mustn't be used. Ever." if self.match("\\underline")
+    msg << "Underline mustn't be used. Ever." if self.match(/\\underline/)
     msg << "Unescaped %-signs?" if self.match(/[^\\]%/)
 
     begs = self.scan(/\\begin\{[a-z]+?\}/)
     ends = self.scan(/\\end\{[a-z]+?\}/)
     if  begs.count != ends.count
-	msg << "\\begin and \\end count differs. This is what has been found:"
-	msg << "\tBegins: #{begs.join("\t")}"
-	msg << "\tEnds:   #{ends.join("\t")}"
+      msg << "\\begin and \\end count differs. This is what has been found:"
+      msg << "\tBegins: #{begs.join("\t")}"
+      msg << "\tEnds:   #{ends.join("\t")}"
     end
 
     msg.collect { |x| "\t" + x }.join("\n")
   end
 end
 
+class Array
+  # calls String#strip_common_tex for each argument
+  def strip_common_tex
+    self.map { |x| x.to_s.strip_common_tex }
+  end
+end
 
 # Renders the given TeX Code directly into a PDF file at the given
 # location. Set add_header to false if you plan to include your own
@@ -93,12 +119,14 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
   File.open(tmp, 'w') {|f| f.write(tex_code) }
 
   if tex_to_pdf(tmp) and File.exists?(tmp)
-    File.makedirs(File.dirname(pdf_path))
+    FileUtils.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
     puts
     puts "Done, have a look at #{pdf_path}"
+    return true
   else
     puts "Rendering your TeX Code failed."
+    return false
   end
 end
 
@@ -206,4 +234,30 @@ def test_tex_code(content)
   end
 
   (stat == 0)
+end
+
+
+
+
+
+
+if ENV['TESTING']
+  require 'test/unit'
+
+  class TestString < Test::Unit::TestCase
+    def test_strip_all_tex
+      assert_equal("Staatsexamen including Lehramt", "Staatsexamen\\linebreak\\emph{including Lehramt}".strip_all_tex)
+      assert_equal("Staatsexamen including Lehramt (State Examination including Civil Service Examination)", "Staatsexamen\\linebreak\\emph{including Lehramt} (State Examination \\emph{including Civil \\textls[-15]{Service Examination)}}".strip_all_tex)
+      assert_equal("1 asd", "\\emph[lol]{1} asd".strip_all_tex)
+      assert_equal("2 asd", "\\emph[][gg]{2} asd".strip_all_tex)
+      assert_equal(" asd3", "\\emph[]{} asd3".strip_all_tex)
+      assert_equal(" asd4", "\\emph{} asd4".strip_all_tex)
+      assert_equal(" asd5", "\\cmd asd5".strip_all_tex)
+      assert_equal("X123456", "X\\some{123}{456}".strip_all_tex)
+      assert_equal("asd…", "asd\\dots".strip_all_tex)
+      assert_equal("test%", "\\textls[-15]test\\%".strip_all_tex)
+      assert_equal("asd…", "\\emph{asd\\ldots}% wtf".strip_all_tex)
+
+    end
+  end
 end

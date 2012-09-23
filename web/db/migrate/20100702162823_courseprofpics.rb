@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Courseprofpics < ActiveRecord::Migration
   def self.up
      rename_column :c_pics, :course_id, :course_prof_id

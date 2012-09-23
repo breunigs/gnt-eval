@@ -1,7 +1,9 @@
+# encoding: utf-8
+
 # tutors belong to a course.
 class Tutor < ActiveRecord::Base
-  belongs_to :course
-  has_many :pics
+  belongs_to :course, :inverse_of => :tutors
+  has_many :pics, :inverse_of => :tutor
   has_one :form, :through => :course
   has_one :faculty, :through => :course
   has_one :semester, :through => :course
@@ -16,6 +18,44 @@ class Tutor < ActiveRecord::Base
   # parent course is critical or if the course has returned sheets
   def critical?
     course.critical? || course.returned_sheets > 0
+  end
+
+  # Evaluates this tutor only.
+  def evaluate
+    I18n.locale = course.language
+
+    b = RT.load_tex_definitions
+    b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
+    b << course.eval_lecture_head
+
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+      return b
+    end
+
+    # walk all questions, one section at a time. Simplified version of
+    # the same loop in courses.rb#evaluate. Only one tutor is relevant
+    # here.
+    form.sections.each do |section|
+      questions = Array.new(section.questions)
+      # walk all questions in this section
+      while !questions.empty?
+        # find all questions in this sections until repeat_for changes
+        repeat_for = questions.first.repeat_for
+        block = []
+        while !questions.empty? && questions.first.repeat_for == repeat_for
+          block << questions.shift
+        end
+
+        # now evaluate that block of questions
+        if repeat_for == :tutor
+          s = section.any_title
+          b << eval_block(block, s)
+        end
+      end
+    end
+
+    return b
   end
 
   def eval_block(questions, section)

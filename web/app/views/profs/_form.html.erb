@@ -1,0 +1,26 @@
+<%= form_for(@prof) do |f| %>
+  <%= render "shared/error_messages", :model => @prof %>
+
+  <table>
+    <% for item in
+      [
+        [f.label(:firstname), f.text_field(:firstname), "required"],
+        [f.label(:surname),   f.text_field(:surname),   "required"],
+        [f.label(:email),     f.text_field(:email)],
+        [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"]
+
+      ]
+    %>
+      <tr>
+        <th><%= item.shift %></th>
+        <td><%= item.shift %></td>
+        <% for data in item do %> <td><%=h data %></td> <% end %>
+      </tr>
+    <% end %>
+  </table>
+
+  <div class="button-group">
+    <%= f.submit submit_text, :disable_with => "Saving…", :class => "button primary" %>
+    <%= link_to 'Cancel', profs_path, :class => "button" %>
+  </div>
+<% end %>

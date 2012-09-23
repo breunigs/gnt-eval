@@ -1,14 +1,11 @@
-require 'net/http'
-require 'pp'
-require 'rubygems'
-require 'date'
-require 'rexml/document'
-require 'csv'
-require 'fastercsv'
-require File.dirname(__FILE__) + "/../lib/result_tools.rb"
-require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
+# encoding: utf-8
 
-GNT_ROOT = File.dirname(__FILE__) + "/.." unless defined?(GNT_ROOT)
+# Boot Rails iff the tool is called stand alone. If some of the Rails
+# stack is already loaded, assume that all dependencies are fulfilled.
+require "#{File.dirname(__FILE__)}/../web/config/environment" unless defined?(GNT_ROOT)
+require 'net/http'
+require 'rexml/document'
+
 RT = ResultTools.instance unless defined?(RT)
 
 # About the term ID:
@@ -74,7 +71,11 @@ class LSF
       warn "URL: #{url}"
       req.error!
     end
-    @@cache_http[url] = req.body.gsub(/\s+/, " ")
+    # Net::HTTP always returns ASCII-8BIT encoding although the webpage
+    # is delivered in UTF-8. Try to read encoding from the headers and
+    # use that.
+    enc = req.get_fields("content-type").join.match(/charset=([a-z0-9-]+)/i)
+    @@cache_http[url] = req.body.force_encoding(enc[1]).gsub(/\s+/, " ")
     #File.open("/tmp/seee/"+url.gsub(/[^a-z0-9\-_]/, ""), 'w') {|f| f.write(@@cache_http[url]) }
 
     @@cache_http[url]
@@ -91,8 +92,7 @@ class LSF
 
   # Includes all required files in order to connect to Seee/Rails
   def self.connect_rails
-    require "#{GNT_ROOT}/web/config/boot"
-    require "#{GNT_ROOT}/web/lib/ext_requirements.rb"
+    require "#{GNT_ROOT}/web/config/environment"
   end
 
   # Searches for a given lecture and prof, returns an array of possible
@@ -102,7 +102,6 @@ class LSF
     s = SEARCH_URL.gsub("LECTURE", lecture)
     s.gsub!("SURNAME", prof)
     s.gsub!("TERM", LSF.guess_term)
-
     lect_ids = load_url(s).scan(/publishid=([0-9]+)&/).flatten
     lects = lect_ids.map { |l| [*LSF.get_lecture(l)] }
     # remove all lectures whose skip attribute is set to true
@@ -347,7 +346,7 @@ class LSF
     term_summer = Date.new(y, 3, 1)..Date.new(y, 8, 31)
     term_winter_newyear = Date.new(y, 1, 1)..Date.new(y, 3, 1)
 
-    summer = term_summer.include?(DateTime.now)
+    summer = term_summer.include?(Date.today)
     # if we’re in winter term, but already celebrated new years…
     y -= 1 if !summer && term_winter_newyear.include?(DateTime.now)
     "#{y}#{summer ? 1 : 2}"
@@ -454,7 +453,7 @@ class LSFLecture
   def hash; id end
 
   def eval_always?
-    self.type == "Grundvorlesung" || self.type == "Kursvorlesung"
+    self.type == "Grundvorlesung" || self.type == "Kursvorlesung" || self.name =~ /Programmierkurs/i
   end
 end
 
@@ -465,7 +464,7 @@ class String
   # define some stoptypes that we do not want to include
   def is_stop_type?
     cmp = self.downcase
-    ["übung", "praktikum", "kolloquium", "hauptseminar", "colloquium", \
+    ["übung", "kolloquium", "hauptseminar", "colloquium", \
       "prüfung", "oberseminar"].include?(cmp)
   end
 
@@ -547,6 +546,7 @@ class LSF
   # set in Seee (compares titles). Tries to extract data from seee and
   # fill it in, if possible.
   def self.print_final_tex(data)
+    data = data.dup
     LSF.connect_rails
     # find courses in active semesters
     cs = Semester.currently_active.map { |s| s.courses }.flatten
@@ -561,6 +561,7 @@ class LSF
 
   # prints all given lectures into a list.
   def self.print_pre_tex(input)
+    input = input.dup
     # sort be type, then by name
     input.sort! { |x,y| x.type+x.name <=> y.type+y.name }
     intro = 'Kreuze zu evaluierende Veranstaltungen. Streiche solche, die nicht evaluiert werden sollen. Achte besonders auf automatisch Gekreuzte. Erstellung: \the\day.\the\month.\the\year'
@@ -579,7 +580,7 @@ class LSF
       end
       profs = profs.collect { |p| p.last }.uniq.join(", ")
       [box, d.name, d.type, d.lang[0..2], profs]
-    end.compact
+    end.compact.uniq
 
     ERB.new(RT.load_tex("../table")).result(binding)
   end
@@ -587,7 +588,7 @@ class LSF
 
 
   def self.print_allmighty_csv(data)
-    s = FasterCSV.generate({:headers => true}) do |csv|
+    s = CSV.generate({:headers => true}) do |csv|
       csv << ["id", "titel", "zeiten", "räume", "art", "fakultät-id", "erwartete Teilnehmer", "sws", "prof", "profmail",  "akad. grad", "anrede", "vorname", "nachname"]
       data.each do |d|
         profs = d.profs.flatten.uniq unless d.profs.nil?
@@ -605,7 +606,7 @@ class LSF
   end
 
   def self.print_zuv_eval_csv(data)
-    s = FasterCSV.generate({:headers => true}) do |csv|
+    s = CSV.generate({:headers => true}) do |csv|
       csv << ["Funktion", "Anrede", "Titel", "Vorname", "Nachname", "E-Mail-Adresse", "Lehrveranstatlung: Name/Titel", "Lehrveranstaltungskennung laut LSF", "Lehrveranstaltungsort(e)", "Hier können Sie eintragen: 1) Von welcher studienorganisatorischen Einheit wird die Lehrveranstaltung angeboten (relevant bei Import / Export)? 2) Für welchen / welche Studiengänge wird die LV angeboten?", "Lehrveranstaltungsart", "erwartete Teilnehmer / benötigte Fragebögen", "weitere/Sekundär-Dozenten", "Sprache", "veranschlagte SWS", "Leistungspunkte", "Modulzugehörigkeit (zu welchem Modul gehört die LV? Ggf. Kürzel angeben) --> ggf. bei Studiengang mit eintragen?", "Rhythmus (Blockveranstaltung oder wöchentlich)", "Wochentag", "Zeit (Uhrzeit)", "Dauer (von bis)", "Präsenzveranstaltung oder Moodle-Kurs / E-Learning", "Pflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Wahlpflichtveranstaltung für welchen Studiengang / welche Studiengänge?", "Semester", "Studienjahr"]
       data.each do |d|
         profs = d.profs.flatten.uniq unless d.profs.nil?

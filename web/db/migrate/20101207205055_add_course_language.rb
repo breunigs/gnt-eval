@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class AddCourseLanguage < ActiveRecord::Migration
   def self.up
     add_column :courses, :language, :string

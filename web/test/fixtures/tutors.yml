@@ -1,9 +1,14 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
-  course: 
-  abbr_name: MyString
+oliver:
+  course: :mathSummerCourse
+  abbr_name: Oliver ist Doof
 
-two:
-  course: 
-  abbr_name: MyString
+paul:
+  course: :mathSummerCourse
+  abbr_name: Paul ist doof
+  comment: At least I believe he has at least one commit
+
+beccy:
+  course: :physWinterCourse
+  abbr_name: Oliver ist Doof

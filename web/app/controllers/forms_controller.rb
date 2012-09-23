@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class FormsController < ApplicationController
   # GET /forms
   # GET /forms.xml
@@ -21,15 +23,17 @@ class FormsController < ApplicationController
     end
   end
 
-  # GET /forms/new
-  # GET /forms/new.xml
+  def preview
+    @form = Form.find(params[:id])
+    # this renders the small partial preview view only. shared/preview
+    # will invoke form_helpers.rb#texpreview.
+    render :partial => "shared/preview", :locals => {:text => nil}
+  end
+
   def new
     @form = Form.new
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @form }
-    end
+    $emptyFormYaml ||= File.read(File.join(GNT_ROOT, "doc", "example_forms", "empty.yaml"))
+    @form.content = $emptyFormYaml
   end
 
   # GET /forms/1/edit
@@ -42,38 +46,53 @@ class FormsController < ApplicationController
   def create
     @form = Form.new(params[:form])
 
-    kill_caches
-
     respond_to do |format|
       if @form.save
+        params[:id] = @form.id
         flash[:notice] = 'Form was successfully created.'
+
         format.html { redirect_to(@form) }
-        format.xml  { render :xml => @form, :status => :created, :location => @form }
+        format.json {
+          form = render_to_string(:partial => "form_basic.html.erb", :locals => {:is_edit => true})
+          coll = render_to_string(:partial => "shared/collision_detection.html.erb")
+          render :json => {
+              :collision => coll,
+              :preview => preview_form_path(@form),
+              :form => form
+            },
+            :status => :created,
+            :location => @form
+        }
       else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @form.errors, :status => :unprocessable_entity }
+        format.json { render :json => @form.errors, :status => :unprocessable_entity }
       end
     end
   end
 
   # PUT /forms/1
-  # PUT /forms/1.xml
   def update
     @form = Form.find(params[:id])
-    kill_caches @form
 
     respond_to do |format|
       if @form.critical?
-        flash[:error] = 'Form was critical and has therefore not been updated.' if @form.critical?
+        flash[:error] = 'Form was critical and has therefore not been updated.'
         format.html { redirect_to(@form) }
-        format.xml  { head :ok }
+        format.json { render json: flash[:error], status: :unprocessable_entity }
       elsif @form.update_attributes(params[:form])
-        flash[:notice] = 'Form was successfully updated.'
-        format.html { redirect_to(@form) }
-        format.xml  { head :ok }
+        expire_fragment("preview_forms_#{params[:id]}")
+
+        if $loaded_yaml_sheets.keys.any? { |k| k.is_a?(String) }
+          raise "$loaded_yaml_sheets only allows integer keys, but somewhere a string-key got added. Find out where, or you will run into a lot of stale caches."
+        end
+        logger.warn "\n\n\n\n\n\n"
+
+        $loaded_yaml_sheets[params[:id].to_i] = nil
+        format.html { redirect_to @form, notice: 'Form was successfully updated.' }
+        format.json { head :no_content }
       else
         format.html { render :action => "edit" }
-        format.xml  { render :xml => @form.errors, :status => :unprocessable_entity }
+        format.json { render json: @form.errors, status: :unprocessable_entity }
       end
     end
   end
@@ -82,9 +101,10 @@ class FormsController < ApplicationController
   # DELETE /forms/1.xml
   def destroy
     @form = Form.find(params[:id])
-    @form.destroy unless @form.critical?
-
-    kill_caches @form
+    unless @form.critical?
+      @form.destroy
+      $loaded_yaml_sheets[params[:id].to_i] = nil
+    end
 
     respond_to do |format|
       flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
@@ -118,39 +138,6 @@ class FormsController < ApplicationController
       flash[:error] = 'Form was critical and has therefore not been destroyed.' if form.critical?
       format.html { redirect_to(forms_url) }
       format.xml  { head :ok }
-    end
-  end
-
-  caches_page :index, :show, :new, :edit
-  private
-  def kill_caches(form = nil)
-    puts "="*50
-    puts "Expiring form caches" + (form ? " for #{form.title}" : "")
-    expire_page :action => "index"
-    expire_page :action => "new"
-    if form
-      expire_page :action => "show", :id => form
-      expire_page :action => "edit", :id => form
-      $loaded_yaml_sheets[form.id] = nil if $loaded_yaml_sheets
-    end
-
-    # need to expire all edit+new pages, in case a form was added
-    if defined? Courses && !Courses.nil?
-      Courses.find(:all) do |c|
-        puts "Expiring courses#edit+new caches for #{c.title}"
-        expire_page :controller => "courses", :action => "edit", :id => c
-        expire_page :controller => "courses", :action => "new", :id => c
-      end
-    end
-
-    return unless form
-    form.courses.each do |c|
-      puts "Expiring courses#show caches for #{c.title}"
-      expire_page :controller => "courses", :action => "show", :id => c
-      c.profs.each do |p|
-        puts "Expiring profs#edit for #{p.surname}"
-        expire_page :controller => "profs", :action => "edit", :id => p
-      end
     end
   end
 end

@@ -4,8 +4,8 @@ require 'pp'
 require 'rubygems'
 require 'yaml'
 require 'dbi'
-require '../lib/AbstractForm.rb'
-require '../lib/RandomUtils.rb'
+require '../web/app/lib/AbstractForm.rb'
+require '../web/app/lib/RandomUtils.rb'
 require '../pest/helper.AbstractFormExtended.rb'
 
 $tests = []

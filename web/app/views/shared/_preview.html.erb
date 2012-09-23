@@ -1,16 +1,29 @@
 <%
 # this is a general preview shared view. Hand in the text that should
 # be previewed as a local variable, like this:
-# <%= render :partial => "shared/preview", :locals => { :text => TEXT } %>
+#    render "shared/preview", :text => TEXT
 %>
 
-<% cache("#{params[:controller]}_#{params[:id]}") do %>
-  <% failed, exitcodes, error, base64 = texpreview(text) %>
+<% cache("preview_#{params[:controller]}_#{params[:id]}") do %>
+  <%
+    failed, exitcodes, error, base64 = texpreview(text)
+    is_img = !failed && !base64.blank?
+  %>
+
+  <%# required for properly previewing in form editor %>
+  <%= "<div>".html_safe unless is_img %>
 
   <% if failed || base64.nil? %>
-    <strong>Error:</strong> An error occurred while rendering the preview. Most likely, you have a typo in the TeX code somewhere. Scroll down to see what TeX has to say about this.<br/><br/>
-    EXIT CODES: <%= exitcodes.join(", ") %> <br/> <%= error %>
+    <span class="error">An error occurred while rendering the preview. Most likely, you have a typo in the TeX code somewhere. Scroll down to see what TeX has to say about this.</span><br/><br/>
+    EXIT CODES: <%= exitcodes.join(", ") %>
+    <br/><div class="pre"><%= error.html_safe %></div>
   <% end %>
 
-  <%= "<img src=\"data:image/png;base64,#{base64}\"/>" unless failed || base64.nil? || base64.empty? %>
+  <% if !base64.nil? && base64.empty? %>
+    <span class="info">Nothing to display.</span>
+  <% end %>
+
+  <%= "</div>".html_safe unless is_img %>
+
+  <%= %(<img class="no-shadow" src="data:image/png;base64,#{base64}"/>).html_safe if is_img %>
 <% end %>

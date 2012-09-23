@@ -1,0 +1,36 @@
+<%
+# Works just like preview_big, except that the actual rendering
+# is executed via AJAX so it doesn’t stall the page load. For
+# this to work the controller needs to have a preview method that
+# renders the shared/preview.html.erb partial.
+# Use it like this:
+#   render "shared/preview_ajax", :preview_url => preview_form_path(@form)
+#
+# The way actually taken looks something like this:
+# 1. preview_ajax requests given preview_url (preview_form_path)
+# 2. form controller renders partial view shared/preview
+# 3. shared/preview calls the "texpreview" helper method for this controller
+# 4. forms_helper.rb#texpreview actually renders the preview.
+#
+# Note that if only basic text rendering services are required, the
+# controller will usually hand down the text directly in step 2 and so
+# will shared/preview in step 3. The helper file then includes
+# FunkyTeXBits which also have a texpreview(text) method.
+%>
+
+<div>
+  <h3><%=latex_logo%> Preview</h3>
+
+  <div class="preview large">
+    <script>
+      var e = $("script:last").parent(".preview");
+      e.load("<%=preview_url%>", function() {
+        e.animate({height:"1000px"}, 1000, function() {
+          e.removeClass("loading").css("height", "auto");
+        });
+        e.siblings(".loading").slideUp();
+      });
+    </script>
+  </div>
+  <%=render "shared/loading"%>
+</div>

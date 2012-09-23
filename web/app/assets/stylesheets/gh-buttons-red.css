@@ -1,0 +1,53 @@
+/* fix some settings so the buttons integrate better into the rest of
+ * the project */
+
+.button.big {
+  padding: 0.5rem 1.2rem !important;
+}
+
+.button:not(.big) {
+  padding: 0 0.8rem !important;
+  display:inline-block;
+  height:2.2rem;
+  line-height:2.3rem !important;
+  vertical-align:middle;
+}
+
+
+
+.button:hover,
+.button:focus,
+.button:active,
+.button.active {
+  border-color: #BA2727 !important;
+  border-bottom-color: #801B1B !important;
+  background-color: #FF3636 !important;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#FF3636), to(#BA2727)) !important;
+  background-image: -moz-linear-gradient(#FF3636, #BA2727) !important;
+  background-image: -o-linear-gradient(#FF3636, #BA2727) !important;
+  background-image: linear-gradient(#FF3636, #BA2727) !important;
+}
+
+
+
+.button:active,
+.button.active {
+  border-color: #801B1B !important;
+  border-bottom-color: #992020 !important;
+  background-color: #BA2727 !important;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#BA2727), to(#FF3636)) !important;
+  background-image: -moz-linear-gradient(#BA2727, #FF3636) !important;
+  background-image: -ms-linear-gradient(#BA2727, #FF3636) !important;
+  background-image: -o-linear-gradient(#BA2727, #FF3636) !important;
+  background-image: linear-gradient(#BA2727, #FF3636) !important;
+}
+
+.button-group.minor-group .button:hover,
+.button-group.minor-group .button:focus {
+  background-color: #FF3636 !important;
+}
+
+.button-group.minor-group .button:active,
+.button-group.minor-group .button.active {
+  background-color: #BA2727 !important;
+}

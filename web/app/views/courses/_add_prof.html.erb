@@ -1,0 +1,20 @@
+<form method="post" action="<%=add_prof_course_path(@course)%>" id="add_prof">
+  <input type="hidden" value="<%= form_authenticity_token %>" style="display:none"/>
+  <%= collection_select(:courses, :profs, Prof.find(:all, :order => 'surname'), :id, :surnamefirst, { :include_blank => true }, { :class => "combobox" }) %>
+  <div class="button-group" style="vertical-align:top">
+    <%= submit_tag 'Add professor to course', :class => "button primary" %>
+    <%= link_to 'Create New Prof', new_prof_path, :class => "button" %>
+  </div>
+</form>
+<% content_for :script do %>
+<script>
+  $(document).ready(function() {
+    $("form#add_prof").submit(function(e) {
+      if(!$("form#add_prof .combobox").val()) {
+        $("form#add_prof input.ui-autocomplete-input").focus();
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+<% end %>

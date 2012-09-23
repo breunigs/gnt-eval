@@ -1,6 +1,6 @@
-<fieldset>
-<h1>Form <%=h @form.name %> (<%=h @form.semester.title %>) Preview</h1>
-  <%= (not @form.form_checks_out?) ? "<strong>⚠ Form is invalid</strong><br/>" : ""%>
+<div>
+<h2>Previewing Form <%=@form.name %> (<%=@form.semester.title %>)</h2>
+  <%= (not @form.form_checks_out?) ? "<strong>⚠ Form is invalid</strong><br/>".html_safe : ""%>
 
  <table>
     <% for item in
@@ -10,7 +10,7 @@
         ["Table",         @form.db_table]
       ]
     %>
-      <tr style="background: #<%= cycle('efefef', 'fff') %>">
+      <tr>
         <th><%=h item.shift %></th>
         <% for data in item do %> <td><%=h data %></td> <% end %>
       </tr>
@@ -18,33 +18,40 @@
   </table><br/>
 
   <%= nav_links %>
-</fieldset>
+</div>
 
-<% if @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
-  <fieldset>
-    <legend>ERROR: more than one tutor_table</legend>
-    <p>You specified a tutor_table question more than once. However, it is
+<% if @form.abstract_form_valid? && @form.db_table.blank? %>
+  <div>
+    <h3>ERROR: db_table blank</h3>
+    <p class="error">Each form needs to have a db_table specified so it’s clear where the data goes. It’s possible for two different forms to have the same database, but it’s best practice to have new tables for each form and term.</p>
+  </div>
+<% end %>
+
+<% if @form.questions && @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
+  <div>
+    <h3>ERROR: more than one tutor_table</h3>
+    <p class="error">You specified a tutor_table question more than once. However, it is
     currently not possible to evaluate more than one tutor per sheet. The
     software is not equipped to differentiate to which tutor a question
     belongs.</p>
     <p>If you need to evaluate more than one tutor, hand sheets out twice.</p>
-  </fieldset>
+  </div>
 <% end %>
 
 <% if @form.has_duplicate_db_columns? %>
-  <fieldset>
-    <legend>ERROR: duplicate db columns</legend>
-    Some of the questions have the same db column. This doesn’t make
-    any sense and G'n'T Eval will break if you do not fix this.
+  <div>
+    <h3>ERROR: duplicate db columns</h3>
+    <p class="error">Some of the questions have the same db column. This doesn’t make
+    any sense and <%=APP_NAME%> will break if you do not fix this.</p>
     <table>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <th>db column</th><th>offending questions</th>
       </tr>
     <%
     @form.get_duplicate_db_columns.each do |col, quests|
       quests.each do |q|
     %>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <td><%=col%></td><td><%=q.strip_common_tex%></td>
       </tr>
     <%
@@ -52,31 +59,47 @@
     end
     %>
     </table>
-  </fieldset>
+  </div>
 <% end %>
 
 <% if @form.has_questions_without_visualizer? %>
-  <fieldset>
-    <legend>WARNING: questions without visualizer (defaults to empty)</legend>
+  <div>
+    <h3>WARNING: questions without visualizer</h3>
     <table>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <th>offending questions</th>
       </tr>
     <% @form.get_questions_without_visualizer.each do |q| %>
-      <tr style="background: #<%= cycle('efefef', 'fff')%>">
+      <tr>
         <td><%=q.text.strip_common_tex%></td>
       </tr>
     <% end %>
     </table>
-  </fieldset>
+  </div>
+<% end %>
+
+
+<% if @form.questions %>
+  <% empty_qtext = @form.questions.keep_if { |q| q.qtext.is_a?(Array) ? q.qtext.any? { |l| l.blank? } : q.qtext.blank? } %>
+  <% if empty_qtext.any? %>
+  <div>
+    <h3>WARNING: questions without question text</h3>
+    <p class="warning">The following questions have missing questions in at least one locale. If the db_column of that question is empty as well, it <i>might</i> be hard to find…</p>
+    <ul>
+    <% empty_qtext.each do |q| %>
+      <li><%=q.db_column.blank? ? "(db column empty)".html_safe : q.db_column%></li>
+    <% end %>
+    </ul>
+  </div>
+  <% end %>
 <% end %>
 
 <% oosv = @form.find_out_of_scope_variables
 unless oosv.empty?
 %>
-  <fieldset>
-    <legend>ERROR: Out of scope variables</legend>
-      <p>
+  <div>
+    <h3>ERROR: Out of scope variables</h3>
+      <p class="error">
         There are some variables which can be used to design the form, e.g.
         \lect to refer to the lecturer’s name. These variables may be valid
         for the whole sheet when the questions are used in the form due to
@@ -97,27 +120,28 @@ unless oosv.empty?
         </tr>
       <% end %>
       </table>
-  </fieldset>
+  </div>
 <% end %>
 
 <a id="tex-image-preview"></a>
-<%= render :partial => "shared/preview_big", :locals => {:text => nil}  %>
+<%= render "shared/preview_ajax", :preview_url => preview_form_path(@form) %>
 
 
-<fieldset id="tex-code-preview">
-  <legend>TeX-Code used for generating the preview:</legend>
+<div id="tex-code-preview">
+  <h3>TeX-Code used for generating the preview</h3>
   <%= nav_links %>
-  <pre style="max-width:850px; max-height:700px; overflow:scroll"><%=h form_tex_code(@form) %></pre>
+  <pre><%=form_tex_code(@form) || "Your form is invalid. Please fix the errors first." %></pre>
+  <br/>
   You can use this line to compile the document yourself:
-  <pre><%=h Seee::Config.commands[:pdflatex_real] %> somefile.tex</pre>
-</fieldset>
+  <pre><%=Seee::Config.commands[:pdflatex_real] %> somefile.tex</pre>
+</div>
 
-<fieldset id="ruby-yaml-code">
-  <legend>Ruby-fied YAML Code:</legend>
+<div id="ruby-yaml-code">
+  <h3>Ruby-fied YAML Code</h3>
   <%= nav_links %>
-  <pre  style="max-width:850px; max-height:700px; overflow:scroll"><%=h (@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
-</fieldset>
+  <pre><%=(@form.is_a?(String) ? "wrong!"  : @form.pretty_abstract_form) %></pre>
+</div>
 
-<fieldset>
+<div>
   <%= nav_links %>
-</fieldset>
+</div>

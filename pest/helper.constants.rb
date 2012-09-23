@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # PEST
 # Praktisches Evaluations ScripT
 # (Practical Evaluation ScripT)
@@ -23,6 +25,17 @@ SP_TO_PX = 65536 * 72.27 / 300
 # The default values are for A4 paper. Specify them as floats.
 PAGE_HEIGHT = 3508.0
 PAGE_WIDTH = 2480.0
+
+# distance between two corners
+CORNER_HEIGHT = 3390.0
+CORNER_WIDTH = 2370.0
+
+# minimum amount of pixels difference, after which a side is considered
+# broken. If a side is broken, the corner with the smaller angle will be
+# taken out, as it is assumed that the edge is detected nearer to the
+# edges of the paper rather than further in.
+CORNER_DEVIATION = 20.0
+
 
 # set the different fill grade levels. Checkboxes below or above the
 # min/max fill grade will be marked as not checked. DESPERATE_ is only

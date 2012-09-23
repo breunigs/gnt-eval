@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class SemestersController < ApplicationController
   # GET /semesters
   # GET /semesters.xml
@@ -40,7 +42,6 @@ class SemestersController < ApplicationController
   # POST /semesters
   # POST /semesters.xml
   def create
-    killall_caches
     @semester = Semester.new(params[:semester])
 
     respond_to do |format|
@@ -58,7 +59,6 @@ class SemestersController < ApplicationController
   # PUT /semesters/1
   # PUT /semesters/1.xml
   def update
-    killall_caches
     @semester = Semester.find(params[:id])
 
     respond_to do |format|
@@ -76,48 +76,14 @@ class SemestersController < ApplicationController
   # DELETE /semesters/1
   # DELETE /semesters/1.xml
   def destroy
-    killall_caches
     @semester = Semester.find(params[:id])
-    @semester.destroy unless @semester.critical?
+    d = @semester.critical? || @semester.courses.any?
+    @semester.destroy unless d
 
     respond_to do |format|
-      flash[:error] = 'Semester was critical and has therefore not been destroyed.' if @semester.critical?
+      flash[:error] = 'Semester was critical and has therefore not been destroyed.' if d
       format.html { redirect_to(semesters_url) }
       format.xml  { head :ok }
     end
-  end
-
-  caches_page :index, :edit, :new
-  private
-  def killall_caches
-    puts "="*50
-    puts "Expiring all caches"
-    expire_page(:action => "index")
-    expire_page(:action => "new")
-    expire_page(:action => "edit")
-
-    expire_page(:controller => "tutors", :action => "index")
-    expire_page(:controller => "tutors", :action => "show")
-    expire_page(:controller => "tutors", :action => "edit")
-    expire_page(:controller => "tutors", :action => "preview")
-
-    expire_page(:controller => "forms", :action => "index")
-    expire_page(:controller => "forms", :action => "show")
-    expire_page(:controller => "forms", :action => "new")
-    expire_page(:controller => "forms", :action => "edit")
-
-    expire_page(:controller => "courses", :action => "index")
-    expire_page(:controller => "courses", :action => "show")
-    expire_page(:controller => "courses", :action => "new")
-    expire_page(:controller => "courses", :action => "edit")
-    expire_page(:controller => "courses", :action => "preview")
-
-    expire_page(:controller => "profs", :action => "index")
-    expire_page(:controller => "profs", :action => "new")
-    expire_page(:controller => "profs", :action => "edit")
-
-    expire_page(:controller => "faculties", :action => "index")
-    expire_page(:controller => "faculties", :action => "new")
-    expire_page(:controller => "faculties", :action => "edit")
   end
 end

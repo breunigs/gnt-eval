@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
+
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
@@ -40,9 +41,6 @@ class Box
 
   # special value for easier LaTeX sheet generation, e.g. square or comment
   attr_accessor :type
-
-  # if this is a comment field, we need to know its height
-  attr_accessor :height
 
   def initialize(c, t)
     @choice = c
@@ -120,7 +118,17 @@ class Question
     !@visualizer.nil?
   end
 
-  attr_accessor :donotuse
+  # Returns box description text for the given value. The value is one-
+  # based, i.e. it does not refer to the actual array but to the value
+  # the box is associated with. In other words, the first box has the
+  # value 1 and it is stored like this in the database.
+  # If a box does not have a description, the position of the box is
+  # returned.
+  def box_text_by_value(val, lang = I18n.locale)
+    raise "Value must be integer" unless val.is_a?(Integer)
+    raise "Value is out of range. Only 1-#{boxes.size} is valid, given was #{val}." unless val.between?(1, boxes.size)
+    boxes[val-1] ? boxes[val-1].any_text : "#{val}/#{boxes.size}"
+  end
 
   # FIXME: remove failchoice and nochoice
   def initialize(boxes = [], qtext='', failchoice=-1,
@@ -178,7 +186,7 @@ class Question
   end
 
   def last_is_textbox?
-    !@last_is_textbox.nil? && @last_is_textbox > 0
+    !@last_is_textbox.blank? && @last_is_textbox.to_i > 0
   end
 
   # returns false if hide_answers has set been to false or not been set
@@ -208,7 +216,7 @@ class Question
   # true.
   def get_answers(language = I18n.locale)
     return [] if boxes.nil? || boxes.empty?
-    boxes.collect { |x| x.any_text(language) }
+    boxes.collect { |x| x ? x.any_text(language) : nil }
   end
 
   # question itself in appropriate language and gender
@@ -250,7 +258,7 @@ class Question
   # export a single question to tex (used for creating the forms)
   def to_tex(lang = I18n.locale, gender = :both)
     s = ""
-    qq = text(lang, gender) # FIXME, lecturer’s name is currently broken
+    qq = text(lang, :both) # FIXME, lecturer’s name is currently broken
     case @type
       when "text_wholepage" then
         # don't need to do anything for that
@@ -262,7 +270,7 @@ class Question
         s << "\n\\printtutors{#{qq}}{#{@db_column}}\n"
 
       when "square" then
-        answers = @boxes.map{ |x| "[#{x.any_text(lang)}]" }
+        answers = @boxes.map{ |x| "[#{x ? x.any_text(lang) : ""}]" }
         # add dummy entry so the no answer checkbox in the first row is taken
         # into account. it will be removed later.
         answers.unshift(nil) if no_answer?
@@ -307,6 +315,8 @@ end
 # groups questions of the same type or of the same category together
 # and prints a header into the questionnaire and into the results
 class Section
+  ATTRIBUTES = :title
+
   attr_accessor :title
 
   attr_writer :questions
@@ -337,21 +347,23 @@ end
 
 # this is really just needed for tex and OMR
 class Page
+  ATTRIBUTES = :tex_at_top, :tex_at_bottom
 
   # list of sections on that page
-  attr_accessor :sections
+  attr_writer :sections
   attr_accessor :tex_at_top
   attr_accessor :tex_at_bottom
 
   def initialize(secs=[])
     @sections = secs
   end
+
+  def sections
+    @sections || []
+  end
+
   def questions
-    if @sections.nil?
-      @questions
-    else
-      @sections.collect {|s| s.questions}.flatten
-    end
+    sections.collect {|s| s.questions }.flatten
   end
 end
 
@@ -579,7 +591,6 @@ class AbstractForm
         b << "\n"
         sect_open = true
         s.questions.each do |q|
-          next if ((not q.donotuse.nil?)) && (not q.db_column =~ /comment/)
           quest = q.to_tex(lang, gender)
           # need to remove line breaks at the end to avoid spacing issues
           b << (sect_open ? quest.strip : quest)

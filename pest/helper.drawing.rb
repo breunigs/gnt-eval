@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # extends the PESTOmr with some drawing related tools. This subclass
 # is not intended to work alone, but rather supply useful functions
 # that ought be used from within the main class. Expects there's a valid

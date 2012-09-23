@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class CreateProfs < ActiveRecord::Migration
   def self.up
     create_table :profs do |t|

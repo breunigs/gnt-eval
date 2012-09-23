@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 # PEST
 # Praktisches Evaluations ScripT
@@ -24,8 +25,9 @@ require 'rubygems'
 require 'optparse'
 require 'yaml'
 require 'pp'
-require 'ftools'
+require 'fileutils'
 require 'tempfile'
+require "unicode_utils"
 
 require cdir + '/helper.misc.rb' # also loads rmagick
 
@@ -35,9 +37,9 @@ require cdir + '/helper.drawing.rb'
 require cdir + '/helper.constants.rb'
 require cdir + '/helper.image.rb'
 
-require cdir + '/../lib/AbstractForm.rb'
+require cdir + '/../web/app/lib/AbstractForm.rb'
 require cdir + '/helper.AbstractFormExtended.rb'
-require cdir + '/../lib/RandomUtils.rb'
+require cdir + '/../web/app/lib/RandomUtils.rb'
 
 # Profiler. Uncomment code at the end of this file, too.
 #~ require 'ruby-prof'
@@ -61,11 +63,11 @@ class PESTOmr < PESTDatabaseTools
       # TeX stores the box’s coordinates near its bottom right corner.
       # This translation is static and thus different to the one introduced
       # by imperfect scanning. Positive values move the box left/top.
-      moveleft, movetop = 53, 41
+      moveleft, movetop = 45, 47
     else
       # if the last box is a textbox, adjust some values so the textbox
       # can be checked. For now, only checked/unchecked is supported.
-      moveleft, movetop = 1, 67
+      moveleft, movetop = -10, 67
       box.height = 40
     end
 
@@ -133,6 +135,7 @@ class PESTOmr < PESTDatabaseTools
       x, y = search_square_box(img_id, box)
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
+        @soft_error += 1
         debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
               " db_column=#{question.db_column} in #{@currentFile}"
         debug "Assuming there is no box and no choice was made."
@@ -203,15 +206,15 @@ class PESTOmr < PESTDatabaseTools
     else # single choice question
       case checked.size
         # only one checkbox remains, so go for it
-        when 1: checked.first.choice
-        when 0: # no checkboxes. We're officially desperate now. Let’s
-                # try again with lower standards.
+        when 1 then checked.first.choice
+        when 0 then # no checkboxes. We're officially desperate now. Let’s
+                    # try again with lower standards.
           barely = question.boxes.select { |x| x.is_barely_checked? }
           case barely.size
-            when 1: barely.first.choice # one barely checked, take it
+            when 1 then barely.first.choice # one barely checked, take it
             # no barely checked either. If there are any overfull ones,
             # ask the user; otherwise the question really wasn’t answered
-            when 0: ((question.boxes.any? { |x| x.is_overfull? }) ? ANSW_FAIL : ANSW_NONE)
+            when 0 then ((question.boxes.any? { |x| x.is_overfull? }) ? ANSW_FAIL : ANSW_NONE)
             else    ANSW_FAIL # at least two boxes are barely checked, ask user
           end
         else ANSW_FAIL # at least two boxes are checked, ask user
@@ -367,23 +370,16 @@ class PESTOmr < PESTDatabaseTools
   end
 
   # Saves a given area (in form of a boxes array) for the current image.
-  def save_text_image(img_id, save_as, boxes, use_page_width = true)
+  def save_text_image(img_id, save_as, boxes, expand = 30)
     return if save_as.nil? || save_as.empty?
     debug("    Saving Comment Image: #{save_as}", "save_image") if @verbose
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + save_as + ".jpg"
     x, y, w, h = calculateBounds(boxes)
-    if use_page_width
-      img = @ilist[img_id].crop(0, y, PAGE_WIDTH, h, true).minify
-    else
-      img = @ilist[img_id].crop(x, y, w, h, true).minify
-    end
-    # add text about where to find the original file
-    @draw[999] = Magick::Draw.new
-    @draw[999].pointsize = 9*@dpifix
-    draw_solid_box!(999, [0,0], [PAGE_WIDTH/2, 7], "white")
-    draw_text!(999, [1,7], "black", "Comment cut off? See #{File.expand_path(@currentFile, @path)} page #{img_id+1}")
-    @draw[999].draw(img)
+    newy = [y - expand, 0].max
+    newh = [h + expand + (y-newy), PAGE_HEIGHT].min
+    img = @ilist[img_id].crop(0, newy, PAGE_WIDTH, newh, true).minify
+
     # write out file
     img.write filename
     img.destroy!
@@ -458,9 +454,15 @@ class PESTOmr < PESTDatabaseTools
     debug("  Loaded Image", "loading_image") if @verbose
 
     # do the hard work
+    @soft_error = 0
     locate_corners
     supplement_missing_corners unless @cancelProcessing
     process_questions unless @cancelProcessing
+    # if there are many soft errors, like not found text boxes, mark the
+    # sheet bizarr. Likely the base sheet with position information does
+    # not fit.
+    @cancelProcessing = true if @soft_error >= 10
+
 
     # Draw debugging image with thresholds, selected fields, etc.
     if @debug
@@ -491,11 +493,12 @@ class PESTOmr < PESTDatabaseTools
 
     if @cancelProcessing
       debug "  Something went wrong while recognizing this sheet."
-      debug "  " + File.basename(file)
-      return @test_mode # don't move the sheet if in test_mode
+      return if @test_mode || @debug # don't move the sheet in test/debug
+      debug "  Moving #{File.basename(file)} to bizarre"
       dir = File.join(File.dirname(file).gsub(/\/[^\/]+$/, ""), "bizarre/")
-      File.makedirs(dir)
-      File.move(file, File.join(dir, File.basename(file)))
+      FileUtils.makedirs(dir)
+      FileUtils.move(file, File.join(dir, File.basename(file)))
+      `rm "#{file.gsub(/\.tif$/, "*")}"` # remove comments and similar
       return
     end
 
@@ -525,7 +528,7 @@ class PESTOmr < PESTDatabaseTools
 
       if q.multi?
         q.boxes.each_with_index do |box,i|
-          vals << (q.value.include?(box.choice) ? box.choice : 0).to_s
+          vals << (q.value && q.value.include?(box.choice) ? box.choice : 0).to_s
           keys << q.db_column[i]
         end
       else
@@ -553,8 +556,8 @@ class PESTOmr < PESTDatabaseTools
     # don't write to DB in test mode
     return if @test_mode
     begin
-      RT.custom_query("DELETE FROM #{yaml.db_table} WHERE path = ?", [filename])
-      RT.custom_query(q, vals)
+      RT.custom_query_no_result("DELETE FROM #{yaml.db_table} WHERE path = ?", [filename])
+      RT.custom_query_no_result(q, vals)
     rescue DBI::DatabaseError => e
       debug "Failed to insert #{File.basename(filename)} into database."
       debug q
@@ -589,10 +592,10 @@ class PESTOmr < PESTDatabaseTools
 
     oldsize = files.size
     RT.custom_query("SELECT path FROM #{db_table}").each do |row|
-      files -= row
+      files.delete(row["path"])
     end
     if oldsize != files.size
-      debug "  WARNING: #{oldsize-files.size} files already exist and have been skipped."
+      debug "Skipping #{oldsize-files.size} already processed files."
     end
 
     files
@@ -729,8 +732,10 @@ class PESTOmr < PESTDatabaseTools
         opts.on( '-h', '--help', 'Display this screen' ) { puts opts; exit }
       end
       opt.parse!
-    rescue
+    rescue Exception => e
       puts "Parsing arguments didn't work. Please check your commandline is correct."
+      puts "Error given:"
+      puts e
       puts
       opt.parse(["-h"]) if !@path || !@omrsheet
       exit
@@ -781,7 +786,6 @@ class PESTOmr < PESTDatabaseTools
 
   # Splits the given file and reports the status of each sub-process.
   def delegate_work(files)
-    debug "Owning certain software, #{@cores} sheets at a time"
     splitFiles = files.chunk(@cores)
 
     cmd = " -p " + @path.gsub(/(?=\s)/, "\\")
@@ -796,13 +800,15 @@ class PESTOmr < PESTDatabaseTools
     splitFiles.each_with_index do |f, corecount|
       next if f.empty?
 
-      tmp = Tempfile.new("pest-omr-status-#{corecount}").path
+      cachedir = Seee::Config.file_paths[:cache_tmp_dir]
+      FileUtils.makedirs(cachedir)
+      tmp = Tempfile.new("pest-omr-status-#{corecount}--", cachedir).path
       tmpfiles << tmp
 
       list = ""
       f.each { |x| list << " " + File.basename(x).gsub(/(?=\s)/, "\\") }
-      threads << Thread.new do
-        `ruby #{File.dirname(__FILE__)}/omr2.rb #{cmd} #{list} > #{tmp}`
+      threads << Thread.new(tmp) do |log_path|
+        `ruby #{File.dirname(__FILE__)}/omr2.rb #{cmd} #{list} > #{log_path}`
         exit_codes[corecount] = $?.exitstatus
       end
     end
@@ -826,12 +832,13 @@ class PESTOmr < PESTDatabaseTools
   def print_progress(tmpfiles)
     last_length = 0
     while Thread.list.length > 1
-      tmpfiles.reject! { |x| !File.exists?(x) }
+      tmpf = tmpfiles.dup
+      tmpf.reject! { |x| !File.exists?(x) }
       print "\r" + " "*last_length + "\r"
       last_length = 0
-      tmpfiles.each_with_index do |x, i|
-        dat = `tail -n 1 #{x}`.strip
-        dat = dat.ljust([dat.length+10, 60].max) if i < tmpfiles.size - 1
+      tmpf.each_with_index do |x, i|
+        dat = `tail -n 1 #{x} 2> /dev/null`.strip
+        dat = dat.ljust([dat.length+7, 50].max) if i < tmpf.size - 1
         print dat
         last_length += dat.length
       end

@@ -1,11 +1,11 @@
-#!/usr/bin/env ruby
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
+cdir = File.dirname(File.realdirpath(__FILE__))
 require 'rubygems'
 require 'erb'
 require 'work_queue'
-require 'lib/RandomUtils.rb'
-require 'lib/result_tools.rb'
+require File.join(cdir, 'RandomUtils.rb')
+require File.join(cdir, 'result_tools.rb')
 require 'digest'
 
 module FunkyTeXBits
@@ -106,10 +106,11 @@ module FunkyTeXBits
 
     # beautify error output. If there’s a TeX error it will remove the
     # stuff TeX prints before it encounters the error.
+    error.encode!('UTF-8', 'UTF-8', :invalid => :replace)
     e = error.split("\n" + path[0..77], 2)
     error = "\n" + path[0..77] + e.last if e.size == 2
     # highlight likely TeX errors
-    error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"error\">\\0</span>")
+    error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"red\">\\0</span>")
 
     return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64
   end

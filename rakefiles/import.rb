@@ -1,5 +1,4 @@
-require 'rubygems'
-require 'date'
+# encoding: utf-8
 
 class String
   # convert “surname, firstname” to “firstname surname” and remove
@@ -17,13 +16,6 @@ class String
   def cleanup_name!
     self.replace(self.cleanup_name)
   end
-
-  # returns given text in UTF-8 encoding
-  def utf8_enc(from = "ISO-8859-1")
-    $iconv ||= {}
-    $iconv[from] ||= Iconv.new('UTF-8', from)
-    $iconv[from].iconv(self + ' ')[0..-2]
-  end
 end
 
 class LaierCSV
@@ -32,9 +24,9 @@ class LaierCSV
   def self.data
     require 'csv'
     data = {}
-    Dir.glob(IMPORT_PATH + "*.csv") do |csv|\
+    Dir.glob(IMPORT_PATH + "*.csv") do |csv|
       puts "Processing CSV #{simplify_path(csv)}"
-      CSV.open(csv, 'r') do |row|
+      CSV.foreach(csv, 'r') do |row|
 	next if row[0].nil? # lecture
 	next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
 
@@ -84,16 +76,21 @@ class UebungenDotPhysik
   URL_LECTURE_LIST = "#{URL_BASE}/liste.php?lang=en"
   URL_READ_LECTURE = "#{URL_BASE}/liste.php?lang=en&vorl="
 
+  def self.fix_enc(txt)
+    return txt unless txt.is_a?(String)
+    txt.force_encoding("iso-8859-15").encode("utf-8")
+  end
+
   # Gathers all data from uebungen.physik and returns them as array of
   # hashes.
   def self.data
     puts "Loading UebungenDotPhysik…"
     require 'mechanize'
-    @@brows ||= WWW::Mechanize.new
+    @@brows ||= Mechanize.new
     # Fix crappy charset detections. We can do this because we know what
     # encoding the page is in.
-    WWW::Mechanize::Util::CODE_DIC[:SJIS] = "ISO-8859-1"
-    WWW::Mechanize::Util::CODE_DIC[:EUC] = "ISO-8859-1"
+    Mechanize::Util::CODE_DIC[:SJIS] = "ISO-8859-1"
+    Mechanize::Util::CODE_DIC[:EUC] = "ISO-8859-1"
     @@brows.read_timeout = 30
 
     ids = UebungenDotPhysik.find_lecture_ids
@@ -107,7 +104,7 @@ class UebungenDotPhysik
     @@brows.get(URL_LECTURE_LIST) do |page|
       code = page.content.compress_whitespace
       reg  = code.scan(/<a href=\'liste\.php\?vorl=([0-9]+)\' title=\'authentification needed\' >&lt;show group list/)
-      return reg.map { |r| r[0] }.compact
+      return reg.map { |r| UebungenDotPhysik.fix_enc(r[0]) }.compact
     end
   end
 
@@ -127,9 +124,13 @@ class UebungenDotPhysik
       tuts = code.scan(/<li><a href=\'teilnehmer\.php\?gid=[0-9]+\'><b>(?:.*?)<\/b><\/a> \((.*?)\) <br>/)
       tutors = tuts.map { |t| t[0].cleanup_name }.compact
       tutors.reject! { |t| t.empty? }
+      tutors.map! { |t| UebungenDotPhysik.fix_enc(t) }
 
-      return { :title => title, :lecturer => lect,
+      data = { :title => title, :lecturer => lect,
 	      :students => students, :tutors => tutors }
+      data_fixed = {}
+      data.each { |k, v| data_fixed[k] = UebungenDotPhysik.fix_enc(v) }
+      return data_fixed
     end
   end
 end
@@ -141,8 +142,12 @@ namespace :misc do
     # (the Rails Model)
     def names_to_profs(names, lsf_data)
       names.map do |l|
-	name = l.split(" ")
-	p = Prof.find_by_firstname_and_surname(name.first, name.last)
+	name = l.gsub(/[^a-z]+/i, " ").split(" ")
+	if name.size >= 2 # assume we have a first and last name
+	  p = Prof.find_by_firstname_and_surname(name.first, name.last)
+	else
+	  p = Prof.find_by_surname(name.last)
+	end
 	next p if p
 	# okay, so we couldn’t find a match in our database. Let’s see
 	# if we can find it in lect.profs, so we can automatically add
@@ -169,8 +174,8 @@ namespace :misc do
 	  get_user_input(/^[1-9][0-9]*|skip$/, true)
 	end
 	case action
-	  when "skip": next
-	  when "add":
+	  when "skip" then next
+	  when "add"
 	    p = Prof.new(:firstname => p.first,
 			  :surname => p.last,
 			  :email => p.mail,
@@ -178,8 +183,11 @@ namespace :misc do
 	    p.save
 	    next p
 	  else
-	    p = Prof.find(pid)
-	    redo if p.nil?
+	    p = Prof.find(action)
+	    if p.nil?
+	      puts "Could not find prof with id=#{action}. Try again."
+	      redo
+	    end
 	    next p
 	end
       end
@@ -187,7 +195,6 @@ namespace :misc do
 
 
     IMPORT_PATH = "#{GNT_ROOT}/tmp/import/"
-
     puts
     puts "Before running this task, please ensure the following:"
     puts "* internet connection works"
@@ -201,17 +208,17 @@ namespace :misc do
     require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     LSF.set_debug = false
 
-    FRIENDS_PATH=IMPORT_PATH
-    require "#{GNT_ROOT}/lib/friends.rb"
+    #~ FRIENDS_PATH=IMPORT_PATH
+    #~ require "#{GNT_ROOT}/lib/friends.rb"
     friends = nil
     work_queue.enqueue_b { friends = Friends.new }
 
     puts "Gathering data:"
     # get information about tutors, student count, … ###################
     data = []
-    work_queue.enqueue_b { data[0] = MuesliYAML.data }
-    work_queue.enqueue_b { data[1] = LaierCSV.data }
-    work_queue.enqueue_b { data[2] = UebungenDotPhysik.data }
+    work_queue.enqueue_b { data[0] = MuesliYAML.data; "MuesliYAML OK" }
+    work_queue.enqueue_b { data[1] = LaierCSV.data; "LaierCSV OK" }
+    work_queue.enqueue_b { data[2] = UebungenDotPhysik.data; "UebungenDotPhysik OK" }
 
     # get information about what’s in seee #############################
     # courses will be added to the last semester currently active.
@@ -234,20 +241,23 @@ namespace :misc do
     work_queue.join
 
     # load LSF data ####################################################
-    search = ["Mathematik und Informatik", "Fakultät für Physik und Astronomie"]
+    search = ["Mathematik und Informatik", "Physik und Astronomie"]
     maths, physics = LSF.find_certain_roots(search)
 
     # Convert the URLs to actual data
-    physics = []
     work_queue.enqueue_b do
       puts "Loading physics LSF tree…"
       term, rootid = LSF.set_term_and_root(physics[:url])
       physics = LSF.get_tree(rootid)
+      physics.sort! { |x,y| x.type+x.name <=> y.type+y.name }
+      puts "LSF Physics OK"
     end
     work_queue.enqueue_b do
       puts "Loading maths LSF tree…"
       term, rootid = LSF.set_term_and_root(maths[:url])
       maths = LSF.get_tree(rootid)
+      maths.sort! { |x,y| x.type+x.name <=> y.type+y.name }
+      puts "LSF Maths OK"
     end
 
     # wait for data ####################################################
@@ -271,10 +281,11 @@ namespace :misc do
 
       # collect lists and merge similar entries. Then try to find them
       # in Seee.
+
       lects = lect.profs.flatten.uniq.map { |p| "#{p.first} #{p.last}" }
       lects += dat.map { |d| d[:lecturer] }.flatten.compact
       lects = friends.uniq_sim(lects)
-      lects = names_to_profs(lects, lect)
+      lects = names_to_profs(lects, lect).uniq.compact
 
       # collect lists and merge similar
       tutors = dat.map { |d| d[:tutors] }.flatten.compact
@@ -282,10 +293,10 @@ namespace :misc do
 
       # select smallest number. Try to guess based on tutor count, if
       # there are any tutors but no other data
-      students = [999, *dat.map { |d| d[:students] }].compact.min
-      students = 999 if students == 0
-      students_source = students == 999 ? "not known" : "from data"
-      if students == 999 && tutors.size >= 1
+      students = dat.map { |d| d[:students] }.compact.min
+      students = nil if students == 0
+      students_source = students ? "from data" : "not known"
+      if students.nil? && tutors.size >= 1
 	students = 30*tutors.size
 	students_source = "guessed from tutor count"
       end
@@ -321,13 +332,13 @@ namespace :misc do
       puts "About to import lecture with the following data:"
       puts "Title:     #{title}"
       puts "Lecturers: #{lects.map { |l| "#{l.fullname} (#{l.id})" }.join(", ")}"
-      puts "Students:  #{students} (#{students_source})"
+      puts "Students:  #{students ? students : "?"} (#{students_source})"
       puts "Form:      #{form.name} (#{form_source})"
       puts "Language:  #{lang}"
       puts "Tutors:    #{tutors.join(", ")}"
       puts "Faculty:   #{fac.longname} (guessed)"
       puts
-      next unless get_user_yesno("Add the lecture with this data?")
+      redo unless get_user_yesno("Add the lecture with this data?")
 
       # well, add it to seee ###########################################
       begin

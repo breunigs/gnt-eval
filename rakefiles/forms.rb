@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 namespace :forms do
   desc "Create form samples for all available forms. Leave empty for current terms."
   task :samples, :semester_id do |t,a|
@@ -31,14 +33,25 @@ namespace :forms do
     prog = 0
     puts
     puts "Creating forms:"
+    missing_students = []
     cps.each do |cp|
       work_queue.enqueue_b do
-        make_pdf_for(cp, dirname)
+        if cp.course.students.blank?
+          missing_students << cp.course.title
+        else
+          make_pdf_for(cp, dirname)
+        end
         prog += 1
         print_progress(prog, cps.size, cp.course.title)
       end
     end
     work_queue.join
+
+    unless missing_students.empty?
+      warn "There are courses that don’t have their student count specified."
+      warn missing_students.compact.join("\n")
+      warn "No sheets were generated for these courses."
+    end
 
     Rake::Task["forms:cover_sheets"].invoke(a.semester_id)
     Rake::Task["clean".to_sym].invoke
@@ -57,6 +70,7 @@ namespace :forms do
     puts
     puts "Done."
     puts "You can print the forms using «rake forms:print»"
+    puts "But remember some forms have been omitted due to missing students count." if missing_students.any?
   end
 
   desc "Generate cover sheets that contain all available information about the lectures. Leave empty for current terms."

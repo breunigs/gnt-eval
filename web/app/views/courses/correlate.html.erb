@@ -1,0 +1,48 @@
+<% content_for :script, javascript_include_tag("excanvas.js") %>
+<% content_for :script, javascript_include_tag("visualize.jQuery.js") %>
+<% content_for :script do %>
+<script>
+  var root = "<%=j url_for(:only_path => false) %>";
+  var question = <%=(params[:question] ? %("#{j params[:question]}") : "null").html_safe %>;
+</script>
+<% end %>
+<% content_for :script, javascript_include_tag("correlate.js") %>
+
+<%
+  links = %(<div class="button-group">)
+  links << (link_to "Return to #{@course.title}", @course, :class => "button")
+  links << %(</div>)
+  links = links.html_safe
+%>
+
+<div>
+  <h2>Correlate <%=@course.title %> (<%=@course.semester.title %>)</h2>
+  <%=links%>
+  <br style="clear:both"/>
+
+  <label for="correlate_by">Select question to correlate by:</label><br/>
+  <select id="correlate_by">
+    <option value="">Please select</option>
+    <%=
+      o = ActiveSupport::SafeBuffer.new
+      @course.form.sections.each do |s|
+        o << %(<optgroup label="#{h s.any_title}">).html_safe
+        s.questions.each do |q|
+          next if q.multi? || q.comment?
+          sel = params[:correlate_by] == q.db_column ? %(selected="selected") : ""
+          o << %(<option value="#{h q.db_column}" #{sel}>).html_safe
+          o << q.text.strip_all_tex
+          o << %(</option>).html_safe
+        end
+        o << %(</optgroup>).html_safe
+      end
+      o
+    %>
+  </select>
+</div>
+
+
+
+<div>
+  <%=links%>
+</div>

@@ -1,48 +1,44 @@
-ActionController::Routing::Routes.draw do |map|
-  map.resources :forms
+# encoding: utf-8
 
-  map.resources :faculties
+Seee::Application.routes.draw do
+  resources :forms do
+    member do
+      get "/copy_to_current" => "forms#copy_to_current"
+      get "/preview" => "forms#preview"
+    end
+  end
+
+  resources :faculties
+
+  match "/tutors" => "tutors#index"
+  resources :courses do
+    resources :tutors
+    get "/tutors/:id/preview" => "tutors#preview", :as => "tutor_preview"
+    post "/tutors/:id/result_pdf" => "tutors#result_pdf", :as => "tutor_result_pdf"
+    member do
+      post "/add_prof" => "courses#add_prof"
+      delete "/drop_prof" => "courses#drop_prof"
+      get "/preview" => "courses#preview"
+      get "/correlate" => "courses#correlate"
+    end
+  end
+
+  resources :profs
+
+  resources :semesters do
+    get "/courses" => "courses#index"
+  end
+
+  root :to => "courses#index"
+
+  post "/course_profs/:id/print" => "course_profs#print", :as => :print_course_prof
+
+  # comment image source pass throughs
+  get "/pics/:id/download" => "pics#download", :as => :download_pic
+  get "/cpics/:id/download" => "cpics#download", :as => :download_cpic
 
 
-  map.resources :tutors
-
-  map.resources :courses, :has_many => :tutors
-
-  map.resources :profs
-
-  map.resources :semesters
-
-  # The priority is based upon order of creation: first created -> highest priority.
-
-  # Sample of regular route:
-  #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
-  # Keep in mind you can assign values other than :controller and :action
-
-  # Sample of named route:
-  #   map.purchase 'products/:id/purchase', :controller => 'catalog', :action => 'purchase'
-  # This route can be invoked with purchase_url(:id => product.id)
-
-  # Sample resource route (maps HTTP verbs to controller actions automatically):
-  #   map.resources :products
-
-  # Sample resource route with options:
-  #   map.resources :products, :member => { :short => :get, :toggle => :post }, :collection => { :sold => :get }
-
-  # Sample resource route with sub-resources:
-  #   map.resources :products, :has_many => [ :comments, :sales ], :has_one => :seller
-
-  # Sample resource route within a namespace:
-  #   map.namespace :admin do |admin|
-  #     # Directs /admin/products/* to Admin::ProductsController (app/controllers/admin/products_controller.rb)
-  #     admin.resources :products
-  #   end
-
-  # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
-  map.root :controller => "courses"
-
-  # See how all your routes lay out with "rake routes"
-
-  # Install the default routes as the lowest priority.
-  map.connect ':controller/:action/:id'
-  map.connect ':controller/:action/:id.:format'
+  match "/:cont/:viewed_id/ping/" => "sessions#ping", :as => "viewer_count"
+  match "/:cont/:viewed_id/ping/:ident" => "sessions#ping", :as => "ping"
+  match "/:cont/:viewed_id/unping/:ident" => "sessions#unping", :as => "unping"
 end

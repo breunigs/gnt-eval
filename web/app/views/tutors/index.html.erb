@@ -1,27 +1,23 @@
-<%= render "shared/main_menu" %>
+<div>
+  <h2>Available Tutors</h2>
 
-<% content_for :script, javascript_include_tag("table_filter") %>
-
-<fieldset>
-<h1>Listing tutors</h1>
-
-  <b>Filter:</b>
-  <input name="filter" onkeyup="table_filter(this.value, 'tutors_table')" type="text" id="filter">
-  <button type="button" onclick="table_filter_clear('filter', 'tutors_table');">Clear</button><br/><br/>
-
-  <table id="tutors_table">
-    <tr>
-      <th>Abbr name</th>
-      <th>Course</th>
-      <th>Semester</th>
-    </tr>
-
-  <% for tutor in @tutors %>
-    <tr class="<%= cycle('odd', 'even') %>">
-      <td><%= link_to tutor.abbr_name, tutor  %></td>
-      <td><%= link_to tutor.course.title, tutor.course %></td>
-      <td><%=h tutor.course.semester.title %></td>
-    </tr>
-  <% end %>
+  <%=render "shared/tablemagic"%>
+  <table id="tablemagic" style="min-width:60em">
+    <thead>
+      <tr>
+        <th><%=Tutor.human_attribute_name("abbr_name")%></th>
+        <th>Course</th>
+        <th>Semester</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% for tutor in @tutors %>
+      <tr>
+        <td><%= link_to tutor.abbr_name, [tutor.course, tutor] %></td>
+        <td><%= link_to tutor.course.title, tutor.course %></td>
+        <td><%=h tutor.course.semester.title %></td>
+      </tr>
+    <% end %>
+    </tbody>
   </table>
-</fieldset>
+</div>

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # contains useful utilities to work with result data and transform it
 # in into a more suitable way to display. The actual display routines
 # are located in text/results/. I.e. database and TeX handling.
@@ -9,7 +11,7 @@ require "singleton"
 require "dbi"
 
 cdir = File.dirname(__FILE__)
-require cdir + "/seee_config.rb"
+require File.join(cdir, "../../config", "seee_config.rb")
 
 class ResultTools
   # only allow one instance of this class
@@ -73,11 +75,11 @@ class ResultTools
   def table_exists?(table)
     raise unless report_valid_name?(table)
     qry = case SCed[:dbi_handler].downcase
-      when "sqlite3": "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+      when "sqlite3" then "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
       # SQL standard as implemented by… nobody
       else "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?"
     end
-    sth = @dbh.prepare(qry)
+    sth = dbh.prepare(qry)
     sth.execute(table)
     r = sth.fetch
     sth.finish
@@ -98,7 +100,7 @@ class ResultTools
     # exclude invalid values
     sql << "AND 0 < #{column} AND #{column} < 99"
     r = custom_query(sql, where_hash.values, true)
-    return r[:count], r[:avg], r[:stddev]
+    return r["count"].to_i, r["avg"].to_f, r["stddev"].to_f
   end
 
   # Counts the amount of rows for the given hash. It is processed in the
@@ -109,10 +111,13 @@ class ResultTools
   # If a db column is given as 3rd argument, will group by that db
   # column and return multiple results. The format is a hash of
   # { value => count }
-  def count(table, where_hash = {}, group = nil)
+  def count(table, where_hash = {}, group = nil, skip_null = true)
     return -1 unless report_valid_name?(table)
     return table.uniq.collect {|t| count(t, where_hash, group) }.sum \
       if table.is_a?(Array)
+    # Don’t report missing tables in test mode and don’t query them
+    # even if they exist
+    return 0 if ENV["RAILS_ENV"] == "test"
     unless table_exists?(table)
       warn "Given table `#{table}` does NOT exist."
       warn "Assuming this means there are no sheets for that table."
@@ -129,25 +134,108 @@ class ResultTools
     sql << clause
     if group && group.is_a?(String)
       sql << " GROUP BY #{group} "
-      return Hash[custom_query(sql, where_hash.values, false)]
+      r = {}
+      custom_query(sql, where_hash.values, false).each do |row|
+        next if skip_null && row["value"].nil?
+        v = row["value"] =~ /^[0-9]+$/ ? row["value"].to_i : row["value"]
+        r[v] = row["count"].to_i
+      end
+      return r
     else
       r = custom_query(sql, where_hash.values, true)
-      return r[:count]
+      return r["count"].to_i
     end
   end
 
+  # May be used to group a given question by what was answered in
+  # correlate_by. For example, if you want to see how the study group
+  # attendance differs per major, you would it like this:
+  # RT.correlate("some_table", "major", "study_group_attendance", {:barcode => 123})
+  # Set combine_no_answers to true if you don’t want to differentiate
+  # between “no checkmark” and “checked not specified”.
+  def correlate(table, correlate_by, question, where_hash = {}, combine_no_answers = false)
+    return -1 unless report_valid_name?(table)
+    return -1 unless report_valid_name?(correlate_by)
+    return -1 unless report_valid_name?(question)
+    clause = hash_to_where_clause(where_hash)
+    return -1 if clause.nil?
+    qry = "SELECT DISTINCT #{correlate_by} FROM #{table} WHERE #{clause}"
+    answ = custom_query(qry, where_hash.values).map { |row| row[correlate_by].to_i }
+    if combine_no_answers && answ.include?(99)
+      answ << 0 unless answ.include?(0)
+      answ.delete(99)
+    end
+
+    results = {}
+    answ.each do |a|
+      if combine_no_answers && a == 0
+        where_hash[correlate_by] = [0, 99]
+        a = "not specified/no answer given"
+      else
+        where_hash[correlate_by] = a
+      end
+      results[a] = RT.count(table, where_hash, question)
+    end
+    # combine 0/99 for each value
+    if combine_no_answers
+      cpy = results
+      cpy.each do |k,v|
+        sum = (v[0] || 0 ) + (v[99] || 0 )
+        next if sum == 0
+        results[k]["not specified/no answer given"] = sum
+        results[k].delete(99)
+        results[k].delete(0)
+      end
+    end
+    results
+  end
+
+  # Returns a histogram of the answers given for a specific table and
+  # question. Table should be a string; the question a AbstractForm-
+  # Question-Class. Give a single integer barcode to get the results for
+  # one CourseProf or an array of integers for multiple ones. Set text_
+  # only to false if you /also/ want to get the result count by box
+  # index. Be careful when processing the output via TeX, as the text
+  # may contain commas and there are no guard braces. If absolute_numbers
+  # is false, then the percentage of each answer will be given. Otherwise
+  # raw numbers are returned.
+  def answer_histogram(table, question, barcode, text_only = true, absolute_numbers = false)
+    raise "Invalid barcode" unless barcode.is_a?(Integer) || barcode.is_a?(Array)
+    raise "Invalid question" unless question.is_a?(Question)
+    raise "Invalid table" unless table_exists?(table)
+    a = get_answer_counts(table, question, {:barcode => barcode})
+    a.reject! { |k, v| k.is_a?(Integer) } if text_only
+    unless absolute_numbers
+      # sum up amount of all answers; ignore integer based ones so
+      # answers aren’t counted multiple times
+      sum = 0.0; a.each { |k, v| sum += k.is_a?(Integer) ? 0 : v }
+      a = Hash[a.map {|k, v| [k, "#{v.to_f/sum*100.0}%"] }]
+    end
+
+    # removes guard braces inserted by get_anwer_counts
+    Hash[a.map {|k, v| [k.is_a?(String) ? k[1..-2] : k, v] }]
+  end
+
   # runs a custom query against the result-database. Returns the all
-  # results as an array of DBI::Row and instantly finishes the statement.
+  # results as an array of hashes and instantly finishes the statement.
   # Therefore you don’t want to use this if you gather large values. If
-  # first_row is set to true, “LIMIT 1” will be added automatically.
+  # first_row is set to true, “LIMIT 1” will be added automatically and
+  # the hash will be returned directely.
   def custom_query(query, values = [], first_row = false)
     raise "values parameter must be an array." unless values.is_a?(Array)
     query << " LIMIT 1" if first_row
     check_query(query, values)
-    q = @dbh.prepare(query)
+    q = dbh.prepare(query)
     begin
       q.execute(*values.flatten)
-      v = first_row ? q.fetch : q.fetch_all
+      if first_row
+        v = q.fetch_hash
+      else
+        v = []
+        while h = q.fetch_hash do
+          v << h
+        end
+      end
     rescue DBI::DatabaseError => e
       warn ""
       warn "Query:  #{query}"
@@ -159,11 +247,27 @@ class ResultTools
     v # return the result; or nil if an error occurred
   end
 
+  # works the same as custom_query but never returns a result.
+  def custom_query_no_result(query, values = [])
+    raise "values parameter must be an array." unless values.is_a?(Array)
+    check_query(query, values)
+    q = dbh.prepare(query)
+    begin
+      q.execute(*values.flatten)
+    rescue DBI::DatabaseError => e
+      warn ""
+      warn "Query:  #{query}"
+      warn "Values: #{values.join(", ")}"
+      raise "SQL-Error (Err-Code: #{e.err}; Err-Msg: #{e.errstr}; SQLSTATE: #{e.state}). Query was: #{query}"
+    ensure
+      q.finish
+    end
+  end
+
   # initializes a database connection. Since this class includes the
   # singleton mixin, only one connection will be opened per Ruby
   # instance.
   def initialize
-    reconnect_to_database
     @tex = {}
   end
 
@@ -179,9 +283,16 @@ class ResultTools
 
     if @dbh.nil? || !@dbh.connected?
       debug "ERROR: Couldn’t open a results database connection."
-      debug "Have a look at lib/seee_config.rb to correct the settings."
+      debug "Have a look at seee_config.rb to correct the settings."
       exit 1
     end
+  end
+
+  # returns the database handle. Use this insteady of directly accessing
+  # @dbh, so connect on demand works.
+  def dbh
+    reconnect_to_database if @dbh.nil? || !@dbh.connected?
+    @dbh
   end
 
   # evaluates a given question with the sheets matching special_where.
@@ -408,7 +519,7 @@ class ResultTools
 
       # correct the “last textbox” count from above
       answ[q.boxes.count] -= all
-      # guard against commas
+      # guard against commas (may cause problems when parsed in TeX)
       t = "{#{q.get_answers.last}}"
       answ[t] = answ[q.boxes.count] unless t.nil? || t.empty?
     end
@@ -448,7 +559,12 @@ class ResultTools
   # it is not.
   def report_valid_name?(name)
     v = valid_name?(name)
-    warn "Given name #{name} is invalid." unless v
+    unless v
+      warn "Given name “#{name}” is invalid."
+      begin; raise; rescue Exception => e
+        warn e.backtrace
+      end
+    end
     v
   end
 
@@ -464,5 +580,13 @@ class ResultTools
   # convenience translation method
   def t(name)
     I18n.translate(name.to_sym)
+  end
+
+  def warn(text)
+    if defined?(Rails) && Rails.logger
+      Rails.logger.warn text
+    else
+      Kernel.warn text
+    end
   end
 end

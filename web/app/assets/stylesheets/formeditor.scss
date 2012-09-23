@@ -1,0 +1,351 @@
+// applies background grandient to element for all browsers.
+@mixin addgradient($from, $to, $normalbg) {
+  background: $normalbg, -moz-linear-gradient($from, $to);
+  background: $normalbg, -o-linear-gradient($from, $to);
+  background: $normalbg, -ms-linear-gradient($from, $to);
+  background: $normalbg, -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
+}
+
+// keep height in sync with formeditor.js. grep this: CLOSEDHEIGHT
+$closed-height: 3.5rem;
+
+#form_tools {
+  float:right;
+  width:25rem;
+  margin:0;
+  padding:1rem;
+
+  // only matters when the box overlaps the form. This may only happen
+  // if the browser window is made smaller after the initial load
+  background:#fff;
+
+  a {
+    display:block;
+    border-bottom:0 !important;
+    padding:0.4rem 0;
+    height:3rem;
+    overflow:hidden;
+    font-weight:bold;
+    width:25rem;
+    margin-top:0.5rem !important;
+
+    span {
+      font-weight:normal;
+    }
+
+    &.disabled {
+      cursor:not-allowed;
+      color:#999;
+    }
+
+    &:before {
+      font-size:3rem;
+      line-height:2rem;
+      float:left;
+      padding-top:0.2rem;
+      padding-right:3.3rem;
+      font-weight:normal;
+      content: " ";
+    }
+  }
+
+  #save:before {
+    content: "⛁";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
+  #preview:before {
+    content: "⎙";
+    padding-right:0.7rem;
+    padding-left:0.8rem;
+  }
+  #redo:before {
+    content: "↷";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
+  #undo:before {
+    content: "↶";
+    padding-left:0.1rem;
+    padding-right:0.7rem;
+  }
+  #languages:before {
+    content: "‽";
+    padding-right:0.7rem;
+    padding-left:1.0rem;
+  }
+  #delete, #cancel-delete {
+    &:before {
+      content: "×";
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
+  }
+  #duplicate, #cancel-duplicate {
+    &:before {
+      content: "⎘";
+      font-size:2.6rem;
+      padding-left: 1rem;
+      padding-right: 0.7rem;
+    }
+  }
+  #sort, #cancel-sort {
+    &:before {
+      content: "⇅";
+      font-size:3rem;
+      padding-left: 0.4rem;
+      padding-right: 0.4rem;
+    }
+  }
+}
+
+
+#form_preview {
+  position: fixed;
+  left:0rem;
+  right:0rem;
+  top:0rem;
+  bottom:0rem;
+  overflow:auto;
+  z-index:1002;
+  display: none;
+  text-align:center;
+  margin:0;
+
+  > img {
+    box-shadow: 0 0 4rem #000;
+    margin:8rem;
+    border-right:1rem solid white;
+    border-left:1rem solid white;
+    background: white;
+  }
+
+  > div {
+    box-shadow: 0 0 4rem #000;
+    background:#fff;
+    max-width:80rem;
+    padding: 1rem;
+    margin:8rem auto;
+    text-align:left;
+    background: white;
+  }
+}
+
+#form_editor {
+  float:left;
+  width:70rem;
+  counter-reset:section;
+  counter-reset:question;
+
+  h4, h5, h6 {
+    font-size:inherit;
+  }
+
+  ol, ul {
+    margin: 0;
+    list-style-type: none;
+    li {
+      padding:0;
+    }
+  }
+
+  label {
+    display: inline-block;
+    width:10rem;
+    overflow:hidden;
+    height:2.5rem;
+    line-height:2.2rem;
+    vertical-align:top;
+    white-space: nowrap;
+  }
+
+  input {
+    width:44rem;
+    height:1.5rem;
+
+    &[type=checkbox] {
+      width: auto;
+      min-width: 0 !important;
+    }
+  }
+
+  textarea {
+    min-height:4rem;
+    width:42.4rem;
+    @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.8rem);
+    padding-left:2rem;
+    line-height:16px;
+    resize: none;
+    white-space: nowrap;
+    overflow-x:auto !important;
+    overflow-y:hidden;
+
+    + a {
+      line-height:2.2rem;
+      vertical-align:top;
+    }
+  }
+
+  select {
+    width: 44rem + 0.8rem;
+  }
+
+  span {
+    display:block;
+    margin-left:0.2rem;
+  }
+
+  .deleteTarget, .deleteTarget * {
+    cursor: crosshair !important;
+  }
+
+  .indent {
+    border-left:0.1rem solid #ccc;
+    border-bottom:0.1rem solid #ccc;
+    margin-left:0.4rem;
+    padding-left:1rem;
+    margin-bottom:1rem;
+
+    label {
+      width:8.6rem - 0.1rem;
+    }
+
+    .indent label {
+      width:7.2rem - 0.2rem;
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  /* don’t allow genderization for box descriptions */
+  .boxes .genderize {
+    display: none;
+  }
+
+  .page {
+    &:before {
+      content: "page break";
+      background:#ccc;
+      display:block;
+      font-weight:bold;
+      padding:1rem;
+      border-bottom:0.1rem solid #000;
+      margin-bottom:1rem;
+      margin-top:2rem;
+    }
+  }
+
+  .section {
+    counter-increment:section;
+    counter-reset:question;
+    h5 {
+      margin-top:2rem;
+      &:before { content: "Section " counter(section) ": " attr(data-title); }
+      display:block;
+      background:#eee;
+      border-bottom:0.1rem solid #aaa;
+      padding-left:1rem;
+      margin-bottom:0.4rem;
+      font-weight:bold;
+      line-height:3.4rem;
+      height:3.4rem;
+
+      a {
+        font-weight:normal;
+      }
+    }
+
+  }
+
+  .question {
+    counter-increment:question;
+    > .header {
+      &:before {
+        content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
+      }
+    }
+  }
+
+  // give new quest, new sect, new page links some room
+  .section, .page, & {
+    span:last-of-type {
+      margin-top:0.5rem;
+    }
+  }
+
+  .sortable-question-placeholder {
+    height: $closed-height - 2*1rem;
+    margin: 1rem 0;
+    margin-left:-2.1rem;
+    background-image: -ms-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -moz-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -o-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: -webkit-linear-gradient(left, #FFEC9E 0%, #FFFFFF 70%);
+    background-image: linear-gradient(to right, #FFEC9E 0%, #FFFFFF 70%);
+    display:block;
+    &:last-of-type {
+      // fix flickering, not sure why this is required
+      margin-bottom:3rem;
+    }
+  }
+
+  .header a, a.delete {
+    display:block;
+    float:right;
+    padding-left:0.5rem;
+    width:2rem;
+    height:inherit;
+    font-size:2rem;
+    overflow:hidden;
+    margin-left:0.5rem;
+    color:#F2CACD;
+    border:0 !important;
+    &:hover {
+      color:#FF3636;
+      text-shadow:none;
+      opacity:1;
+    }
+  }
+
+  .page > a.delete {
+    margin-top:-4rem;
+    width:3rem;
+    padding-right: 0.3rem;
+  }
+
+  .collapsable {
+    overflow: hidden;
+
+    .header {
+      margin-top:0.5rem;
+      display:block;
+      margin-bottom:0.5rem;
+      height:2.6rem;
+      overflow: hidden;
+      background:rgba(245,245,245,0.8);
+      line-height:2.6rem;
+      padding-left:0.5rem;
+      font-weight:normal;
+      font-size:inherit;
+
+      a {
+        &.collapse:before { content: "↟"; }
+        &.move { cursor: move }
+      }
+    }
+
+    &.closed {
+      height: $closed-height;
+      .header a.collapse:before { content: "↡"; }
+    }
+  }
+
+  .heading > .heading {
+    border:1px solid red;
+    &:before {
+      content: "invalid headings!";
+    }
+  }
+}

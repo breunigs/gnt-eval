@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
 # A semester is a period of time, in which courses are held --
 # typically a semester. A semester has many courses.
 class Semester < ActiveRecord::Base
-  has_many :courses
+  has_many :forms, :inverse_of => :semester
+  has_many :courses, :inverse_of => :semester
   has_many :course_profs, :through => :courses
   has_many :tutors, :through => :courses
-  has_many :forms
+  has_many :faculties, :through => :courses, :uniq => true
   validates_presence_of :title
   validates_presence_of :longtitle
 
@@ -73,12 +74,8 @@ class Semester < ActiveRecord::Base
   def critical?
     critical
   end
-
-  def dirFriendlyName
-    title.gsub(' ', '_').gsub('/', '_')
-  end
-
-  def dirfriendly_title
-    dirFriendlyName
+  
+  def dir_friendly_title
+    ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
   end
 end

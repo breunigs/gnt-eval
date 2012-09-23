@@ -1,0 +1,45 @@
+If you want to run the Rails part of GnT Eval in production mode,
+you need to call the following to set everything up:
+
+  # first, remove all cached files and restore revisioned ones in
+  # case they got deleted:
+  cd web/public
+  rm -r assets
+  find . -name "*.html" -exec rm {} \;
+  git checkout .
+  
+  # Now compile CSS and JS files:
+  cd ..
+  bundle exec rake assets:precompile
+  
+  # and finally start the server with:
+  RAILS_ENV=production rails server
+
+
+Your server should now be up and running and available at
+  http://localhost:3000
+  
+  
+
+If you want to serve it via Apache or Nginx you’ll probably need
+RVM and Phusion Passenger. The RVM part is largely covered in the
+INSTALL file, so have a look there first to avoid choosing the
+wrong Ruby version and the like.
+
+Installing Passenger is covered in [1,2] for Apache and nginx and
+GnT Eval should be mostly set up for this. If there are other
+projects on your server that won’t work with the Ruby version
+required by GnT Eval, you need to fiddle a bit more, but there’s
+documentation in [3-5]. If you’re capable of German there’s also
+a nice summary on how to do this for Debian systems in [6].
+
+Be aware that Rails.root is actually in the web/ subfolder. Thus
+if you checked out the repository into /var/www-gnt-eval your
+DocumentRoot would be /var/www-gnt-eval/web/public/.
+
+[1] http://www.modrails.com/documentation/Users%20guide%20Apache.html
+[2] http://www.modrails.com/documentation/Users%20guide%20Nginx.html
+[3] http://blog.phusion.nl/2010/09/21/phusion-passenger-running-multiple-ruby-versions/
+[4] http://blog.ninjahideout.com/posts/the-path-to-better-rvm-and-passenger-integration
+[5] http://everydayrails.com/2010/09/13/rvm-project-gemsets.html
+[6] http://www.asconix.com/howtos/debian/multiple-ruby-rails-apache-passenger-rvm-debian-howto

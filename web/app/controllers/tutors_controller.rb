@@ -1,18 +1,19 @@
+# encoding: utf-8
+
 class TutorsController < ApplicationController
-  before_filter :load_course
+  before_filter :load_course, :except => :index
 
   def load_course
-    if not params[:course_id].nil?
-          @course = Course.find(params[:course_id])
-    end
+    @course = Course.find(params[:course_id])
   end
+
   # GET /tutors
   # GET /tutors.xml
   def index
     # (inner) join prevents us from loading tutors whose course does
     # not exist anymore
     @tutors = Tutor.all(:joins => :course, :include => [:semester],
-                :order => :abbr_name)
+                :order => ["semester_id DESC", :title, :abbr_name])
 
     respond_to do |format|
       format.html # index.html.erb
@@ -27,17 +28,6 @@ class TutorsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.xml  { render :xml => @tutor }
-    end
-  end
-
-  # GET /tutors/new
-  # GET /tutors/new.xml
-  def new
-    @tutor = @course.tutors.build
-
-    respond_to do |format|
-      format.html # new.html.erb
       format.xml  { render :xml => @tutor }
     end
   end
@@ -62,25 +52,22 @@ class TutorsController < ApplicationController
   def create
     existingTutors = @course.tutors.map { |x| x.abbr_name }
     par = params[:tutor]['abbr_name'].split(',').map{ |x| x.strip }
-    failure = nil
+
+    errors = []
     par.uniq.sort.each do |p|
-      next if existingTutors.include? p
+      next if existingTutors.include?(p)
       t = @course.tutors.build({'abbr_name'=>p})
-      if not t.save
-        failure = true
+      unless t.save
+        errors << t.errors
       end
     end
 
-    kill_caches
-
     respond_to do |format|
-      if failure.nil?
+      if errors.empty?
         flash[:notice] = 'Tutor was successfully created.'
         format.html { redirect_to(@course) }
-        format.xml  { render :xml => @tutor, :status => :created, :location => @course }
      else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @tutor.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -88,14 +75,13 @@ class TutorsController < ApplicationController
   # PUT /tutors/1
   # PUT /tutors/1.xml
   def update
-    @tutor = @course.tutors.find(params[:id])
-    kill_caches @tutor
-    expire_fragment("tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
+    @tutor = Tutor.find(params[:id])
+    expire_fragment("preview_tutors_#{params[:id]}") if @tutor.comment != params[:tutor][:comment]
 
     respond_to do |format|
       if @tutor.update_attributes(params[:tutor])
         flash[:notice] = 'Tutor was successfully updated.'
-        format.html { redirect_to(@tutor) }
+        format.html { redirect_to([@tutor.course, @tutor]) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
@@ -107,10 +93,10 @@ class TutorsController < ApplicationController
   # DELETE /tutors/1
   # DELETE /tutors/1.xml
   def destroy
-    @tutor = @course.tutors.find(params[:id])
-    kill_caches @tutor
+    @tutor = Tutor.find(params[:id])
+
     # expire preview cache as well
-    expire_fragment("tutors_#{params[:id]}")
+    expire_fragment("preview_tutors_#{params[:id]}")
     @tutor.destroy unless @tutor.critical?
 
     respond_to do |format|
@@ -120,15 +106,24 @@ class TutorsController < ApplicationController
     end
   end
 
-  caches_page :index, :show, :edit, :preview
+  def result_pdf
+    @tutor = Tutor.find(params[:id])
+    if @tutor.nil?
+      flash[:error] = 'No tutor with this ID has been found'
+      redirect_to tutors_path
+      return
+    end
 
-  private
-  def kill_caches(tutor = nil)
-    puts "="*50
-    puts "Expiring tutor caches" + (tutor ? " for #{tutor.abbr_name}" : "")
-    expire_page :action => "index"
-    expire_page :action => "show", :id => tutor
-    expire_page :action => "preview", :id => tutor
-    expire_page :action => "edit", :id => tutor
+    pdf_path = temp_dir("tutor_result_pdf")
+    path = pdf_path + "/tutor_eval_#{@tutor.id}.pdf"
+    tex_code = @tutor.evaluate
+
+    unless render_tex(tex_code, path, true, true)
+      flash[:error] = 'Couldn’t render TeX due to some errors. Have a look at the log file to find out why.'
+      redirect_to [@tutor.course, @tutor]
+      return
+    end
+    send_file path, :type => "application/pdf"
+    File.delete(path)
   end
 end

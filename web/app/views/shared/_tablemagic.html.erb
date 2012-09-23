@@ -1,0 +1,32 @@
+<%# adds filtering and sorting goodies to up to one table per page. %>
+<%# Use it like this: %>
+<%# render "shared/tablemagic" %>
+<%# <table id="tablemagic" style="min-width:123em"> … %>
+
+
+
+
+<%# If search is also implemented on the server side you can pass %>
+<%# :search => true; then the form will be submitable using GET and %>
+<%# the ?search= URL parameter. %>
+
+<% clear=%(<a href="#" onclick="var f=$('#filterfield'); f.val(''); f.trigger('change'); return false;" class="button">Clear</a>).html_safe %>
+
+<% if defined?(search) && search %>
+  <%= form_tag "", :method => 'get', :class => "singleline" do %>
+    <%= text_field_tag :search, params[:search],
+          :placeholder => "Filter…",
+          :type => "search",
+          :id => "filterfield",
+          :style => "margin-right:.2rem"
+      %>
+    <% if params[:search] %>
+      <a href="<%=request.path%>" class="button">Clear</a>
+    <% else %>
+      <%=clear%>
+    <% end %>
+  <% end %>
+<% else %>
+  <input type="text" id="filterfield" placeholder="Filter…"/>
+  <%=clear%>
+<% end %>
