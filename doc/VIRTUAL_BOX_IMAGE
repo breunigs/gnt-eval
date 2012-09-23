@@ -1,0 +1,68 @@
+G'n'T-Eval Virtual Box Image
+============================
+
+This image is meant for you to try out G'n'T-Eval before having to do
+any real setup work. The webserver is forwarded by default, so you can
+simply point your webbrowser to
+  http://localhost:3000
+to view the web GUI. Of course, you can use the one in the VirtualBox,
+too.
+
+
+You can download the image at:
+http://b.uni-hd.de/gnt-eval/virtualboximg.html
+
+
+All passwords, the user account, the hostname and everything else is set
+to “gnt-eval”.
+
+
+It’s recommended to use VirtualBox folder sharing feature if you want
+to actually process scanned sheets from within the VBox. You can read
+more about that here:
+http://www.virtualbox.org/manual/ch04.html#sharedfolders
+
+
+
+== Changes to default Debian Install
+
+* Passwordless sudo via visudo command:
+  ---------------
+  gnt-eval ALL =(ALL) NOPASSWD : ALL
+  ---------------
+
+* Using http.debian.net mirror in /etc/apt/sources.list so it chooses
+  the nearest mirror automatically
+
+* Deactivated screensaver and screenlocker in Applications → System Tools
+    → Preferences → System Settings → Brightness and Lock
+
+* Added the Rails Server for the Web Gui to Startup Applications in
+  Applications → System Tools → Startup Applications using
+  ---------------
+  gnome-terminal -e "bash -c 'cd /home/gnt-eval/gnt-eval/web && rails server || sleep 900'"
+  gnome-terminal -e "bash -c ' . $HOME/.rvm/scripts/rvm && cd /home/gnt-eval/gnt-eval/web && rails server || sleep 900'"
+  gnome-terminal -e "bash -c 'cd /home/gnt-eval && source .rvm/scripts/rvm && cd gnt-eval/web && rails server || sleep 900'"
+  ---------------
+
+* Similar for the webbrowser:
+  ---------------
+  bash -c "sleep 30 && x-www-browser http://localhost:3000"
+  ---------------
+
+* Removed unnecessary software to make the image smaller
+
+* Disabled Swap
+
+* Installed oh-my-zsh
+
+
+== Settings in VirtualBox
+
+* Port 3000 is forwarded, so that the web GUI may be accessed from
+  outside the VM. The command required to set this up is:
+  ---------------
+  VBoxManage modifyvm "GnT-Eval" --natpf1 "RailsForward,tcp,,3000,,3000"
+  ---------------
+
+* 1 GB of RAM is recommended
