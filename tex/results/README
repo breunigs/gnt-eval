@@ -1,7 +1,7 @@
 Order of inclusion
 ==================
 
-These files are loaded when evaluating a semester (i.e. rake pdf:semester).
+These files are loaded when evaluating a term (i.e. rake results:pdf_report).
 Some handling is done in lib/result_tools.rb. The order of inclusion is
 determined by each of the models’ evaluate method, starting with
 web/app/models/semester.rb. It currently looks something like this:
