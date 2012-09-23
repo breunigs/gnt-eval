@@ -67,9 +67,11 @@ For starters, the project is split up into interconnected parts:
 project. It is also known as _seee_. Many configuration options may be found in 
 `web/config/seee_config.rb`. The web GUI is used for operations that apply to a 
 single lecture, professor, etc.
-- Operations that work on many things at once are handled in the `Rakefile` (split into parts in `rakefiles/*`)
+- Operations that work on many things at once are handled in the `Rakefile` (split 
+into parts in `rakefiles/*`)
 - the optical mark recognition is located in `pest/`.
-- The actual tex class rendering the questionnaires may be found in `tex/sheets/tex/latex/eval/eval.cls`. The directory structure is required by TeX.
+- The actual tex class rendering the questionnaires may be found in 
+`tex/sheets/tex/latex/eval/eval.cls`. The directory structure is required by TeX.
 - The result.pdf generation is distributed across many files. A good starting 
 point is `web/app/lib/AbstractForm.rb`. The visualizers for different question 
 types are located in `tex/results`. There’s also a readme there that should get 
@@ -90,28 +92,36 @@ doc/ATTRIBUTION. If there are any issues please open a ticket.
 About
 -----
 
-G'n'T Eval started as Rails project to manage the lectures that should be evaluated but has grown to offer the full stack required to carry out evaluations. While many of the components had names already, the project as a whole didn’t. The parts are listed in order of creation:
+G'n'T Eval started as Rails project to manage the lectures that should be 
+evaluated but has grown to offer the full stack required to carry out evaluations. 
+While many of the components had names already, the project as a whole didn’t. The 
+parts are listed in order of creation:
 
-- *WebGUI:* Seee for _Siehe, es erleichtert Evaluation_ or _see, it simplifies 
+- **WebGUI:** Seee for _Siehe, es erleichtert Evaluation_ or _see, it simplifies 
 evaluation_. _See_ is German for _lake_ and the name was chosen because all 
 projects of [Fachschaft MathPhys](http://mathphys.fsk.uni-heidelberg.de/) refered 
 to bodies of water at that time.
-- *Optical Mark Recognition:* Pest for _Practival Evaluation ScripT_. _Pest_ is 
+- **Optical Mark Recognition:** Pest for _Practival Evaluation ScripT_. _Pest_ is 
 German for the _Black Death_.
-- *TeX form generation:* Its name is actually Cholera, but it never established. I 
+- **TeX form generation:** Its name is actually Cholera, but it never established. I 
 can’t remeber the meaning of the acronym.
 
-Keeping true to the obscure acronym naming as explained in [PhD’s Clever Acronyms](http://www.phdcomics.com/comics.php?f=1100) we came up with the project name:
+Keeping true to the obscure acronym naming as explained in [PhD Comic’s Clever 
+Acronyms](http://www.phdcomics.com/comics.php?f=1100) we came up with the project 
+name:
 
 
             .-""-.             G'n'T-Eval
       ⑊    /      \             
-      │⑊~~~~~~~│   ;           _G_ as in Evaluation
-      │ ⑊      │  /            _T_ as in [Excellence](https://en.wikipedia.org/wiki/German_Universities_Excellence_Initiative)
-      │  ⑊     │-'             and _n_ as in and.
+      │⑊~~~~~~~│   ;           G as in Evaluation
+      │ ⑊      │  /            T as in Excellence
+      │  ⑊     │-'             and n as in and.
       │   ⑊    │
       │    ⑊   │
       │     ⑊  │
       │      ⑊ │
       │       ⑊│
       └────────┘
+
+Excellence is a reference to the [German Universities Excellence 
+Initiative]((https://en.wikipedia.org/wiki/German_Universities_Excellence_Initiative)
