@@ -125,3 +125,11 @@ name:
 
 Excellence is a reference to the [German Universities Excellence 
 Initiative](https://en.wikipedia.org/wiki/German_Universities_Excellence_Initiative)
+
+The following people have contributed and are therefore lovingly called _daft_ by
+the project (in German, alphabetical order):
+- Jasper ist doof
+- Oliver ist doof
+- Paul ist doof
+- Rebecca ist doof
+- Stefan ist doof
