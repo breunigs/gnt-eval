@@ -59,3 +59,42 @@ is_new = !is_edit
   var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
   $F().setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
 </script>
+
+<div class="help">
+  <h3>Help</h3>
+  <ul>
+    <li><b>Question types:</b>
+      <ul>
+        <li>Use <b>single</b> if the user should only be allow to make one checkmark.<br/>
+        Typical questions ask for ranges, e.g. from “very good” to “very bad”. You don’t need to give every box a description (“text” in form editor) as long as the left- and rightmost box are clear enough. For ranges, the histogram visualizers are recommended.<br/>
+        Of course, you can also ask single choice questions that are not ranged, e.g. “Choose your favorite open source project” and then list a view. In this case, every box should be named and the horizontal_bars visualizer chosen.</li>
+
+        <li>Use <b>tutor</b> if you want the user to be able to answer question for his or her tutor (the assumption is that one lecture has many tutors and that each user or student who fills out the sheets has exactly one tutor). The question is single choice and boxes will be filled for you. You can add tutors in each corse’s page. The tutor_overview visualizer inserts an overview table (tutor name, returned questionnaires, page in results.pdf). It is highly recommended to name the db_column for that question <b>tutor_id</b>.</li>
+
+        <li>Use <b>multi</b> if the user should be able to make more than one checkmark. All boxes must be named for this type of question. Currently there is only the horizontal_bars visualizer. There’s no visual difference between single and multiple choice questions, so it’s recommended to mark latter by text (e.g. append “multiple entries possible” to the question).</li>
+
+        <li>Use <b>text</b> if you want the user to be able to enter handwritten text that must be manually typed in order to appear in the results.pdf. In- or decrease the height field by 100 to get an idea how big the comment field will be and only care about the details once your sheet is finished and about to be polished. Choose the list visualizer to simply display whatever you write in the comment field.</li>
+      </ul>
+    </li>
+
+    <li><b>repeat_for and those variables</b><br/>
+      A course can have multiple lecturers and multiple tutors. Any question that relates to the course, e.g. “how is the time of the course?”, should be shown only once. If a question relates to the lecturer, it should be shown for each lecturer. For example for the question “how clear was the speech?” it would be helpful to know who had problems (if there are any). Likewise for the tutors. It also puts comments where they belong to.<br/>
+      Depending on the repeat_for, you can use different variables that will fill in the lecturer’s or tutor’s name. Former is especially useful for multi-lecturer courses since almost anyone skips the header and jumps right to the first question. It’s easy to miss how is actually being rated. (Note: the feature is not yet enabled; it will always choose the neutral question). Variables are:
+      <ul>
+        <li><i>repeat_for=lecturer</i> \lectLast{}  \lectFirst{} \lect{} – last name, first name or both</li>
+        <li><i>repeat_for=tutor</i> \tutor \myTutor – if the name is available, both contain the name of the tutor. That is usually only the case in the result.pdf. If not, \tutor expands to “<%=I18n.t(:tutor)%>” and \myTutor to “<%=I18n.t(:my_tutor)%>”. Both can be set in web/config/locales/*.yml for each language.</li>
+        <li><i>anywhere</i>
+          <ul>
+            <li>\noAnswerText – the text used for the last checkbox that one can check to say “I do not want to answer” this question</li>
+            <li>\storedLecture – name of the current lecture/course</li>
+            <li>\storedTerm – current term</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+
+    <li><b>Saving space</b><br/>If you’re low on space, you can set a question to ”hide answers”. This means it will simply not print each box’s text. The text is still required for the results.pdf, though. To let the user know what the answers actually are you can put them in the section header (answers text field – one answer per line). Obviously, all questions should have the same answers for this to work. You can have a look at the default forms to see how this can be pulled off.</li>
+
+    <li><b>last_is_textbox</b><br/>You can make the last box of a question a very, very small user-writable field that must be manually evaluated. This is useful for question that have 90%+ of the time some common answer but you still want to catch “other” answers, too, without summarizing them under “other”. </li>
+  </ul>
+</div>
