@@ -120,7 +120,7 @@
 \definecolor{gray}{rgb}{.88,.88,.88}
 \definecolor{darkgray}{rgb}{.6,.6,.6}
 
-% overwrite color of the horizontal lines
+% overwrite color of the horizontal lines. Needs also to be set in the \separator command
 \arrayrulecolor{darkgray}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -370,7 +370,7 @@
 
 % used at the end of the page to mark the end of a comment field
 \newcommand{\separator}[1]{
-  \vspace{-1.15em}\rule{19.2cm}{#1}\\
+  \vspace{-1.15em}\color{darkgray}\rule{19.2cm}{#1}\\
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
