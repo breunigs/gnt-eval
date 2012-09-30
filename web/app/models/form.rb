@@ -51,7 +51,10 @@ class Form < ActiveRecord::Base
 
   # returns true iff the form is a valid AbstractForm class. Nothing else is checked.
   def abstract_form_valid?
-    abstract_form.is_a? AbstractForm
+    abstract_form.is_a?(AbstractForm) \
+      && abstract_form.pages.all? { |s| s.is_a?(Page) } \
+      && abstract_form.sections.all? { |s| s.is_a?(Section) } \
+      && abstract_form.questions.all? { |s| s.is_a?(Question) }
   end
 
   # runs all kinds of checks to see if the form is fine and ready to be used in the wild.
