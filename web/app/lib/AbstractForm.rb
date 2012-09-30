@@ -466,9 +466,8 @@ class AbstractForm
   # { :offending_column => ["Question 1?", "Question 2?"] }
   def get_duplicate_db_columns
     h = {}
-    c = get_all_db_columns
-    c.get_duplicates.each do |d|
-      h[d.to_sym] = c.find_all { |q| q.db_column == d }.map { |q| q.text }
+    get_all_db_columns.get_duplicates.each do |d|
+      h[d.to_sym] = questions.find_all { |q| q.db_column == d }.map { |q| q.text }
     end
     h
   end
