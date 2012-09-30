@@ -1,8 +1,12 @@
 <%
-#render "shared/aceify_textareas", :mode => "json"
-content_for :script, javascript_include_tag("js-yaml.min")
-content_for :script, javascript_include_tag("json2yaml")
-content_for :script, javascript_include_tag("formeditor")
+if @form.abstract_form_valid?
+  content_for :script, javascript_include_tag("js-yaml.min")
+  content_for :script, javascript_include_tag("json2yaml")
+  content_for :script, javascript_include_tag("formeditor")
+else
+  render "shared/aceify_textareas", :mode => "yaml"
+end
+
 is_edit = controller.action_name == "edit"
 is_new = !is_edit
 %>
@@ -10,55 +14,63 @@ is_new = !is_edit
 
 <%= render "form_basic", :is_edit => is_edit %>
 
-<div>
-  <h3>Graphical Form Editor</h3>
+<% if @form.abstract_form_valid? %>
+  <div>
+    <h3>Graphical Form Editor</h3>
 
-  <div id="form_editor"></div>
+    <div id="form_editor"></div>
 
-  <div id="form_tools">
-    <h4>Tools</h4>
-    <a id="save" onclick="$F().save()">Save</a>
-    <a id="preview" onclick="$F().preview()">Preview</a>
-    <a id="undo" class="disabled" onclick="$F().undo()">Undo <span></span></a>
-    <a id="redo" class="disabled" onclick="$F().redo()">Redo <span></span></a>
+    <div id="form_tools">
+      <h4>Tools</h4>
+      <a id="save" onclick="$F().save()">Save</a>
+      <a id="preview" onclick="$F().preview()">Preview</a>
+      <a id="undo" class="disabled" onclick="$F().undo()">Undo <span></span></a>
+      <a id="redo" class="disabled" onclick="$F().redo()">Redo <span></span></a>
 
-    <a id="sort" onclick="$F().toggleSorting()">Enable Sorting <span>(Shows buttons for dragging or move up/down)</span></a>
-    <a id="cancel-sort" onclick="$F().toggleSorting()">Disable Sorting <span>(Hides buttons, order stays)</span></a>
+      <a id="sort" onclick="$F().toggleSorting()">Enable Sorting <span>(Shows buttons for dragging or move up/down)</span></a>
+      <a id="cancel-sort" onclick="$F().toggleSorting()">Disable Sorting <span>(Hides buttons, order stays)</span></a>
 
-    <a id="delete" onclick="$F().toggleDeleting()">Enable Deleting <span>(Shows buttons that allow deletion)</span></a>
-    <a id="cancel-delete" onclick="$F().toggleDeleting()">Disable Deleting <span>(Hides buttons, nothing is restored)</span></a>
+      <a id="delete" onclick="$F().toggleDeleting()">Enable Deleting <span>(Shows buttons that allow deletion)</span></a>
+      <a id="cancel-delete" onclick="$F().toggleDeleting()">Disable Deleting <span>(Hides buttons, nothing is restored)</span></a>
 
-    <a id="duplicate" onclick="$F().toggleDuplicating()">Enable Duplicating <span>(Shows buttons that allow duplication)</span></a>
-    <a id="cancel-duplicate" onclick="$F().toggleDuplicating()">Disable Duplicating <span>(Hides buttons, duplicates stay)</span></a>
+      <a id="duplicate" onclick="$F().toggleDuplicating()">Enable Duplicating <span>(Shows buttons that allow duplication)</span></a>
+      <a id="cancel-duplicate" onclick="$F().toggleDuplicating()">Disable Duplicating <span>(Hides buttons, duplicates stay)</span></a>
 
-    <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
+      <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
+    </div>
+
+    <div id="form_preview"></div>
   </div>
 
-  <div id="form_preview"></div>
-</div>
+  <script type="text/javascript">
+    <%
+      attr = {}
+      attr[:PreviewUrl] = @form.id ? preview_form_path(@form) : nil
+      attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
+      attr[:Page] = [Page::ATTRIBUTES].flatten
+      attr[:Section] = [Section::ATTRIBUTES].flatten
+      attr[:Visualizers] = {}
+      attr[:Visualizers][:Single] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_*.tex.erb"))
+      attr[:Visualizers][:Single].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
+      attr[:Visualizers][:Tutor] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_tutor_*.tex.erb"))
+      attr[:Visualizers][:Tutor].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
+      # TODO: this is another artifact of the weird type handling…
+      attr[:Visualizers][:Single] = attr[:Visualizers][:Single] - attr[:Visualizers][:Tutor]
+      attr[:Visualizers][:Multi] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "multi_*.tex.erb"))
+      attr[:Visualizers][:Multi].map! { |f| f.gsub(/^multi_|\.tex.erb$/, "") }
+      attr[:Visualizers][:Text] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "comment_*.tex.erb"))
+      attr[:Visualizers][:Text].map! { |f| f.gsub(/^comment_|\.tex.erb$/, "") }
+    %>
+    var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
+    $F().setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
+  </script>
 
-<script type="text/javascript">
-  <%
-    attr = {}
-    attr[:PreviewUrl] = @form.id ? preview_form_path(@form) : nil
-    attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
-    attr[:Page] = [Page::ATTRIBUTES].flatten
-    attr[:Section] = [Section::ATTRIBUTES].flatten
-    attr[:Visualizers] = {}
-    attr[:Visualizers][:Single] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_*.tex.erb"))
-    attr[:Visualizers][:Single].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
-    attr[:Visualizers][:Tutor] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "single_tutor_*.tex.erb"))
-    attr[:Visualizers][:Tutor].map! { |f| f.gsub(/^single_|\.tex.erb$/, "") }
-    # TODO: this is another artifact of the weird type handling…
-    attr[:Visualizers][:Single] = attr[:Visualizers][:Single] - attr[:Visualizers][:Tutor]
-    attr[:Visualizers][:Multi] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "multi_*.tex.erb"))
-    attr[:Visualizers][:Multi].map! { |f| f.gsub(/^multi_|\.tex.erb$/, "") }
-    attr[:Visualizers][:Text] = Dir.glob_files(File.join(GNT_ROOT, "tex/results", "comment_*.tex.erb"))
-    attr[:Visualizers][:Text].map! { |f| f.gsub(/^comment_|\.tex.erb$/, "") }
-  %>
-  var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
-  $F().setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
-</script>
+<% else %>
+  <div>
+    <h3>Broken form?</h3>
+    <p>The form is broken so that it can’t be fixed using the FormEditor. This usually means that the YAML is somehow wrong, because that’s basically the only requirement. If you know what caused this, please open a ticket.</p>
+  </div>
+<% end %>
 
 <div class="help">
   <h3>Help</h3>
