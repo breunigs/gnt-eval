@@ -19,3 +19,6 @@
 [submodule "submodules/jquery-autosize"]
 	path = submodules/jquery-autosize
 	url = git://github.com/jackmoore/autosize.git
+[submodule "submodules/ace-builds"]
+	path = submodules/ace-builds
+	url = git://github.com/ajaxorg/ace-builds.git
