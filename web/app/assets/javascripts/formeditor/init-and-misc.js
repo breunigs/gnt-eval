@@ -33,7 +33,35 @@ function FormEditor() {
     return arguments.callee.instance;
   arguments.callee.instance = this;
 
-  // default variables
+
+  this.loadFormFromTextbox();
+
+
+  // listeners and other initial setup work
+  $("[type=numeric]").numeric({ decimal: false, negative: false });
+  this.attachSectionHeadUpdater();
+  this.attachQuestionHeadUpdater();
+  this.attachChangeListenerForUndo();
+  this.attachCollapsers();
+  $('#form_editor textarea').autosize();
+  this.allowSortingCancelByEsc();
+
+  this.checkSectionUpDownLinks();
+  this.attachFormSubmit();
+  $(document).ready(function() { $F().fixToolBoxScrolling(); });
+
+  this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
+
+  // hide original text edit box if form editor loaded successfully
+  $("#form_content").parents("tr").hide();
+}
+
+/* @private
+ * Loads the YAML sheet from the default text area and parses it into
+ * a FormEditor. Should be only called once in production mode, but may
+ * be useful when debugging. */
+FormEditor.prototype.loadFormFromTextbox = function() {
+  // (re)set default variables
   this.undoData = new Array();
   this.redoData = new Array();
   this.undoTmp = null;
@@ -46,26 +74,10 @@ function FormEditor() {
   // parsing
   this.parseAbstractForm(this.data);
 
-  // listeners and other initial setup work
-  $("[type=numeric]").numeric({ decimal: false, negative: false });
-  this.attachSectionHeadUpdater();
-  this.attachQuestionHeadUpdater();
-  this.attachChangeListenerForUndo();
-  this.attachCollapsers();
-  $('#form_editor textarea').autosize();
-  this.allowSortingCancelByEsc();
   this.toggleSorting(false);
   this.toggleDeleting(false);
   this.toggleDuplicating(false);
-  this.checkSectionUpDownLinks();
-  this.attachFormSubmit();
-  $(document).ready(function() { $F().fixToolBoxScrolling(); });
-
-  this.assert(this.groupTagStack.length == 0, "There are unclosed groups!");
-
-  // hide original text edit box if form editor loaded successfully
-  $("#form_content").parents("tr").hide();
-}
+};
 
 /* @private
  * Run once function that makes the #form_tools element semi-fixed.
@@ -165,6 +177,27 @@ FormEditor.prototype.assert = function(expression, message) {
     this.invalidData = true;
     this.trace();
     throw(message);
+  }
+};
+
+/* @public
+ * Checks if the given expression is true; prints the message if it
+ * isn’t. If expression is a function, the function will be executed.
+ * If there’s no error, it’s assumed everything worked fine, otherwise
+ * the message will be printed. The functions return value doesn’t
+ * matter.
+ * @param expression to check
+ * @param message to show, if expression is not true */
+FormEditor.prototype.test = function(expression, message) {
+  if(typeof expression === "function") {
+    try {
+      expression.call();
+    } catch(err) {
+      this.warn(message);
+      this.log(err);
+    }
+  } else if (!expression) {
+    this.warn(message);
   }
 };
 

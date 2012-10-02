@@ -35,7 +35,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
   this.createActionLink("$F().createAdditionalPage()", "Create New Page (insert page break)");
   this.closeGroup();
 
-  $('#form_editor').append(this.generatedHtml);
+  $('#form_editor').html(this.generatedHtml);
 };
 
 /* @public
