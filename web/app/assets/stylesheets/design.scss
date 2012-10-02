@@ -193,7 +193,7 @@ table {
   /* automatically zebra stripe tables unless they have even/odd classes.
    * This allows for table filtering where the even/odd are added via js.
    */
-  tr:nth-child(2n+1):not(.odd):not(.even), .odd {
+  tr:nth-child(2n):not(.odd):not(.even), .even {
     background:#f2f2f2;
   }
 }
