@@ -28,7 +28,7 @@ FormEditor.prototype.deletePageBreak = function(link) {
   }
   this.addUndoStep("deleting page");
   // append sections to previous page
-  allPages[pos-1].append(s.children(".section"));
+  $(allPages[pos-1]).append(s.children(".section"));
   // remove page
   s.replaceWith("");
   this.checkDuplicateIds();
