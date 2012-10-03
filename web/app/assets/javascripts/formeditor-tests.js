@@ -5,13 +5,16 @@
  * tests, it is specified at the bottom of this file. */
 
 
-//$(document).ready(function() {
-//  $F().runTests();
-//});
+$(document).ready(function() {
+  //$F().runTests();
+});
 
 
 /* Runs all available tests. */
 FormEditor.prototype.runTests = function() {
+  // prevent submission everywhere
+  $("form").attr("action", "");
+
   try {
     $F().loadTestForm();
   } catch(err) {
@@ -39,17 +42,37 @@ FormEditor.prototype.runTests = function() {
   $F().loadTestForm();
   var newSection = $F().findLinksByText("#form_editor", "Create New Section");
   $F().test(newSection.length === 1, "There should be only one new section link, but "+newSection.length+" have been found.");
+  l = $("input[type=hidden][value=Section]");
+  $F().test(l.length === 1, "There should be only one (hidden) section header, but "+l.length+" have been found.");
   $F().test(function() { newSection.click() }, "Creating a new section didn’t work.");
+  l = $("input[type=hidden][value=Section]");
+  $F().test(l.length === 2, "(After adding section) There should now be two (hidden) section headers, but "+l.length+" have been found.");
   $F().test(function() { $(".section > .header > .delete").last().click() }, "Deleting a section didn’t work.");
   $F().checkForNoOps("Adding and deleting a section isn’t no-op.");
+  l = $("input[type=hidden][value=Section]");
+  $F().test(l.length === 1, "(After deleting section) There should now be only one (hidden) section header, but "+l.length+" have been found.");
 
   // Question basics: adding, removing
   $F().loadTestForm();
   var newQuestion = $F().findLinksByText("#form_editor", "Create New Question");
   $F().test(newQuestion.length === 1, "There should be only one new question link, but "+newQuestion.length+" have been found.");
+  l = $("input[type=hidden][value=Question]");
+  $F().test(l.length === 5, "There should be five (hidden) question headers, but "+l.length+" have been found.");
   $F().test(function() { newQuestion.click() }, "Creating a new question didn’t work.");
+  l = $("input[type=hidden][value=Question]");
+  $F().test(l.length === 6, "(After adding question) There should now be six (hidden) question headers, but "+l.length+" have been found.");
   $F().test(function() { $(".question > .header > .delete").last().click() }, "Deleting a question didn’t work.");
   $F().checkForNoOps("Adding and deleting a question isn’t no-op.");
+  l = $("input[type=hidden][value=Question]");
+  $F().test(l.length === 5, "(After deleting question) There should now again be five (hidden) question headers, but "+l.length+" have been found.");
+
+  // Undo/Redo
+  $F().loadTestForm();
+  $F().test(function() { $F().findLinksByText("#form_editor", "Create New Question").click(); $("#undo").click(); }, "Undo-ing didn’t work.");
+  $F().checkForNoOps("Creating a question and undoing isn’t a no-op.");
+  $F().test(function() { $("#redo").click(); }, "Redo-ing didn’t work.");
+
+
 };
 
 /* Checks that the current state of the DOM is equal to the original
