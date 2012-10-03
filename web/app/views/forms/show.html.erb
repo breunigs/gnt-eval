@@ -1,6 +1,10 @@
 <div>
 <h2>Previewing Form <%=@form.name %> (<%=@form.semester.title %>)</h2>
-  <%= (not @form.form_checks_out?) ? "<strong>⚠ Form is invalid</strong><br/>".html_safe : ""%>
+  <% unless @form.form_checks_out? %>
+    <strong>⚠ Form is invalid</strong>
+    <% message = @form.abstract_form_valid_message %><% if message %>(<%=message%>)<% end%>
+    <br/>
+  <% end %>
 
  <table>
     <% for item in
