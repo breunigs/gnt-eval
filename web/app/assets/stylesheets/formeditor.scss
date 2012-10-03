@@ -97,6 +97,11 @@ $closed-height: 3.5rem;
       padding-right: 0.4rem;
     }
   }
+  #closeall:before {
+    content: "↟";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
 }
 
 

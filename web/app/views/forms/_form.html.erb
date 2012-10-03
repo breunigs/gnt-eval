@@ -36,7 +36,8 @@ is_new = !is_edit
       <a id="duplicate" onclick="$F().toggleDuplicating()">Enable Duplicating <span>(Shows buttons that allow duplication)</span></a>
       <a id="cancel-duplicate" onclick="$F().toggleDuplicating()">Disable Duplicating <span>(Hides buttons, duplicates stay)</span></a>
 
-      <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(Allows adding/removing available translations)</span></a>
+      <a id="languages" onclick="$F().setLanguagesPopup()">Set Languages <span>(add/remove available translations)</span></a>
+      <a id="closeall" onclick="$('.question:not(.closed) a.collapse').click()">Collapse All Questions</a>
     </div>
 
     <div id="form_preview"></div>
