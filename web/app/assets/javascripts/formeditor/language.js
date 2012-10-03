@@ -66,7 +66,7 @@ FormEditor.prototype.setLanguages = function(langs, automated) {
     });
     // add missing languages to dom
     $.each(l, function(ind, lang) {
-      $F().setPath(sis.data, path + "/" + lang, isTextArea ? [] : "");
+      $F().setPath($F().data, path + "/" + lang, isTextArea ? [] : "");
       $F().generatedHtml = "";
       if(isTextArea)
         $F().createLangTextArea(path, lang);
