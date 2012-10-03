@@ -90,11 +90,15 @@ FormEditor.prototype.attachCollapsers = function() {
       el.animate({height: el.data("old-height") || "35rem"}, 500, function() {
         el.removeClass("closed");
         el.attr("style", "");
+        $(window).scroll(); // re-position toolbox
       });
     } else {
       el.data("old-height", el.height());
       // keep height in sync with formeditor.scss. grep this: CLOSEDHEIGHT
-      el.animate({height:"3.5rem"}, 500, function() { el.addClass("closed") });
+      el.animate({height:"3.5rem"}, 500, function() {
+        $(window).scroll(); // re-position toolbox
+        el.addClass("closed")
+      });
     }
   });
 };

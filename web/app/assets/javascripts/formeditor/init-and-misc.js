@@ -125,6 +125,9 @@ FormEditor.prototype.fixToolBoxScrolling = function() {
     else
       box.css({ position: "fixed", top: "0" , right: "2.1rem"  });
   });
+
+  // run once
+  $(window).scroll();
 };
 
 /* @public
