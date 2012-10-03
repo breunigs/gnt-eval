@@ -51,10 +51,20 @@ class Form < ActiveRecord::Base
 
   # returns true iff the form is a valid AbstractForm class. Nothing else is checked.
   def abstract_form_valid?
-    abstract_form.is_a?(AbstractForm) \
-      && abstract_form.pages.all? { |s| s.is_a?(Page) } \
-      && abstract_form.sections.all? { |s| s.is_a?(Section) } \
-      && abstract_form.questions.all? { |s| s.is_a?(Question) }
+    return false unless abstract_form.is_a?(AbstractForm)
+    return false unless abstract_form.pages.all? { |s| s.is_a?(Page) }
+    return false unless abstract_form.sections.all? { |s| s.is_a?(Section) }
+    return false unless abstract_form.questions.all? { |s| s.is_a?(Question) }
+    true
+  end
+
+  # returns string why the abstract form is considered invalid
+  def abstract_form_valid_message
+    return "Form is not a valid AbstractForm Class" unless abstract_form.is_a?(AbstractForm)
+    return "Not all pages are of “Page” Class" unless abstract_form.pages.all? { |s| s.is_a?(Page) }
+    return "Not all sections are of “Section” Class" unless abstract_form.sections.all? { |s| s.is_a?(Section) }
+    return "Not all questions are of “Question” Class" unless abstract_form.questions.all? { |s| s.is_a?(Question) }
+    nil
   end
 
   # runs all kinds of checks to see if the form is fine and ready to be used in the wild.
