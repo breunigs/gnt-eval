@@ -70,8 +70,11 @@ FormEditor.prototype.runTests = function() {
   $F().loadTestForm();
   $F().test(function() { $F().findLinksByText("#form_editor", "Create New Question").click(); $("#undo").click(); }, "Undo-ing didn’t work.");
   $F().checkForNoOps("Creating a question and undoing isn’t a no-op.");
+  $F().test(this.undoData.length == 0, "There shouldn’t be any undo step, but "+this.undoData.length+"are possible.");
   $F().test(function() { $("#redo").click(); }, "Redo-ing didn’t work.");
-
+  // check typing into field adds undo step
+  $("input[id$=column]").first().focus().val("test test").change();
+  $F().test(this.undoData.length == 2 /* new quest + value change */, "Changing text didn’t create undo event.");
 
 };
 
