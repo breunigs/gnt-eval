@@ -6,7 +6,7 @@
  * changes in them. If there are, an undo step is added. Only ever
  * needs to be called once. */
 FormEditor.prototype.attachChangeListenerForUndo = function() {
-  var match = "#form_editor select, #form_editor input, #form_editor textarea";
+  var match = "select, input, textarea";
   $("#form_editor").on("focusin change", match, function(event) {
     if(event.type == "focusin") // not a typo, focus_in_ (or focus_out_)
       $F().fillUndoTmp();
