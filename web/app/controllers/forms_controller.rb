@@ -115,23 +115,28 @@ class FormsController < ApplicationController
 
   def copy_to_current
     form = Form.find(params[:id])
-    sems = Semester.currently_active
-    if sems.empty?
-      flash[:error] = "No current semesters found. Please create them first."
+    terms = Semester.currently_active
+    if terms.empty?
+      flash[:error] = "No current terms found. Please create them first."
     else
-      sems.each do |s|
-        if s.forms.map { |f| f.name }.include?(form.title)
-          flash[:warning] = "Could not add #{form.title} to #{s.title} because there is already a form with that name."
+      terms.each do |t|
+        if t.forms.any? { |f| f.name == form.title }
+          flash[:warning] ||= []
+          flash[:warning] << "Could not add #{form.title} to #{t.title} because there is already a form with that name."
           next
         end
-        new_form = form.clone
-        new_form.semester = s
+        new_form = form.dup
+        new_form.semester = t
         if new_form.save
-          flash[:notice] = "Copied #{form.title} to #{s.title}."
+          flash[:notice] ||= []
+          flash[:notice] << "Copied #{form.title} to #{t.title}."
         else
-          flash[:warning] = "Could not add #{form.title} to #{s.title} because of some error."
+          flash[:warning] ||= []
+          flash[:warning] << "Could not add #{form.title} to #{t.title} because of some error."
         end
       end
+      flash[:warning] *= "; " if flash[:warning].is_a?(Array)
+      flash[:notice] *= "; " if flash[:notice].is_a?(Array)
     end
 
     respond_to do |format|
