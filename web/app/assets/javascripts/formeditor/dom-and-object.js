@@ -10,7 +10,7 @@ FormEditor.prototype.getValue = function() {
   try {
     return jsyaml.load($('#form_content').val());
   } catch(err) {
-    this.log("Error loading JS-YAML: " + err.message);
+    this.log("Error loading JS-YAML: " + err);
     this.invalidData = true;
   }
 };
