@@ -43,7 +43,7 @@ function FormEditor() {
   this.attachQuestionHeadUpdater();
   this.attachChangeListenerForUndo();
   this.attachCollapsers();
-  $('#form_editor textarea').autosize();
+  this.attachTextAreaAutosize();
   this.allowSortingCancelByEsc();
 
   this.checkSectionUpDownLinks();

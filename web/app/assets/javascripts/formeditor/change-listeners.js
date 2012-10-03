@@ -113,6 +113,18 @@ FormEditor.prototype.attachFormSubmit = function() {
 };
 
 /* @public
+ * Makes all text areas autosize to their content. Only needs to be
+ * called once, because it listens for new text areas. */
+FormEditor.prototype.attachTextAreaAutosize = function() {
+  // watch for new text areas
+  $('#form_editor').on("focusin", "textarea", function(ev) {
+    $(this).autosize();
+  });
+  // areas existing initially
+  $('#form_editor textarea').autosize();
+};
+
+/* @public
  * Called when the user changes type of a question. Handles showing
  * and hiding the appropriate boxes, checkmarks, etc. for that question
  * type. */
