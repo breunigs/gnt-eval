@@ -110,15 +110,45 @@ FormEditor.prototype.makeQuestionsSortable = function() {
       // collapse all other questions
       $(".section .collapsable:not(.closed) a.collapse").trigger("click");
     },
-    beforeStop: function(event, ui) {
+    update: function(event, ui) {
       var dat = $F().undoTmp;
       if(!dat) return; // probably event has been cancelled
       var t = ui.item.find("h6").data("db-column");
       $F().addUndoStep("moving question: " + t, dat);
+      $F().renumberElements();
     }
   });
 
   $("#form_editor").on("mousedown", "a.move", function() {
     $F().fillUndoTmp();
   });
+};
+
+/* @private
+ * Renumbers all elements according to their position in the DOM. After
+ * calling this DOM position and path/id will match up. */
+FormEditor.prototype.renumberElements = function() {
+  this.log("Renumbering elements…");
+  var page = -1,
+    section = -1,
+    question = -1;
+  $("#form_editor [id^='/'], #form_editor label[for^='/']").each(function(ind, elem) {
+    var elem = $(elem);
+    var path = elem.attr("id") || elem.attr("for");
+
+    if(elem.attr("type") === "hidden" && path.indexOf("/rubyobject", path.length-11) !== -1) {
+      switch(elem.val()) {
+        case "Page":     page++;    section=-1; question=-1; break;
+        case "Section":             section++;  question=-1; break;
+        case "Question":                        question++; break;
+      }
+    }
+
+    path = path.replace(/^\/pages\/[0-9]+\//, "/pages/"+page+"/");
+    path = path.replace(/^(\/pages\/[0-9]+\/sections\/)[0-9]+\//, "$1"+section+"/");
+    path = path.replace(/^(\/pages\/[0-9]+\/sections\/[0-9]+\/questions\/)[0-9]+\//, "$1"+question+"/");
+
+    elem.attr(elem.prop("tagName") === "LABEL" ? "for" : "id", path);
+  });
+  this.checkDuplicateIds();
 };
