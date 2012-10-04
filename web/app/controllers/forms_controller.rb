@@ -86,7 +86,6 @@ class FormsController < ApplicationController
         if $loaded_yaml_sheets.keys.any? { |k| k.is_a?(String) }
           raise "$loaded_yaml_sheets only allows integer keys, but somewhere a string-key got added. Find out where, or you will run into a lot of stale caches."
         end
-        logger.warn "\n\n\n\n\n\n"
 
         $loaded_yaml_sheets[params[:id].to_i] = nil
         format.html { redirect_to @form, notice: 'Form was successfully updated.' }
