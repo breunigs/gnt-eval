@@ -45,8 +45,13 @@
   -webkit-box-sizing:content-box;
 }
 
-b, i, u {
+b, i, u, tt {
   color: inherit;
+}
+
+tt {
+  font-family: monospace;
+  font-style:normal;
 }
 
 /* 1rem == 10px; See http://snook.ca/archives/html_and_css/font-size-with-rem */
