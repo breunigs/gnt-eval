@@ -275,8 +275,7 @@
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
-% from being interrupted by a page break. Moves its content slightly to the left
-% to combat the hardcoded padding inside the box. Usage:
+% from being interrupted by a page break. Usage:
 % \preventBreak{%
 %    some content
 % }
@@ -284,7 +283,7 @@
   \begin{tabular}[t]{p{192mm}}
     #1
   \end{tabular}
-  \vspace*{-1.8mm}
+  \vspace{-1.78mm}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
