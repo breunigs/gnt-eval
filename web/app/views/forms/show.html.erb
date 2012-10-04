@@ -128,7 +128,7 @@ unless oosv.empty?
 <% end %>
 
 <% if @form.questions %>
-  <% add_no_answer = @form.questions.keep_if { |q| q.boxes.compact.any? { |b| b.any_text.include?("\\noAnswTxt") } } %>
+  <% add_no_answer = @form.questions.keep_if { |q| (q.boxes || []).compact.any? { |b| b.any_text.include?("\\noAnswTxt") } } %>
   <% if add_no_answer.any? %>
   <div>
     <h3>WARNING: using \noAnswTxt in question answers</h3>
@@ -147,7 +147,9 @@ unless oosv.empty?
 <% if @form.questions %>
   <% empty_boxes = []
   @form.questions.each do |q|
+    next if q.type == "text"
     @form.languages.each do |lng|
+      next if q.boxes.nil?
       if q.multi?
         q.boxes.each do |b|
           empty_boxes << [q.db_column, q.qtext, lng] if b.nil? || b.any_text(lng).blank?
