@@ -315,6 +315,7 @@
 
 % helper function that prints the main text in a header
 \newcommand{\sectText}[1]{\ \ \textbf{#1} \phantom{\"Ay}}
+
 % helper function prints the gray box around any content given in the style of a headline
 \newcommand{\sectBox}[1]{\colorbox{gray}{%
   \hspace*{-1.05mm}%
@@ -324,6 +325,7 @@
   }%
   \hspace*{-1.8mm}
 }}
+
 % helper function that sets the given options in a tabular environment so everything aligns. See
 % \sect for a better explanation.
 \NewDocumentCommand\sectFullBox{m o o o o o o o}{%
@@ -355,7 +357,8 @@
   \setlength{\sectionHeight}{\the\sectionHeight/2}
   \setlength{\sectionHeight}{\maxof{\the\sectionHeight}{0mm}}
 
-  \stepcounter{section}
+  \stepcounter{section}%
+  \vspace*{-2.6mm}%
   \sectFullBox{\arabic{section}. #1}[#2][#3][#4][#5][#6][#7][#8]
 
   \vspace*{-2.4mm}
