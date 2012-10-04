@@ -82,6 +82,7 @@ class FormsController < ApplicationController
       elsif @form.update_attributes(params[:form])
         expire_fragment("preview_forms_#{params[:id]}")
 
+        $loaded_yaml_sheets ||= {}
         if $loaded_yaml_sheets.keys.any? { |k| k.is_a?(String) }
           raise "$loaded_yaml_sheets only allows integer keys, but somewhere a string-key got added. Find out where, or you will run into a lot of stale caches."
         end
