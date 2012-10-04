@@ -109,5 +109,7 @@ is_new = !is_edit
     <li><b>Saving space</b><br/>If you’re low on space, you can set a question to ”hide answers”. This means it will simply not print each box’s text. The text is still required for the results.pdf, though. To let the user know what the answers actually are you can put them in the section header (answers text field – one answer per line). Obviously, all questions should have the same answers for this to work. You can have a look at the default forms to see how this can be pulled off.</li>
 
     <li><b>last_is_textbox</b><br/>You can make the last box of a question a very, very small user-writable field that must be manually evaluated. This is useful for question that have 90%+ of the time some common answer but you still want to catch “other” answers, too, without summarizing them under “other”. </li>
+
+    <li><b>squeeze text under boxes</b><br/>If the texts under the boxes overlap or collide, you can force linebreaks using <tt>\linebreak{}</tt>. Similarly, you can prevent breaks by putting text into an <tt>\mbox{where the contents don’t break}</tt>. Both will be removed when generating the results.pdf file, so they only apply in the questionnaires.</li>
   </ul>
 </div>
