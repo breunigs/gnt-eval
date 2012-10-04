@@ -32,6 +32,7 @@ FormEditor.prototype.deletePageBreak = function(link) {
   // remove page
   s.replaceWith("");
   this.checkDuplicateIds();
+  $(window).scroll(); // reposition toolbox
 };
 
 /* @public
@@ -42,6 +43,7 @@ FormEditor.prototype.deleteSection = function(link) {
   var s = $(link).parents(".section");
   this.addUndoStep("deleting section " + s.children("h5").data("title") || "");
   s.replaceWith("");
+  $(window).scroll(); // reposition toolbox
 };
 
 /* @public
@@ -52,6 +54,7 @@ FormEditor.prototype.deleteQuestion = function(link) {
   var q = $(link).parents(".question");
   this.addUndoStep("deleting question " + q.children("h6").data("db-column") || "");
   q.replaceWith("");
+  $(window).scroll(); // reposition toolbox
 };
 
 /* @public
