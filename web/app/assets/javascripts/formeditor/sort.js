@@ -58,6 +58,7 @@ FormEditor.prototype.moveSectionUp = function(link) {
   } else {
     sect.insertBefore(allSect[pos-1]);
   }
+  this.renumberElements();
   this.checkSectionUpDownLinks();
 };
 
@@ -83,6 +84,7 @@ FormEditor.prototype.moveSectionDown = function(link) {
   } else {
     sect.insertAfter(allSect[pos+1]);
   }
+  this.renumberElements();
   this.checkSectionUpDownLinks();
 };
 
