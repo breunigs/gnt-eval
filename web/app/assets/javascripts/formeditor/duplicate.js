@@ -71,5 +71,6 @@ FormEditor.prototype.duplicate = function(elm, type, pathGroup) {
   });
 
   newElm.insertAfter(elm);
+  $(".sortable-question").sortable("refresh");
   this.checkDuplicateIds();
 };
