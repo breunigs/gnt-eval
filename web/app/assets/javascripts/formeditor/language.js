@@ -134,7 +134,7 @@ FormEditor.prototype.translatePath = function(path, caller) {
   } catch(e) {}
   var translated = { };
   $.each(this.languages, function(i, lang) {
-    translated[lang] = isTextArea ? oldText.split("\n") : oldText;
+    translated[lang] = isTextArea && !$.isArray(oldText) ? oldText.split("\n") : oldText;
   });
 
   // inject new object
