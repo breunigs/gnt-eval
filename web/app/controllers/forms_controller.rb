@@ -101,13 +101,15 @@ class FormsController < ApplicationController
   # DELETE /forms/1.xml
   def destroy
     @form = Form.find(params[:id])
-    unless @form.critical?
+    # don’t delete if form is critical or any course uses it
+    cantdel = @form.critical? || !Course.find_by_form_id(params[:id]).nil?
+    unless cantdel
       @form.destroy
       $loaded_yaml_sheets[params[:id].to_i] = nil
     end
 
     respond_to do |format|
-      flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
+      flash[:error] = 'Form was critical and has therefore not been destroyed.' if cantdel
       format.html { redirect_to(forms_url) }
       format.xml  { head :ok }
     end
