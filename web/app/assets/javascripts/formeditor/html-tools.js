@@ -14,7 +14,7 @@ FormEditor.prototype.createTranslateableTextArea = function(path) {
   if($.isArray(texts)) {
     this.openGroup();
     this.createTextArea(path, path.split("/").pop());
-    this.createActionLink("$F().translatePath($(this).prev.attr('id'), this)", "Translate »");
+    this.createActionLink("$F().translatePath($(this).prev().attr('id'), this)", "Translate »");
     this.closeGroup();
   } else {
     this.createHeading(path);
@@ -223,7 +223,7 @@ FormEditor.prototype.createLangTextBox = function(path, lang) {
   var path = path+"/"+lang;
   this.openGroup("language");
   this.createTextBox(path, lang);
-  this.createActionLink("$F().genderizePath($(this).prev.attr('id'), this)", "Genderize »", "genderize");
+  this.createActionLink("$F().genderizePath($(this).prev().attr('id'), this)", "Genderize »", "genderize");
   this.closeGroup();
 };
 
