@@ -59,7 +59,7 @@ FormEditor.prototype.duplicate = function(elm, type, pathGroup) {
     newPathSeg = "/" + pathGroup + "/" + pos + "/";
     var tmpPath = oldPath.replace(oldPathSeg, newPathSeg);
     this.assert(oldPath !== tmpPath, "Replacing didn’t work.");
-    if(document.getElementById(tmpPath); === null) break;
+    if(document.getElementById(tmpPath) === null) break;
     pos++;
   }
 

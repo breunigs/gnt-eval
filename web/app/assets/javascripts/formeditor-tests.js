@@ -134,8 +134,6 @@ FormEditor.prototype.runTests3 = function() {
   this.test(function() { dup.click(); }, "Chain-duplicating #2 failed");
   this.test(function() { dup.click(); }, "Chain-duplicating #3 failed");
   this.test(function() { dup.click(); }, "Chain-duplicating #4 failed");
-  return;
-
 
   // (un)genderizing
   this.loadTestForm();
