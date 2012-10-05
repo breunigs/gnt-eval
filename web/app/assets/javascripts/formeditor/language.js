@@ -114,13 +114,12 @@ FormEditor.prototype.getLanguagesFromDom = function() {
  * Translates a given path. It therefore updates the data object from
  * the current DOM. This way the common functions to generate the text
  * boxes and action links may be used.
- * @param path    The path which should be translated. Will not object
- *                if the path is not suitable to be translated.
  * @param caller  The element which issues the call. Required if the
  *                un-translated text box should be replaced with the
  *                new version. Will replace the caller’s parent with
  *                the new textbox. Tailored for the default links. */
-FormEditor.prototype.translatePath = function(path, caller) {
+FormEditor.prototype.translatePath = function(caller) {
+  var path = $(caller).prev().attr('id');
   this.addUndoStep("translating " + path);
 
   this.updateDataFromDom();
@@ -134,6 +133,7 @@ FormEditor.prototype.translatePath = function(path, caller) {
   } catch(e) {}
   var translated = { };
   $.each(this.languages, function(i, lang) {
+    $F().assert(lang.length === 3, "Language Code doesn’t look as expected: " + lang);
     translated[lang] = isTextArea && !$.isArray(oldText) ? oldText.split("\n") : oldText;
   });
 
@@ -152,7 +152,8 @@ FormEditor.prototype.translatePath = function(path, caller) {
 /* @public
  * Works just like translatePath, but the other way round. See there
  * for details. */
-FormEditor.prototype.untranslatePath = function(path, caller) {
+FormEditor.prototype.untranslatePath = function(caller) {
+  var path = $(caller).parent().attr('id');
   this.addUndoStep("un-translating " + path);
 
   this.updateDataFromDom();
@@ -193,12 +194,12 @@ FormEditor.prototype.createTranslateableTextBox = function(path) {
   if(typeof(texts) == "string") {
     this.openGroup();
     this.createTextBox(path, path.split("/").pop());
-    this.createActionLink("$F().translatePath(\""+path+"\", this)", "Translate »");
+    this.createActionLink("$F().translatePath(this)", "Translate »");
     this.closeGroup();
   } else {
     this.createHeading(path);
     if(!this.translationsHaveGendering(texts))
-      this.createActionLink("$F().untranslatePath(\""+path+"\", this)", "« Unify (no localization)");
+      this.createActionLink("$F().untranslatePath(this)", "« Unify (no localization)");
     for(var lang in texts) {
       this.assert(lang.match(/^:[a-z][a-z]$/), "Language Code must be in the :en format. Given lang: "+lang);
       if(typeof(texts[lang] ) == "string") {
