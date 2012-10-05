@@ -9,9 +9,7 @@ texhead: " "
 title:
   :de: "Umfrage zur Qualität der Lehre"
   :en: "Survey Regarding the Quality of Teaching"
-intro:
-  :de: "Diese Evaluation wird von der Studienkommission in Zusammenarbeit mit der Fachschaft MathPhys durchgeführt. Dieser Bogen soll helfen, die Lehre zu verbessern bzw. Lehrveranstaltung guter Qualität zu erhalten. Auch in eurem Interesse bitten wir euch, den Bogen sorgfältig und deutlich lesbar auszufüllen. Kreuze so checkLikeThis{} an und verbessere Dich ggf. so correctLikeThis{}."
-  :en: "This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly. Mark like checkLikeThis{} and correct yourself using correctLikeThis{}."
+intro: "This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly. Mark like checkLikeThis{} and correct yourself using correctLikeThis{}."
 lecturer_header:
   :de:
     :both: "Fragen zur Vorlesung (Dozent/in: #1, Bögen: #2)"
