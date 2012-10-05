@@ -130,8 +130,9 @@ FormEditor.prototype.createAdditionalQuestion = function(link) {
 
   // find path for new section
   var sect = $(link).parents(".section");
-  var path = sect.find("input[type=hidden][value=Section]").attr("id");
-  path = path.replace(/\/rubyobject$/, "") + "/questions/";
+  var oldPath = sect.find("input[type=hidden][value=Section]").attr("id");
+  path = oldPath.replace(/\/rubyobject$/, "") + "/questions/";
+  this.assert(oldPath !== path, "Replacing didn’t work, can’t continue with invalid path.");
   var pos = sect.find(".question").length;
   // ensure the chosen position does not yet exist in DOM. Deleting
   // and duplicating does not ensure the IDs are in order without gaps.
