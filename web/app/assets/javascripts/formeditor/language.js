@@ -171,9 +171,10 @@ FormEditor.prototype.untranslatePath = function(caller) {
   }
 
   var isTextArea = $(caller).parent().find("textarea").length > 0;
+  if(isTextArea && !$.isArray(oldText)) oldText = oldText.split("\n")
 
   // inject new object
-  this.setPath(this.data, path, isTextArea ? oldText.split("\n") : oldText);
+  this.setPath(this.data, path, oldText);
   this.generatedHtml = "";
   if(isTextArea)
     this.createTranslateableTextArea(path);
