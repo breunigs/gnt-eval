@@ -20,6 +20,7 @@ FormEditor.prototype.runTests = function() {
   // prevent submission everywhere
   $("form").attr("action", "");
   this.testMode = true;
+  this.failedTests = 0;
 
   try {
     this.loadTestForm();
@@ -147,6 +148,12 @@ FormEditor.prototype.runTests3 = function() {
   this.test(function() {$F().getDomObjFromPath("/intro").next().click() }, "Translating text box did not work.");
   this.test(function() { $F().getDomObjFromPath("/intro").children("a").click() }, "Un-Translating text box did not work. (depends on translating it first, so may want to check that first)");
   this.checkForNoOps("Translating and then un-translating is not a no-op.");
+
+  this.log("==========================");
+  if(this.failedTests > 0)
+    this.warn("Testing done. "+this.failedTests+" failed tests. Look for warnings above.");
+  else
+    this.log("Testing done. No errors :)");
 };
 
 /* Checks that the current state of the DOM is equal to the original

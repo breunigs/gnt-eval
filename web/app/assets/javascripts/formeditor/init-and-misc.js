@@ -204,9 +204,11 @@ FormEditor.prototype.test = function(expression, message) {
     } catch(err) {
       this.warn(message);
       this.log(err);
+      this.failedTests++;
     }
   } else if (!expression) {
     this.warn(message);
+    this.failedTests++;
   }
 };
 
