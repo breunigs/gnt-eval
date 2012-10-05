@@ -6,7 +6,12 @@
 
 
 $(document).ready(function() {
-  $F().runTests();
+  if(location.href.indexOf("/forms/new") > 0) {
+    $F().log("Running tests since a create new form page is open.");
+    $F().runTests();
+  } else {
+    $F().log("Tests have not been run because editing a form. You can still run them using $F().runTests();");
+  }
 });
 
 
