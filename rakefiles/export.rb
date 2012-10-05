@@ -192,6 +192,8 @@ namespace :results do
 
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
   task :export, [:base64_data] do |t, a|
+    PRECISION = 2
+
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
     require "rubygems"
@@ -340,10 +342,24 @@ namespace :results do
       end
     end
     qry = qry.join(" UNION ALL ")
-    # add the question text to each question header as well
-    header = export.clone
-    fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
 
+
+    puts
+    puts "======="
+    puts "Expand?"
+    puts "======="
+    puts "Include question text in column header? [y/N]"
+    puts "y = db_column+qtext      n = db_column"
+    expand = get_or_fake_user_input(/^$|^[ny]$/i, a[:expand]).downcase
+    expand = "n" if expand.empty?
+
+    # add the question text to each question header as well, if desired
+    header = export.clone
+    fullheader = expand == "y" ? header.map { |h| h + ": " + ident[h].join(" // ") } : header
+
+
+    puts
+    puts
     puts
     puts "========"
     puts "Metadata"
@@ -360,7 +376,7 @@ namespace :results do
       "profgender" => "gender of prof. m=male, f=female, o=other",
       "tutor" => "name of tutor, if available",
       "term" => "abbreviation of term",
-      "NONE" => "If you are absolutely sure you do not need any meta data" }
+      "NONE" => "If you don’t need any metadata, simply press enter." }
     meta.sort.each { |k,v| puts "#{k.ljust(10)}: #{v}" }
     meta = get_or_fake_user_input(meta.keys, a[:meta])
     meta_store = meta
@@ -431,9 +447,30 @@ namespace :results do
         end
         histogram = RT.answer_histogram(table, question, bc)
         sc, sa, ss = RT.count_avg_stddev(table, col, {:barcode => bc})
-        line += [sa, ss] + histogram.values
+
+        # sanity check the output
+        msgs = []
+        msgs << "AVG: #{sa}" if sa < 0 || sa > question.boxes.size
+        msgs << "STDDEV: #{sa}" if ss > question.boxes.size/2.0
+        tmpcnt = 0
+        histogram.each do |hkey, hval|
+          tmpcnt += hval.to_f
+          msgs<< "Histogram value for #{hkey}: #{hval}" if hval.to_f > 100
+        end
+        # allow rounding errors >> eps
+        msgs <<  "Histogram values don’t sum up to 100: #{tmpcnt}" unless tmpcnt.between?(99.9, 100.1)
+        if msgs.any?
+          warn "\nOdd values detected for:"
+          warn "Course: #{cp.course.title}"
+          warn "Prof:   #{cp.prof.fullname}"
+          warn "Quest:  #{question.db_column}"
+          warn msgs.join("\n")
+        end
+
+        hvals = histogram.values.map { |v| "#{v.to_f.round(PRECISION)}%" }
+        line += ["", sa.round(PRECISION), ss.round(PRECISION)] + hvals
         unless looped_once
-          header_stat += ["#{col} AVG", "#{col} STDDEV"]
+          header_stat += ["", "#{col} AVG", "#{col} STDDEV"]
           header_stat += histogram.keys.map { |k| "#{col}: #{k}" }
         end
       end
@@ -472,7 +509,7 @@ namespace :results do
     puts "=============="
     puts "If you want to run this query in the future, you can use:"
 
-    data = {:terms => terms, :dbs => dbs, :cols => export,
+    data = {:terms => terms, :dbs => dbs, :cols => export, :expand => expand,
               :meta => meta_store, :faculty => faculty.map { |f| f.id }}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
