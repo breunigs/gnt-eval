@@ -506,6 +506,11 @@ namespace :results do
     puts "Done, have a look at " + %("#{file_data}").bold
     puts "Also, if you know what you are doing see #{file_stat}."
     puts
+    puts "If gnumeric (or more specifically, ssconvert) is installed,"
+    puts "there will also be Excel 2007+ XLSX files."
+    system(%(type ssconvert >/dev/null 2>&1 && ssconvert "#{file_data}" "#{file_data[0..-4]}xlsx" > /dev/null))
+    system(%(type ssconvert >/dev/null 2>&1 && ssconvert "#{file_stat}" "#{file_stat[0..-4]}xlsx" > /dev/null))
+    puts
     puts
     puts "=============="
     puts "Automatization"
