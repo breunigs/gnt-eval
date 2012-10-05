@@ -480,6 +480,7 @@ namespace :results do
 
     # write data to CSV
     puts "Writing CSV"
+    FileUtils.mkdir_p "tmp/export/"
     filename = "tmp/export/"
     filename << Time.now.strftime("%Y-%m-%d %H:%M") + " "
     filename << faculty.map { |f| f.shortname }.join("+") + " "
@@ -506,10 +507,15 @@ namespace :results do
     puts "Done, have a look at " + %("#{file_data}").bold
     puts "Also, if you know what you are doing see #{file_stat}."
     puts
-    puts "If gnumeric (or more specifically, ssconvert) is installed,"
-    puts "there will also be Excel 2007+ XLSX files."
-    system(%(type ssconvert >/dev/null 2>&1 && ssconvert "#{file_data}" "#{file_data[0..-4]}xlsx" > /dev/null))
-    system(%(type ssconvert >/dev/null 2>&1 && ssconvert "#{file_stat}" "#{file_stat[0..-4]}xlsx" > /dev/null))
+    `type ssconvert >/dev/null 2>&1`
+    if $?.exitstatus == 0
+      puts "Also generating XLSX versions of those CSV files."
+      system(%(ssconvert "#{file_data}" "#{file_data[0..-4]}xlsx" > /dev/null))
+      system(%(ssconvert "#{file_stat}" "#{file_stat[0..-4]}xlsx" > /dev/null))
+    else
+      puts "Install gnumeric (or more specifically ssconvert) if you want"
+      puts "to have export output XLSX files as well."
+    end
     puts
     puts
     puts "=============="
@@ -581,5 +587,20 @@ namespace :results do
     csvs.each { |path, csv_table|
       File.open(path, 'w') {|f| f.write(csv_table) }
     }
+
+    `type ssconvert >/dev/null 2>&1`
+    if $?.exitstatus == 0
+      puts "Attempting to re-create the XLSX files from the modified CSV ones…"
+      csvs.each { |path, csv_table|
+        p = path[0..-4]
+        next unless File.exist?(p + "xlsx")
+        begin
+          File.delete(p + "xlsx")
+          system(%(ssconvert "#{p}csv" "#{p}xlsx" > /dev/null))
+        rescue
+          warn "Couldn’t re-create #{p}xlsx from the CSV. Consider it broken."
+        end
+      }
+    end
   end
 end
