@@ -480,10 +480,13 @@ namespace :results do
 
     # write data to CSV
     puts "Writing CSV"
-    `mkdir -p "tmp/export"`
-    now = Time.now.strftime("%Y-%m-%d %H:%M")
-    file_data = "tmp/export/#{now}_data.csv"
-    file_stat = "tmp/export/#{now}_stat.csv"
+    filename = "tmp/export/"
+    filename << Time.now.strftime("%Y-%m-%d %H:%M") + " "
+    filename << faculty.map { |f| f.shortname }.join("+") + " "
+    filename << terms.map { |f| Semester.find(f).title }.join("+")
+
+    file_data = filename + " data.csv"
+    file_stat = filename + " stat.csv"
     opt = {:headers => true, :write_headers => true}
     CSV.open(file_data, "wb", opt) do |csv|
       csv << header
