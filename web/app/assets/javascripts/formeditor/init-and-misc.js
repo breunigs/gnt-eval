@@ -37,6 +37,10 @@ function FormEditor() {
   this.loadFormFromTextbox();
 
 
+  // useful for testing
+  this.animationSpeed = 500;
+
+
   // listeners and other initial setup work
   $("[type=numeric]").numeric({ decimal: false, negative: false });
   this.attachSectionHeadUpdater();

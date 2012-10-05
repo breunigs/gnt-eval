@@ -87,7 +87,7 @@ FormEditor.prototype.attachCollapsers = function() {
       // animate to old height first, then remove the fixed value so it
       // automatically adjusts to its contents. If the value isn’t
       // present, just guess and hope no one notices.
-      el.animate({height: el.data("old-height") || "35rem"}, 500, function() {
+      el.animate({height: el.data("old-height") || "35rem"}, $F().animationSpeed, function() {
         el.removeClass("closed");
         el.attr("style", "");
         $(window).scroll(); // re-position toolbox
@@ -95,7 +95,7 @@ FormEditor.prototype.attachCollapsers = function() {
     } else {
       el.data("old-height", el.height());
       // keep height in sync with formeditor.scss. grep this: CLOSEDHEIGHT
-      el.animate({height:"3.5rem"}, 500, function() {
+      el.animate({height:"3.5rem"}, $F().animationSpeed, function() {
         $(window).scroll(); // re-position toolbox
         el.addClass("closed")
       });
