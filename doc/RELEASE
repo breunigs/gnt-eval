@@ -1,5 +1,14 @@
-This is G'n'T Eval 1.0.1
+This is G'n'T Eval 1.0.2
 
+1.0.2:
+  • Bugfix: Various fixes for the FormEditor
+  • Bugfix: Export-Stats-File was missing columns
+  • Bugfix: Loading the stack for external apps required a DB
+            connection due to including the Session-Classes
+  • Bugfix: Questionnaires wouldn’t page break in certain locations
+  • Feature: also export to XLSX if Gnumeric is installed
+  • Feature: add many sanity checkers for Forms/Questionnaires
+  
 1.0.1: Fix small error in docs
 
 1.0: It marks the first public release, that is
