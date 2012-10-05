@@ -51,23 +51,25 @@ FormEditor.prototype.duplicate = function(elm, type, pathGroup) {
   var r = new RegExp("/" + pathGroup + "/([0-9]+)/");
 
   // find new, not yet used id
-  var lastPath = elm.parent().find("[type=hidden][value="+type+"][id^='/']").last().attr("id").match(r),
-      oldPath = "/" + pathGroup + "/" + lastPath[1] + "/",
-      pos = parseInt(lastPath[1])+1;
+  var oldPath = elm.parent().find("[type=hidden][value="+type+"][id^='/']").last().attr("id");
+  var oldId = oldPath.match(r)[1];
+  var oldPathSeg = "/" + pathGroup + "/" + oldId + "/";
+  var pos = parseInt(oldId)+1;
   while(true) {
-    newPath = "/" + pathGroup + "/" + pos + "/";
-    var check = document.getElementById(lastPath[0].replace(oldPath, newPath));
-    if(check === null) break;
+    newPathSeg = "/" + pathGroup + "/" + pos + "/";
+    var tmpPath = oldPath.replace(oldPathSeg, newPathSeg);
+    this.assert(oldPath !== tmpPath, "Replacing didn’t work.");
+    if(document.getElementById(tmpPath); === null) break;
     pos++;
   }
 
   // clone and update id/for attributes
   var newElm = elm.clone();
   newElm.find("[id^='/']").each(function(pos, elm) {
-    $(elm).attr("id", $(elm).attr("id").replace(r, newPath));
+    $(elm).attr("id", $(elm).attr("id").replace(r, newPathSeg));
   });
   newElm.find("[for^='/']").each(function(pos, elm) {
-    $(elm).attr("for", $(elm).attr("for").replace(r, newPath));
+    $(elm).attr("for", $(elm).attr("for").replace(r, newPathSeg));
   });
 
   newElm.insertAfter(elm);
