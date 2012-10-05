@@ -39,6 +39,7 @@ function FormEditor() {
 
   // useful for testing
   this.animationSpeed = 500;
+  this.testMode = false;
 
 
   // listeners and other initial setup work
@@ -183,7 +184,7 @@ FormEditor.prototype.assert = function(expression, message) {
   if (!expression) {
     this.invalidData = true;
     this.trace();
-    alert("The FormEditor… crashed. At least it encountered a situation it can’t handle. Maybe it still works, but you also might have data loss. If you haven’t saved you form yet, reloading will get you to an old version.");
+    if(!this.testMode) alert("The FormEditor… crashed. At least it encountered a situation it can’t handle. Maybe it still works, but you also might have data loss. If you haven’t saved you form yet, reloading will get you to an old version.");
     throw(message);
   }
 };

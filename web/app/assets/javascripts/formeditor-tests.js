@@ -14,6 +14,7 @@ $(document).ready(function() {
 FormEditor.prototype.runTests = function() {
   // prevent submission everywhere
   $("form").attr("action", "");
+  this.testMode = true;
 
   try {
     this.loadTestForm();
@@ -119,6 +120,16 @@ FormEditor.prototype.runTests3 = function() {
 
   var b = $("input[type=hidden][value=Box]").length;
   this.test(v.split("            - !ruby/object:Box").length-1 === b, "Box count doesn’t match in YAML and DOM.");
+
+  // duplicating section two times, that is not the last section
+  this.loadTestForm();
+  var dup = $(".section > .header > .duplicate").first();
+  this.test(function() { dup.click(); }, "Chain-duplicating #1 failed");
+  this.test(function() { dup.click(); }, "Chain-duplicating #2 failed");
+  this.test(function() { dup.click(); }, "Chain-duplicating #3 failed");
+  this.test(function() { dup.click(); }, "Chain-duplicating #4 failed");
+  return;
+
 
   // (un)genderizing
   this.loadTestForm();
