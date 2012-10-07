@@ -23,7 +23,7 @@ FormEditor.prototype.parseAbstractForm = function(data) {
 
     this.assert($.inArray(ATTRIBUTES["AbstractForm"].x), "The given data subset contains an unknown attribute for AbstractForm: " + x + ".");
 
-    this.createTranslateableTextBox(path + "/" + x, x);
+    this.createTranslateableTextBox(path + "/" + x);
   }
 
   for(var x in this.data["pages"]) {
@@ -48,7 +48,7 @@ FormEditor.prototype.parsePage = function(page, path) {
   this.append('<a class="delete" onclick="$F().deletePageBreak(this)" title="Delete Page Break" style="display: none;">⌫</a>');
   for(var y in ATTRIBUTES["Page"]) {
     var attr = ATTRIBUTES["Page"][y];
-    this.createTranslateableTextBox(path + "/" + attr, attr);
+    this.createTranslateableTextBox(path + "/" + attr);
   }
   var sections = page["sections"];
   for(var sect in sections) {
@@ -82,7 +82,7 @@ FormEditor.prototype.parseSection = function(section, path) {
   this.createHiddenBox(path+"/rubyobject", "Section");
   for(var y in ATTRIBUTES["Section"]) {
     var attr = ATTRIBUTES["Section"][y];
-    this.createTranslateableTextBox(path + "/" + attr, attr);
+    this.createTranslateableTextBox(path + "/" + attr);
   }
   section["answers"] = section["answers"] || [];
   this.createTranslateableTextArea(path + "/answers");
@@ -115,7 +115,7 @@ FormEditor.prototype.parseQuestion = function(question, path) {
   this.append('<a class="delete" title="Delete Question" onclick="$F().deleteQuestion(this)">×</a>');
   this.append('</h6>');
   this.createHiddenBox(path+"/rubyobject", "Question");
-  this.createTranslateableTextBox(path + "/qtext", "qtext");
+  this.createTranslateableTextBox(path + "/qtext");
   var isMulti = this.isQuestionMulti(question);
   // TODO: fix how type works elsewhere and merge with multi-choice
   var typeTranslation = {"square": "Single", "tutor_table": "Tutor", "text": "Text" };
