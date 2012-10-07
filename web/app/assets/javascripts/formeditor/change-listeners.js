@@ -80,6 +80,7 @@ FormEditor.prototype.attachCollapsers = function() {
   $("#form_editor").on("click", ".collapsable .header a.collapse", function(){
     var el = $(this).parents(".collapsable");
     if(el.hasClass("closed")) {
+      el.find("textarea").autosize();
       // animate to old height first, then remove the fixed value so it
       // automatically adjusts to its contents. If the value isn’t
       // present, just guess and hope no one notices.
@@ -110,18 +111,6 @@ FormEditor.prototype.attachFormSubmit = function() {
 
     $F().dom2yaml();
   });
-};
-
-/* @public
- * Makes all text areas autosize to their content. Only needs to be
- * called once, because it listens for new text areas. */
-FormEditor.prototype.attachTextAreaAutosize = function() {
-  // watch for new text areas
-  $('#form_editor').on("focusin", "textarea", function(ev) {
-    $(this).autosize();
-  });
-  // areas existing initially
-  $('#form_editor textarea').autosize();
 };
 
 /* @public

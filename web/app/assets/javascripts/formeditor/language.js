@@ -146,7 +146,9 @@ FormEditor.prototype.translatePath = function(caller) {
     this.createTranslateableTextArea(path);
   else
     this.createTranslateableTextBox(path);
-  $(caller).parent().replaceWith(this.generatedHtml);
+  var c = $(this.generatedHtml);
+  $(caller).parent().replaceWith(c);
+  if(isTextArea) c.find("textarea").autosize();
 };
 
 /* @public
@@ -180,7 +182,9 @@ FormEditor.prototype.untranslatePath = function(caller) {
     this.createTranslateableTextArea(path);
   else
     this.createTranslateableTextBox(path);
-  $(caller).closest(".heading").replaceWith(this.generatedHtml);
+  var c = $(this.generatedHtml);
+  $(caller).closest(".heading").replaceWith(c);
+  if(isTextArea) c.find("textarea").autosize();
 };
 
 /* @public

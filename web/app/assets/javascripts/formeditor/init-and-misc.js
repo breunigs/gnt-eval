@@ -47,7 +47,6 @@ function FormEditor() {
   this.initSectionAndQuestionHeaders();
   this.attachChangeListenerToAllInputs();
   this.attachCollapsers();
-  this.attachTextAreaAutosize();
   this.allowSortingCancelByEsc();
 
   this.checkSectionUpDownLinks();
