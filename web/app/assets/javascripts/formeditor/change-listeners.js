@@ -23,9 +23,7 @@ FormEditor.prototype.attachChangeListenerToAllInputs = function() {
  * should be called once; after the form has loaded. */
 FormEditor.prototype.initSectionAndQuestionHeaders = function() {
   // likely candidates that will be required for the header.
-  var s = "input:visible[id*='/title']  ,";
-  s += "input:visible[id*='/qtext']    ,";
-  s += "input:visible[id$='/db_column']";
+  var s = "input[id*='/title'], input[id*='/qtext'], .db_column input";
   $(s).each(function(ind, elm) {
     $F().handleSectionAndQuestionUpdates($(elm));
   });
@@ -36,37 +34,40 @@ FormEditor.prototype.initSectionAndQuestionHeaders = function() {
  * it is, the header will be updated automatically. */
 FormEditor.prototype.handleSectionAndQuestionUpdates = function(elm) {
   if(!elm.is("input")) return;
-
   var id = elm.attr("id");
-  // quick check if the element is suitable at all
-  if(id.indexOf("/title") === -1 && id.indexOf("/qtext") === -1 && id.indexOf("/db_column") === -1)
-    return;
 
-  var section = elm.parents(".section");
-  var title = section.find("input:visible[id*='/title']:first");
-  if(id === title.attr("id")) {
-    var el = section.children("h5");
-    el.attr("data-title", elm.val());
-    // work around webkit not updating the element even after data-attr
-    // have been changed
-    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
-    return;
+  if(id.indexOf("/title") !== -1) {
+    var section = elm.parents(".section");
+    var title = section.find("input[id*='/title']:first");
+    if(id === title.attr("id")) {
+      var el = section.children("h5");
+      el.attr("data-title", elm.val());
+      // work around webkit not updating the element even after data-attr
+      // have been changed
+      if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+      return;
+    }
   }
 
-  var q = elm.parents(".question");
-  var qtext = q.find("input:visible[id*='/qtext']:first");
-  if(id === qtext.attr("id")) {
-    var el = q.children("h6");
-    el.attr("data-qtext", elm.val().slice(0,40));
-    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
-    return;
+  if(id.indexOf("/qtext") !== -1) {
+    var q = elm.parents(".question");
+    var qtext = q.find("input[id*='/qtext']:first");
+    if(id === qtext.attr("id")) {
+      var el = q.children("h6");
+      el.attr("data-qtext", elm.val().slice(0,40));
+      if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+      return;
+    }
   }
 
-  var dbcol = q.find("input:visible[id$='/db_column']");
-  if(id === dbcol.attr("id")) {
-    var el = q.children("h6");
-    el.attr("data-db-column", elm.val());
-    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+  if(id.indexOf("/db_column") !== -1) {
+    var q = elm.parents(".question");
+    var dbcol = q.find(".db_column input");
+    if(id === dbcol.attr("id")) {
+      var el = q.children("h6");
+      el.attr("data-db-column", elm.val());
+      if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+    }
   }
 };
 
