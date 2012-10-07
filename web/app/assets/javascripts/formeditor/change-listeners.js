@@ -23,9 +23,9 @@ FormEditor.prototype.attachChangeListenerToAllInputs = function() {
  * should be called once; after the form has loaded. */
 FormEditor.prototype.initSectionAndQuestionHeaders = function() {
   // likely candidates that will be required for the header.
-  var s = ".section input:visible[id*='/title']  ,";
-  s += ".question input:visible[id*='/qtext']    ,";
-  s += ".question input:visible[id$='/db_column']";
+  var s = "input:visible[id*='/title']  ,";
+  s += "input:visible[id*='/qtext']    ,";
+  s += "input:visible[id$='/db_column']";
   $(s).each(function(ind, elm) {
     $F().handleSectionAndQuestionUpdates($(elm));
   });
