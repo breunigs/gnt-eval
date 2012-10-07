@@ -44,9 +44,8 @@ function FormEditor() {
 
   // listeners and other initial setup work
   $("[type=numeric]").numeric({ decimal: false, negative: false });
-  this.attachSectionHeadUpdater();
-  this.attachQuestionHeadUpdater();
-  this.attachChangeListenerForUndo();
+  this.initSectionAndQuestionHeaders();
+  this.attachChangeListenerToAllInputs();
   this.attachCollapsers();
   this.attachTextAreaAutosize();
   this.allowSortingCancelByEsc();

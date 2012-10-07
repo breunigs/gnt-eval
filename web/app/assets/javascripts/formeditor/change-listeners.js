@@ -3,75 +3,71 @@
 
 /* @public
  * Attaches listener to all writable input elements and looks for
- * changes in them. If there are, an undo step is added. Only ever
- * needs to be called once. */
-FormEditor.prototype.attachChangeListenerForUndo = function() {
+ * changes in them. If there are, an undo step is added. It also updates
+ * the section/question headers, if the changed field is used in the
+ * header. Only ever needs to be called once. */
+FormEditor.prototype.attachChangeListenerToAllInputs = function() {
   var match = "select, input, textarea";
   $("#form_editor").on("focusin change", match, function(event) {
     if(event.type == "focusin") // not a typo, focus_in_ (or focus_out_)
       $F().fillUndoTmp();
-    else
-      $F().addUndoStep("changing " +  event.target.id, $F().undoTmp);
+    else {
+      $F().addUndoStep("changing " + event.target.id, $F().undoTmp);
+      $F().handleSectionAndQuestionUpdates($(event.target));
+    }
   });
 };
 
 /* @public
- * Finds the contents of the first visible input-field in a section to
- * derive the title of the section from it. Only ever needs to be
- * called once. */
-FormEditor.prototype.attachSectionHeadUpdater = function() {
-  var s = [];
-  // Selects the untranslated textboxes right after the section:
-  s[0] = ".section > div.collapsable > div:first-of-type > input";
-  // Selects the first translated but ungenderized textbox
-  s[1] = ".section > div.collapsable .language:first-of-type > input";
-  // Selects the first translated + genderized textbox
-  s[2] = ".section > div.collapsable .language:first-of-type .indent > div:first-of-type > input";
-
-  $("#form_editor").on("change", s.join(", "), function() {
-    var el = $(this).parents(".section").children("h5");
-    el.attr("data-title", $(this).val());
-    // work around webkit not updating the element even after data-attr
-    // have been changed
-    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+ * Sets up the question and section headers with detailed info. Only
+ * should be called once; after the form has loaded. */
+FormEditor.prototype.initSectionAndQuestionHeaders = function() {
+  // likely candidates that will be required for the header.
+  var s = ".section input:visible[id*='/title']  ,";
+  s += ".question input:visible[id*='/qtext']    ,";
+  s += ".question input:visible[id$='/db_column']";
+  $(s).each(function(ind, elm) {
+    $F().handleSectionAndQuestionUpdates($(elm));
   });
-
-  // run once for initialization
-  $(s.join(", ")).trigger("change");
 };
 
 /* @public
- * Finds the contents of the first visible input-field in a question to
- * question text from it. Also finds the question’s db_column at writes
- * both to the question’s title bar. Only needs to be called once. */
-FormEditor.prototype.attachQuestionHeadUpdater = function() {
-  var s = [];
-  // Selects the untranslated textboxes right after the section:
-  s[0] = ".question > div:first-of-type > input";
-  // Selects the first translated but ungenderized textbox
-  s[1] = ".question > div:first-of-type .language:first-of-type > input";
-  // Selects the first translated + genderized textbox
-  s[2] = ".question > div:first-of-type .language:first-of-type .indent > div:first-of-type > input";
+ * Checks if the given element is used to generate the header info. If
+ * it is, the header will be updated automatically. */
+FormEditor.prototype.handleSectionAndQuestionUpdates = function(elm) {
+  if(!elm.is("input")) return;
 
-  $("#form_editor").on("change", s.join(", "), function(){
-    var el = $(this).parents(".question").children("h6");
-    el.attr("data-qtext", $(this).val().slice(0,40));
+  var id = elm.attr("id");
+  // quick check if the element is suitable at all
+  if(id.indexOf("/title") === -1 && id.indexOf("/qtext") === -1 && id.indexOf("/db_column") === -1)
+    return;
+
+  var section = elm.parents(".section");
+  var title = section.find("input:visible[id*='/title']:first");
+  if(id === title.attr("id")) {
+    var el = section.children("h5");
+    el.attr("data-title", elm.val());
     // work around webkit not updating the element even after data-attr
     // have been changed
     if($.browser.webkit) el.replaceWith(el[0].outerHTML);
-  });
+    return;
+  }
 
-  $("#form_editor").on("change", ".question div.db_column input", function(){
-    var el = $(this).parents(".question").children("h6");
-    el.attr("data-db-column", $(this).val());
-    // work around webkit not updating the element even after data-attr
-    // have been changed
+  var q = elm.parents(".question");
+  var qtext = q.find("input:visible[id*='/qtext']:first");
+  if(id === qtext.attr("id")) {
+    var el = q.children("h6");
+    el.attr("data-qtext", elm.val().slice(0,40));
     if($.browser.webkit) el.replaceWith(el[0].outerHTML);
-  });
+    return;
+  }
 
-  // run once for initialization
-  $(s.join(", ")).trigger("change");
-  $(".question div.db_column input").trigger("change");
+  var dbcol = q.find("input:visible[id$='/db_column']");
+  if(id === dbcol.attr("id")) {
+    var el = q.children("h6");
+    el.attr("data-db-column", elm.val());
+    if($.browser.webkit) el.replaceWith(el[0].outerHTML);
+  }
 };
 
 /* @public
