@@ -3,9 +3,6 @@
 
 require File.dirname(__FILE__) + "/../web/config/ext_requirements.rb"
 
-#require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
-#require File.dirname(__FILE__) + "/../web/config/seee_config.rb"
-
 interactive = true
 simulate = false
 
@@ -19,7 +16,11 @@ BIN_SMALL="FinEUPHBUpper" # on top
 BIN_DESC={ BIN_LARGE => "bin on bottom", BIN_SMALL => "bin on top" }
 
 # Other print options which are handed to each lpr run
-LPR_OPTIONS="-o sides=two-sided-long-edge -o PageSize=A4"
+LPR_OPTIONS="-o sides=two-sided-long-edge -o PageSize=A4 -o Resolution=300dpi"
+
+# If the questionnaires need to be stapled (i.e. more than two pages)
+# this determines how:
+STAPLE="-o StapleLocation=UpperLeft"
 
 # Define which how to languages to print in addition to the one of the
 # sheet at hand. E.g., if this is set to “en”, an “en” sheet will yield
@@ -141,8 +142,14 @@ forms_sorted.each do |file, data|
     end
   end
 
+  pages = `pdfinfo "#{file}" | grep Pages: | awk '{print $2}'`.to_i
+  if pages > 2
+    warn "Sheet to print has more than 2 pages. Trying to staple them."
+  end
+
+
   # cycle bins
-  if bin == BIN_SMALL || count > 150
+  if bin == BIN_SMALL || count > 150 || pages > 2
     bin = BIN_LARGE
   else
     bin = BIN_SMALL
@@ -151,7 +158,7 @@ forms_sorted.each do |file, data|
   # issue print commands / submit to queue
   cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
   cover =  "lpr            -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
-  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
+  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
   banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
   howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
