@@ -15,7 +15,14 @@ $(document).ready(function() {
         // hide and show collision warning, but respect collapsed state
         var w = $("#collision-warning");
         var d = $("#darkened");
-        if(data >= 2) {
+        if(data["viewers"] >= 2) {
+          var name = getUsernameCookie();
+          console.log("name=" + name);
+          var s = $.map(data["users"], function(val) {
+            console.log("val=" + val);
+            return val === name ? val + " (this is you)" : val;
+          }).join("<br>");
+          $("#viewers").html(s);
           w.removeClass("hidden");
           if(!w.hasClass("collapsed")) d.fadeIn();
         } else {
@@ -47,3 +54,22 @@ $(document).ready(function() {
       $("#darkened").fadeOut();
   });
 });
+
+
+function setUsernameCookie() {
+  var name = prompt("Please set your username and possibly location, so others know who you are: (requires cookies!)", getUsernameCookie());
+  if(name === null) return;
+  name = escape(name.replace(/[^a-z0-9-_\s]/ig, "").substring(0, 20));
+  var v = name + "; expires=Thu, 31 Dec 2020 23:59:59 GMT";
+  document.cookie = "username=" + v;
+};
+
+function getUsernameCookie() {
+  var all = document.cookie.split(";");
+  for(i=0; i < all.length; i++) {
+    name=all[i].substr(0, all[i].indexOf("="));
+    value=all[i].substr(all[i].indexOf("=")+1);
+    if(name === "username" && value !== "") return unescape(value);
+  }
+  return ident;
+}
