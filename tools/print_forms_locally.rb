@@ -194,7 +194,7 @@ forms_sorted.each do |file, data|
   puts "#{totalcounter} of #{sheets} have been queued/printed."
 
   # print warning, if many sheets have been queued
-  warningcounter += howtos.size + count
+  warningcounter += howtos.size + count*(pages/2.0).ceil
   if warningcounter > SHEET_WARNING
     puts
     puts "="*35
