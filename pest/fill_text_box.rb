@@ -47,6 +47,11 @@ Semester.currently_active.each do |semester|
 
       rows.each do |r|
         form = Marshal.load(Base64.decode64(r["abstract_form"]))
+        unless File.exist?(r["path"])
+          warn "Missing file: #{r["path"]}. Skipping."
+          next
+        end
+
         box = form.get_question(col).boxes[quest.no_answer? ? -2 : -1]
         coords = "#{box.width.to_i+2*200}x#{box.height.to_i+2*100}"
         coords << "+#{box.x-200}+#{box.y-100}"
