@@ -51,7 +51,7 @@ class Box
   # be /the/ accessor for @text, similar to the way question#text works.
   def any_text(lang = I18n.locale)
     return @text if @text.is_a? String
-    (return @text[lang.to_sym] || @text[:en] || @text.first[1]) if @text.is_a? Hash
+    (return (@text[lang.to_sym] || @text[:en] || @text.first[1]).to_s) if @text.is_a? Hash
     ""
   end
 end
