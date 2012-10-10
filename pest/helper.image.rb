@@ -189,18 +189,18 @@ module PESTImageTools
       draw_dot(i, [x, y], "red")
       @corners[i].merge!({:br => [x,y]}) unless [x, y].any_nil?
 
-      len_l = (@corners[i][:bl][1] - @corners[i][:tl][1] - CORNER_HEIGHT).abs
-      len_r = (@corners[i][:br][1] - @corners[i][:tr][1] - CORNER_HEIGHT).abs
-      len_t = (@corners[i][:tr][0] - @corners[i][:tl][0] - CORNER_WIDTH).abs
-      len_b = (@corners[i][:br][0] - @corners[i][:bl][0] - CORNER_WIDTH).abs
+      len_l = (@corners[i][:bl][1] - @corners[i][:tl][1] - CORNER_HEIGHT).abs rescue len_l = nil
+      len_r = (@corners[i][:br][1] - @corners[i][:tr][1] - CORNER_HEIGHT).abs rescue len_r = nil
+      len_t = (@corners[i][:tr][0] - @corners[i][:tl][0] - CORNER_WIDTH).abs rescue len_t = nil
+      len_b = (@corners[i][:br][0] - @corners[i][:bl][0] - CORNER_WIDTH).abs rescue len_b = nil
 
       # try to remove the corner which deviates very much from the
       # expected position
       c = nil
-      c = corner_angle(i, :tl) > corner_angle(i, :tr) ? :tr : :tl if len_t >= CORNER_DEVIATION
-      c = corner_angle(i, :bl) > corner_angle(i, :br) ? :br : :bl if len_b >= CORNER_DEVIATION
-      c = corner_angle(i, :tl) > corner_angle(i, :bl) ? :bl : :tl if len_l >= CORNER_DEVIATION
-      c = corner_angle(i, :tr) > corner_angle(i, :br) ? :br : :tr if len_r >= CORNER_DEVIATION
+      c = corner_angle(i, :tl) > corner_angle(i, :tr) ? :tr : :tl if len_t && len_t >= CORNER_DEVIATION
+      c = corner_angle(i, :bl) > corner_angle(i, :br) ? :br : :bl if len_b && len_b >= CORNER_DEVIATION
+      c = corner_angle(i, :tl) > corner_angle(i, :bl) ? :bl : :tl if len_l && len_l >= CORNER_DEVIATION
+      c = corner_angle(i, :tr) > corner_angle(i, :br) ? :br : :tr if len_r && len_r >= CORNER_DEVIATION
       if c
         debug("  Removing corner #{c} on page #{i} because it is so far off.") if @verbose
         @corners[i][c] = [nil, nil]
