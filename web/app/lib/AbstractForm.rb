@@ -363,6 +363,9 @@ class Page
   end
 
   def questions
+    # some forms don’t have any sections and instead specify their
+    # questions right here. If that’s the case, simply return those.
+    return @questions if @questions
     sections.collect {|s| s.questions }.flatten
   end
 end

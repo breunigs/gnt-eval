@@ -99,7 +99,3 @@ end
 class Question
   attr_accessor :value
 end
-
-class Page
-  attr_accessor :questions
-end
