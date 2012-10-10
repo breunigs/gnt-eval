@@ -228,7 +228,7 @@ namespace :images do
         # let rails know about this comment
         p.save
         # move comment to correct location
-        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title))
+        `#{cp} #{f} #{File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title)}`
         print_progress(curr+1, allfiles.size)
       end # Dir glob
     end # Semester.each
