@@ -108,7 +108,7 @@
         $(document).ready(function() {
           $(".commentview").each(function() {
             var max = $(window).height() - $("#commentfield").outerHeight() - 60 /*margins*/;
-            max = Math.max(max, 280)l
+            max = Math.max(max, 280);
             var h = $(this).find("img:first").height();
             $(this).height(Math.min(h, max) + "px");
           });
