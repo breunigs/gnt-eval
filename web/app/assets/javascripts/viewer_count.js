@@ -17,9 +17,7 @@ $(document).ready(function() {
         var d = $("#darkened");
         if(data["viewers"] >= 2) {
           var name = getUsernameCookie();
-          console.log("name=" + name);
           var s = $.map(data["users"], function(val) {
-            console.log("val=" + val);
             return val === name ? val + " (this is you)" : val;
           }).join("<br>");
           $("#viewers").html(s);
