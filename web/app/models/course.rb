@@ -10,6 +10,7 @@ class Course < ActiveRecord::Base
   belongs_to :form, :inverse_of => :courses
   has_many :course_profs, :inverse_of => :course
   has_many :profs, :through => :course_profs
+  has_many :c_pics, :through => :course_profs
   has_many :tutors, :inverse_of => :course
   validates_presence_of :semester_id, :title, :faculty, :language, :form
   validates_numericality_of :students, :allow_nil => true
