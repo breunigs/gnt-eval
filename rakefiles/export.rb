@@ -355,7 +355,7 @@ namespace :results do
 
     # add the question text to each question header as well, if desired
     header = export.clone
-    fullheader = expand == "y" ? header.map { |h| h + ": " + ident[h].join(" // ") } : header
+    fullheader = expand == "y" ? header.map { |h| h + ": " + ident[h].join(" // ") } : header.clone
 
 
     puts
@@ -379,7 +379,7 @@ namespace :results do
       "NONE" => "If you don’t need any metadata, simply press enter." }
     meta.sort.each { |k,v| puts "#{k.ljust(10)}: #{v}" }
     meta = get_or_fake_user_input(meta.keys, a[:meta])
-    meta_store = meta
+    meta_store = meta.clone
     meta = meta.reject { |m| m == "NONE" }
 
 
@@ -484,7 +484,7 @@ namespace :results do
     filename = Time.now.strftime("%Y-%m-%d %H:%M") + " "
     filename << faculty.map { |f| f.shortname }.join("+") + " "
     filename << terms.map { |f| Semester.find(f).title }.join("+")
-    filename = "tmp/export/" + filename.gsub(/[^a-z0-9.,;\s_-]/i, "")
+    filename = "tmp/export/" + filename.gsub(/[^a-z0-9.,;:\s_-]/i, "")
 
     file_data = filename + " data.csv"
     file_stat = filename + " stat.csv"
