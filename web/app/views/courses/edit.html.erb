@@ -87,13 +87,14 @@
   <div class="group">
     <h3>Scanned comments</h3>
     <div class="commentview">
+      <% cnt = 0 %>
       <% @course.course_profs.each do |cp| %>
         <% if cp.c_pics.empty? %>
           <span>NO COMMENTS for <%=h cp.prof.fullname %></span>
           <% next %>
         <% end %>
 
-        <span>for <%=cp.prof.fullname %>:</span>
+        <span>for <%=cp.prof.fullname %>: (#<%="#{cnt+1} – ##{cnt + cp.c_pics.size}"%>)</span> <% cnt += cp.c_pics.size %>
         <% cp.c_pics.each do |p| %>
           <%= render "shared/comment_pic", :course => @course, :pic => p %>
         <% end %>
