@@ -69,6 +69,8 @@
           $("#course_evaluator").bind("blur change keyup", function() {
             var v = $(this).val().trim().toLowerCase();
             var v = v.length == 0 ? "" : v + "@<%=j Seee::Config.settings[:standard_mail_domain]%>";
+            if(v.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i) === null)
+              v = "Cannot derive mail address automatically.";
             $("#course_fscontact").attr("placeholder", v);
           }).blur();
         });
