@@ -481,11 +481,10 @@ namespace :results do
     # write data to CSV
     puts "Writing CSV"
     FileUtils.mkdir_p "tmp/export/"
-    filename = "tmp/export/"
     filename << Time.now.strftime("%Y-%m-%d %H:%M") + " "
     filename << faculty.map { |f| f.shortname }.join("+") + " "
     filename << terms.map { |f| Semester.find(f).title }.join("+")
-    filename.gsub!(/[^a-z0-9.,;\s_-]/i, "")
+    filename = "tmp/export/" + filename.gsub(/[^a-z0-9.,;\s_-]/i, "")
 
     file_data = filename + " data.csv"
     file_stat = filename + " stat.csv"
