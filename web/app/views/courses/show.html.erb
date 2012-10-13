@@ -5,12 +5,13 @@
 
   <table style="float:left;min-width:50%;">
     <tr><th colspan="2" style="font-size:120%">master data</th></tr>
+    <% comment_link = link_to "comments: #{@course.c_pics.size}", (edit_course_path(@course) + "#commentfield") %>
     <% for item in [
         [:title,         @course.title],
         [:semester,      link_to(@course.semester.title, edit_semester_path(@course.semester))],
         [:faculty,       link_to(@course.faculty.longname, edit_faculty_path(@course.faculty))],
         [:form,          link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
-        [:students,      "#{@course.students} (returned sheets: #{@course.returned_sheets}; comments: #{@course.c_pics.size})"],
+        [:students,      "#{@course.students} (returned sheets: #{@course.returned_sheets}; #{comment_link})".html_safe],
         [:note,          @course.note]] %>
       <tr>
         <th><%=Course.human_attribute_name(item.shift) %></th>
