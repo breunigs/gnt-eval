@@ -35,7 +35,7 @@ Seee::Application.routes.draw do
 
   # comment image source pass throughs
   get "/pics/:id/download" => "pics#download", :as => :download_pic
-  get "/cpics/:id/download" => "cpics#download", :as => :download_cpic
+  get "/cpics/:id/download" => "CPics#download", :as => :download_cpic
 
 
   match "/:cont/:viewed_id/ping/" => "sessions#ping", :as => "viewer_count"
