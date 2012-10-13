@@ -107,10 +107,12 @@
       <script>
         $(document).ready(function() {
           $(".commentview").each(function() {
+            var view = $(this);
             var max = $(window).height() - $("#commentfield").outerHeight() - 60 /*margins*/;
             max = Math.max(max, 280);
-            var h = $(this).find("img:first").height();
-            $(this).height(Math.min(h, max) + "px");
+            $(this).find("img:first").load(function() {
+              view.height(Math.min($(this).height(), max) + "px");
+            });
           });
         });
       </script>
