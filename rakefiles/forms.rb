@@ -35,7 +35,7 @@ namespace :forms do
     puts "Creating forms:"
     missing_students = []
     cps.each do |cp|
-      work_queue.enqueue_b do
+      #work_queue.enqueue_b do
         if cp.course.students.blank?
           missing_students << cp.course.title
         else
@@ -43,7 +43,7 @@ namespace :forms do
         end
         prog += 1
         print_progress(prog, cps.size, cp.course.title)
-      end
+     # end
     end
     work_queue.join
 
