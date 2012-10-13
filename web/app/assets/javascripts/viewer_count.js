@@ -60,7 +60,7 @@ function setUsernameCookie() {
   var name = prompt("Please set your username and possibly location, so others know who you are: (requires cookies!)", getUsernameCookie());
   if(name === null) return;
   name = escape(name.replace(/[^a-z0-9-_\s]/ig, "").substring(0, 20));
-  var v = name + "; expires=Thu, 31 Dec 2020 23:59:59 GMT";
+  var v = name + "; expires=Thu, 31 Dec 2020 23:59:59 GMT; path=/";
   document.cookie = "username=" + v;
 };
 
