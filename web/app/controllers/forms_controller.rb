@@ -117,7 +117,7 @@ class FormsController < ApplicationController
 
   def copy_to_current
     form = Form.find(params[:id])
-    terms = Semester.currently_active
+    terms = Term.currently_active
     if terms.empty?
       flash[:error] = "No current terms found. Please create them first."
     else
@@ -128,7 +128,7 @@ class FormsController < ApplicationController
           next
         end
         new_form = form.dup
-        new_form.semester = t
+        new_form.term = t
         if new_form.save
           flash[:notice] ||= []
           flash[:notice] << "Copied #{form.title} to #{t.title}."

@@ -221,18 +221,18 @@ namespace :misc do
     work_queue.enqueue_b { data[2] = UebungenDotPhysik.data; "UebungenDotPhysik OK" }
 
     # get information about what’s in seee #############################
-    # courses will be added to the last semester currently active.
+    # courses will be added to the last term currently active.
     # Therefore sem references that term, but course titles will include
-    # the data of all currently active semesters.
+    # the data of all currently active terms.
     cst = []
     sem = nil
     forms = {}
     form_names = []
     faculties = []
     work_queue.enqueue_b do
-      cs = Semester.currently_active.map { |s| s.courses }.flatten
+      cs = Term.currently_active.map { |s| s.courses }.flatten
       cst = cs.map { |c| c.title }
-      sem = Semester.currently_active.last
+      sem = Term.currently_active.last
       form_names = sem.forms.map { |f| f.name }
       faculties = Faculty.all
       forms[:seminar] = sem.forms.detect { |f| f.name.match(/seminar/i) }
@@ -264,7 +264,7 @@ namespace :misc do
     work_queue.join
     data.flatten!
 
-    puts "Semester = #{sem.title}"
+    puts "Term = #{sem.title}"
 
     # Now process every lecture in the LSF data and merge it with
     # additional data from other sources.
@@ -342,13 +342,13 @@ namespace :misc do
 
       # well, add it to seee ###########################################
       begin
-	cc = Course.new(:semester_id => sem.id,
+	cc = Course.new(:term_id     => sem.id,
 			:title       => title ,
 			:students    => students,
 			:form_id     => form.id,
 			:language    => lang,
 			:faculty_id  => fac.id,
-			:evaluator => "", :description => "",
+			:evaluator   => "", :description => "",
 			:summary => "", :fscontact => "", :note => "")
 	cc.save
 	lects.each { |l| cc.profs << l }

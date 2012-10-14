@@ -1,5 +1,5 @@
 <div>
-<h2>Previewing Form <%=@form.name %> (<%=@form.semester.title %>)</h2>
+<h2>Previewing Form <%=@form.name %> (<%=@form.term.title %>)</h2>
   <% unless @form.form_checks_out? %>
     <strong>⚠ Form is invalid</strong>
     <% message = @form.abstract_form_valid_message %><% if message %>(<%=message%>)<% end%>
@@ -9,9 +9,9 @@
  <table>
     <% for item in
       [
-        ["Semester",      @form.semester.title],
-        ["Name",          @form.name],
-        ["Table",         @form.db_table]
+        ["Term",      @form.term.title],
+        ["Name",      @form.name],
+        ["Table",     @form.db_table]
       ]
     %>
       <tr>

@@ -1,3 +1,4 @@
+<% content_for :title, "“#{@tutor.abbr_name}”" %>
 <%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
 
 <%= form_for([@course, @tutor]) do |f| %>
@@ -5,7 +6,7 @@
     <h2>Editing <%=@tutor.abbr_name%></h2>
 
     <div class="button-group">
-      <%= f.submit "Update and Preview", :disable_with => "Saving…", :class => "button primary" %>
+      <%= f.submit "Save and Preview", :disable_with => "Saving…", :class => "button primary" %>
       <%= link_to "Cancel", @tutor.course, :class => "button" %>
       <%= render "shared/error_messages", :model => @tutor %>
     </div>
@@ -38,7 +39,7 @@
 
   <div class="group">
     <div class="button-group">
-      <%= f.submit "Update and Preview", :disable_with => "Saving…".html_safe, :class => "button primary" %>
+      <%= f.submit "Save and Preview", :disable_with => "Saving…".html_safe, :class => "button primary" %>
       <%= link_to "Cancel", @tutor.course, :class => "button" %>
     </div>
   </div>

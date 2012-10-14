@@ -15,13 +15,13 @@ answ = {}
 pdf_viewer_started = false
 tmp_path = "#{temp_dir}/fill_text_box.jpg"
 
-Semester.currently_active.each do |semester|
-  semester.forms.each do |source_form|
+Term.currently_active.each do |term|
+  term.forms.each do |source_form|
     puts "Proccessing #{source_form.name}"
 
     table = source_form.db_table
     unless RT.table_exists?(table)
-      warn "#{semester.title} | #{source_form.name}’s table #{table} " \
+      warn "#{term.title} | #{source_form.name}’s table #{table} " \
               + "does not exist. Skipping."
       warn ""
       next

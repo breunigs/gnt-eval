@@ -2,17 +2,17 @@
 
 require 'erb'
 
-# A course has many professors, belongs to a semester and has a lot of
+# A course has many professors, belongs to a term and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
-  belongs_to :semester, :inverse_of => :courses
+  belongs_to :term, :inverse_of => :courses
   belongs_to :faculty, :inverse_of => :courses
   belongs_to :form, :inverse_of => :courses
   has_many :course_profs, :inverse_of => :course
   has_many :profs, :through => :course_profs
   has_many :c_pics, :through => :course_profs
   has_many :tutors, :inverse_of => :course
-  validates_presence_of :semester_id, :title, :faculty, :language, :form
+  validates_presence_of :term_id, :title, :faculty, :language, :form
   validates_numericality_of :students, :allow_nil => true
 
   # finds all courses that contain all given keywords in their title.
@@ -22,7 +22,7 @@ class Course < ActiveRecord::Base
   # additional classes to include in order to speed things up using
   # the inc variable. An array is expected. Use cond and vals to specify
   # additional search criteria. For example, to limit to certain
-  # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
+  # terms, you would specify: cond="term_id IN (?)"  vals=[1,4]
   # You can also sort by passing an array of attributes to sorty by.
   def self.search(term, inc = [], cond = [], vals = [], order = nil)
     return Course.filter(inc, cond, vals, order) if term.nil?
@@ -72,10 +72,10 @@ class Course < ActiveRecord::Base
   end
 
   # returns if the course is critical. If it is, some features should
-  # be disabled (e.g. deletion). A course is critical, when the semester
+  # be disabled (e.g. deletion). A course is critical, when the term
   # it belongs to is.
   def critical?
-    semester.critical? || returned_sheets > 0
+    term.critical? || returned_sheets > 0
   end
 
   # Tries to parse the description field for eval times and returns them
@@ -196,7 +196,7 @@ class Course < ActiveRecord::Base
       b << RT.load_tex_definitions
       b << '\maketitle' + "\n\n"
       facultylong = faculty.longname
-      sem_title = { :short => semester.title, :long => semester.longtitle }
+      term_title = { :short => term.title, :long => term.longtitle }
       b << ERB.new(RT.load_tex("preface")).result(binding)
     end
 

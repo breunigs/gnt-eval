@@ -25,7 +25,7 @@ class CoursesControllerTest < ActionController::TestCase
   def test_should_create_course
     assert_difference('Course.count') do
       post :create, :course => {
-        :semester_id => semesters(:winterTerm).id,
+        :term_id => terms(:winterTerm).id,
         :title => "Herp A Derp",
         :students => "123",
         :evaluator => "bruno",

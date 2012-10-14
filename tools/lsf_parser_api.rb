@@ -19,7 +19,7 @@ if ARGV.empty? || ARGV.length != 2
   puts "faculties listed here:"
   puts LSF.toplevel
   puts
-  puts "Ensure that you have selected the right semester, otherwise"
+  puts "Ensure that you have selected the right term, otherwise"
   puts "you will get old data."
   puts
   puts "These are the links available at top level:"
@@ -34,7 +34,7 @@ end
 name = ARGV[0].gsub(/[^a-z0-9_-]/i, "")
 term, rootid = LSF.set_term_and_root(ARGV[1])
 if term.nil? || rootid.nil? || term == 0 || rootid == 0 || name.nil? || name.empty?
-  warn "Couldn't extract semester and root id. Please fix the script."
+  warn "Couldn't extract term and root id. Please fix the script."
   exit 1
 end
 

@@ -20,7 +20,7 @@ class FormsControllerTest < ActionController::TestCase
     assert_difference('Form.count') do
       post :create, :form => {
         :name => "asdasdasd",
-        :semester_id => semesters(:winterTerm).id,
+        :term_id => terms(:winterTerm).id,
         :content => "an invalid form"
       }
     end

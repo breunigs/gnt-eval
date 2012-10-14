@@ -44,7 +44,12 @@ is_new = !is_edit
   </div>
 
   <script type="text/javascript">
+//var profiler = new $.Profiler();
+//profiler.start();
     <%
+
+
+
       attr = {}
       attr[:PreviewUrl] = @form.id ? preview_form_path(@form) : nil
       attr[:AbstractForm] = [AbstractForm::ATTRIBUTES].flatten
@@ -64,6 +69,11 @@ is_new = !is_edit
     %>
     var ATTRIBUTES = <%= ActiveSupport::JSON.encode(attr).html_safe %>;
     $F().setLanguages(<%= ActiveSupport::JSON.encode(@form.languages).html_safe %>, true);
+
+//profiler.stop();
+
+//profiler.topTime();
+//profiler.topCalls();
   </script>
 
 <% else %>

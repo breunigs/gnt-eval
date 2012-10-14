@@ -8,7 +8,7 @@ class CourseProf < ActiveRecord::Base
   # shortcuts
   has_one :form, :through => :course
   has_one :faculty, :through => :course
-  has_one :semester, :through => :course
+  has_one :term, :through => :course
   # import some features from other classes
   delegate :gender, :gender=, :to => :prof
 

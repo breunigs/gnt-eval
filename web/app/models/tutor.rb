@@ -6,7 +6,7 @@ class Tutor < ActiveRecord::Base
   has_many :pics, :inverse_of => :tutor
   has_one :form, :through => :course
   has_one :faculty, :through => :course
-  has_one :semester, :through => :course
+  has_one :term, :through => :course
 
   validates_presence_of :abbr_name
   validates_uniqueness_of :abbr_name, :scope => :course_id, \

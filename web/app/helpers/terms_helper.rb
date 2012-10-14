@@ -1,4 +1,4 @@
 # encoding: utf-8
 
-module SemestersHelper
+module TermsHelper
 end

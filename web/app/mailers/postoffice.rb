@@ -44,7 +44,7 @@ class Postoffice < ActionMailer::Base
   # 'http://mathphys.fsk.uni-heidelberg.de/~eval/.uieduie/Ich_bin_das_richtige_file.pdf'
   def evalverschickung(course_id, faculty_links)
     c = Course.find(course_id)
-    
+
     raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
     @title = c.title
@@ -72,7 +72,7 @@ class Postoffice < ActionMailer::Base
 
     # guess the correct path
     if path.empty?
-      filename = c.dir_friendly_title << '_' << c.semester.dir_friendly_title << '.pdf'
+      filename = c.dir_friendly_title << '_' << c.term.dir_friendly_title << '.pdf'
       path = File.join(Rails.root, '../tmp/results/singles/', filename)
     end
 

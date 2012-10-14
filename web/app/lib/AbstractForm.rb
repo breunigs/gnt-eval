@@ -504,7 +504,7 @@ class AbstractForm
                 "Pierre Dupont", "John Smith", "Eddi Exzellenz",
                 "Joe Bloggs", "John Doe", "Stefan ist doof",
                 "Beccy ist doof"],
-      semester = "the same semester as last year",
+      term    = "the same term as last year",
       barcode = "00000000")
 
     # in case someone didn’t give us symbols
@@ -524,7 +524,7 @@ class AbstractForm
     tex << "\\lecturerLast{#{lecturer_last.escape_for_tex}}\n"
     tex << "\\lecture{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
-    tex << "\\term{#{semester.escape_for_tex}}\n"
+    tex << "\\term{#{term.escape_for_tex}}\n"
     tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
     # note: these cannot be customized per tutor, as the tutor is not
     # known yet. They will be filled in result.pdf, so give placeholders
@@ -577,7 +577,7 @@ class AbstractForm
     s << "#{intro(lang)}\n\n"
     s << "\\vspace{0.8mm}"
     s << "\\dataline{#{I18n.t(:title)}}"
-    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:term)}}\n"
     s << "\\vspace{-2.5mm}"
     s
   end

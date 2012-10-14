@@ -1,3 +1,5 @@
+<% content_for :title, "“#{@course.title}”" %>
+
 <%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
 
 <% # can’t change anything while critical, so don’t load JS %>
@@ -6,7 +8,7 @@
 <%= form_for(@course) do |f| %>
   <%
     links = %(<div class="button-group">)
-    links << (f.submit "Update and Preview", :disable_with => "Saving…", :class => "button primary")
+    links << (f.submit "Save and Preview", :disable_with => "Saving…", :class => "button primary")
     links << (link_to "Discard and Preview", @course, :class => "button")
     links << %(</div>)
     links = links.html_safe
@@ -21,11 +23,11 @@
     <table style="float:left;min-width:50%;">
       <tr><th colspan="3" style="font-size:120%">master data</th></tr>
       <% [[f.label(:title),                             f.text_field(:title), "required"],
-          [f.label(:semester),
+          [f.label(:term),
               if @course.critical?
-                "#{@course.semester.title} (can't change this while critical)"
+                "#{@course.term.title} (can't change this while critical)"
               else
-                collection_select(:course, :semester_id, Semester.all.reverse, :id, :title, {:prompt => true})
+                collection_select(:course, :term_id, Term.all.reverse, :id, :title, {:prompt => true})
               end, "required"],
           [f.label(:faculty, :for=>"course_faculty_id"),collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"],
           [f.label(:form),

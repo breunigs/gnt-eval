@@ -48,7 +48,7 @@ end
 \usepackage{xstring}                  % common string functions for TeX
 
 \usepackage[pdftex,
-  pdftitle={<%= t(:teaching_eval_pdf_title).gsub('$faculty_semester') { evalname }%>},
+  pdftitle={<%= t(:teaching_eval_pdf_title).gsub('$faculty_term') { evalname }%>},
   pdfauthor={<%= Seee::Config.settings[:author_pdf] %>},
   pdfborder=0 0 1, bookmarks=true, pdftoolbar=true, pdfmenubar=true,
   colorlinks=true, linkcolor=black, citecolor=black, filecolor=black,
@@ -63,7 +63,7 @@ end
 % set meta information %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \author{<%=Seee::Config.settings[:author_page_headline] %>}
-\title{<%=t(:teaching_eval_headline).gsub("$faculty_semester"){ evalname }%>}
+\title{<%=t(:teaching_eval_headline).gsub("$faculty_term"){ evalname }%>}
 \date{\today}
 
 % common methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

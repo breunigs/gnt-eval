@@ -20,8 +20,8 @@ de:
   preface: Vorwort
   eval_results: Ergebnis der Evaluation
   tex_babel_lang: ngerman
-  teaching_eval_pdf_title: Lehrevaluation $faculty_semester
-  teaching_eval_headline: Lehrevaluation\\$faculty_semester
+  teaching_eval_pdf_title: Lehrevaluation $faculty_term
+  teaching_eval_headline: Lehrevaluation\\$faculty_term
 
   results_of_survey: Ergebnisse der Veranstaltungsumfrage
   scope_of_this_eval: 'Umfang dieser Evaluation:'
@@ -38,7 +38,7 @@ de:
     :male: Dozent
     :female: Dozentin
     :both: Dozent/in
-  semester: Semester
+  term: Semester
 
   # these serve as placeholders for the forms when the name of the
   # tutor is not yet available. In result.pdf, these variables will

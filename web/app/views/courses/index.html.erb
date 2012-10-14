@@ -1,7 +1,11 @@
 <div>
-  <h2>Available courses</h2>
+  <h2>Courses in <%=Term.currently_active.map { |t| t.title }.join(", ")%></h2>
 
-  <%=link_to 'Create new Course', new_course_path, :class => "button"%><br/><br/>
+  <div class="button-group">
+  <%=link_to 'Create new Course', new_course_path, :class => "button"%>
+  <%=link_to 'Show courses from other terms', terms_path, :class => "button"%>
+  </div>
+  <br/><br/>
 
   <%=render "shared/tablemagic", :search => true %>
   <table id="tablemagic" style="min-width:70em; width:100%">

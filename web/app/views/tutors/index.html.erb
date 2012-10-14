@@ -7,7 +7,7 @@
       <tr>
         <th><%=Tutor.human_attribute_name("abbr_name")%></th>
         <th>Course</th>
-        <th>Semester</th>
+        <th>Term</th>
       </tr>
     </thead>
     <tbody>
@@ -15,7 +15,7 @@
       <tr>
         <td><%= link_to tutor.abbr_name, [tutor.course, tutor] %></td>
         <td><%= link_to tutor.course.title, tutor.course %></td>
-        <td><%=h tutor.course.semester.title %></td>
+        <td><%=h tutor.course.term.title %></td>
       </tr>
     <% end %>
     </tbody>

@@ -4,10 +4,10 @@ class CoursesController < ApplicationController
   # GET /courses
   # GET /courses.xml
   def index
-    @curr_sem ||= view_context.get_selected_semesters
-    if @curr_sem.empty?
-      flash[:error] = "Cannot list courses for current semester, as there isn’t any current semester. Please create a new one first."
-      redirect_to :controller => "semesters", :action => "index"
+    @curr_term ||= view_context.get_selected_terms
+    if @curr_term.empty?
+      flash[:error] = "Cannot list courses for current term, as there isn’t any current term. Please create a new one first."
+      redirect_to :controller => "terms", :action => "index"
       return
     end
     # don’t allow URLs that have the search parameter without value
@@ -16,8 +16,8 @@ class CoursesController < ApplicationController
       return
     end
 
-    cond = "semester_id IN (?)"
-    vals = view_context.get_selected_semesters.map { |s| s.id }
+    cond = "term_id IN (?)"
+    vals = view_context.get_selected_terms.map { |s| s.id }
 
     # filter by search term. Provide it as additional array, so the table
     # may hide entries instead of not showing them at all. This allows
@@ -103,10 +103,10 @@ class CoursesController < ApplicationController
   # GET /courses/new.xml
   def new
     @course = Course.new
-    @curr_sem ||= view_context.get_selected_semesters
-    if @curr_sem.empty?
-      flash[:error] = "Cannot create a new course for current semester, as there isn’t any current semester. Please create a new one first."
-      redirect_to :controller => "semesters", :action => "index"
+    @curr_term ||= view_context.get_selected_terms
+    if @curr_term.empty?
+      flash[:error] = "Cannot create a new course for current term, as there isn’t any current term. Please create a new one first."
+      redirect_to :controller => "terms", :action => "index"
     else
       respond_to do |format|
         format.html # new.html.erb
@@ -233,43 +233,43 @@ class CoursesController < ApplicationController
   # looks if critical changes to a course were made and reports them iff
   # the course is critical.
   def critical_changes? course
-    # if the semester is critical, these fields will not be submitted.
+    # if the term is critical, these fields will not be submitted.
     # supply them from the database instead.
     params[:course][:form_id] ||= course.form.id
     params[:course][:language] ||= course.language
     lang_changed = course.language.to_s != params[:course][:language].to_s
     form_changed = course.form.id.to_s != params[:course][:form_id].to_s
     if course.critical? && (lang_changed || form_changed)
-      flash[:error] = "Can’t change the language because the semester is critical." if lang_changed
-      flash[:error] = "Can’t change the form because the semester is critical." if form_changed
+      flash[:error] = "Can’t change the language because the term is critical." if lang_changed
+      flash[:error] = "Can’t change the form because the term is critical." if form_changed
       return true
     end
     false
   end
 
-  # Checks if the semester actually has the form and if that form
+  # Checks if the term actually has the form and if that form
   # actually offers the language selected. Will report any errors.
   def form_lang_combo_valid?
-    # if the semester is critical, these fields will not be submitted.
+    # if the term is critical, these fields will not be submitted.
     # supply them from the database instead.
     if @course
       params[:course][:form_id] ||= @course.form.id if @course.form
       params[:course][:language] ||= @course.language
-      params[:course][:semester_id] ||= @course.semester.id if @course.semester
+      params[:course][:term_id] ||= @course.term.id if @course.term
     end
 
-    # check semester has form
-    s = Semester.find(params[:course][:semester_id])
+    # check term has form
+    t = Term.find(params[:course][:term_id])
     f = Form.find(params[:course][:form_id])
 
-    unless s && f
-      flash[:error] = "Selected semester or form not found."
+    unless t && f
+      flash[:error] = "Selected term or form not found."
       return false
     end
 
-    unless s.forms.map { |f| f.id }.include?(params[:course][:form_id].to_i)
+    unless t.forms.map { |f| f.id }.include?(params[:course][:form_id].to_i)
       flash[:error] = "Form “#{f.name}” (id=#{f.id}) is not " \
-                        + "available for semester “#{s.title}”"
+                        + "available for term “#{t.title}”"
       return false
     end
 

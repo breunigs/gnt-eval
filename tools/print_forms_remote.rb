@@ -15,10 +15,10 @@ class Rails
 end
 require mypath + '/../web/config/ext_requirements.rb'
 
-semester = Semester.find(:all).find { |s| s.now? }.title.gsub(/\s+/, "_").scan(/[-_a-z0-9]+/i).join
+term = Term.find(:all).find { |s| s.now? }.title.gsub(/\s+/, "_").scan(/[-_a-z0-9]+/i).join
 
-if semester.nil?
-  puts "Could not detect current semester. Exiting."
+if term.nil?
+  puts "Could not detect current term. Exiting."
   exit 1
 end
 
@@ -49,7 +49,7 @@ puts
 puts
 puts
 puts "If you continue, all forms listed above will be uploaded to:"
-puts "\t#{account}@#{server}:~/forms_#{semester}"
+puts "\t#{account}@#{server}:~/forms_#{term}"
 puts "Press Enter"
 gets
 
@@ -59,13 +59,13 @@ exit 3 if $?.exitstatus != 0
 
 puts
 puts
-`#{ssh} 'test -d ~/forms_#{semester}'`
+`#{ssh} 'test -d ~/forms_#{term}'`
 if $?.exitstatus == 0
   puts "Target folder exists, aborting. Remove it manually before attemping again."
   exit 1
 end
 
-`#{ssh} 'mkdir -p ~/forms_#{semester}'`
+`#{ssh} 'mkdir -p ~/forms_#{term}'`
 exit 3 if $?.exitstatus != 0
 
 puts
@@ -76,9 +76,9 @@ puts
 puts
 puts
 forms.each do |k,v|
-  system("scp -o \"ControlPath=/tmp/print_forms_%r@%h:%p\" \"#{k}\" #{account}@#{server}:~/forms_#{semester}")
+  system("scp -o \"ControlPath=/tmp/print_forms_%r@%h:%p\" \"#{k}\" #{account}@#{server}:~/forms_#{term}")
   # -# doesn't work :(
-  name = File.expand_path("#{homepath}/forms_#{semester}/#{File.basename(k)}")
+  name = File.expand_path("#{homepath}/forms_#{term}/#{File.basename(k)}")
   system("#{ssh} 'lpr -Pqpsdup -o sides=two-sided-long-edge  \"#{name}\"'")
   system("#{ssh} 'rm \"#{name}\"'")
 end

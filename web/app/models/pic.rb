@@ -2,5 +2,5 @@
 
 class Pic < ActiveRecord::Base
   belongs_to :tutor, :inverse_of => :pics
-  has_one :semester, :through => :tutor
+  has_one :term, :through => :tutor
 end

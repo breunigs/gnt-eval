@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121009064330) do
+ActiveRecord::Schema.define(:version => 20121014072808) do
 
   create_table "c_pics", :force => true do |t|
     t.string   "basename"
@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(:version => 20121009064330) do
   end
 
   create_table "courses", :force => true do |t|
-    t.integer  "semester_id"
+    t.integer  "term_id"
     t.string   "title"
     t.integer  "students"
     t.integer  "faculty_id"
@@ -51,7 +51,7 @@ ActiveRecord::Schema.define(:version => 20121009064330) do
   end
 
   create_table "forms", :force => true do |t|
-    t.integer  "semester_id"
+    t.integer  "term_id"
     t.string   "name"
     t.text     "content"
     t.datetime "created_at"
@@ -75,16 +75,6 @@ ActiveRecord::Schema.define(:version => 20121009064330) do
     t.datetime "updated_at"
   end
 
-  create_table "semesters", :force => true do |t|
-    t.date     "firstday"
-    t.date     "lastday"
-    t.string   "title"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.boolean  "critical"
-    t.string   "longtitle"
-  end
-
   create_table "sessions", :force => true do |t|
     t.string   "ident"
     t.string   "cont"
@@ -94,6 +84,16 @@ ActiveRecord::Schema.define(:version => 20121009064330) do
     t.string   "ip"
     t.string   "agent"
     t.string   "username"
+  end
+
+  create_table "terms", :force => true do |t|
+    t.date     "firstday"
+    t.date     "lastday"
+    t.string   "title"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "critical"
+    t.string   "longtitle"
   end
 
   create_table "tutors", :force => true do |t|

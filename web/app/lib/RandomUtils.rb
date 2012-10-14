@@ -239,7 +239,7 @@ def make_pdf_for(cp, dirname)
       cp.prof.lastname,
       cp.prof.gender,
       cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
-      cp.semester.title,
+      cp.term.title,
       cp.barcode)
   end
 

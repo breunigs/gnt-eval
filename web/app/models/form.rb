@@ -4,18 +4,18 @@ require 'pp'
 require 'stringio'
 
 class Form < ActiveRecord::Base
-  belongs_to :semester, :inverse_of => :forms
+  belongs_to :term, :inverse_of => :forms
   has_many :courses, :inverse_of => :form
-  validates_presence_of :semester, :name, :content
-  validates_uniqueness_of :name, :scope => :semester_id
+  validates_presence_of :term, :name, :content
+  validates_uniqueness_of :name, :scope => :term_id
 
   alias_attribute :title, :name
 
-  # returns if the form is critical. This is the case if the semester is
+  # returns if the form is critical. This is the case if the term is
   # critical. It may be edited/removed even if there are associated
   # courses. Latter would not be too wise, though.
   def critical?
-    semester.critical?
+    term.critical?
   end
 
   # the AbstractForm object belonging to this form

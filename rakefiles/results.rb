@@ -2,23 +2,23 @@
 
 namespace :results do
   # This is a helper function that will create the result PDF file for a
-  # given semester and faculty_id in the specified directory.
-  def evaluate(semester_id, faculty_id, directory)
+  # given term and faculty_id in the specified directory.
+  def evaluate(term_id, faculty_id, directory)
     f = Faculty.find(faculty_id)
-    s = Semester.find(semester_id)
+    t = term.find(term_id)
 
     puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
-    puts "Could not find specified semester (id = #{semester_id})" if s.nil?
-    return if f.nil? || s.nil?
+    puts "Could not find specified term (id = #{term_id})" if t.nil?
+    return if f.nil? || t.nil?
 
     filename = f.longname.gsub(/\s+/,'_').gsub(/^\s|\s$/, "")
-    filename << '_' << s.dir_friendly_title
+    filename << '_' << t.dir_friendly_title
     filename << '_' << (I18n.tainted? ? "mixed" : I18n.default_locale).to_s
     filename << '.tex'
 
     puts "Now evaluating #{filename}"
     File.open(directory + filename, 'w') do |h|
-      h.puts(s.evaluate(f))
+      h.puts(t.evaluate(f))
     end
 
     puts "Wrote #{directory+filename}"
@@ -27,7 +27,7 @@ namespace :results do
 
   desc "fix common TeX errors and warn about possible ones"
   task :fix_tex_errors do
-    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    courses = Term.currently_active.map { |s| s.courses }.flatten
     courses.each do |c|
       unless c.summary.nil?
         c.summary = c.summary.fix_common_tex_errors
@@ -58,7 +58,7 @@ namespace :results do
 
   desc "find comment fields with broken LaTeX code"
   task :find_broken_comments do
-    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    courses = Term.currently_active.map { |s| s.courses }.flatten
     @max = 0
     @cur = 0
 
@@ -101,16 +101,16 @@ namespace :results do
     I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
 
     c = Course.find(a.course_id)
-    filename = c.dir_friendly_title << '_' << c.semester.dir_friendly_title << '.pdf'
+    filename = c.dir_friendly_title << '_' << c.term.dir_friendly_title << '.pdf'
     render_tex(c.evaluate(true), dirname + filename, false)
   end
 
-  desc "create pdf reports for all courses of a faculty for a given semester one at a time (i.e. a whole bunch of files). leave semester_id and faculty_id empty for current semester and all faculties."
-  task :pdf_singles, [:semester_id, :faculty_id] => "forms:samples" do |t,a|
-    sem_ids = if a.semester_id.nil?
-      Semester.currently_active.map { |s| s.id }
+  desc "create pdf reports for all courses of a faculty for a given term one at a time (i.e. a whole bunch of files). leave term_id and faculty_id empty for current term and all faculties."
+  task :pdf_singles, [:term_id, :faculty_id] => "forms:samples" do |t,a|
+    sem_ids = if a.term_id.nil?
+      Term.currently_active.map { |s| s.id }
     else
-      [a.semester_id]
+      [a.term_id]
     end
 
     faculty_ids = if a.faculty_id.nil?
@@ -119,7 +119,7 @@ namespace :results do
                     [a.faculty_id]
                   end
     courses = Course.find(:all).find_all do |c|
-      sem_ids.include?(c.semester_id) and faculty_ids.include?(c.faculty_id)
+      sem_ids.include?(c.term_id) and faculty_ids.include?(c.faculty_id)
     end
     courses.each do |course|
       work_queue.enqueue_b { system("rake -s results:pdf_single[#{course.id}]") }
@@ -127,16 +127,16 @@ namespace :results do
     work_queue.join
   end
 
-  desc "create report pdf file for a given semester and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
-  task :pdf_report, [:lang_code, :semester_id, :faculty_id] => "forms:samples" do |t, a|
+  desc "create report pdf file for a given term and faculty (leave empty for: lang = mixed, sem = current, fac = all)"
+  task :pdf_report, [:lang_code, :term_id, :faculty_id] => "forms:samples" do |t, a|
     lang_code = a.lang_code || "mixed"
     dirname = './tmp/results/'
     FileUtils.mkdir_p(dirname)
 
-    sem_ids = if a.semester_id.nil?
-      Semester.currently_active.map { |s| s.id }
+    sem_ids = if a.term_id.nil?
+      Term.currently_active.map { |s| s.id }
     else
-      [a.semester_id]
+      [a.term_id]
     end
 
     sem_ids.each do |sem_id|

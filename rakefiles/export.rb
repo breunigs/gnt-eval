@@ -4,7 +4,7 @@ namespace :results do
   # accepts array of term IDs and returns array of valid forms for
   # that term
   def get_forms_for_terms(terms)
-    forms = terms.collect { |s| Semester.find_by_id(s).forms }.flatten
+    forms = terms.collect { |s| Term.find_by_id(s).forms }.flatten
     forms.select { |f| f.abstract_form_valid? }
   end
 
@@ -20,10 +20,10 @@ namespace :results do
   def ask_term(user_input)
     print_head "Term"
     puts "Choose term to export:"
-    Semester.all.each do |s|
+    Term.all.each do |s|
       puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
     end
-    terms = get_or_fake_user_input(Semester.all.collect{|x|x.id}, user_input)
+    terms = get_or_fake_user_input(Term.all.collect{|x|x.id}, user_input)
     puts
     puts
     if terms.empty?
@@ -65,7 +65,7 @@ namespace :results do
         when "lecture"    then line << cp.course.title
         when "lang"       then line << cp.course.language
         when "sheet"      then line << cp.course.form.name
-        when "term"       then line << cp.course.semester.title
+        when "term"       then line << cp.course.term.title
         when "prof"       then line << cp.prof.fullname
         when "profmail"   then line << cp.prof.email
         when "profgender" then line << cp.prof.gender.to_s[0..0]
@@ -138,7 +138,7 @@ namespace :results do
     # now we have all required data, let’s build the query
     forms.each do |f|
       tutor_col = f.get_tutor_question.db_column
-      bcs = faculty_barcodes & f.semester.barcodes
+      bcs = faculty_barcodes & f.term.barcodes
       # outer query is only used for sorting by the sum of all AVGs to
       # give a rough sorting on 'awesomeness' of the tutor. Highly
       # doubtful, so please don’t tell anyone.
@@ -242,7 +242,7 @@ namespace :results do
     # stores if a certain DB has a tutor table as well as its name
     tutor_col = {}
     terms.each do |term|
-      term = Semester.find(term)
+      term = Term.find(term)
       dbs += term.forms.collect { |f| f.db_table }.uniq
       title += term.forms.collect do |f|
         "#{f.db_table} (#{f.name}, #{term.title})"
@@ -327,7 +327,7 @@ namespace :results do
     all.flatten!
 
     facs_bcs = faculty.collect { |f| f.barcodes }.flatten
-    terms_bcs = terms.collect { |t| Semester.find(t).barcodes }.flatten
+    terms_bcs = terms.collect { |t| Term.find(t).barcodes }.flatten
     valid_barcodes = facs_bcs & terms_bcs
 
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
@@ -483,7 +483,7 @@ namespace :results do
     FileUtils.mkdir_p "tmp/export/"
     filename = Time.now.strftime("%Y-%m-%d %H:%M") + " "
     filename << faculty.map { |f| f.shortname }.join("+") + " "
-    filename << terms.map { |f| Semester.find(f).title }.join("+")
+    filename << terms.map { |f| Term.find(f).title }.join("+")
     filename = "tmp/export/" + filename.gsub(/[^a-z0-9.,;:\s_-]/i, "")
 
     file_data = filename + " data.csv"

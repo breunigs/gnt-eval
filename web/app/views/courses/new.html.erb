@@ -3,12 +3,12 @@
 <%= form_for(@course) do |f| %>
   <div class="group">
     <h2>Create new course</h2>
-    <%= render "shared/error_messages", :model => @semester %>
+    <%= render "shared/error_messages", :model => @term %>
 
     <table>
       <% for item in
         [
-          [f.label(:semester_id),                       f.collection_select(:semester_id, Semester.all.reverse, :id, :title, {}, {:onchange => "updateSelectors();" }), "required"],
+          [f.label(:term_id),                           f.collection_select(:term_id, Term.all.reverse, :id, :title, {}, {:onchange => "updateSelectors();" }), "required"],
           [f.label(:title),                             f.text_field(:title), "required"],
           [f.label(:students),                          f.text_field(:students), "numeric"],
           [f.label(:form_id),                           f.collection_select(:form_id, Form.all, :id, :name, {}, {:onchange => "updateSelectors();" }), "required"],

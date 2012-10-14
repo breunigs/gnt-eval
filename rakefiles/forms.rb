@@ -2,11 +2,11 @@
 
 namespace :forms do
   desc "Create form samples for all available forms. Leave empty for current terms."
-  task :samples, :semester_id do |t,a|
-    forms = if a.semester_id.nil?
-      Semester.currently_active.map { |s| s.forms }.flatten
+  task :samples, :term_id do |t,a|
+    forms = if a.term_id.nil?
+      Term.currently_active.map { |s| s.forms }.flatten
     else
-      Semester.find(a.semester_id).forms
+      Term.find(a.term_id).forms
     end
 
     forms.each do |f|
@@ -20,14 +20,14 @@ namespace :forms do
 
 
   desc "(1) Generate the forms for each course and prof. Leave empty for current terms."
-  task :generate, [:semester_id] do |t, a|
+  task :generate, [:term_id] do |t, a|
     dirname = './tmp/forms/'
     FileUtils.mkdir_p(dirname)
 
-    cps = if a.semester_id.nil?
-      Semester.currently_active.map { |s| s.course_profs }.flatten
+    cps = if a.term_id.nil?
+      Term.currently_active.map { |s| s.course_profs }.flatten
     else
-      Semester.find(a.semester_id).course_profs
+      Term.find(a.term_id).course_profs
     end
 
     prog = 0
@@ -53,7 +53,7 @@ namespace :forms do
       warn "No sheets were generated for these courses."
     end
 
-    Rake::Task["forms:cover_sheets"].invoke(a.semester_id)
+    Rake::Task["forms:cover_sheets"].invoke(a.term_id)
     Rake::Task["clean".to_sym].invoke
     puts
     puts "Checking if any form does not have two pages…"
@@ -74,7 +74,7 @@ namespace :forms do
   end
 
   desc "Generate cover sheets that contain all available information about the lectures. Leave empty for current terms."
-  task :cover_sheets, [:semester_id] do |t, a|
+  task :cover_sheets, [:term_id] do |t, a|
     require "#{GNT_ROOT}/tools/lsf_parser_base.rb"
     LSF.set_debug = false
 
@@ -89,10 +89,10 @@ namespace :forms do
     puts "once and have it printed on top of the last stack of that"
     puts "lecture."
 
-    courses =  if a.semester_id.nil?
-      Semester.currently_active.map { |s| s.courses }.flatten
+    courses =  if a.term_id.nil?
+      Term.currently_active.map { |s| s.courses }.flatten
     else
-      Semester.find(a.semester_id).courses
+      Term.find(a.term_id).courses
     end
 
     prog = 0
@@ -123,7 +123,7 @@ namespace :forms do
   desc "Generate checklist to see if everything has been printed and packed."
   task :checklist do
     puts "Rendering…"
-    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    courses = Term.currently_active.map { |s| s.courses }.flatten
     courses.sort! { |a,b| b.students <=> a.students }
 
     count = {}
@@ -162,4 +162,3 @@ namespace :forms do
   end
 
 end
-

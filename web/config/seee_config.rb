@@ -136,7 +136,7 @@ module Seee
       # Specify a directory where to cache things
       :cache_tmp_dir => '/tmp/seee/',
 
-      # directory to store the extracted comment images in. Each semester
+      # directory to store the extracted comment images in. Each term
       # has its own subfolder, which will be created automatically.
       :comment_images_public_dir  => File.join(RAILS_ROOT, "public", "comments"),
 

@@ -1,5 +1,5 @@
 mathSummerCourse:
-  semester: :summerTerm
+  term: :summerTerm
   title: Mathematical background of east-asian art-history
   students: 123
   faculty: :mathFac
@@ -10,7 +10,7 @@ mathSummerCourse:
   language: de
 
 physWinterCourse:
-  semester: :winterTerm
+  term: :winterTerm
   title: Physical background of east-asian art-history
   students: 321
   faculty: :physFac

@@ -548,14 +548,14 @@ class LSF
   def self.print_final_tex(data)
     data = data.dup
     LSF.connect_rails
-    # find courses in active semesters
-    cs = Semester.currently_active.map { |s| s.courses }.flatten
-    cst = cs.map { |c| c.title }
+    # find courses in active termss
+    ct = Term.currently_active.map { |t| t.courses }.flatten
+    ctt = ct.map { |c| c.title }
     # keep only courses in seee
-    data.reject! { |x| !cst.include?(x.name) }
+    data.reject! { |x| !ctt.include?(x.name) }
     data.sort! { |x,y| x.name <=> y.name }
     # create course.title ⇒ course Hash for easy data lookup
-    courses = Hash[cs.collect { |c| [c.title, c] }]
+    courses = Hash[ct.collect { |c| [c.title, c] }]
     ERB.new(RT.load_tex("../lsf_parser_final")).result(binding)
   end
 

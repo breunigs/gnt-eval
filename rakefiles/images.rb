@@ -91,7 +91,7 @@ namespace :images do
     puts "to you so you can decide to throw it out or not."
     all_sql = []
     tables = []
-    Semester.currently_active.map { |s| s.forms }.flatten.each do |form|
+    Term.currently_active.map { |s| s.forms }.flatten.each do |form|
       tables << form.db_table
       sql = "SELECT path FROM #{form.db_table} WHERE #{checks} > (0 "
       form.questions.map do |q|
@@ -132,7 +132,7 @@ namespace :images do
 
   desc "(6) Correct invalid sheets"
   task :correct do
-    forms = Semester.currently_active.map { |s| s.forms }.flatten
+    forms = Term.currently_active.map { |s| s.forms }.flatten
     tables = forms.collect { |form| form.db_table }
     system("./pest/fix.rb #{tables.join(" ")}")
 
@@ -152,7 +152,7 @@ namespace :images do
     cp = SCc[:cp_comment_image_directory]
     mkdir = SCc[:mkdir_comment_image_directory]
 
-    Semester.currently_active.each do |sem|
+    Term.currently_active.each do |sem|
       system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dir_friendly_title}\"")
       path=File.join(File.dirname(__FILE__), "tmp/images")
 
@@ -231,7 +231,7 @@ namespace :images do
         `#{cp} #{f} #{File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title)}`
         print_progress(curr+1, allfiles.size)
       end # Dir glob
-    end # Semester.each
+    end # Term.each
 
     puts
     puts "Done."
@@ -240,7 +240,7 @@ namespace :images do
     puts "After that, the commands in the “rake results:*” group should help you."
   end
 
-  # find forms for current semester and extract variables from the
+  # find forms for current term and extract variables from the
   # first key that comes along. The language should exist for every
   # key, even though this is currently not enforced. Will be though,
   # once a graphical form creation interface exists.
@@ -249,7 +249,7 @@ namespace :images do
   desc "Finds all different forms for each folder and saves the form file as #{simplify_path(SCfp[:sorted_pages_dir])}/[form id].yaml."
   task :getyamls do |t,o|
     `mkdir -p ./tmp/images`
-    forms = Semester.currently_active.map { |s| s.forms }.flatten
+    forms = Term.currently_active.map { |s| s.forms }.flatten
     forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
         target = File.join(SCfp[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")

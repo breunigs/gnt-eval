@@ -1,10 +1,8 @@
 # encoding: utf-8
 
-# A semester is a period of time, in which courses are held --
-# typically a semester. A semester has many courses.
-class Semester < ActiveRecord::Base
-  has_many :forms, :inverse_of => :semester
-  has_many :courses, :inverse_of => :semester
+class Term < ActiveRecord::Base
+  has_many :forms, :inverse_of => :term
+  has_many :courses, :inverse_of => :term
   has_many :course_profs, :through => :courses
   has_many :tutors, :through => :courses
   has_many :faculties, :through => :courses, :uniq => true
@@ -13,18 +11,18 @@ class Semester < ActiveRecord::Base
 
   include FunkyTeXBits
 
-  # Returns array of all semesters that are currently active. I.e., a
-  # more efficient way of Semester.find(:all).find_all { |s| s.now? }.
+  # Returns array of all terms that are currently active. I.e., a
+  # more efficient way of Term.find(:all).find_all { |t| t.now? }.
   def self.currently_active
     d = Date.today
     find(:all, :conditions => ["firstday <= ? AND lastday >= ?", d, d])
   end
 
   def self.currently_active_forms
-    Semester.currently_active.map { |s| s.forms }.flatten
+    Term.currently_active.map { |t| t.forms }.flatten
   end
 
-  # lists all barcodes associated with the current semester
+  # lists all barcodes associated with the current term
   def barcodes
     course_profs.map { |cp| cp.id }
   end
@@ -55,7 +53,7 @@ class Semester < ActiveRecord::Base
     b << ERB.new(RT.load_tex("header")).result(binding)
 
     facultylong = faculty.longname
-    sem_title = { :short => title, :long => longtitle }
+    term_title = { :short => title, :long => longtitle }
     b << ERB.new(RT.load_tex("preface")).result(binding)
 
     puts "Evaluating #{cs.count} courses…"
@@ -65,7 +63,7 @@ class Semester < ActiveRecord::Base
     return b
   end
 
-  # is it currently this semester?
+  # is it currently this term?
   def now?
     (firstday <= Date.today && Date.today <= lastday)
   end
@@ -74,7 +72,7 @@ class Semester < ActiveRecord::Base
   def critical?
     critical
   end
-  
+
   def dir_friendly_title
     ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
   end

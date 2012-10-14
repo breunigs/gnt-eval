@@ -102,7 +102,7 @@ pages:
         text: 7-10
       - !ruby/object:Box
         text: "> 10"
-      db_column: v_central_semester
+      db_column: v_central_term
 #      qtext: "Bitte gib Dein Fachsemester in \\emph{diesem Studienfach} an:"
       qtext:
         :de: "Bitte geben Sie Ihr Fachsemester in \\emph{diesem Studienfach} an:"

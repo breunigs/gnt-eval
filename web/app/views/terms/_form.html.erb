@@ -1,6 +1,6 @@
-<%= render "shared/error_messages", :model => @semester %>
+<%= render "shared/error_messages", :model => @term %>
 
-<%= form_for(@semester) do |f| %>
+<%= form_for(@term) do |f| %>
   <table>
     <% for item in
       [
@@ -23,6 +23,6 @@
   <p>
     <% text = {"edit" => "Save Changes", "new" => "Create new #{controller.human_name}"}[controller.action_name] %>
     <%= f.submit text, :disable_with => "Saving…", :class => "button primary" %>
-    <%= link_to 'Cancel', semesters_path, :class => "button" %>
+    <%= link_to 'Cancel', terms_path, :class => "button" %>
   </p>
 <% end %>

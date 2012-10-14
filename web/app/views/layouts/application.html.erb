@@ -1,4 +1,4 @@
-<% @curr_sem ||= get_selected_semesters %>
+<% @curr_term ||= get_selected_terms %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,17 +13,17 @@
 <body>
   <div>
     <div class="infobox">
-      <% if @curr_sem.nil? || @curr_sem.empty? %>
-        <span class="warning">No active terms. Change the dates or <%= link_to "create a new one", new_semester_path %>.</span>
+      <% if @curr_term.blank? %>
+        <span class="warning">No active terms. Change the dates or <%= link_to "create a new one", new_term_path %>.</span>
       <% else %>
-        <b>active term</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
+        <b>active term</b><br/><%=@curr_term.map { |c| c.title }.join(", ") %><br/>
       <% end %>
 
-      <% if @course && @course.semester && @course.semester.critical? %>
+      <% if @course && @course.term && @course.term.critical? %>
         <span class="warning">Sheets have been printed for this course. Destroy them all before changing anything.</span>
       <% end %>
 
-      <% if (@course.nil? || @course.semester.nil?) && @curr_sem.any? { |c| c.critical? } %>
+      <% if (@course.nil? || @course.term.nil?) && @curr_term.any? { |c| c.critical? } %>
         <span class="warning">Careful, current term is critical.</span>
       <% end %>
     </div>
@@ -32,7 +32,7 @@
     <nav class="button-group">
       <%= link_to 'Courses', 	  courses_path,   :class => "button big" %>
       <%= link_to 'Professors', profs_path,     :class => "button big" %>
-      <%= link_to 'Terms',      semesters_path, :class => "button big" %>
+      <%= link_to 'Terms',      terms_path, :class => "button big" %>
       <%= link_to 'Forms', 		  forms_path,     :class => "button big" %>
       <%= link_to 'Faculties',  faculties_path, :class => "button big" %>
       <%= link_to 'Tutors', 		tutors_path,    :class => "button big" %>
