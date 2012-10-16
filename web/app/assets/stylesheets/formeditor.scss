@@ -165,7 +165,7 @@ $closed-height: 3.5rem;
   }
 
   input {
-    width:44rem;
+    width:49rem;
     height:1.5rem;
 
     &[type=checkbox] {
@@ -176,7 +176,7 @@ $closed-height: 3.5rem;
 
   textarea {
     min-height:4rem;
-    width:42.4rem;
+    width:47.4rem;
     @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.8rem);
     padding-left:2rem;
     line-height:16px;
@@ -192,7 +192,7 @@ $closed-height: 3.5rem;
   }
 
   select {
-    width: 44rem + 0.8rem;
+    width: 49rem + 0.8rem;
   }
 
   span {
