@@ -243,7 +243,6 @@ $closed-height: 3.5rem;
     counter-reset:question;
     h5 {
       margin-top:2rem;
-      &:before { content: "Section " counter(section) ": " attr(data-title); }
       display:block;
       background:#eee;
       border-bottom:0.1rem solid #aaa;
@@ -256,6 +255,14 @@ $closed-height: 3.5rem;
       a {
         font-weight:normal;
       }
+
+      &:before {
+        content: "Section " counter(section) ": " attr(data-title);
+        display: inline-block;
+        overflow: hidden;
+        width: 56.5rem;
+        white-space:nowrap;
+      }
     }
 
   }
@@ -265,6 +272,10 @@ $closed-height: 3.5rem;
     > .header {
       &:before {
         content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
+        display: inline-block;
+        overflow: hidden;
+        width: 56.5rem;
+        white-space:nowrap;
       }
     }
   }
