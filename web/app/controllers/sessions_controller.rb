@@ -8,6 +8,7 @@ class SessionsController < ApplicationController
       x.agent = request.env['HTTP_USER_AGENT']
       x.ip = request.env['REMOTE_ADDR']
       x.username = (cookies["username"] || "").gsub(/[^a-z0-9-_\s]/i, "")[0..20]
+      x.touch
       x.save
     end
 
