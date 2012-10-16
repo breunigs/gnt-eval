@@ -54,7 +54,7 @@ FormEditor.prototype.handleSectionAndQuestionUpdates = function(elm) {
     var qtext = q.find("input[id*='/qtext']:first");
     if(id === qtext.attr("id")) {
       var el = q.children("h6");
-      el.attr("data-qtext", elm.val().slice(0,40));
+      el.attr("data-qtext", elm.val());
       if($.browser.webkit) el.replaceWith(el[0].outerHTML);
       return;
     }
@@ -144,4 +144,12 @@ FormEditor.prototype.questionTypeChanged = function(element) {
     this.getDomObjFromPath(path + "/boxes").parent().hide();
   else
     this.getDomObjFromPath(path + "/boxes").parent().show();
+
+  // hide the lecturer option for text fields because it is not implemented
+  // Since by default single question is chosen, it should not be possible
+  // for this option to appear unless it’s wrong to begin with.
+  var rf = $F().getDomObjFromPath(path + "/repeat_for");
+  rf.children("[value=lecturer]").toggle(element.value != "Text");
+  if(element.value === "Text" && rf.val() === "lecturer")
+    rf.val("only_once");
 };
