@@ -59,7 +59,7 @@ required. If you want to carry it out, you can find details in `doc/INSTALL`.
 Contribution
 ------------
 
-Please do! If you have a suggestions, patches or simply want to report bugs please
+Please do! If you have suggestions, patches or simply want to report bugs please
 either [open a ticket](https://github.com/breunigs/gnt-eval/issues/new) or write
 an email to <breunig@uni-hd.de>.
 
