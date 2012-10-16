@@ -393,6 +393,18 @@ namespace :results do
       fullheader.unshift(m)
     end
 
+
+    puts
+    puts "============"
+    puts "Decimal Mark"
+    puts "============"
+    puts "Please specify the decimal mark to use. This is required because"
+    puts "importing CSV might otherwise lead to funny results. For example,"
+    puts "English uses a dot (e.g. 3.14) while German uses a comma (e.g. 3,14)."
+    puts "Decimal Divider (exactly one character): "
+    # list of valid decimal points, taken from Wikipedia. Expand if required.
+    decimal_mark = get_or_fake_user_input(/^[٫,.ˌ]$/i, a[:decimal_mark])
+
     puts
     puts "========="
     puts "Execution"
@@ -470,8 +482,10 @@ namespace :results do
           warn msgs.join("\n")
         end
 
-        hvals = histogram.values.map { |v| "#{v.to_f.round(PRECISION)}%" }
-        line += ["", sa.round(PRECISION), ss.round(PRECISION)] + hvals
+        hvals = histogram.values.map { |v| "#{v.to_f.round(PRECISION)}%".sub(".", decimal_mark) }
+        sa = sa.round(PRECISION).to_s.sub(".", decimal_mark)
+        ss = ss.round(PRECISION).to_s.sub(".", decimal_mark)
+        line += ["", sa, ss] + hvals
         unless looped_once
           header_stat += ["", "#{col} AVG", "#{col} STDDEV"]
           header_stat += histogram.keys.map { |k| "#{col}: #{k}" }
@@ -527,7 +541,8 @@ namespace :results do
     puts "If you want to run this query in the future, you can use:"
 
     data = {:terms => terms, :dbs => dbs, :cols => export, :expand => expand,
-              :meta => meta_store, :faculty => faculty.map { |f| f.id }}
+              :meta => meta_store, :faculty => faculty.map { |f| f.id },
+              :decimal_mark => decimal_mark}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
     print %(rake "results:export[)
