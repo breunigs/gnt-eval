@@ -227,6 +227,14 @@ namespace :results do
     # select term to limit list of tables
     terms = ask_term(a[:terms])
 
+    facs_bcs = faculty.collect { |f| f.barcodes }.flatten
+    terms_bcs = terms.collect { |t| Term.find(t).barcodes }.flatten
+    valid_barcodes = facs_bcs & terms_bcs
+    if valid_barcodes.empty?
+      puts "No courses found for selected term and faculty. Aborting."
+      exit 1
+    end
+
     ## collect some data which will be required later
     # stores which tables exist
     dbs = []
@@ -326,10 +334,6 @@ namespace :results do
     all = export.map { |c| columns_text.include?(c) ? [c, "#{c}_text"] : c }
     all.flatten!
 
-    facs_bcs = faculty.collect { |f| f.barcodes }.flatten
-    terms_bcs = terms.collect { |t| Term.find(t).barcodes }.flatten
-    valid_barcodes = facs_bcs & terms_bcs
-
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
@@ -356,7 +360,6 @@ namespace :results do
     # add the question text to each question header as well, if desired
     header = export.clone
     fullheader = expand == "y" ? header.map { |h| h + ": " + ident[h].join(" // ") } : header.clone
-
 
     puts
     puts
