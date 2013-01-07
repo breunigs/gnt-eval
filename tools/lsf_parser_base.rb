@@ -310,6 +310,8 @@ class LSF
     end
     # Remove bogus lectures
     lectures.compact!
+    # Remove duplicate lectures
+    lectures.uniq! { |l| l.id }
     lectures
   end
 
