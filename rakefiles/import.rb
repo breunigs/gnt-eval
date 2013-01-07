@@ -121,7 +121,8 @@ class UebungenDotPhysik
       students = code[/<span class=\'rot\'>([0-9]+)<\/span> Participants/, 1]
       students = students.to_i == 0 ? nil : students.to_i
 
-      tuts = code.scan(/<li><a href=\'teilnehmer\.php\?gid=[0-9]+\'><b>(?:.*?)<\/b><\/a> \((.*?)\) <br>/)
+      tuts = code.scan(/<li[^>]*><a href=\'teilnehmer\.php\?gid=[0-9]+\'><b>(?:.*?)<\/b><\/a> \((.*?)\) <br>/)
+
       tutors = tuts.map { |t| t[0].cleanup_name }.compact
       tutors.reject! { |t| t.empty? }
       tutors.map! { |t| UebungenDotPhysik.fix_enc(t) }
