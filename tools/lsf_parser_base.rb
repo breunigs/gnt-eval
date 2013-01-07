@@ -310,6 +310,8 @@ class LSF
     end
     # Remove bogus lectures
     lectures.compact!
+    # Remove duplicate lectures
+    lectures.uniq! { |l| l.id }
     lectures
   end
 
@@ -550,9 +552,17 @@ class LSF
     LSF.connect_rails
     # find courses in active termss
     ct = Term.currently_active.map { |t| t.courses }.flatten
-    ctt = ct.map { |c| c.title }
     # keep only courses in seee
-    data.reject! { |x| !ctt.include?(x.name) }
+    data.reject! do |x|
+      matches = ct.select  { |c| c.title == x.name }
+      # compare lecturers
+      a = x.profs.flatten.uniq.map { |p| p.last }
+      b = matches.map { |c| c.profs.map { |p| p.surname } }.flatten
+      # only keep entries whose name appears in seee and if there is at
+      # least on lecturer in common
+      matches.none? || (a & b).empty?
+    end
+
     data.sort! { |x,y| x.name <=> y.name }
     # create course.title ⇒ course Hash for easy data lookup
     courses = Hash[ct.collect { |c| [c.title, c] }]
