@@ -5,7 +5,7 @@ class String
   # titles
   def cleanup_name
     s = self.gsub(/\s+/, " ")
-    [/^Dr\. /i, /^Priv\. Doz\. Dr\. /i, /^N\.N\./i, /^Prof\. Dr\. /i].each do |r|
+    [/\(apl\.\) /, /Dr\./i, /^Priv\. Doz\. Dr\. /i, /^N\.N\./i, /^Prof\./i].each do |r|
       s.gsub!(r, '')
     end
     s.split(",").reverse.join(" ").compress_whitespace
@@ -115,7 +115,7 @@ class UebungenDotPhysik
 
       title = code[/<h2><b>(.*) \(.*\)<\/b><\/h2>/, 1]
 
-      lect = code[/<span class=\'kleiner\'>Dozent: <\/span>(.*?) <span class=\'kleiner\'>/, 1]
+      lect = code[/<span class=\'kleiner\'>Dozent: <\/span>(.*?)(?:<span class=\'kleiner\'>|<br>)/, 1]
       lect.cleanup_name! unless lect.nil?
 
       students = code[/<span class=\'rot\'>([0-9]+)<\/span> Participants/, 1]
@@ -125,7 +125,8 @@ class UebungenDotPhysik
 
       tutors = tuts.map { |t| t[0].cleanup_name }.compact
       tutors.reject! { |t| t.empty? }
-      tutors.map! { |t| UebungenDotPhysik.fix_enc(t) }
+      tutors.map! { |t| UebungenDotPhysik.fix_enc(t).cleanup_name }
+      tutors.uniq!
 
       data = { :title => title, :lecturer => lect,
 	      :students => students, :tutors => tutors }
