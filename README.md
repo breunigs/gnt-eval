@@ -78,7 +78,7 @@ into parts in `rakefiles/*`)
 point is `web/app/lib/AbstractForm.rb`. The visualizers for different question
 types are located in `tex/results`. There’s also a readme there that should get
 you started.
-- If you looking for something specific but can’t find it, please
+- If you’re looking for something specific but can’t find it, please
 [open a ticket](https://github.com/breunigs/gnt-eval/issues/new)
 
 
