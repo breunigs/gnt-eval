@@ -2,11 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%=APP_NAME%> // <%=controller.human_name.pluralize %> // <%= params[:action].humanize %> <%= yield(:title) %></title>
+  <title><%=APP_NAME%> // <%=controller.human_name.pluralize %> // <%= controller.action_name.humanize %> <%= yield(:title) %></title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
   <%= yield(:script) %>
+  <% unless yield(:css).blank? %><style><%= yield(:css) %></style><% end %>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link href="<%=ENV['RAILS_RELATIVE_URL_ROOT'] || "" %>/favicon.ico" rel="icon" type="image/x-icon" />
 </head>
@@ -48,6 +49,6 @@
   <% end %>
 
 <%= yield %>
-  <% if controller.action_name == "edit" %><%=render "shared/collision_detection"%><% end %>
+  <% if ["edit", "assign_work"].include?(controller.action_name) %><%=render "shared/collision_detection"%><% end %>
 </body>
 </html>
