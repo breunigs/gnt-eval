@@ -50,7 +50,8 @@ $(document).ready(function() {
     editor.getSession().setWrapLimitRange();
     editor.renderer.setHScrollBarAlwaysVisible(false);
     editor.renderer.setShowPrintMargin(false);
-    hack_line_offset_into_ace(editor);
+    if(line_offset_number != 0)
+      hack_line_offset_into_ace(editor);
 
     // copy textarea’s value to ACE
     editor.getSession().setValue(txt.val());
