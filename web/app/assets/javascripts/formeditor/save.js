@@ -39,7 +39,7 @@ FormEditor.prototype.saveWorker = function() {
 
       // replace new form with edit-style one
       if($("#new_form").length) {
-        $("head").append($(data["collision"]));
+        $("body").prepend($(data["collision"]));
         $("#new_form").replaceWith($(data["form"]));
         ATTRIBUTES["PreviewUrl"] = data["preview"];
         // hide original textbox again
