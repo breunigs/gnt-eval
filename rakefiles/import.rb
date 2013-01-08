@@ -27,20 +27,20 @@ class LaierCSV
     Dir.glob(IMPORT_PATH + "*.csv") do |csv|
       puts "Processing CSV #{simplify_path(csv)}"
       CSV.foreach(csv, 'r') do |row|
-	next if row[0].nil? # lecture
-	next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
+        next if row[0].nil? # lecture
+        next if row[3].nil? || row[3].strip.empty? # column 'G' for 'genehmigt'
 
-	t = row[0].strip.downcase
-	next if SKIP.include?(t)
+        t = row[0].strip.downcase
+        next if SKIP.include?(t)
 
-	# 8: Tutor 1st name
-	# 7: Tutor last name
-	tut = "#{row[8]} #{row[7]}".compress_whitespace
-	next if tut.gsub(".", "") == "NN"
+        # 8: Tutor 1st name
+        # 7: Tutor last name
+        tut = "#{row[8]} #{row[7]}".compress_whitespace
+        next if tut.gsub(".", "") == "NN"
 
-	data[row[0]] ||= { :title => row[0], :lecturer => row[11].strip,
-			  :students => nil, :tutors => [] }
-	data[row[0]][:tutors] << tut
+        data[row[0]] ||= { :title => row[0], :lecturer => row[11].strip,
+                          :students => nil, :tutors => [] }
+        data[row[0]][:tutors] << tut
       end
     end
     data.values
@@ -53,18 +53,18 @@ class MuesliYAML
     Dir.glob(IMPORT_PATH + "*.y*ml") do |x|
       puts "Processing YAML #{simplify_path(x)}"
       begin
-	YAML::load(File.read(x)).each do |l|
-	  tuts = l["tutors"].collect { |t| t.cleanup_name }
-	  data << { :title => l["name"],
-		    :lecturer => l["lecturer"].cleanup_name,
-		    :students => l["student_count"],
-		    :tutors => tuts }
-	end
+        YAML::load(File.read(x)).each do |l|
+          tuts = l["tutors"].collect { |t| t.cleanup_name }
+          data << { :title => l["name"],
+                    :lecturer => l["lecturer"].cleanup_name,
+                    :students => l["student_count"],
+                    :tutors => tuts }
+        end
       rescue => e
-	warn "#{x} does not appear to be a 'good' YML file for the task at hand. Skipping."
-	warn "Error:"
-	warn PP.pp(e, "")
-	next
+        warn "#{x} does not appear to be a 'good' YML file for the task at hand. Skipping."
+        warn "Error:"
+        warn PP.pp(e, "")
+        next
       end
     end # glob
     data
@@ -129,7 +129,7 @@ class UebungenDotPhysik
       tutors.uniq!
 
       data = { :title => title, :lecturer => lect,
-	      :students => students, :tutors => tutors }
+              :students => students, :tutors => tutors }
       data_fixed = {}
       data.each { |k, v| data_fixed[k] = UebungenDotPhysik.fix_enc(v) }
       return data_fixed
@@ -144,54 +144,54 @@ namespace :misc do
     # (the Rails Model)
     def names_to_profs(names, lsf_data)
       names.map do |l|
-	name = l.gsub(/[^a-z]+/i, " ").split(" ")
-	if name.size >= 2 # assume we have a first and last name
-	  p = Prof.find_by_firstname_and_surname(name.first, name.last)
-	else
-	  p = Prof.find_by_surname(name.last)
-	end
-	next p if p
-	# okay, so we couldn’t find a match in our database. Let’s see
-	# if we can find it in lect.profs, so we can automatically add
-	# him/her.
-	puts "Couldn’t find Prof #{l} in our database. You now can:"
-	puts "* Skip by typing “skip”. The prof will not be added."
-	puts "* Look for him/her manually and give the Prof ID"
-	p = lsf_data.profs.detect { |x| "#{x.first} #{x.last}" == l }
-	action = if p && p.mail && !p.mail.empty?
-	  puts "* Automatically add the prof with the following data by typing “add”:"
-	  puts "    Firstname: #{p.first}"
-	  puts "    Lastname:  #{p.last}"
-	  puts "    Mail:      #{p.mail}"
-	  gender = guess_gender(p.first)
-	  # prefer female. If it’s wrong, everyone will believe it’s a
-	  # data error and not call you sexist.
-	  gender = :female if gender == :unknown
-	  puts "    Gender:    #{gender} (guessed)"
-	  puts "What do you want to do?"
-	  get_user_input(/^[1-9][0-9]*|add|skip$/, true)
-	else # cannot automatically create prof
-	  puts "* Manually create a new entry and give the Prof ID"
-	  puts "What do you want to do?"
-	  get_user_input(/^[1-9][0-9]*|skip$/, true)
-	end
-	case action
-	  when "skip" then next
-	  when "add"
-	    p = Prof.new(:firstname => p.first,
-			  :surname => p.last,
-			  :email => p.mail,
-			  :gender => [:female, :male].index(gender))
-	    p.save
-	    next p
-	  else
-	    p = Prof.find(action)
-	    if p.nil?
-	      puts "Could not find prof with id=#{action}. Try again."
-	      redo
-	    end
-	    next p
-	end
+        name = l.gsub(/[^a-z]+/i, " ").split(" ")
+        if name.size >= 2 # assume we have a first and last name
+          p = Prof.find_by_firstname_and_surname(name.first, name.last)
+        else
+          p = Prof.find_by_surname(name.last)
+        end
+        next p if p
+        # okay, so we couldn’t find a match in our database. Let’s see
+        # if we can find it in lect.profs, so we can automatically add
+        # him/her.
+        puts "Couldn’t find Prof #{l} in our database. You now can:"
+        puts "* Skip by typing “skip”. The prof will not be added."
+        puts "* Look for him/her manually and give the Prof ID"
+        p = lsf_data.profs.detect { |x| "#{x.first} #{x.last}" == l }
+        action = if p && p.mail && !p.mail.empty?
+          puts "* Automatically add the prof with the following data by typing “add”:"
+          puts "    Firstname: #{p.first}"
+          puts "    Lastname:  #{p.last}"
+          puts "    Mail:      #{p.mail}"
+          gender = guess_gender(p.first)
+          # prefer female. If it’s wrong, everyone will believe it’s a
+          # data error and not call you sexist.
+          gender = :female if gender == :unknown
+          puts "    Gender:    #{gender} (guessed)"
+          puts "What do you want to do?"
+          get_user_input(/^[1-9][0-9]*|add|skip$/, true)
+        else # cannot automatically create prof
+          puts "* Manually create a new entry and give the Prof ID"
+          puts "What do you want to do?"
+          get_user_input(/^[1-9][0-9]*|skip$/, true)
+        end
+        case action
+          when "skip" then next
+          when "add"
+            p = Prof.new(:firstname => p.first,
+                          :surname => p.last,
+                          :email => p.mail,
+                          :gender => [:female, :male].index(gender))
+            p.save
+            next p
+          else
+            p = Prof.find(action)
+            if p.nil?
+              puts "Could not find prof with id=#{action}. Try again."
+              redo
+            end
+            next p
+        end
       end
     end
 
@@ -299,8 +299,8 @@ namespace :misc do
       students = nil if students == 0
       students_source = students ? "from data" : "not known"
       if students.nil? && tutors.size >= 1
-	students = 30*tutors.size
-	students_source = "guessed from tutor count"
+        students = 30*tutors.size
+        students_source = "guessed from tutor count"
       end
 
       # automatically select the form if there is reason to believe they
@@ -310,12 +310,12 @@ namespace :misc do
       form = forms[:seminar] if lect.type.match(/seminar/i)
       form = forms[:lecture] if lect.type.match(/vorlesung|lecture/i)
       if form.nil?
-	puts "Couldn’t auto-detect form type for given type: #{lect.type}"
-	puts "Please choose which form to use. Valid ones:"
-	puts form_names.join("\n")
-	input = get_user_input(form_names, true)
-	form = sem.forms.detect { |f| f.name == input }
-	form_source = "chosen"
+        puts "Couldn’t auto-detect form type for given type: #{lect.type}"
+        puts "Please choose which form to use. Valid ones:"
+        puts form_names.join("\n")
+        input = get_user_input(form_names, true)
+        form = sem.forms.detect { |f| f.name == input }
+        form_source = "chosen"
       end
 
       # Guess language. Default to English.
@@ -344,26 +344,26 @@ namespace :misc do
 
       # well, add it to seee ###########################################
       begin
-	cc = Course.new(:term_id     => sem.id,
-			:title       => title ,
-			:students    => students,
-			:form_id     => form.id,
-			:language    => lang,
-			:faculty_id  => fac.id,
-			:evaluator   => "", :description => "",
-			:summary => "", :fscontact => "", :note => "")
-	cc.save
-	lects.each { |l| cc.profs << l }
-	tutors.each { |t| cc.tutors.build({:abbr_name => t}).save }
-	puts "Everything should have worked…"
-	puts
-	puts
+        cc = Course.new(:term_id     => sem.id,
+                        :title       => title ,
+                        :students    => students,
+                        :form_id     => form.id,
+                        :language    => lang,
+                        :faculty_id  => fac.id,
+                        :evaluator   => "", :description => "",
+                        :summary => "", :fscontact => "", :note => "")
+        cc.save
+        lects.each { |l| cc.profs << l }
+        tutors.each { |t| cc.tutors.build({:abbr_name => t}).save }
+        puts "Everything should have worked…"
+        puts
+        puts
       rescue Exception => e
-	warn "An error occured while adding #{title}. Here’s the error:"
-	warn e.message
-	warn e.backtrace.inspect
-	puts "Please try to fix the error before continuing."
-	exit 1 unless get_user_yesno("Continue?")
+        warn "An error occured while adding #{title}. Here’s the error:"
+        warn e.message
+        warn e.backtrace.inspect
+        puts "Please try to fix the error before continuing."
+        exit 1 unless get_user_yesno("Continue?")
       end
     end
 
