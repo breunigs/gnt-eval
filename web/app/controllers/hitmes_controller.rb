@@ -13,7 +13,6 @@ class HitmesController < ApplicationController
 
     # don’t hand out ones that are currently being edited
     all.reject! { |a| Session.exists?(:cont => a.class.to_s.downcase, :viewed_id => a.id) }
-    all = []
 
     if all.empty?
       redirect_to :action => "overview"
@@ -32,5 +31,9 @@ class HitmesController < ApplicationController
 
   def save_comment
     # FIXME
+  end
+
+  def cookie_test
+    render :json => cookies[:testcookie] == "test value"
   end
 end

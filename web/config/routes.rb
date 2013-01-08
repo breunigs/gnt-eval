@@ -40,6 +40,7 @@ Seee::Application.routes.draw do
 
   get "/hitme" => "hitmes#overview"
   get "/hitme/assign_work" => "hitmes#assign_work"
+  get "/hitme/cookie_test" => "hitmes#cookie_test"
   post "/hitme/save_comment" => "hitmes#save_comment"
 
 

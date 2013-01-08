@@ -1,0 +1,63 @@
+<% content_for :css, ".broken, .broken * { color: red }" %>
+<% content_for :css, ".itworks, .itworks * { color: darkgreen }" %>
+<% content_for :css, ".unknown, .unknown * { color: orange }" %>
+<% content_for :script, javascript_include_tag("viewer_count") %>
+<% content_for :script do %>
+<script>
+  function setStatus(object, worked) {
+    $("#" + object.toLowerCase())
+      .attr("class", (worked ? "itworks" : "broken"))
+      .html((worked ? "✔" : "✘")+ " <b>"+object+" </b>");
+  }
+
+  function updateUsername() {
+    if(usernameValid())
+      $("#currentUsername").html("(currently known as <b>" + getUsernameCookie() + "</b>)");
+    else
+      $("#currentUsername").html("(no username set)");
+  }
+
+  $(document).ready(function() {
+    if(getCookie("testcookie") === "test value" || usernameValid()) {
+      setStatus("Cookies", true);
+    } else {
+      document.cookie = "testcookie=test value; expires=Thu, 31 Dec 2020 23:59:59 GMT; path=/"
+      $.getJSON("<%=url_for(:controller => "hitmes", :action => "cookie_test")%>",  function(result) {
+        setStatus("Cookies", result);
+      });
+
+    }
+
+    updateUsername();
+    setStatus("Username", usernameValid());
+  });
+</script>
+<% end %>
+
+<div>
+  <h2>What is this?</h2>
+  Each Hitme is a <b>small unit of work</b>. It requires <b>no time commitment</b> on your side, so you can even do it in very short breaks. You don’t even need to finish if you’re interrupted.<br><br>
+  There are multiple steps:
+  <ol>
+    <li>type handwritten comment</li>
+    <li>proofread</li>
+    <li>fix <%=latex_logo%> errors</li>
+    <li>combine / merge</li>
+    <li>final check</li>
+  </ol><br/>
+
+  The last two steps might take more than five minutes, depending on the lecture. If you don’t have that amount of time right now, you can skip this chunk of work and be assigned another one. Or you could start, but mark it as incomplete and leave it for the next person to finish. Just click the correct button below each hitme.
+</div>
+
+<div>
+  <h2>What do I need?</h2>
+
+  <span class="noscript broken"><b>✘ JavaScript </b></span> – Ensure JavaScript is enabled for the whole domain and that you don’t block any of it’s features.<script>$(".noscript").attr("class", "itworks").html("✔ <b>JavaScript </b>");</script><br/>
+
+  <span id="cookies" class="unknown"><b>? Cookies </b></span> – Enable cookies for the domain. Persistent ones are preferred, so you only need to set your username once.<br/>
+
+  <span id="username" class="unknown"><b>? Username </b></span> – Set a descriptive username, so others may easily identify who is working on what.<br/><br/>
+
+  <a onclick="setUsernameCookie(); setStatus('Username', usernameValid()); updateUsername();"><b>Change Username</b></a>
+  <span id="currentUsername"><span>
+</div>
