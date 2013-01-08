@@ -62,8 +62,4 @@ module CoursesHelper
     d << link_to("⤶ List courses", term_courses_path(@course.term), :class => "button")
     %(<div class="button-group">#{d*""}</div>).html_safe
   end
-
-  def comment_image_link
-    Seee::Config.file_paths[:comment_images_public_link]
-  end
 end

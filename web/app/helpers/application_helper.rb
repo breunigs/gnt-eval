@@ -21,4 +21,8 @@ module ApplicationHelper
 
     Term.currently_active
   end
+
+  def comment_image_link
+    Seee::Config.file_paths[:comment_images_public_link]
+  end
 end
