@@ -49,7 +49,7 @@ module CoursesHelper
     link_to_unless(@course.critical?, 'Destroy course', @course, \
       :confirm => "Really destroy course '#{@course.title}'?", \
       :method => :delete,
-      :class => "button") do
+      :class => "button danger") do
       "&nbsp;⚠ Course is critical".html_safe
     end
   end
