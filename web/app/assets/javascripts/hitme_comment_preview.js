@@ -1,6 +1,7 @@
 var renderInProgress = false;
 var renderTimeout = null;
 var edit = null;
+if(typeof listify === 'undefined') var listify = false;
 
 function renderPreview() {
   renderInProgress = true;
@@ -8,7 +9,7 @@ function renderPreview() {
 
   $("#previewbox").load(
     hitme_preview_url,
-    { "text": edit.getValue() },
+    { "text": edit.getValue(), "listify": listify },
     function() {
       renderInProgress = false;
       $("#rendermsg").html('<a onclick="renderPreview()">Force Update now</a>');

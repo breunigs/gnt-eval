@@ -1,7 +1,7 @@
-<% content_for :title, " // Type!" %>
+<% content_for :title, " // #{@workon.step == 1 ? "Proofread" : "Type"}!" %>
 <% content_for :css, "#text_ace_editor { height: 100px }" %>
 <% content_for :css, "figure img { max-width: 100% }" %>
-<% content_for :script, "<script>var ident = '#{@ident}';</script>".html_safe %>
+<% content_for :script, "<script>var ident = '#{@ident}'; var listify = true;</script>".html_safe %>
 
 <%= render "shared/aceify_textareas", :line_offset => 0 %>
 
