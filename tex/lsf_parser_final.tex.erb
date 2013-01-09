@@ -41,7 +41,6 @@ Beispiel-Seminar & Rebecca Schön & FS-Raum & $\Box$ \time{18}{15}-\time{18}{45}
 \endhead
 
 <% data.each do |d| %>
-  <% next if (d.times.empty? || d.rooms.empty? || d.profs.empty?) %>
   <%= d.name.to_table_cell_tex %> &
   <%= LSF.list_profs_html(d.profs).to_table_cell_tex %> &
   <%= d.rooms.join("\n").to_table_cell_tex %> &

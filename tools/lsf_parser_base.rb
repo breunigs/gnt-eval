@@ -555,12 +555,19 @@ class LSF
     # keep only courses in seee
     data.reject! do |x|
       matches = ct.select  { |c| c.title == x.name }
-      # compare lecturers
+      if matches.none?
+        LSF.debug "skipping #{x.name} because name doesn’t match"
+        next true
+      end
+
+      # only keep lectures that have at least one prof in common.
+      # Obviously, neither data set may be complete, therefore
+      # include an entry if either data set has no profs at all
       a = x.profs.flatten.uniq.map { |p| p.last }
       b = matches.map { |c| c.profs.map { |p| p.surname } }.flatten
-      # only keep entries whose name appears in seee and if there is at
-      # least on lecturer in common
-      matches.none? || (a & b).empty?
+      next false if a.empty? || b.empty? || (a & b).any?
+      LSF.debug "skipping #{x.name} because no profs in common #{a.join(", ")} --- #{b.join(", ")}"
+      true
     end
 
     data.sort! { |x,y| x.name <=> y.name }
