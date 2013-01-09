@@ -64,6 +64,9 @@ $(document).ready(function() {
       $formHasBeenEdited++;
     });
 
+    // associate text field with editor, so it may easily be accessed
+    txt.data("editor", editor);
+
     // finally hide text area
     txt.hide();
   });
