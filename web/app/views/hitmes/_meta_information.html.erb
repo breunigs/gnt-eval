@@ -1,0 +1,11 @@
+<div style="float:right">
+  <h2>Meta Information</h2>
+  <table>
+    <tr><th>meant for</th><td><%=workon.for%></td></tr>
+    <tr><th>Lecture</th><td><%=workon.course.title%></td></tr>
+    <tr><th>Profs</th><td><%=safe_join(workon.course.profs.map(&:fullname).sort, "<br>".html_safe)%></td></tr>
+    <tr><th>Tutors</th><td><%=safe_join(workon.course.tutors.map(&:abbr_name).sort, "<br>".html_safe)%></td></tr>
+    <tr><th>Form</th><td><%=link_to("#{workon.course.form.name} (language: #{workon.course.language})", workon.course.form)%></td></tr>
+    <tr><th>Faculty</th><td><%=workon.course.faculty.longname%></td></tr>
+  </table>
+</div>

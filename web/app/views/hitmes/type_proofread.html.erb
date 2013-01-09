@@ -1,0 +1,49 @@
+<% content_for :title, " // Type!" %>
+<% content_for :css, "#text_ace_editor { height: 100px }" %>
+<% content_for :css, "figure img { max-width: 100% }" %>
+<% content_for :script, "<script>var ident = '#{@ident}';</script>".html_safe %>
+
+<%= render "shared/aceify_textareas", :line_offset => 0 %>
+
+
+<div>
+  <div style="width:60%;float:left">
+    <% if @workon.step == 1 %>
+      <h2>Your Job: Proofread!</h2>
+      <ul>
+        <li>check for <b>spelling errors</b> as well as for <b>differences from handwritten comment</b></li>
+        <li>ensure there’s only <b>one bullet point per line</b></li>
+        <li>comment insulting or offensive? Prepend a %-sign but keep it! Include reasoning if you want, so the next person know why you wanted to exclude the comment. Example: <i>% Jasper ist doof %% almost cried when he heard this</i></li>
+        <li>write valid <b><%=latex_logo%></b>. Use proper UTF-8 quotes, e.g. <b>„Deutsch“</b> or <b>“English”</b>. Escape % or $ by prepending a backslash \.</li>
+        <li>No need to add \item commands and similar. Those will be automatically created for you.</li>
+      </ul>
+    <% else %>
+      <h2>Your Job: Type!</h2>
+      <ul>
+        <li><b>type handwritten comment</b> into text field</li>
+        <li>write one and only <b>one bullet point per line</b></li>
+        <li>comment doesn’t belong here? Type anyway!</li>
+        <li>comment insulting or offensive? Prepend a %-sign and type anyway! Include reasoning if you want, so the next person know why you wanted to exclude the comment. Example: <i>% Jasper ist doof %% almost cried when he heard this</i></li>
+        <li>write valid <b><%=latex_logo%></b>. Use proper UTF-8 quotes, e.g. <b>„Deutsch“</b> or <b>“English”</b>. Escape % or $ by prepending a backslash \.</li>
+        <li>No need to add \item commands and similar. Those will be automatically created for you.</li>
+      </ul>
+    <% end %>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_comment") %>
+  <%= hidden_field_tag(:type, @workon.class) %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <div class="group" id="commentfield">
+    <%= text_area_tag(:text, @workon.text, :style => 'width:99%')%>
+    <br/>
+    <%= render "shared/comment_pic", :course => @workon.course, :pic => @workon %>
+    <br/>
+    Hint: if the comment is cut off, click-and-hold for one second to download the original sheet.
+  </div>
+
+  <%= render "comment_preview" %>
+  <%= render "action_buttons" %>
+</form>

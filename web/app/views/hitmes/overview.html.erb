@@ -17,6 +17,15 @@
       $("#currentUsername").html("(no username set)");
   }
 
+  function giveWork() {
+    if($('.broken').size() !== 0) {
+      alert("Please fix the issues mentioned above before continuing.");
+      return;
+    }
+
+    location.href = location.href + "/assign_work";
+  }
+
   $(document).ready(function() {
     if(getCookie("testcookie") === "test value" || usernameValid()) {
       setStatus("Cookies", true);
@@ -41,7 +50,6 @@
   <ol>
     <li>type handwritten comment</li>
     <li>proofread</li>
-    <li>fix <%=latex_logo%> errors</li>
     <li>combine / merge</li>
     <li>final check</li>
   </ol><br/>
@@ -59,5 +67,45 @@
   <span id="username" class="unknown"><b>? Username </b></span> – Set a descriptive username, so others may easily identify who is working on what.<br/><br/>
 
   <a onclick="setUsernameCookie(); setStatus('Username', usernameValid()); updateUsername();"><b>Change Username</b></a>
-  <span id="currentUsername"><span>
+  <span id="currentUsername"></span><br/><br/>
+
+  <a onclick="giveWork();" style="font-size:120%;font-weight:bold">Give me a chunk of work</a>
+</div>
+
+
+<div>
+  <h2>Active Users</h2>
+  <% sessions = Session.where(:cont => ["cpic", "pic"]) %>
+  <% if sessions.none? %>
+    No active users currently.
+  <% else %>
+    <table>
+      <tr><th>User</th><th>at it for</th><th>last ping</th><th colspan="3">working on</th></tr>
+      <% sessions.each do |s| %>
+        <% c = (s.cont == "cpic" ? CPic : Pic).find(s.viewed_id); %>
+        <tr>
+          <td><%=s.username%></td>
+          <td><%=time_ago_in_words(s.created_at)%></td>
+          <td><%=time_ago_in_words(s.updated_at, true)%> ago</td>
+          <td><%=Hitme.step_to_text(c.step) %></td>
+          <td><%=c.course.title %></td>
+          <td><%=c.for %></td>
+        </tr>
+      <% end %>
+    </table>
+  <% end %>
+</div>
+
+<div>
+  <h3>Queue Lengths</h3>
+  This table shows how many items are in each queue <i>right now</i>. Note that higher items feed the lower ones; say once a bunch of comments have been proofread they may become available for combining. In other words: only zeros read from the top matter.
+  <%
+    to_type = Hitme.get_all_comments_by_step(0).size
+    to_proofread = Hitme.get_all_comments_by_step(1).size
+  %>
+  <table>
+    <tr><th>comments to type</th><td><%=to_type%></td><td></td></tr>
+    <tr><th>comments to proofread</th><td><%=to_proofread%></td></tr>
+    <tr><th>lectures / tutors to combine</th><td><%= Hitme.get_all_comments_by_step(1).size%></td></tr>
+  </table>
 </div>
