@@ -2,9 +2,18 @@
 # this is a general preview shared view. Hand in the text that should
 # be previewed as a local variable, like this:
 #    render "shared/preview", :text => TEXT
+# Optionally hand in the object, so it gets auto expired. Otherwise
+# you need to call expire_fragment manually.
+#    render "shared/preview", :text => TEXT, :obj => OBJECT
+# You can also disable caching altogether by passing :disable_cache => true
 %>
 
-<% cache("preview_#{params[:controller]}_#{params[:id]}") do %>
+<%
+
+key = (defined?(obj) && obj) ? obj : "preview_#{params[:controller]}_#{params[:id]}"
+enable_cache = !defined?(disable_cache) || !disable_cache
+
+optional_cache(key, enable_cache) do %>
   <%
     failed, exitcodes, error, base64 = texpreview(text)
     is_img = !failed && !base64.blank?
