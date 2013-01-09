@@ -75,14 +75,18 @@
 
 <div>
   <h2>Active Users</h2>
-  <% sessions = Session.where(:cont => ["cpic", "pic"]) %>
+  <% sessions = Session.where(:cont => ["cpics", "pics", "courses"]) %>
   <% if sessions.none? %>
     No active users currently.
   <% else %>
     <table>
       <tr><th>User</th><th>at it for</th><th>last ping</th><th colspan="3">working on</th></tr>
       <% sessions.each do |s| %>
-        <% c = (s.cont == "cpic" ? CPic : Pic).find(s.viewed_id); %>
+        <%
+          c = (s.cont == "cpic" ? CPic : Pic).find(s.viewed_id);
+
+          # fixme: handle courses/combine, final check??
+        %>
         <tr>
           <td><%=s.username%></td>
           <td><%=time_ago_in_words(s.created_at)%></td>
@@ -96,6 +100,7 @@
   <% end %>
 </div>
 
+<% if false %>
 <div>
   <h3>Queue Lengths</h3>
   This table shows how many items are in each queue <i>right now</i>. Note that higher items feed the lower ones; say once a bunch of comments have been proofread they may become available for combining. In other words: only zeros read from the top matter.
@@ -109,3 +114,4 @@
     <tr><th>lectures / tutors to combine</th><td><%= Hitme.get_all_comments_by_step(1).size%></td></tr>
   </table>
 </div>
+<% end %>

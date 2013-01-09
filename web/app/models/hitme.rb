@@ -38,7 +38,7 @@ class Hitme < ActiveRecord::Base
   end
 
   def self.get_combinable
-    (self.get_combinable_courses + self.get_combinable_tutors).sample
+    (self.get_all_combinable_courses + self.get_all_combinable_tutors).sample
   end
 
 
@@ -46,6 +46,8 @@ class Hitme < ActiveRecord::Base
     c = Course.includes(:c_pics).where("term_id" => self.t)
     # remove all courses which have comments that are not yet in step 2
     c.reject! { |x| x.c_pics.size == 0 || x.c_pics.size != x.c_pics.where(:step => 2).size }
+    # remove courses that don’t have any text comments
+    c.reject! { |x| x.c_pics.all? { |p| p.text.blank? } }
     c
   end
 
@@ -53,6 +55,8 @@ class Hitme < ActiveRecord::Base
     c = Tutor.joins(:course).includes(:pics).where("courses.term_id" => self.t)
     # remove all tutors who have comments that are not yet in step 2
     c.reject! { |x| x.pics.size != x.pics.where(:step => 2) }
+    # remove tutors who don’t have any text comments
+    c.reject! { |x| x.pics.all? { |p| p.text.blank? } }
     c
   end
 

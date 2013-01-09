@@ -9,22 +9,24 @@ class HitmesController < ApplicationController
     # typing and proofreading basically work the same
     @workon = Hitme.get_workable_comment_by_step(0)
     @workon ||= Hitme.get_workable_comment_by_step(1)
-    @workon ||= Hitme.get_combinable
+    @workon = Hitme.get_combinable # FIXME
 
     if @workon.nil?
       flash[:notice] = "Currently no available tasks. Try again later."
       redirect_to :action => "overview"
     else
       # make collision detection happy
-      params[:controller] = @workon.class.to_s.downcase
+      params[:controller] = @workon.class.to_s.pluralize.downcase
       params[:id] = @workon.id
 
       @ident = precreate_session(@workon)
 
-      case @workon.step
-        when nil then render :action => "type_proofread"
-        when 0   then render :action => "type_proofread"
-        when 1   then render :action => "type_proofread"
+      case @workon.class.to_s
+        when "Pic"  then render :action => "type_proofread"
+        when "CPic" then render :action => "type_proofread"
+        when "Tutor"  then render :action => "combine"
+        when "Course" then render :action => "combine"
+        else raise "not implemented"
       end
     end
   end
@@ -75,8 +77,10 @@ class HitmesController < ApplicationController
 
 
   def preview_text
+    text = params[:text]
+    text = params[:listify].to_s == "true" ? view_context.text_to_list(text) : text
     render :partial => "shared/preview", :locals => {
-      :text => view_context.text_to_list(params[:text]),
+      :text => text,
       :disable_cache => true}
   end
 

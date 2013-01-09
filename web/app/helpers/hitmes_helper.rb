@@ -5,6 +5,6 @@ module HitmesHelper
 
   def text_to_list(text)
     return "" if text.blank?
-    "\\begin{itemize}\n\\item " + text.strip.gsub("\n", "\\item ") + "\\end{itemize}"
+    "\\begin{compactitem}\n\\item " + text.strip.gsub("\n", "\\item ") + "\\end{compactitem}"
   end
 end

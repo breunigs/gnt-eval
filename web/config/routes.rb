@@ -43,6 +43,7 @@ Seee::Application.routes.draw do
   get "/hitme/cookie_test" => "hitmes#cookie_test"
   post "/hitme/preview_text" => "hitmes#preview_text"
   post "/hitme/save_comment" => "hitmes#save_comment"
+  post "/hitme/save_combination" => "hitmes#save_combination"
 
 
   match "/:cont/:viewed_id/ping/" => "sessions#ping", :as => "viewer_count"
