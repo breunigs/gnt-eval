@@ -17,7 +17,6 @@ class Postoffice < ActionMailer::Base
     subject = "Evaluation Ihrer Veranstaltung '#{c.title}'"
     to = c.profs.collect{ |p| p.email }
 
-
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
 
@@ -92,10 +91,10 @@ class Postoffice < ActionMailer::Base
 
   private
   def do_mail(to, subject, debug = true)
-    if debug
+    if debug || to.compact.empty?
       mail(:to => DEBUG_MAILTO_ADDRESS, :cc => [], :bcc => [], :subject => subject)
     else
-      mail(:to => to, :subject => subject)
+      mail(:to => to.compact, :subject => subject)
     end
   end
 
