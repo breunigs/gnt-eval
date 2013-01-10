@@ -34,6 +34,12 @@
         <% item.each { |d| %> <td><%=d %></td> <% } %>
       </tr>
     <% end %>
+    <% unless @course.mails_sent.blank? %>
+      <tr>
+        <th><%=Course.human_attribute_name(:mails_sent) %></th>
+        <td><%=@course.mails_sent%></td>
+      </tr>
+    <% end %>
   </table>
 </div>
 
