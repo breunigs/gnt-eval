@@ -27,11 +27,17 @@
     <% for item in [
         [:evaluator,      @course.evaluator],
         [:fscontact,      @course.fscontact],
-        [:email,          mail_to(@course.fs_contact_addresses)],
+        [:email,          @course.fs_contact_addresses_array.map { |a| mail_to(a) }.join(", ").html_safe],
         [:description,    @course.description]] %>
       <tr>
         <th><%=Course.human_attribute_name(item.shift) %></th>
         <% item.each { |d| %> <td><%=d %></td> <% } %>
+      </tr>
+    <% end %>
+    <% unless @course.mails_sent.blank? %>
+      <tr>
+        <th><%=Course.human_attribute_name(:mails_sent) %></th>
+        <td><%=@course.mails_sent%></td>
       </tr>
     <% end %>
   </table>
