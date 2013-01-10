@@ -104,6 +104,7 @@ class Postoffice < ActionMailer::Base
   private
   def do_mail(to, subject, debug = true)
     if debug || to.compact.empty?
+      headers['X-GNT-Eval-Debug'] = "yes"
       mail(:to => DEBUG_MAILTO_ADDRESS, :cc => [], :bcc => [], :subject => subject)
     else
       mail(:to => to.compact, :subject => subject)
