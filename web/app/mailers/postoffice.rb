@@ -14,9 +14,11 @@ class Postoffice < ActionMailer::Base
     @anrede = prof_address(c)
     @sprache = {:de => 'Deutsch', :en => "Englisch"}[c.language]
 
+    headers['X-GNT-Eval-Mail'] = __method__.to_s
+    headers['X-GNT-Eval-Id'] = c.id.to_s
+
     subject = "Evaluation Ihrer Veranstaltung '#{c.title}'"
     to = c.profs.collect{ |p| p.email }
-
 
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
@@ -29,6 +31,9 @@ class Postoffice < ActionMailer::Base
 
     @course = c
     @anrede = evaluator_address(c)
+
+    headers['X-GNT-Eval-Mail'] = __method__.to_s
+    headers['X-GNT-Eval-Id'] = c.id.to_s
 
     subject = "Evaluation von '#{c.title}' am #{c.description}"
     to = c.fs_contact_addresses_array
@@ -47,6 +52,9 @@ class Postoffice < ActionMailer::Base
 
     raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
+    headers['X-GNT-Eval-Mail'] = __method__.to_s
+    headers['X-GNT-Eval-Id'] = c.id.to_s
+
     @title = c.title
     @anrede = prof_address(c)
     @link = faculty_links[c.faculty.id] + '#nameddest=' + course_id.to_s
@@ -63,6 +71,9 @@ class Postoffice < ActionMailer::Base
 
   def single_evalverschickung(course_id, faculty_links, path = "")
     c = Course.find(course_id)
+
+    headers['X-GNT-Eval-Mail'] = __method__.to_s
+    headers['X-GNT-Eval-Id'] = c.id.to_s
 
     raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
@@ -92,10 +103,10 @@ class Postoffice < ActionMailer::Base
 
   private
   def do_mail(to, subject, debug = true)
-    if debug
+    if debug || to.compact.empty?
       mail(:to => DEBUG_MAILTO_ADDRESS, :cc => [], :bcc => [], :subject => subject)
     else
-      mail(:to => to, :subject => subject)
+      mail(:to => to.compact, :subject => subject)
     end
   end
 
