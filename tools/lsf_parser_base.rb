@@ -563,8 +563,9 @@ class LSF
       # only keep lectures that have at least one prof in common.
       # Obviously, neither data set may be complete, therefore
       # include an entry if either data set has no profs at all
-      a = x.profs.flatten.uniq.map { |p| p.last }
+      a = x.profs.flatten.uniq.map { |p| p.last.split(/\s+/) }.flatten
       b = matches.map { |c| c.profs.map { |p| p.surname } }.flatten
+
       next false if a.empty? || b.empty? || (a & b).any?
       LSF.debug "skipping #{x.name} because no profs in common #{a.join(", ")} --- #{b.join(", ")}"
       true
