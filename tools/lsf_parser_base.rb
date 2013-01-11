@@ -350,7 +350,7 @@ class LSF
 
     summer = term_summer.include?(Date.today)
     # if we’re in winter term, but already celebrated new years…
-    y -= 1 if !summer && term_winter_newyear.include?(DateTime.now)
+    y -= 1 if !summer && term_winter_newyear.include?(Date.today)
     "#{y}#{summer ? 1 : 2}"
   end
 
