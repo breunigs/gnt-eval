@@ -50,8 +50,8 @@
   <ol>
     <li>type handwritten comment</li>
     <li>proofread</li>
-    <li>combine / merge</li>
-    <li>final check</li>
+    <li>group/sort comments</li>
+    <li>final touches</li>
   </ol><br/>
 
   The last two steps might take more than five minutes, depending on the lecture. If you don’t have that amount of time right now, you can skip this chunk of work and be assigned another one. Or you could start, but mark it as incomplete and leave it for the next person to finish. Just click the correct button below each hitme.
@@ -83,16 +83,36 @@
       <tr><th>User</th><th>at it for</th><th>last ping</th><th colspan="3">working on</th></tr>
       <% sessions.each do |s| %>
         <%
-          c = (s.cont == "cpic" ? CPic : Pic).find(s.viewed_id);
+          c = nil
+          step = nil
+          course = nil
+          case s.cont
+            when "cpic" then
+              c = CPic.find(s.viewed_id)
+            when "pic" then
+              c = Pic.find(s.viewed_id)
+            when "course" then
+              c = Course.find(s.viewed_id)
+              step = Hitme::COMBINING
+              course = c
+            when "tutor" then
+              c = Tutor.find(s.viewed_id)
+              step = Hitme::COMBINING
+            else
+              raise "not implemented"
+          end
+          step ||= c.step
+          course ||= c.course
 
-          # fixme: handle courses/combine, final check??
+
+          # fixme: handle final check??
         %>
         <tr>
           <td><%=s.username%></td>
           <td><%=time_ago_in_words(s.created_at)%></td>
           <td><%=time_ago_in_words(s.updated_at, true)%> ago</td>
-          <td><%=Hitme.step_to_text(c.step) %></td>
-          <td><%=c.course.title %></td>
+          <td><%=Hitme.step_to_text(step) %></td>
+          <td><%=course.title %></td>
           <td><%=c.for %></td>
         </tr>
       <% end %>

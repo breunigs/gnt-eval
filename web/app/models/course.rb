@@ -50,6 +50,7 @@ class Course < ActiveRecord::Base
 
   # Create an alias for this rails variable
   def comment; summary; end
+  def comment=(text); summary = text; end
 
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted

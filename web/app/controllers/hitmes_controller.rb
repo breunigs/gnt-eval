@@ -7,9 +7,16 @@ class HitmesController < ApplicationController
 
   def assign_work
     # typing and proofreading basically work the same
+
     @workon = Hitme.get_workable_comment_by_step(0)
     @workon ||= Hitme.get_workable_comment_by_step(1)
-    @workon = Hitme.get_combinable # FIXME
+    @workon ||= Hitme.get_combinable
+    # required because final checkables and course combines are the same
+    # class
+    is_final_checkable = true #@workon.nil?  ## FIXME
+    @workon = Hitme.get_final_checkable
+
+    @workon.freeze
 
     if @workon.nil?
       flash[:notice] = "Currently no available tasks. Try again later."
@@ -25,7 +32,8 @@ class HitmesController < ApplicationController
         when "Pic"  then render :action => "type_proofread"
         when "CPic" then render :action => "type_proofread"
         when "Tutor"  then render :action => "combine"
-        when "Course" then render :action => "combine"
+        when "Course" then
+          render :action => is_final_checkable ? "final_check" : "combine"
         else raise "not implemented"
       end
     end
@@ -74,6 +82,46 @@ class HitmesController < ApplicationController
       redirect_to :action => "overview"
     end
   end
+
+
+  def save_combination
+    x = case params[:type]
+      when "Course" then Course.find(params[:id])
+      when "Tutor"  then Tutor.find(params[:id])
+      else nil
+    end
+
+    if params[:cancel] || x.nil?
+      flash[:error] = "Could not find course/tutor with given ID." if x.nil?
+      redirect_to :action => "overview"
+
+    elsif params[:save_and_skip]
+      x.comment = params[:text]
+      x.step ||= 0
+      flash[:error] = "Your combination/merge could not be saved. Please investigate." if not x.save
+      redirect_to :action => "assign_work"
+
+    elsif params[:save_and_quit] || params[:save_and_give]
+      x.comment = params[:text]
+
+      if x.save
+        flash[:notice] = "Changes have been saved."
+        # advance all comments by one step
+        pics = x.respond_to?("c_pics") ? x.c_pics : x.pics
+        pics.update_all("step = #{Hitme::FINALCHECK}")
+      else
+        flash[:error] = "Your changes could not be saved. Please investigate before continuing."
+      end
+
+      redirect_to :action => params[:save_and_quit] ? "overview" : "assign_work"
+
+    else
+      flash[:error] = "Invalid action given. Your comment was not saved."
+      redirect_to :action => "overview"
+    end
+  end
+
+
 
 
   def preview_text

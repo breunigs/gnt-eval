@@ -10,4 +10,8 @@ class CPic < ActiveRecord::Base
   def for
     "prof " + course_prof.prof.fullname
   end
+
+  def step
+    read_attribute(:step) || 0
+  end
 end

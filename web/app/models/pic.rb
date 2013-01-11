@@ -10,4 +10,8 @@ class Pic < ActiveRecord::Base
   def for
     "tutor " + tutor.abbr_name
   end
+
+  def step
+    read_attribute(:step) || 0
+  end
 end
