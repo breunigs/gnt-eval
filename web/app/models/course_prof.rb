@@ -80,8 +80,9 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form.name, course.language, course.title, prof.fullname, \
-      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ').strip
+    x = [course.form.name, course.language, course.title, prof.fullname, \
+      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ')
+    x.gsub(/[\/<>|:&]/, "_")
   end
 
   private
