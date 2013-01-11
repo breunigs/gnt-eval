@@ -82,7 +82,8 @@ class CourseProf < ActiveRecord::Base
   def get_filename
     x = [course.form.name, course.language, course.title, prof.fullname, \
       course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ')
-    x.gsub(/[^a-z0-9_.,\s\-]/i, "_")
+    x = ActiveSupport::Inflector.transliterate(x)
+    x.gsub(/[^a-z0-9_.,:\s\-()]/i, "_")
   end
 
   private
