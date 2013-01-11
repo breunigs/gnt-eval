@@ -157,15 +157,20 @@ forms_sorted.each do |file, data|
 
   # issue print commands / submit to queue
   cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
-  cover =  "lpr            -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
-  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
-  banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
-  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
+  cover =  "lpr            -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
+  print =  "lpr -##{count} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
+  banner = "lpr -#1        -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
+  howtos.map! { |h| "lpr -#1 -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
     system(cover) if File.exists?(cover_file)
     howtos.each { |h| system(h) }
     system(print)
     system(banner)
+  else
+    puts(cover) if File.exists?(cover_file)
+    howtos.each { |h| puts(h) }
+    puts(print)
+    puts(banner)
   end
   puts "The sheets will be put in the #{BIN_DESC[bin].bold}"
   puts
