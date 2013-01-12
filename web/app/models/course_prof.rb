@@ -15,6 +15,7 @@ class CourseProf < ActiveRecord::Base
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
+    raise "No valid form associated." if form.nil?
     RT.count(form.db_table, {:barcode => id})
   end
 

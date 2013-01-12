@@ -3,16 +3,23 @@
 
 oneA:
   id: 10
-  course: :mathSummerCourse
+  course: mathSummerCourse
   prof: :oliver
 
 oneB:
   id: 123
-  course: :mathSummerCourse
+  course: mathSummerCourse
   prof: :rebecca
 
 
 twoA:
   id: 42
-  course: :physWinterCourse
+  course: physWinterCourse
+  prof: :jasper
+
+
+
+hitmeCp:
+  id: 37
+  course: hitmeCourse
   prof: :jasper

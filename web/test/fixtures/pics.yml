@@ -1,0 +1,7 @@
+one:
+  basename: some_image_file1.jpg
+  tutor: :hitmeTutor
+
+two:
+  basename: some_image_file2.jpg
+  tutor: :hitmeTutor

@@ -3,6 +3,7 @@
 oliver:
   course: :mathSummerCourse
   abbr_name: Oliver ist Doof
+  id: 1
 
 paul:
   course: :mathSummerCourse
@@ -12,3 +13,7 @@ paul:
 beccy:
   course: :physWinterCourse
   abbr_name: Oliver ist Doof
+
+hitmeTutor:
+  course: :hitmeCourse
+  abbr_name: Hitme test tutor
