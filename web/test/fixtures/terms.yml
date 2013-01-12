@@ -18,3 +18,10 @@ emptyTerm:
   lastday: 2013-02-28
   title: empty123
   longtitle: Empty Term that is empty
+
+
+nowTerm:
+  firstday: <%= Date.today-10 %>
+  lastday: <%= Date.today+10 %>
+  title: nowTerm
+  longtitle: Term that is active right now

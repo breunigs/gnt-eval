@@ -23,7 +23,7 @@ physWinterCourse:
 
 
 hitmeCourse:
-  term: winterTerm
+  term: nowTerm
   title: Testcourse for the hitme feature
   students: 123
   faculty: mathFac

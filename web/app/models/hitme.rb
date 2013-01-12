@@ -39,7 +39,7 @@ class Hitme < ActiveRecord::Base
   end
 
   def self.get_all_combinable_courses
-    c = Course.includes(:c_pics).where("term_id" => self.t)
+    c = Course.includes(:c_pics).where("term_id" => self.t).to_a
     # remove all courses without images
     c.reject! { |x| x.c_pics.none? }
     # remove course if there are any images below COMBINING
@@ -50,7 +50,7 @@ class Hitme < ActiveRecord::Base
   end
 
   def self.get_all_combinable_tutors
-    c = Tutor.joins(:course).includes(:pics).where("courses.term_id" => self.t)
+    c = Tutor.joins(:course).includes(:pics).where("courses.term_id" => self.t).to_a
     # remove all tutors without images
     c.reject! { |x| x.pics.none? }
     # remove all tutors if there are any images below COMBINING
@@ -69,7 +69,7 @@ class Hitme < ActiveRecord::Base
 
 
   def self.get_all_final_checkable
-    c = Course.includes(:c_pics).where("term_id" => self.t)
+    c = Course.includes(:c_pics).where("term_id" => self.t).to_a
     c.reject! { |x| !x.returned_sheets? }
     # remove course if there are course-images below FINALCHECK
     c.reject! { |x| x.c_pics.any? { |p| p.step < Hitme::FINALCHECK } }
