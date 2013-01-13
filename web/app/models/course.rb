@@ -48,9 +48,7 @@ class Course < ActiveRecord::Base
     Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals], :order => order)
   end
 
-  # Create an alias for this rails variable
-  def comment; summary; end
-  def comment=(text); summary = text; end
+  alias_attribute :comment, :summary
 
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted
