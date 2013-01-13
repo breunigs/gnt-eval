@@ -8,7 +8,7 @@ class HitmeTest < ActiveSupport::TestCase
   end
 
   def test_get_all_methods
-    assert_equal(Hitme.get_all_comments_by_step(0).size, 2, "There should be exactly two comments in step 0")
+    assert_equal(Hitme.get_all_comments_by_step(0).size, 4, "There should be exactly four comments in step 0")
     assert_equal(Hitme.get_all_comments_by_step(1).size, 0, "There shouldn’t be any comments in step 1")
     assert_equal(Hitme.get_all_combinable_courses.size, 0, "There shouldn’t be any combinale courses")
     assert_equal(Hitme.get_all_combinable_tutors.size, 0, "There shouldn’t be any combinale tutors")

@@ -20,6 +20,5 @@ twoA:
 
 
 hitmeCp:
-  id: 37
   course: hitmeCourse
-  prof: :jasper
+  prof: jasper
