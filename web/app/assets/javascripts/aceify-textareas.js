@@ -15,7 +15,6 @@ function hack_line_offset_into_ace(editor) {
     this.gotoLineOrig(ln-line_offset_number, col);
   }
 
-  // compression changes: a == config; d == dom, c == html; e == i
   // adjust display of line numbers in gutter
   var upd = editor.renderer.$gutterLayer.update.toString()
     // strip of function header and its braces
@@ -23,13 +22,13 @@ function hack_line_offset_into_ace(editor) {
     // fix dom not being defined here (replace by JQuery function which
     // does the same). Looks so awkward so because some browsers insert
     // spaces and some don’t (and regexes wouldn’t be better)
-    .replace("d.setInnerHtml", "this.element; $(this.element).html" )
+    .replace("r.setInnerHtml", "this.element; $(this.element).html" )
     .replace("this.element,", "")
     // actual payload: offset line numbers
-    .replace("e + 1", "e + 1 + line_offset_number")
-    .replace("e+1", "e + 1 + line_offset_number")
+    .replace("i + 1", "i + 1 + line_offset_number")
+    .replace("i+1", "i + 1 + line_offset_number");
   // convert into an actual function again and replace the original one
-  editor.renderer.$gutterLayer.update  = new Function("a", upd);
+  editor.renderer.$gutterLayer.update  = new Function("e", upd);
 }
 
 $(document).ready(function() {
