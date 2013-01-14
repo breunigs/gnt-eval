@@ -1,0 +1,91 @@
+<% content_for :title, " // Final Check!" %>
+<% content_for :script, "<script>var ident = '#{@ident}'</script>".html_safe %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset, :autosize => true %>
+<% content_for :script, %(<script>var hitme_preview_url="#{hitme_preview_text_url}"</script>).html_safe%>
+<% content_for :script, %(<script>
+var renderTimeout = {};
+var renderInProgress = {};
+
+function renderPreview(id) {
+  renderInProgress[id] = true;
+
+  var edit = $("#"+id).data("editor");
+
+  var con = $("#"+id).parent().find(".previewbox");
+  con.children(".rendermsg").html("Rendering…");
+
+  con.children("div").load(
+    hitme_preview_url,
+    { "text": edit.getValue() },
+    function() {
+      renderInProgress[id] = false;
+      con.children(".rendermsg").html('<a onclick="renderPreview(\\''+id+'\\')">Force Update now</a>');
+    }
+  );
+}
+
+
+$(document).ready(function() {
+  $(".sidepreview > textarea").each(function(ind, txt) {
+    var txt = $(txt);
+    var id = txt.attr("id");
+
+    txt.data("editor").getSession().on('change', function(){
+      var rt = renderTimeout[id];
+      if(rt) clearTimeout(rt);
+      if(renderInProgress[id]) return;
+      rt = setTimeout("renderPreview('"+id+"')", 1000);
+    });
+
+    renderPreview(id);
+  });
+
+});
+</script>).html_safe%>
+
+
+
+
+<div>
+  <div style="width:60%;float:left">
+    <h2>Your Job: Final Check!</h2>
+    <ul>
+      <li><b>move misplaced comments to the correct position.</b><br>Rule of thumb:
+      <ul><li>concerns tutor or study group’s room? Put in tutor’s text box.</li><li>everything else? Put in course’s one.</li></ul>
+      If your colleagues did good work, you should easily spot those at the top of each text box.</li>
+      <li>Check for improper use of quotation marks. Correct ones are <b>„Deutsch“</b> or <b>“English”</b>.</li>
+      <li>Otherwise: use your intuition.</li>
+    </ul><br/>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_final_check") %>
+  <%= hidden_field_tag(:type, @workon.class) %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
+  <div class="group sidepreview">
+    <h3>Profs / Course Comment</h3>
+    <%= text_area_tag(:course, @workon.summary, :style => 'width:99%')%>
+
+    <div class="previewbox">
+      <span class="rendermsg"></span><br/><br/>
+      <div></div>
+    </div>
+  </div>
+
+  <% @workon.tutors.each do |tutor| %>
+    <div class="group sidepreview">
+      <h3>Tutor: <%=tutor.abbr_name%></h3>
+      <%= text_area_tag("tutor[#{tutor.id}]", tutor.comment, :style => 'width:99%')%>
+      <div class="previewbox">
+        <span class="rendermsg"></span><br/><br/>
+        <div></div>
+      </div>
+    </div>
+
+  <% end %>
+
+  <%= render "action_buttons" %>
+</form>
