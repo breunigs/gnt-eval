@@ -15,6 +15,7 @@ class CourseProf < ActiveRecord::Base
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
+    raise "No valid form associated." if form.nil?
     RT.count(form.db_table, {:barcode => id})
   end
 
@@ -80,8 +81,10 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form.name, course.language, course.title, prof.fullname, \
-      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ').strip
+    x = [course.form.name, course.language, course.title, prof.fullname, \
+      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ')
+    x = ActiveSupport::Inflector.transliterate(x)
+    x.gsub(/[^a-z0-9_.,:\s\-()]/i, "_")
   end
 
   private

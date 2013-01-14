@@ -48,8 +48,7 @@ class Course < ActiveRecord::Base
     Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals], :order => order)
   end
 
-  # Create an alias for this rails variable
-  def comment; summary; end
+  alias_attribute :comment, :summary
 
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted
@@ -249,6 +248,14 @@ class Course < ActiveRecord::Base
 
   def dir_friendly_title
     ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
+  end
+
+  # returns in which Hitme step the current course is. Effectively
+  # returns the lowest step in any of the associated pics
+  def get_hitme_step
+    a = c_pics.map { |p| p.step }.compact.min
+    b = tutors.map { |t| t.pics.map { |p| p.step } }.flatten.compact.min
+    [a, b].compact.min || 0
   end
 
   private

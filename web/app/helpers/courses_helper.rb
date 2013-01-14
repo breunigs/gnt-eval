@@ -49,7 +49,7 @@ module CoursesHelper
     link_to_unless(@course.critical?, 'Destroy course', @course, \
       :confirm => "Really destroy course '#{@course.title}'?", \
       :method => :delete,
-      :class => "button") do
+      :class => "button danger") do
       "&nbsp;⚠ Course is critical".html_safe
     end
   end
@@ -61,9 +61,5 @@ module CoursesHelper
     d << link_to("ϱ Correlate", correlate_course_path(@course), :class => "button")
     d << link_to("⤶ List courses", term_courses_path(@course.term), :class => "button")
     %(<div class="button-group">#{d*""}</div>).html_safe
-  end
-
-  def comment_image_link
-    Seee::Config.file_paths[:comment_images_public_link]
   end
 end

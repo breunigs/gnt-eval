@@ -15,6 +15,7 @@ gem "strip_attributes"
 
 gem "work_queue",      ">=2.0"
 gem "open4"
+gem "fastimage",	"1.2.13"
 
 # Proper unicode downcase and the like
 gem "unicode_utils"
