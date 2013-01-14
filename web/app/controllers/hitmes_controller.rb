@@ -13,8 +13,8 @@ class HitmesController < ApplicationController
     @workon ||= Hitme.get_combinable
     # required because final checkables and course combines are the same
     # class
-    is_final_checkable = true #@workon.nil?  ## FIXME
-    @workon = Hitme.get_final_checkable
+    is_final_checkable = @workon.nil?
+    @workon ||= Hitme.get_final_checkable
 
     @workon.freeze
 
@@ -59,7 +59,7 @@ class HitmesController < ApplicationController
       flash[:error] = "Your changes could not be saved. Please investigate." if not x.save
       redirect_to :action => "assign_work"
 
-    elsif params[:save_and_quit] || params[:save_and_give]
+    elsif params[:save_and_quit] || params[:save_and_work]
       x.text = params[:text]
 
       next_step = { nil => 1, 0 => 1, 1 => 2 }
@@ -99,18 +99,17 @@ class HitmesController < ApplicationController
 
     elsif params[:save_and_skip]
       x.comment = params[:text]
-      x.step ||= 0
       flash[:error] = "Your combination/merge could not be saved. Please investigate." if not x.save
       redirect_to :action => "assign_work"
 
-    elsif params[:save_and_quit] || params[:save_and_give]
+    elsif params[:save_and_quit] || params[:save_and_work]
       x.comment = params[:text]
 
       if x.save
         flash[:notice] = "Changes have been saved."
         # advance all comments by one step
         pics = x.respond_to?("c_pics") ? x.c_pics : x.pics
-        pics.update_all("step = #{Hitme::FINALCHECK}")
+        flash[:warning] = "Could not advance to the next step." unless pics.update_all(:step => Hitme::FINALCHECK)
       else
         flash[:error] = "Your changes could not be saved. Please investigate before continuing."
       end
