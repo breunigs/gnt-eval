@@ -36,6 +36,7 @@
 <%= form_tag(:controller => "hitmes", :action => "save_comment") %>
   <%= hidden_field_tag(:type, @workon.class) %>
   <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
   <div class="group" id="commentfield">
     <%= text_area_tag(:text, @workon.text, :style => 'width:99%')%>
     <br/>

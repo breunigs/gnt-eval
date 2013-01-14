@@ -81,6 +81,8 @@ class HitmesController < ApplicationController
       flash[:error] = "Invalid action given. Your comment was not saved."
       redirect_to :action => "overview"
     end
+
+    remove_session(x)
   end
 
 
@@ -119,6 +121,8 @@ class HitmesController < ApplicationController
       flash[:error] = "Invalid action given. Your comment was not saved."
       redirect_to :action => "overview"
     end
+
+    remove_session(x)
   end
 
 
@@ -142,12 +146,21 @@ class HitmesController < ApplicationController
     # golf via http://stackoverflow.com/a/88341/1684530
     ident = (0...9).map{65.+(rand(26)).chr}.join.downcase
 
-    x = Session.new(:cont => workon.class.to_s.downcase, :viewed_id => workon.id)
+    x = Session.new(:cont => workon.class.to_s.pluralize.downcase, :viewed_id => workon.id)
     x.ident = ident
     x.agent = request.env['HTTP_USER_AGENT']
     x.ip = request.env['REMOTE_ADDR']
     x.username = (cookies["username"] || "").gsub(/[^a-z0-9_\s-]/i, "")[0..20]
     x.save
     ident
+  end
+
+  def remove_session(workon)
+    return unless workon && params[:ident]
+    Session.unscoped.delete_all(
+      :cont => workon.class.to_s.pluralize.downcase,
+      :viewed_id => workon.id,
+      :ident => params[:ident]
+    )
   end
 end
