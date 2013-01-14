@@ -381,6 +381,9 @@ module PESTImageTools
     x = coord.x - move_left + off_left
     y = coord.y - move_top + off_top
 
+    x += @auto_correction_horiz
+    y += @auto_correction_vert
+
     [x, y]
   end
 

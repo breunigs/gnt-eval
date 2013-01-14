@@ -89,10 +89,17 @@ class PESTOmr < PESTDatabaseTools
           [box.br.x+4, box.tl.y+box.height+9], :up, 40, true)
     y -= box.height unless y.nil?
 
+    # note if we had to search again. If we do, it may be the case that
+    # the whole form is misaligned.
+    had_to_fix = { :horiz => false, :vert => false }
+
     # If any coordinate couldn't be found, try again further away. Only
     # searches the newly added area.
-    x = search(img_id, [box.tl.x-15, box.tl.y-10],
-          [box.tl.x-6, box.br.y+10], :right, 30) if x.nil?
+    if x.nil?
+      x = search(img_id, [box.tl.x-15, box.tl.y-10],
+            [box.tl.x-6, box.br.y+10], :right, 30)
+      had_to_fix[:horiz] = true
+    end
     # in case of y-direction, the line that divides the questions would
     # be detected. Search top down instead. Since bottom up failed, we
     # can be pretty sure the initial box was placed too high, therefore
@@ -100,6 +107,7 @@ class PESTOmr < PESTDatabaseTools
     if y.nil?
       y = search(img_id, [box.tl.x-4, box.tl.y],
             [box.br.x+4, box.br.y - box.height/3*2], :down, 40)
+      had_to_fix[:vert] = true
     end
 
     box.x = x unless x.nil?
@@ -107,7 +115,7 @@ class PESTOmr < PESTDatabaseTools
 
     draw_text(img_id, [x-15,y+20], "black", box.choice) unless [x,y].any_nil?
 
-    return x, y
+    return x, y, had_to_fix
   end
 
   # Finds and stores the black percentage for all boxes for the given
@@ -131,8 +139,11 @@ class PESTOmr < PESTDatabaseTools
 
     debug_box = []
 
+    fixes = { :horiz => 0, :vert => 0 }
     question.boxes.each_with_index do |box, i|
-      x, y = search_square_box(img_id, box)
+      x, y, had_to_fix = search_square_box(img_id, box)
+      fixes[:horiz] += 1 if had_to_fix[:horiz]
+      fixes[:vert] += 1 if had_to_fix[:vert]
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
         @soft_error += 1
@@ -152,6 +163,18 @@ class PESTOmr < PESTDatabaseTools
       box.bp = black_percentage(img_id, tl.x, tl.y, br.x-tl.x, br.y-tl.y)
       debug_box[i] = [tl, br]
     end
+
+    # If many boxes were not found on the initial try for one question
+    # then that’s a strong hint that the whole form is misaligned --
+    # or at least it became misaligned due to imperfect printing and/or
+    # scanning. In that case adjust a little so the next boxes my be
+    # found on first try. The values are applied in helper.image.rb
+    # correct/translate.
+    h_fix_ratio = fixes[:horiz].to_f/question.boxes.size.to_f
+    @auto_correction_horiz -= 3 if h_fix_ratio >= 0.65
+
+    v_fix_ratio = fixes[:vert].to_f/question.boxes.size.to_f
+    @auto_correction_vert += 3 if v_fix_ratio >= 0.65
 
     # see if there is anything inside the boxes. If yes, assume the user
     # knows how a checkbox works.
@@ -405,6 +428,9 @@ class PESTOmr < PESTDatabaseTools
         debug "YAML file?"
         next
       end
+
+      @auto_correction_horiz = 0
+      @auto_correction_vert = 0
 
       @doc.pages[i].questions.each do |g|
         @currentQuestion = g.db_column
