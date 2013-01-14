@@ -81,7 +81,7 @@ class Form < ActiveRecord::Base
   def db_table
     name = ("evaldata_" + term.title + "_" + title).strip
     name = ActiveSupport::Inflector.transliterate(name).downcase
-    name.gsub(/[^a-z0-9_-]+/, "_")
+    name.gsub(/[^a-z0-9_]+/, "_")
   end
 
   # There are some variables which can be used to design the form, e.g.
