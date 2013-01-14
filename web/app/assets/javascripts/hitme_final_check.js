@@ -15,6 +15,7 @@ function renderPreview(id) {
     hitme_preview_url,
     { "text": edit.getValue() },
     function() {
+      // http://stackoverflow.com/a/4086085/1684530
       $(this).wrapInner('<div/>');
       $(this).animate( {height: $('div:first',this).height()} );
       con.children(".rendermsg").html('<a onclick="renderPreview(\''+id+'\')">Force Update now</a>');
@@ -36,7 +37,7 @@ $(document).ready(function() {
       renderTimeout[id] = setTimeout("renderPreview('"+id+"')", 1000);
     });
 
-    renderPreview(id);
+    renderTimeout[id] = setTimeout("renderPreview('"+id+"')", 400);
   });
 
 });
