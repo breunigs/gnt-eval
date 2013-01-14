@@ -90,15 +90,16 @@ class HitmeCompleteFlowTest < ActionDispatch::IntegrationTest
 
     # now we’re in step=3, i.e. final check/moving comments
     assert_equal 1, Hitme.get_all_final_checkable.size
+    delete_session
 
     get "/hitme/assign_work"
     assert_response :success
     delete_session
 
-    #post_via_redirect "/hitme/save_finalcheck", #{:text => "testtext", :type => "Tutor", :id => tutors(:hitmeTutor).id, :save_and_skip => true}
-    #~ assert_equal "/hitme/assign_work", path
-    #~ assert_equal nil, flash[:notice]
-    #~ assert_equal 1, Hitme.get_all_combinable_tutors.size
+    post_via_redirect "/hitme/save_final_check", {:course => "coursetext", :id => courses(:hitmeCourse).id, :tutor => {tutors(:hitmeTutor).id => "tutortext"}, :save_and_quit => true}
+    assert_equal "Save successful.", flash[:notice]
+    assert_equal "/hitme", path
+    assert_equal 0, Hitme.get_all_final_checkable.size
 
   end
 
