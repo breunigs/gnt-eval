@@ -23,7 +23,7 @@
       return;
     }
 
-    location.href = location.href + "/assign_work";
+    location.href = "<%=hitme_assign_work_url%>";
   }
 
   $(document).ready(function() {
@@ -60,7 +60,7 @@
 <div>
   <h2>What do I need?</h2>
 
-  <span class="noscript broken"><b>✘ JavaScript </b></span> – Ensure JavaScript is enabled for the whole domain and that you don’t block any of it’s features.<script>$(".noscript").attr("class", "itworks").html("✔ <b>JavaScript </b>");</script><br/>
+  <span class="noscript broken"><b>✘ JavaScript </b></span> – Ensure JavaScript is enabled for the whole domain and that you don’t block any of its features.<script>$(".noscript").attr("class", "itworks").html("✔ <b>JavaScript </b>");</script><br/>
 
   <span id="cookies" class="unknown"><b>? Cookies </b></span> – Enable cookies for the domain. Persistent ones are preferred, so you only need to set your username once.<br/>
 
@@ -86,20 +86,25 @@
           c = nil
           step = nil
           course = nil
+          details = nil
           case s.cont
-            when "cpic" then
+            when "cpics" then
               c = CPic.find(s.viewed_id)
-            when "pic" then
+              details = c.for
+            when "pics" then
               c = Pic.find(s.viewed_id)
-            when "course" then
+              details = c.for
+            when "courses" then
               c = Course.find(s.viewed_id)
-              step = Hitme::COMBINING
+              step = c.get_hitme_step
               course = c
-            when "tutor" then
+              details = "profs / course comment"
+            when "tutors" then
               c = Tutor.find(s.viewed_id)
               step = Hitme::COMBINING
+              details = "tutor #{c.abbr_name}"
             else
-              raise "not implemented"
+              logger.debug "hitme type of #{s.cont} not implemented. Cannot preview this."
           end
           step ||= c.step
           course ||= c.course
@@ -113,7 +118,7 @@
           <td><%=time_ago_in_words(s.updated_at, true)%> ago</td>
           <td><%=Hitme.step_to_text(step) %></td>
           <td><%=course.title %></td>
-          <td><%=c.for %></td>
+          <td><%=details%></td>
         </tr>
       <% end %>
     </table>
