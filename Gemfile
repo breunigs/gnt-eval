@@ -60,7 +60,7 @@ end
 
 # gems required for OMR
 group :pest do
-  gem "gtk2"
+  gem "gtk2", "~> 1.1.5"
   gem "rmagick", :require => "RMagick"
 end
 
