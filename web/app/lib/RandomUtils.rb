@@ -91,7 +91,7 @@ end
 
 # Finds the barcode of a given image file by looking at the image.
 # Automatically rotates and orders the pages if  a barcode is found.
-def find_barcode(filename)
+def find_barcode(filename, desperate = false)
   zbar = Seee::Config.application_paths[:zbar]
   unless File.exist?(zbar)
     puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{`uname -m`.strip}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
@@ -99,10 +99,11 @@ def find_barcode(filename)
   end
   zbar = Seee::Config.commands[:zbar]
   zbar_d = Seee::Config.commands[:zbar_desperate]
-  r = `#{zbar} "#{filename}"`
+  r = `#{desperate ? zbar_d : zbar} "#{filename}"`
   begin
     return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
   rescue
+    return nil if desperate
     r = `#{zbar_d} "#{filename}"`
     begin
       return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?

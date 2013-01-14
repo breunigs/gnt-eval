@@ -43,6 +43,11 @@ namespace :images do
           basename = File.basename(f, '.tif')
           zbar_result = find_barcode(f)
           barcode = (zbar_result.to_f / 10.0).floor.to_i
+          # retry in case a non-existant barcode was found
+          if zbar_result && (not CourseProf.exists?(barcode))
+            zbar_result = find_barcode(f, true)
+            barcode = (zbar_result.to_f / 10.0).floor.to_i
+          end
 
           if zbar_result.nil? || (not CourseProf.exists?(barcode))
             puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
@@ -210,7 +215,7 @@ namespace :images do
 
           # load tutors
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
-          
+
           if tut_num < 0
             warn "\n\nCouldn’t add tutor image #{bname}, because OMR result is ambigious. Have you run `rake images:correct`?"
             next
