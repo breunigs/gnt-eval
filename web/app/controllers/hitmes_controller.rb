@@ -125,6 +125,50 @@ class HitmesController < ApplicationController
   end
 
 
+  def save_final_check
+    course = Course.find(params[:id])
+    errs = []
+    step_warn = false
+
+    errs << "Couldn’t find specified course. Saving failed." unless course
+    if course
+      course.comment = params[:course]
+      unless course.save
+        errs << "Couldn’t save course."
+      else
+        step_warn = true unless course.c_pics.update_all(:step => Hitme::DONE)
+      end
+    end
+
+    params[:tutor].each do |tut_id, text|
+      logger.info "Processing tutor=#{tut_id}"
+      tutor = Tutor.find(tut_id)
+      unless tutor
+        errs << "Couldn’t find specified tutor. Saving failed."
+        next
+      end
+      tutor.comment = text
+      unless tutor.save
+        errs << "Couldn’t save tutor #{tutor.abbr_name}."
+      else
+        step_warn = true unless tutor.pics.update_all(:step => Hitme::DONE)
+      end
+    end
+
+    remove_session(course)
+
+    if errs.empty?
+      flash[:notice] = "Save successful." unless params[:save_and_skip]
+      if params[:save_and_skip] || params[:save_and_work]
+        redirect_to :action => "assign_work"
+      else  # params[:save_and_quit] and others
+        redirect_to :action => "overview"
+      end
+    else
+      flash[:error] = errs.join("<br />").html_safe
+      redirect_to :action => "overview"
+    end
+  end
 
 
   def preview_text
