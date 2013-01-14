@@ -24,13 +24,6 @@
   <%= nav_links %>
 </div>
 
-<% if @form.abstract_form_valid? && @form.db_table.blank? %>
-  <div>
-    <h3>ERROR: db_table blank</h3>
-    <p class="error">Each form needs to have a db_table specified so it’s clear where the data goes. It’s possible for two different forms to have the same database, but it’s best practice to have new tables for each form and term.</p>
-  </div>
-<% end %>
-
 <% if @form.questions && @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
   <div>
     <h3>ERROR: more than one tutor_table</h3>
