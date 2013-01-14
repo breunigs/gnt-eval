@@ -210,6 +210,11 @@ namespace :images do
 
           # load tutors
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
+          
+          if tut_num < 0
+            warn "\n\nCouldn’t add tutor image #{bname}, because OMR result is ambigious. Have you run `rake images:correct`?"
+            next
+          end
 
           if tut_num > tutors.count
             warn "\n\nCouldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
