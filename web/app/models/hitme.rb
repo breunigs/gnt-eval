@@ -23,6 +23,7 @@ class Hitme < ActiveRecord::Base
     step = [nil, Hitme::TYPING] if step == Hitme::TYPING
     all = CPic.joins(:course).where("courses.term_id" => self.t, "step" => step)
     all += Pic.joins(:course).where("courses.term_id" => self.t, "step" => step)
+    logger.debug "Found #{all.size} comments in step #{step}"
     all
   end
 
@@ -44,8 +45,11 @@ class Hitme < ActiveRecord::Base
     c.reject! { |x| x.c_pics.none? }
     # remove course if there are any images below COMBINING
     c.reject! { |x| x.c_pics.any? { |p| p.step < Hitme::COMBINING } }
+    # remove all tutors if there ALL images are above COMBINING
+    c.reject! { |x| x.c_pics.all? { |p| p.step > Hitme::COMBINING } }
     # remove courses that don’t have any text comments
     c.reject! { |x| x.c_pics.all? { |p| p.text.blank? } }
+    logger.debug "Found #{c.size} combineable courses"
     c
   end
 
@@ -55,8 +59,11 @@ class Hitme < ActiveRecord::Base
     c.reject! { |x| x.pics.none? }
     # remove all tutors if there are any images below COMBINING
     c.reject! { |x| x.pics.any? { |p| p.step < Hitme::COMBINING } }
+    # remove all tutors if there ALL images are above COMBINING
+    c.reject! { |x| x.pics.all? { |p| p.step > Hitme::COMBINING } }
     # remove courses that don’t have any text comments
     c.reject! { |x| x.pics.all? { |p| p.text.blank? } }
+    logger.debug "Found #{c.size} combinale tutors"
     c
   end
 
@@ -70,11 +77,18 @@ class Hitme < ActiveRecord::Base
 
   def self.get_all_final_checkable
     c = Course.includes(:c_pics).where("term_id" => self.t).to_a
-    c.reject! { |x| !x.returned_sheets? }
+    c.reject! { |x| x.c_pics.none? && x.tutors.all? { |t| t.pics.none? } }
     # remove course if there are course-images below FINALCHECK
     c.reject! { |x| x.c_pics.any? { |p| p.step < Hitme::FINALCHECK } }
     # remove course if there are tutor-images below FINALCHECK
     c.reject! { |x| x.tutors.any? { |t| t.pics.any? { |p| p.step < Hitme::FINALCHECK } } }
+    # remove course if all images are above FINALCHECK
+    c.reject! do |x|
+      a = x.c_pics.all? { |p| p.step > Hitme::FINALCHECK }
+      b = x.tutors.all? { |t| t.pics.all? { |p| p.step > Hitme::FINALCHECK } }
+      a && b
+    end
+    logger.debug "Found #{c.size} final checkables"
     c
   end
 
@@ -82,14 +96,14 @@ class Hitme < ActiveRecord::Base
 
   private
   def self.t
-    #Term.currently_active.map(&:id)
-    13 # FIXME
+    Term.currently_active.map(&:id)
   end
 
   def self.get_workable_sample(all)
     raise "Expected an array, but got #{all.class}" unless all.is_a?(Array)
     while not (workon = all.sample).nil?
       return workon unless Hitme.is_being_worked_on(workon)
+      logger.debug "#{workon.class}=#{workon.id} is being worked on. Skipping."
       # workon is already being worked on by someone else, remove it
       # from the array so it’s not picked again. Deliberately not using
       # all.delete because it may invoke Rails deleting the object.
