@@ -31,12 +31,13 @@
 
     <h1><%=controller.human_name.pluralize%> // <%= params[:action].humanize %> <%=yield(:title) %></h1>
     <nav class="button-group">
-      <%= link_to 'Courses', 	  courses_path,   :class => "button big" %>
+      <%= link_to 'Courses',    courses_path,   :class => "button big" %>
       <%= link_to 'Professors', profs_path,     :class => "button big" %>
-      <%= link_to 'Terms',      terms_path, :class => "button big" %>
-      <%= link_to 'Forms', 		  forms_path,     :class => "button big" %>
+      <%= link_to 'Terms',      terms_path,     :class => "button big" %>
+      <%= link_to 'Forms',      forms_path,     :class => "button big" %>
       <%= link_to 'Faculties',  faculties_path, :class => "button big" %>
-      <%= link_to 'Tutors', 		tutors_path,    :class => "button big" %>
+      <%= link_to 'Tutors',     tutors_path,    :class => "button big" %>
+      <%= link_to 'Hitmes',     hitme_path,    :class => "button big" %>
     </nav>
   </div>
 
