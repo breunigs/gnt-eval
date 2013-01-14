@@ -18,9 +18,11 @@ function renderPreview() {
 }
 
 $(document).ready(function() {
-  edit = $("#text").data("editor").getSession();
+  edit = $("#text").data("editor");
+  if(!edit) return;
+  sess = edit.getSession();
 
-  edit.on('change', function(){
+  sess.on('change', function(){
     if(renderTimeout) clearTimeout(renderTimeout);
     if(renderInProgress) return;
     renderTimeout = setTimeout("renderPreview()", 1000);
