@@ -66,6 +66,7 @@ namespace :images do
         end
       end
       work_queue.join
+      print_progress(curr, files.size)
       puts
       puts "Done!"
     end # else
