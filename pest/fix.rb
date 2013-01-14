@@ -301,12 +301,10 @@ class PESTFix < PESTDatabaseTools
           valid_fields << "tutor_id"
         end
 
-
-
         @tables[t] = valid_fields.flatten unless valid_fields.empty?
       rescue => e
-        debug "Table #{t} doesn't appear to be valid. Error message:"
-        raise
+        debug "Table #{t} doesn't appear to be valid or doesn’t exist."
+        debug "Error message: #{e.message}"
       end
     end
     @tables
