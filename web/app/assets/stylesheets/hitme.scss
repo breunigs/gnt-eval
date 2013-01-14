@@ -1,0 +1,13 @@
+.sidepreview {
+  .previewbox {
+    float:right;
+    width: 650px;
+  }
+
+  div.ace_editor {
+    float: left;
+    width: calc(100% - 700px);
+    width: -moz-calc(100% - 700px);
+    width: -webkit-calc(100% - 700px);
+  }
+}
