@@ -11,7 +11,7 @@
     <tr>
       <th>Term</th>
       <th>Name</th>
-      <th>Table</th>
+      <th>DB Table</th>
       <th colspan="<%=has_curr_term ? 3 : 2 %>">Actions</th>
       <th></th>
     </tr>
@@ -25,7 +25,7 @@
         <%=h form.term.title %>
       </td>
       <td><%= link_to form.name, form %></td>
-      <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
+      <td><%= form.db_table %></td>
 
       <% if form.critical? %>
         <td colspan="2" class="fade">Term critical</td>
