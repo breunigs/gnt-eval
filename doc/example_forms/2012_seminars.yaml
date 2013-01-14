@@ -17,6 +17,8 @@ lecturer_header:
   :en: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
 pages:
 - !ruby/object:Page
+  tex_at_top: ""
+  tex_at_bottom: ""
   sections:
   - !ruby/object:Section
     title:
@@ -645,11 +647,15 @@ pages:
         text:
           :de: leichter Schein
           :en: "easy course"
-      db_column: v_why_this_seminar
+      db_column:
+      - v_why_this_seminar_a
+      - v_why_this_seminar_b
+      - v_why_this_seminar_c
+      - v_why_this_seminar_d
       visualizer: horizontal_bars
       qtext:
-        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt?"
-        :en: "Why did you choose to attend exactly to this seminar?"
+        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt? (Mehrfachnennung möglich)"
+        :en: "Why did you choose to attend exactly to this seminar? (Multiple entries possible)"
       type: square
 
     - !ruby/object:Question

@@ -17,6 +17,8 @@ lecturer_header:
   :en: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
 pages:
 - !ruby/object:Page
+  tex_at_top: ""
+  tex_at_bottom: ""
   sections:
   - !ruby/object:Section
     title:
