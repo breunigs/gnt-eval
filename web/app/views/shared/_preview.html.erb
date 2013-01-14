@@ -15,7 +15,7 @@ enable_cache = !defined?(disable_cache) || !disable_cache
 
 optional_cache(key, enable_cache) do %>
   <%
-    failed, exitcodes, error, base64 = texpreview(text)
+    failed, exitcodes, error, base64, dim = texpreview(text)
     is_img = !failed && !base64.blank?
   %>
 
@@ -34,5 +34,5 @@ optional_cache(key, enable_cache) do %>
 
   <%= "</div>".html_safe unless is_img %>
 
-  <%= %(<img class="no-shadow" src="data:image/png;base64,#{base64}"/>).html_safe if is_img %>
+  <%= %(<img width="#{dim[0]}" height="#{dim[1]}" class="no-shadow" src="data:image/png;base64,#{base64}"/>).html_safe if is_img %>
 <% end %>

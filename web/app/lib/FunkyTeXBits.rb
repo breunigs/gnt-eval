@@ -103,11 +103,13 @@ module FunkyTeXBits
     end
     failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
 
+    dim = nil
     # convert to base64
     if File.exists?("#{path}.png")
       require 'base64'
       data = File.open("#{path}.png", 'rb') { |f| f.read }
       base64 = Base64.encode64(data)
+      dim = FastImage.size("#{path}.png")
       logger.debug "TEX PREVIEW: PNG to Base64 #{Time.now - exec_time_start}" if logger
       exec_time_start = Time.now
     end
@@ -127,7 +129,7 @@ module FunkyTeXBits
     logger.debug "TEX PREVIEW: Cleanup #{Time.now - exec_time_start}" if logger
     logger.debug "TEX PREVIEW: Base64 size: #{base64.size}" if base64
 
-    return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64
+    return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64, dim
   end
 
   def t(item)
