@@ -80,7 +80,8 @@ namespace :images do
     # OMR needs the YAML files as TeX also outputs position information
     p = SCfp[:sorted_pages_dir]
     Dir.glob(File.join(p, "[0-9]*.yaml")).each do |f|
-      puts "Now processing #{f}"
+      next unless Dir.exist?(f[0..-6])
+      puts "\n\n\nNow processing #{f}"
       bn = File.basename(f, ".yaml")
       system(%(./pest/omr2.rb -s "#{f}" -p "#{p}/#{bn}" -c #{number_of_processors}))
     end
