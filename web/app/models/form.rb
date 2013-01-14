@@ -78,6 +78,15 @@ class Form < ActiveRecord::Base
     true
   end
 
+  # returns an auto-generated string as db table. Historically this was
+  # set manually, but this is discouraged now.
+  def db_table
+    return abstract_form.db_table if abstract_form_valid? && !abstract_form.db_table.blank?
+    name = ("evaldata_" + term.title + "_" + title).strip
+    name = ActiveSupport::Inflector.transliterate(name).downcase
+    name.gsub(/[^a-z0-9_-]+/, "_")
+  end
+
   # There are some variables which can be used to design the form, e.g.
   # \lect to refer to the lecturer’s name. These variables may be valid
   # for the whole sheet when the questions are used in the form. However
