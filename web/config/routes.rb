@@ -38,6 +38,15 @@ Seee::Application.routes.draw do
   get "/cpics/:id/download" => "CPics#download", :as => :download_cpic
 
 
+  get "/hitme" => "hitmes#overview"
+  get "/hitme/assign_work" => "hitmes#assign_work"
+  get "/hitme/cookie_test" => "hitmes#cookie_test"
+  post "/hitme/preview_text" => "hitmes#preview_text"
+  post "/hitme/save_comment" => "hitmes#save_comment"
+  post "/hitme/save_combination" => "hitmes#save_combination"
+  post "/hitme/save_final_check" => "hitmes#save_final_check"
+
+
   match "/:cont/:viewed_id/ping/" => "sessions#ping", :as => "viewer_count"
   match "/:cont/:viewed_id/ping/:ident" => "sessions#ping", :as => "ping"
   match "/:cont/:viewed_id/unping/:ident" => "sessions#unping", :as => "unping"

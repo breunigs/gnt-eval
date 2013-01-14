@@ -1,0 +1,10 @@
+<div class="group">
+  <span class="button-group">
+    <%= submit_tag("Save and give more work", :class => "button primary", :name => "save_and_work") %>
+    <%= submit_tag("Save and quit", :class => "button", :name => "save_and_quit") %>
+    <%= submit_tag("incomplete / can’t read / skip", :class => "button", :name => "save_and_skip") %>
+
+    <%# confirmation handled by prevent-leaving-unsaved-form %>
+    <%= link_to("quit without saving", hitme_path, :class => "button danger") %>
+  </span>
+</div>

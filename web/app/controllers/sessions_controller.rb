@@ -5,9 +5,9 @@ class SessionsController < ApplicationController
     if params[:ident]
       x = Session.where(:cont => params[:cont], :viewed_id => params[:viewed_id],
         :ident => params[:ident]).first_or_create!
-      x.agent = request.env['HTTP_USER_AGENT']
-      x.ip = request.env['REMOTE_ADDR']
-      x.username = (cookies["username"] || "").gsub(/[^a-z0-9-_\s]/i, "")[0..20]
+      x.agent = request.env['HTTP_USER_AGENT'].to_s
+      x.ip = request.env['REMOTE_ADDR'].to_s
+      x.username = (cookies["username"] || "").gsub(/[^a-z0-9_\s-]/i, "")[0..20]
       x.touch
       x.save
     end

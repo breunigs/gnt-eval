@@ -1,0 +1,80 @@
+======================
+irb // rails console?!
+======================
+
+It is assumed you know about interactive ruby (irb) and Rails.
+
+If you don’t, you can learn about “irb” here:
+http://www.ruby-lang.org/en/documentation/quickstart/
+
+A “rails console” basically just an irb which has Rails loaded. Usually
+you can get such an irb simply by running “rails console” in the root
+directory of the Rails project (that would be web/ for G'n'T-Eval).
+However, G'n'T-Eval uses two databases which makes things a tad more
+complicated. Read on.
+
+If you’re looking for a general guide to “rails console” have a look at
+http://www.slideshare.net/reuvenlerner/rails-console starting with slide
+52. Some parts are outdated, but most ideas or tips still fit.
+
+
+=========
+Databases
+=========
+
+G'n'T-Eval uses two databases by default. Have a look in the INSTALL
+file’s “Databases” subsection for some more info.
+
+1. Stores raw results of questionnairs
+
+   Default config is in web/config/database.yml. That file contains
+   a boilerplate readme on how to adjust config if required.
+
+   Tables are created on the fly by the names specified in each form.
+
+
+2. Stores everything else
+
+   Maintained by Rails
+
+   Default config is in web/config/seee_config.rb. That file contains
+   a boilerplate readme on how to adjust config if required.
+
+
+
+=======================
+Exploring interactively
+=======================
+
+
+If you only need a connection to the first database, run:
+
+  require './web/config/ext_requirements.rb'
+
+most classes should be loaded, so you can work comfortably. If you plan
+to write an external tool that does not need the second database, use
+this line to make a connection.
+
+You can access the results either directly or using the ResultTools
+wrapper. By default, an instance of this class is available in the RT
+variable. Have a look at web/app/lib/result_tools.rb for details.
+
+
+
+
+If you need access to the rails database as well, run
+
+  require './web/config/environment.rb'
+
+this will give you access to BOTH databases. Results may be accessed
+via RT as mentioned above or via any of the Rails/Seee Models. If you
+want to test something interactively, it is recommended to use this line
+for simplicity.
+
+Here’s an example that uses both databases:
+  Course.find_all_by_title("Bruno ist doof").map { |c| c.returned_sheets }
+
+The find method is common Rails magic and works on database #2. The
+returned_sheets method is defined in the Course model
+(web/app/models/course.rb). It uses the ResultTools instance to access
+database #1 and retrieve the number of sheets handed in for that course.

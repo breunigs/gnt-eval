@@ -21,4 +21,15 @@ module ApplicationHelper
 
     Term.currently_active
   end
+
+  def comment_image_link
+    Seee::Config.file_paths[:comment_images_public_link]
+  end
+
+  # works just like normal fragment cache command “cache”, except the
+  # cache may be easily toggled off by setting the second argument to
+  # false.
+  def optional_cache(key, cache, &block)
+    cache ? cache(key, &block) : block.call
+  end
 end

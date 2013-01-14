@@ -1,0 +1,87 @@
+<%
+text = ""
+isCourse = false
+if @workon.is_a?(Course)
+  isCourse = true
+  many = @workon.course_profs.size > 1
+  @workon.course_profs.each do |cp|
+    next if cp.c_pics.all? { |p| p.text.blank? }
+    text << %(\\vspace{0.4cm}\\textbf{#{cp.prof.fullname}}\n) if many
+    text << %(\\begin{compactitem}\n)
+    cp.c_pics.each do |p|
+      next if p.text.blank?
+      text << %(  \\item #{p.text}\n)
+    end
+    text << %(\\end{compactitem}\n\n\n)
+  end
+elsif @workon.is_a?(Tutor)
+  unless @workon.pics.all? { |p| p.text.blank? }
+    text << %(\\begin{compactitem}\n)
+    @workon.pics.each do |p|
+      next if p.text.blank?
+      text << %(  \\item #{p.text}\n)
+    end
+    text << %(\\end{compactitem}\n\n\n)
+  end
+else
+  raise "Unknown class; not implemented"
+end
+text.strip!
+%>
+
+<% content_for :title, " // Combine!" %>
+<% content_for :script, %(<script>
+  var ident = '#{@ident}';
+  var combinedText = #{text.to_json};
+
+  function setCombinedText() {
+    var e = $('#text').data('editor').getSession();
+
+    // only ask if the comment field is not empty
+    if($.trim(e.getValue()) !== "" && !confirm('This will overwrite the current text in the comment field. Continue?'))
+      return;
+
+    e.setValue(combinedText);
+    renderPreview();
+  }
+</script>).html_safe %>
+
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
+
+
+
+
+<div>
+  <div style="width:60%;float:left">
+    <h2>Your Job: <%=isCourse ? "Group" : "Sort" %>!</h2>
+    <ul>
+      <li>check auto-combine worked correctly</li>
+      <% if isCourse %>
+        <li><b>group comments sensibly</b>. Usually only required if there are many comments.
+          <ul>
+            <li>group by topic (study group orga, exercises, …) and profs</li>
+            <li>combine frequent, similar comments like this: <i>Beccy ist doof 37$\times$</i></li>
+          </ul>
+        </li>
+      <% end %>
+      <li><b>move comments that do not belong here to the very top</b>. Rule of thumb: <%=isCourse ? "concerns tutor or study group’s room? Move it!" : "doesn’t concern tutor or room? Move it!" %> </li>
+      <li>ensure insults are commented out. Don’t delete them. </li>
+    </ul><br/>
+
+    <a onclick="setCombinedText()">start over (“auto combine comments”)</a>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_combination") %>
+  <%= hidden_field_tag(:type, @workon.class) %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
+  <div class="group">
+    <%= text_area_tag(:text, @workon.comment.blank? ? text : @workon.comment, :style => 'width:99%')%>
+  </div>
+
+  <%= render "comment_preview" %>
+  <%= render "action_buttons" %>
+</form>

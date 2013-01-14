@@ -63,6 +63,8 @@ module FunkyTeXBits
   def texpreview(code)
     return false, ["(no content)"], "", "" if code.nil? || code.strip.empty?
 
+    exec_time_start = Time.now
+
     name = Digest::SHA256.hexdigest(code)
     path = File.join(temp_dir, "preview_#{name}")
 
@@ -82,22 +84,34 @@ module FunkyTeXBits
       f.write(head + spellcheck(code) + foot)
     end
 
+    logger.debug "TEX PREVIEW: Setup Phase #{Time.now - exec_time_start}" if logger
+    exec_time_start = Time.now
+
     error = `cd #{temp_dir} && #{Seee::Config.commands[:pdflatex_real]} "#{path}.tex" 2>&1`
     ex = $?.to_i + (File.exists?("#{path}.pdf") ? 0 : 1)
     error << "<hr><pre>" << head << spellcheck(code) << foot << "</pre>"
     exitcodes << ex
 
+    logger.debug "TEX PREVIEW: PDF Render #{Time.now - exec_time_start}" if logger
+    exec_time_start = Time.now
+
     if ex == 0
       error << `#{Seee::Config.application_paths[:convert]} -density 100 "#{path}.pdf" "#{path}.png"  2>&1`
       exitcodes << $?.to_i
+      logger.debug "TEX PREVIEW: PDF to PNG #{Time.now - exec_time_start}" if logger
+      exec_time_start = Time.now
     end
     failed = (exitcodes.inject(0) { |sum,x| sum += x}) > 0
 
+    dim = nil
     # convert to base64
     if File.exists?("#{path}.png")
       require 'base64'
       data = File.open("#{path}.png", 'rb') { |f| f.read }
       base64 = Base64.encode64(data)
+      dim = FastImage.size("#{path}.png")
+      logger.debug "TEX PREVIEW: PNG to Base64 #{Time.now - exec_time_start}" if logger
+      exec_time_start = Time.now
     end
 
     # cleanup temp files
@@ -112,7 +126,10 @@ module FunkyTeXBits
     # highlight likely TeX errors
     error.gsub!(/(^.*\nl.[0-9]+.*)/, "<span class=\"red\">\\0</span>")
 
-    return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64
+    logger.debug "TEX PREVIEW: Cleanup #{Time.now - exec_time_start}" if logger
+    logger.debug "TEX PREVIEW: Base64 size: #{base64.size}" if base64
+
+    return failed, exitcodes, error.gsub(/[\n\r]+/, "<br/>"), base64, dim
   end
 
   def t(item)
