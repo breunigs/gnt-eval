@@ -32,6 +32,14 @@ function hack_line_offset_into_ace(editor) {
 }
 
 $(document).ready(function() {
+  if($.browser.webkit) {
+    // fix strange sizing issue with ace that only happens in Webkit
+    // for some reason. See https://github.com/ajaxorg/ace/issues/1202
+    $("head").append("<style>body > div { padding: 0; } </style>");
+    $("body > div").css("padding", "10px");
+  }
+
+
   $("textarea").each(function(index, txt) {
     txt = $(txt);
     if(txt.length == 0 || txt.attr("readonly")) return;
