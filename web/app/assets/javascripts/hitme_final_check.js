@@ -17,7 +17,7 @@ function renderPreview(id) {
     function() {
       // http://stackoverflow.com/a/4086085/1684530
       $(this).wrapInner('<div/>');
-      $(this).animate( {height: $('div:first',this).height()} );
+      $(this).animate({height: $('div:first', this).height()} );
       con.children(".rendermsg").html('<a onclick="renderPreview(\''+id+'\')">Force Update now</a>');
       renderInProgress[id] = false;
     }
