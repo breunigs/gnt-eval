@@ -234,6 +234,7 @@ def make_pdf_for(cp, dirname)
   filename = File.join(dirname, cp.get_filename)
   File.open(filename + '.tex', 'w') do |h|
     h << cp.course.form.abstract_form.to_tex(
+      cp.course.form.db_table,
       cp.course.language,
       cp.course.title,
       cp.prof.firstname,

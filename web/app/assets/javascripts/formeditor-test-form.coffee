@@ -3,7 +3,6 @@
 # as their only importance is for displaying the form when TeXing it.
 
 window.formEditorTestForm = """--- !ruby/object:AbstractForm
-db_table: "DUMMY DEBUG TABLE"
 texfoot: ""
 texhead: " "
 title:

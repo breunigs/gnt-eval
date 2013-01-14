@@ -13,7 +13,6 @@ FormEditor.prototype.parseAbstractForm = function(data) {
   var langString = this.languages.join(" ").replace(/:/g, "");
   this.createHiddenBox("availableLanguages", langString);
 
-  this.createTextBox(path + "/db_table", "database table");
   this.append("<br/>");
 
   for(var x in data) {

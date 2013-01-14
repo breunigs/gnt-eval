@@ -52,7 +52,7 @@ def make_sample_sheet(form, lang)
   generate_barcode("0"*8, dir + "barcode00000000.pdf")
 
   File.open(filename + ".tex", "w") do |h|
-    h << form.abstract_form.to_tex(lang)
+    h << form.abstract_form.to_tex(lang, form.db_table)
   end
 
   puts "Wrote #{filename}.tex"

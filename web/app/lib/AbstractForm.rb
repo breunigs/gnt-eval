@@ -3,7 +3,7 @@
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
-# - AbstractForm: Basic class containing pages and dbtable
+# - AbstractForm: Basic class containing pages and headers
 # - Page: Containing list of questions on that particular page
 # - Question: see class.
 # - Box: see class
@@ -371,7 +371,7 @@ class Page
 end
 
 
-# main form, list of pages and dbtable.
+# main form, list of pages and headers.
 #
 
 class AbstractForm
@@ -398,7 +398,8 @@ class AbstractForm
   attr_accessor :pages
 
   # database table to use for this form
-  attr_accessor :db_table
+  attr_reader :db_table
+
 
   # we differentiate gender here
   attr_accessor :lecturer_header
@@ -420,9 +421,8 @@ class AbstractForm
     @pages.count
   end
 
-  def initialize(pages = [], db_table = '')
+  def initialize(pages = [])
     @pages = pages
-    @db_table = db_table
   end
 
   # direct access to sections
@@ -495,6 +495,7 @@ class AbstractForm
   # specific data is provided it will be filled with some default values
   def to_tex(
       lang = I18n.locale,
+      db_table = "db_table_name",
       title = "Jasper ist doof 3",
       lecturer_first = "Oliver",
       lecturer_last = "Istdoof",

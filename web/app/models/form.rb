@@ -72,16 +72,13 @@ class Form < ActiveRecord::Base
   def form_checks_out?
     return false unless abstract_form_valid?
     return false if has_duplicate_db_columns?
-    return false if db_table.blank?
     return false if questions.count { |q| q.type == "tutor_table" } >= 2
     return false unless find_out_of_scope_variables.empty?
     true
   end
 
-  # returns an auto-generated string as db table. Historically this was
-  # set manually, but this is discouraged now.
+  # returns an auto-generated string as db table.
   def db_table
-    return abstract_form.db_table if abstract_form_valid? && !abstract_form.db_table.blank?
     name = ("evaldata_" + term.title + "_" + title).strip
     name = ActiveSupport::Inflector.transliterate(name).downcase
     name.gsub(/[^a-z0-9_-]+/, "_")
