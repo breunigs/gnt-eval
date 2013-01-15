@@ -13,6 +13,8 @@ Seee::Application.routes.draw do
   match "/tutors" => "tutors#index"
   resources :courses do
     resources :tutors
+    get "/emergency_printing" => "courses#emergency_printing"
+    post "/emergency_printing" => "courses#emergency_printing"
     get "/tutors/:id/preview" => "tutors#preview", :as => "tutor_preview"
     post "/tutors/:id/result_pdf" => "tutors#result_pdf", :as => "tutor_result_pdf"
     member do

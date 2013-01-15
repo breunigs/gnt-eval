@@ -229,6 +229,25 @@ class CoursesController < ApplicationController
     end
   end
 
+  def emergency_printing
+    @amount = Seee::Config.settings[:emergency_printing_amount]
+    @course = Course.find(params[:course_id])
+    if request.method.to_s.upcase == "POST"
+      exit_codes = []
+      @course.course_profs.each do |cp|
+        exit_codes << cp.print_execute(@amount)
+      end
+      if exit_codes.sum == 0
+        flash[:notice] = "Should print #{@amount} sheets now for each prof."
+      else
+        flash[:error] = "Printing returned an error. Call for help."
+      end
+      redirect_to :course_emergency_printing
+    else
+      render :action => :emergency_printing
+    end
+  end
+
   private
   # looks if critical changes to a course were made and reports them iff
   # the course is critical.
