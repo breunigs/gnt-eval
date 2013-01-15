@@ -1,0 +1,97 @@
+@import 'mixins';
+@import 'variables';
+
+label {
+  padding:0.2rem;
+  padding-right:0.4rem;
+  display:inline-block;
+}
+
+input:not(.button), textarea, select {
+  background-color: #FBFBFB;
+  @include gradient(#FFFFFF, #FBFBFB);
+  border: 0.1rem solid #D4D4D4;
+  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 0.4rem;
+  height:1.4rem;
+  font-size:1.3rem;
+  min-width:25rem;
+  &:focus, &:active {
+    border:1px solid #999;
+  }
+}
+
+input[type=checkbox] + label {
+  cursor:pointer;
+}
+
+input + span.hint {
+  color:#777;
+  font: {
+    style:italic;
+    size:90%;
+  }
+  padding: 0.4px 0;
+  padding: 0.4rem 0;
+  display:block;
+}
+
+button {
+  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
+  padding: 0.4rem !important;
+  height:1.1rem;
+}
+
+td, th {
+  > label {
+    padding:0;
+  }
+}
+
+select {
+  min-width:26rem;
+  height:2rem;
+  padding:0;
+  padding-top:0.2rem;
+  option {
+    padding:0.2rem;
+    &:nth-child(2n+1) {
+      background:#fafafa;
+    }
+    &:nth-child(2n) {
+      background:#fff;
+    }
+    &[disabled] {
+      text-decoration: line-through;
+    }
+  }
+
+  optgroup {
+    font-weight:bold;
+    padding-top:1rem;
+    background:#fff;
+  }
+}
+
+.field_with_errors {
+  input, textarea, select {
+    border:1px solid #FFB3B3;
+    box-shadow: 0 0 0.2rem rgba(255, 54, 54, 0.2);
+  }
+}
+
+::-webkit-input-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+:-moz-placeholder {
+  color:#777;
+  font-style:italic;
+}
+
+
+:-ms-input-placeholder {
+  color:#777;
+  font-style:italic;
+}

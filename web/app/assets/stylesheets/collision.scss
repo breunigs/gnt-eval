@@ -1,0 +1,38 @@
+@import 'mixins';
+
+#darkened, #darkened2 {
+  background:rgba(0,0,0, 0.1);
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1001; // ace-gutter has z-index 1000
+  margin:0;
+  pointer-events:none;
+  display:none;
+}
+
+#collision-warning {
+  border-top-left-radius: 0.5em;
+  border-bottom-left-radius: 0.5em;
+  width: 25em;
+  position: fixed;
+  top: 4em;
+  right:0em;
+  z-index: 1002;
+  border: 1px solid #333;
+  border-right:0;
+  text-align:justify;
+  cursor:pointer;
+  @include transition(right .4s ease-in-out);
+}
+
+#collision-warning.collapsed {
+  right:-23em;
+}
+
+#collision-warning.hidden {
+  pointer-events:none;
+  right:-27em;
+}

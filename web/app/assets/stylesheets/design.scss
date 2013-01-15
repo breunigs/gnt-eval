@@ -1,35 +1,5 @@
-/* ensures the contents of the element will be cleared after the element.
-   Uses content:after rules. */
-@mixin clear-after {
-  &:after {
-    content: "";
-    display: block;
-    height: 0;
-    clear: both;
-    overflow:hidden;
-    margin-bottom:-3px;
-    margin-bottom:-0.3rem;
-  }
-}
-
-// applies background grandient to element for all browsers.
-@mixin gradient($from, $to) {
-  background-image: -moz-linear-gradient($from, $to);
-  background-image: -o-linear-gradient($from, $to);
-  background-image: -ms-linear-gradient($from, $to);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
-}
-
-
-@mixin transition($transition) {
-  -ms-transition: $transition;
-  -moz-transition: $transition;
-  -o-transition: $transition;
-  -webkit-transition: $transition;
-  transition: $transition;
-}
-
-
+@import 'mixins';
+@import 'variables';
 
 * {
   padding:0;
@@ -65,9 +35,6 @@ body {
   font-size:1.3rem;
 }
 
-$group_border: 1px solid #aaa;
-$group_box_shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.2);
-
 body > div:first-of-type {
   border-top:0;
   margin-top:0;
@@ -88,43 +55,6 @@ h2 {
 h3 {
   margin-bottom:3px;
   margin-bottom:0.3rem;
-}
-
-.warning, .error, .info, .notice {
-  margin: 4px 0 4px 0;
-  margin: 0.4rem 0 0.4rem 0;
-  font-style:italic;
-  &:before {
-    float:left;
-    font-size: 300%;
-    margin-top: -5px;
-    margin-top: -0.5rem;
-    margin-right: 8px;
-    margin-right: 0.8rem;
-    font-style:normal;
-  }
-  @include clear-after;
-}
-
-.info, .notice {
-  color: #404DFF;
-  &:before {
-    content: "ℹ";
-  }
-}
-
-.warning {
-  color: #9F6000;
-  &:before {
-    content: "⚠";
-  }
-}
-
-.error {
-  color: #D8000C;
-  &:before {
-    content: "⚡";
-  }
 }
 
 .infobox {
@@ -199,8 +129,18 @@ table {
    * This allows for table filtering where the even/odd are added via js.
    */
   tr:nth-child(2n):not(.odd):not(.even), .even {
-    background:#f2f2f2;
+    background:$table_stripe_color;
   }
+}
+
+.two-tables-left {
+  float:left;
+  min-width:50%;
+  margin-right:2em;
+}
+
+.two-tables-right {
+  float:left;
 }
 
 ul, ol {
@@ -220,120 +160,10 @@ ol {
   color:#777;
 }
 
-label {
-  padding:2px;
-  padding:0.2rem;
-  padding-right:4px;
-  padding-right:0.4rem;
-  display:inline-block;
-}
-
-input:not(.button), textarea, select {
-  background-color: #FBFBFB;
-  @include gradient(#FFFFFF, #FBFBFB);
-  border: 1px solid #D4D4D4;
-  border: 0.1rem solid #D4D4D4;
-  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
-  padding: 4px;
-  padding: 0.4rem;
-  height:14px;
-  height:1.4rem;
-  font-size:13px;
-  font-size:1.3rem;
-  min-width:250px;
-  min-width:25rem;
-  &:focus, &:active {
-    border:1px solid #999;
-  }
-}
-
-input[type=checkbox] + label {
-  cursor:pointer;
-}
-
-input + span.hint {
-  color:#777;
-  font: {
-    style:italic;
-    size:90%;
-  }
-  padding: 0.4px 0;
-  padding: 0.4rem 0;
-  display:block;
-}
-
-button {
-  border-radius: 0.2rem 0.2rem 0.2rem 0.2rem;
-  padding: 4px !important;
-  padding: 0.4rem !important;
-  height:11px;
-  height:1.1rem;
-}
-
-td, th {
-  > label {
-    padding:0;
-  }
-}
-
-select {
-  min-width:260px;
-  min-width:26rem;
-  height:20px;
-  height:2rem;
-  padding:0;
-  padding-top:2px;
-  padding-top:0.2rem;
-  option {
-    padding:2px;
-    padding:0.2rem;
-    &:nth-child(2n+1) {
-      background:#fafafa;
-    }
-    &:nth-child(2n) {
-      background:#fff;
-    }
-    &[disabled] {
-      text-decoration: line-through;
-    }
-  }
-
-  optgroup {
-    font-weight:bold;
-    padding-top:10px;
-    padding-top:1rem;
-    background:#fff;
-  }
-}
-
 textarea {
   min-height:100px;
   min-height:10rem;
 }
-
-.field_with_errors {
-  input, textarea, select {
-    border:1px solid #FFB3B3;
-    box-shadow: 0 0 0.2rem rgba(255, 54, 54, 0.2);
-  }
-}
-
-::-webkit-input-placeholder {
-  color:#777;
-  font-style:italic;
-}
-
-:-moz-placeholder {
-  color:#777;
-  font-style:italic;
-}
-
-
-:-ms-input-placeholder {
-  color:#777;
-  font-style:italic;
-}
-
 
 table.large_text_area {
   width: 100%;
@@ -357,10 +187,11 @@ span.error {
 }
 
 a, .hold_button:not(.hold_button_form_compat) input {
-  color:#FF3636;
+  color:$link_color;
   text-decoration:none;
   background:transparent;
   cursor:pointer;
+  text-shadow:none;
   &:hover:not(.button):not(.ui-state-default):not(.ui-corner-all) {
     border: 0;
     border-bottom:0.1rem dotted #FF3636;
@@ -445,41 +276,4 @@ select.question {
 
 .red {
   color:red;
-}
-
-#darkened, #darkened2 {
-  background:rgba(0,0,0, 0.1);
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:1001; // ace-gutter has z-index 1000
-  margin:0;
-  pointer-events:none;
-  display:none;
-}
-
-#collision-warning {
-  border-top-left-radius: 0.5em;
-  border-bottom-left-radius: 0.5em;
-  width: 25em;
-  position: fixed;
-  top: 4em;
-  right:0em;
-  z-index: 1002;
-  border: 1px solid #333;
-  border-right:0;
-  text-align:justify;
-  cursor:pointer;
-  @include transition(right .4s ease-in-out);
-}
-
-#collision-warning.collapsed {
-  right:-23em;
-}
-
-#collision-warning.hidden {
-  pointer-events:none;
-  right:-27em;
 }
