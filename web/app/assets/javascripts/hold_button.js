@@ -2,6 +2,8 @@ function hold_button(elem, seconds, only_once, url) {
   var t;
 
   var exe = function() {
+    if(!confirm("Continue?")) return;
+
     if(only_once) {
       elem.mousedown = function () { return false; }
       elem.setAttribute("disabled", "disabled");
@@ -16,7 +18,7 @@ function hold_button(elem, seconds, only_once, url) {
 
   elem.onclick = function (event) { event.preventDefault(); }
 
-  elem.onmousedown = function() {
+  elem.onmousedown = elem.ontouchstart = function() {
     if(t) clearTimeout(t);
     t = setTimeout(exe, seconds*1000);
   }
@@ -24,10 +26,12 @@ function hold_button(elem, seconds, only_once, url) {
   var clear = function () { clearTimeout(t); }
   elem.onmouseup = clear;
   elem.onmouseout = clear;
+  elem.ontouchend = clear;
 }
 
 // auto linkify elements with class "hold"
 $(document).ready(function() {
+
   $(".hold").each(function(ind, elem) {
     if(!$(elem).data("url"))
       return;
@@ -35,14 +39,16 @@ $(document).ready(function() {
     var t;
     elem.onclick = function (event) { event.preventDefault(); }
     var exe = function() {
+      if(!confirm("Continue?")) return;
       window.location = $(elem).data("url");
     }
-    elem.onmousedown = function() {
+    elem.onmousedown = elem.touchstart = function() {
       if(t) clearTimeout(t);
       t = setTimeout(exe, 1000);
     }
     var clear = function () { clearTimeout(t); }
     elem.onmouseup = clear;
     elem.onmouseout = clear;
+    elem.ontouchend = clear;
   });
 });
