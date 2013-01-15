@@ -11,6 +11,7 @@
  *= require design
  *= require collision
  *= require messages
+ *= require lists
  *= require form_elements
  *= require css-noise
  *= require commentview
@@ -25,4 +26,5 @@
  *= require jquery-visualize-custom
  *= require formeditor
  *= require hitme
+ *= require hold_button
 */
