@@ -125,18 +125,23 @@
   <% end %>
 </div>
 
-<% if false %>
 <div>
-  <h3>Queue Lengths</h3>
-  This table shows how many items are in each queue <i>right now</i>. Note that higher items feed the lower ones; say once a bunch of comments have been proofread they may become available for combining. In other words: only zeros read from the top matter.
+  <h3>Progress</h3>
+  It’s assumed amount of work scales linearly with number of comments, so take it with a grain of salt.<br/>
+  Also, there are about <b><%=Term.sheets_to_go.first.to_i%> questionnaires left to process</b>, which are not included below.
   <%
-    to_type = Hitme.get_all_comments_by_step(0).size
-    to_proofread = Hitme.get_all_comments_by_step(1).size
+    stages = [Hitme::TYPING, Hitme::PROOFREADING, Hitme::COMBINING, Hitme::FINALCHECK, Hitme::DONE]
+    data = stages.map { |s| Hitme.get_all_comments_by_step(s).size }
+    all = data.sum.to_f
+
+    def n(d, all)
+      number_to_percentage( 100*d/all, :precision => 0)
+    end
   %>
   <table>
-    <tr><th>comments to type</th><td><%=to_type%></td><td></td></tr>
-    <tr><th>comments to proofread</th><td><%=to_proofread%></td></tr>
-    <tr><th>lectures / tutors to combine</th><td><%= Hitme.get_all_comments_by_step(1).size%></td></tr>
+    <tr><th>typing          </th><td><%=n(all-data[0]        , all)%></td><td rowspan="4" style="font-size:400%;padding-left:2rem"> Σ=<%=n((data[1] + 2*data[2] + 3*data[3] + 4*data[4])/4.0, all)%></td></tr>
+    <tr><th>proofreading    </th><td><%=n(all-data[0]-data[1], all)%></td></tr>
+    <tr><th>grouping/sorting</th><td><%=n(data[3]+data[4]    , all)%></td></tr>
+    <tr><th>final touching  </th><td><%=n(data[4]            , all)%></td></tr>
   </table>
 </div>
-<% end %>
