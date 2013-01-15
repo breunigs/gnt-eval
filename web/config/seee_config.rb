@@ -146,6 +146,10 @@ module Seee
       # Same directory as above, but available via http
       :comment_images_public_link => "http://localhost:3000/comments",
 
+      # public URL to the seee web gui. It’s required in order to
+      # generate the correct links on the cover sheets.
+      :web_gui_public_link => "http://localhost:3000/",
+
       # the directory where the final form pdf files will be stored.
       # this location will be printed below each howto, in case additional
       # sheets need to be printed.

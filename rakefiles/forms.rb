@@ -103,8 +103,11 @@ namespace :forms do
       work_queue.enqueue_b do
         cp = c.course_profs.sort_by { |cp| cp.get_filename }.last
         # probably should have language selector…
-        tex = ERB.new(RT.load_tex("../form_cover")).result(binding)
         path = "#{dirname}cover #{cp.get_filename}.tex"
+        em_url = "#{Seee::Config.file_paths[:web_gui_public_link]}/courses/#{c.id}/emergency_printing"
+        qr_url = "#{dirname}qrcode_#{c.id}.png"
+        `echo "#{em_url}" | qrencode -o "#{qr_url}"` unless File.exist?(qr_url)
+        tex = ERB.new(RT.load_tex("../form_cover")).result(binding)
         File.open(path, 'w') {|f| f.write(tex) }
         xetex_to_pdf(path, true, true)
         prog += 1

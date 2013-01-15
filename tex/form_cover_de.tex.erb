@@ -1,6 +1,8 @@
 \documentclass{article}
 \usepackage{amssymb}
 \usepackage{geometry}
+\usepackage{url}
+\usepackage{wrapfig}
 \geometry{a4paper,left=2cm, right=2cm, top=2cm, bottom=2cm}
 \usepackage{fontspec}
 \setlength{\parindent}{0pt}
@@ -73,4 +75,13 @@ Profs & Raum & Zeit \\
 \hline
 \end{tabular}
 
+\vfill
+
+\section*{zu wenig Bögen?}
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \vspace{-30pt}
+    \hfill\includegraphics[width=30mm]{qrcode_<%=c.id%>.png}
+\end{wrapfigure}
+GAU! Rufe im FS-Raum an und oder drucke über folgende URL in <%=Seee::Config.settings[:emergency_printing_amount]%>er Schritten Bögen aus:\\
+\url{<%=em_url%>}
 \end{document}
