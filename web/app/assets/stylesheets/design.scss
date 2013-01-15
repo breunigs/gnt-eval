@@ -94,11 +94,6 @@ body > div, div.group {
   @include clear-after;
 }
 
-.hold_button input[disabled], .hold_button input[disabled]:hover {
-  text-decoration: line-through;
-}
-
-
 table {
   margin-left:-1px; /* browsers insert 1px between thead/tbody and the table tag */
   margin-bottom:10px;
@@ -141,19 +136,6 @@ table {
 
 .two-tables-right {
   float:left;
-}
-
-ul, ol {
-  list-style-position:outside;
-  margin-left:1.4rem;
-  margin-top:0.3rem;
-  li {
-    padding:0.2rem;
-  }
-}
-
-ol {
-  margin-left: 2.2rem;
 }
 
 .fade {
@@ -201,21 +183,6 @@ a, .hold_button:not(.hold_button_form_compat) input {
 
 a span {
   color: inherit;
-}
-
-.hold_button:not(.hold_button_form_compat) input {
-  border:0;
-  border-bottom:1px dotted transparent;
-  display:inline;
-  height:auto;
-  width:auto;
-  padding:0;
-  min-width:0;
-  border-radius:0;
-}
-
-.hold_button_form_compat {
-  float:left;
 }
 
 .ui-datepicker {
