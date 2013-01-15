@@ -44,7 +44,7 @@ Sprache:  & <%= c.language %> \\
 Evaluist: & <%= c.fs_contact_addresses_short.escape_for_tex %> \\
 Fakultät: & <%= c.faculty.longname.escape_for_tex %>
 \end{tabular}
-
+\fontfamily{lmr}\selectfont
 
 \section*{Daten aus dem LSF}
 <%
@@ -74,10 +74,10 @@ Profs & Raum & Zeit \\
 <% end %>
 \hline
 \end{tabular}
+\fontfamily{lmr}\selectfont
 
 \vfill
-
-\section*{zu wenig Bögen?}
+\section*{\fontfamily{lmr}\selectfont zu wenig Bögen?}
 \begin{wrapfigure}{r}{0.5\textwidth}
   \vspace{-30pt}
     \hfill\includegraphics[width=30mm]{qrcode_<%=c.id%>.png}
