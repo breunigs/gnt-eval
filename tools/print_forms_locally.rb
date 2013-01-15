@@ -70,7 +70,7 @@ else
     next false unless m = p.match(/^--amount=([0-9]+)$/)
     puts "Automatic count detection is deactivated. Will always print #{m[1]} sheets."
     overwrite_count = true
-    given_amount = m[1]
+    given_amount = m[1].to_i
     true
   end
 end
@@ -97,7 +97,10 @@ end
 
 # now check the given files if they are suitable
 poss.each do |f|
-  next unless File.exist?(f)
+  unless File.exist?(f)
+    puts "File #{f} not found, skipping"
+    next
+  end
   next if File.basename(f).start_with?(" multiple")
   data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
   next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
@@ -136,7 +139,7 @@ forms_sorted = forms.sort do |a,b|
 end
 
 forms_sorted.each do |file, data|
-  count = data[:count]
+  count = overwrite_count ? given_amount : data[:count]
   howtos = ([data[:lang]] + DEFAULT_HOWTOS).uniq
 
   puts
@@ -174,9 +177,8 @@ forms_sorted.each do |file, data|
 
   # issue print commands / submit to queue
   cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
-  final = overwrite_count ? given_amount : count
   cover =  "lpr            -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
-  print =  "lpr -##{final} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
+  print =  "lpr -##{count} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
   banner = "lpr -#1        -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
   howtos.map! { |h| "lpr -#1 -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
