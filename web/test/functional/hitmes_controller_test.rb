@@ -11,6 +11,13 @@ class HitmesControllerTest < ActionController::TestCase
 
   def test_should_preview_random_text
     post :preview_text, :text => "Hi, I’m a \\LaTeX{} test text"
+    assert_response :success
+    assert_select ".error", 0
+    assert_select "img", 1
+    post :preview_text, :text => "\\textrightarrow %Hi, I’m a comment "
+    assert_response :success
+    assert_select ".error", 0
+    assert_select "img", 1
   end
 
   def test_skipping_comment_does_not_advance_step
