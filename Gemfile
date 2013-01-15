@@ -30,6 +30,7 @@ group :assets do
   gem "coffee-rails", "~> 3.2.2"
   gem "uglifier", ">= 1.0.3"
   gem "therubyracer"
+  gem "yui-compressor"
 end
 
 group :test do
