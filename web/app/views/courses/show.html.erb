@@ -7,13 +7,18 @@
 
   <table style="float:left;min-width:50%;">
     <tr><th colspan="2" style="font-size:120%">master data</th></tr>
-    <% comment_link = link_to "comments: #{@course.c_pics.size}", (edit_course_path(@course) + "#commentfield") %>
+    <%
+      comment_link = link_to "#{@course.c_pics.size} comments (#{number_to_percentage(@course.c_pics.size/@course.returned_sheets.to_f*100, :precision => 0)})", (edit_course_path(@course) + "#commentfield")
+      comment_returned = "#{@course.returned_sheets} returned (#{number_to_percentage(@course.return_quota*100, :precision => 0)})"
+      spacer = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+      stud_returned = "#{@course.students} #{spacer} #{comment_returned} #{spacer} #{comment_link}".html_safe
+    %>
     <% for item in [
         [:title,    @course.title],
         [:term,     link_to(@course.term.title, edit_term_path(@course.term))],
         [:faculty,  link_to(@course.faculty.longname, edit_faculty_path(@course.faculty))],
         [:form,     link_to("#{@course.form.name} (language: #{@course.language})", @course.form)],
-        [:students, "#{@course.students} (returned sheets: #{@course.returned_sheets}; #{comment_link})".html_safe],
+        [:students, @course.returned_sheets? ? stud_returned : @course.students],
         [:note,     @course.note]] %>
       <tr>
         <th><%=Course.human_attribute_name(item.shift) %></th>
