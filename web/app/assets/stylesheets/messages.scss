@@ -19,20 +19,20 @@
 .info, .notice {
   color: #404DFF;
   &:before {
-    content: "ℹ";
+    content: "\2139"; // ℹ
   }
 }
 
 .warning {
   color: #9F6000;
   &:before {
-    content: "⚠";
+    content: "\26A0"; // ⚠
   }
 }
 
 .error {
   color: #D8000C;
   &:before {
-    content: "⚡";
+    content: "\26A1"; // ⚡
   }
 }
