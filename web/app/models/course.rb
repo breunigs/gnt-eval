@@ -132,13 +132,18 @@ class Course < ActiveRecord::Base
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
-    return 0 if profs.empty?
+    return 0 if course_profs.empty?
     RT.count(form.db_table, {:barcode => barcodes})
   end
 
   # returns true if there have been sheets returned.
   def returned_sheets?
     returned_sheets > 0
+  end
+
+  # calculates the ratio of returned_sheets/printed_sheets
+  def return_quota
+    returned_sheets / (course_profs.size * students).to_f
   end
 
   # the head per course. this adds stuff like title, submitted
