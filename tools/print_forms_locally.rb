@@ -5,6 +5,9 @@ require File.dirname(__FILE__) + "/../web/config/ext_requirements.rb"
 
 interactive = true
 simulate = false
+print_howtos = true
+overwrite_count = false
+given_amount = 0
 
 # Define which tray contains which type of sheet
 TRAY_NORMAL="1Tray,2Tray,3Tray"
@@ -55,6 +58,20 @@ else
     simulate = true
     poss.delete("--simulate")
     puts "Simulating only. LPR is not really called."
+  end
+
+  if poss.include?("--no-howtos")
+    print_howtos = false
+    poss.delete("--no-howtos")
+    puts "Not printing howtos."
+  end
+
+  poss.reject! do |p|
+    next false unless m = p.match(/^--amount=([0-9]+)$/)
+    puts "Automatic count detection is deactivated. Will always print #{m[1]} sheets."
+    overwrite_count = true
+    given_amount = m[1]
+    true
   end
 end
 
@@ -157,18 +174,19 @@ forms_sorted.each do |file, data|
 
   # issue print commands / submit to queue
   cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
+  final = overwrite_count ? given_amount : count
   cover =  "lpr            -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
-  print =  "lpr -##{count} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
+  print =  "lpr -##{final} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
   banner = "lpr -#1        -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
   howtos.map! { |h| "lpr -#1 -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
     system(cover) if File.exists?(cover_file)
-    howtos.each { |h| system(h) }
+    howtos.each { |h| system(h) } if print_howtos
     system(print)
     system(banner)
   else
     puts(cover) if File.exists?(cover_file)
-    howtos.each { |h| puts(h) }
+    howtos.each { |h| puts(h) } if print_howtos
     puts(print)
     puts(banner)
   end
