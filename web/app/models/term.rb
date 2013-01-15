@@ -22,6 +22,36 @@ class Term < ActiveRecord::Base
     Term.currently_active.map { |t| t.forms }.flatten
   end
 
+  # returns the expected amount of sheets not yet processed for the
+  # currently active terms. Also returns the weighted average return
+  # quota as second parameter.
+  def self.sheets_to_go
+    # calculate the weighted average of the return quota.
+    return_quota = 0
+    sheets_done = 0
+    sheets_to_go = 0
+    Term.currently_active.each do |t|
+      t.courses.includes(:course_profs).each do |c|
+        if c.returned_sheets?
+          return_quota += c.return_quota*c.returned_sheets
+          sheets_done += c.returned_sheets
+        else
+          sheets_to_go += c.students
+        end
+      end
+    end
+
+    # fill in default value if there aren’t any returned sheets yet
+    if return_quota == 0
+      return_quota = 0.75
+    else
+      return_quota /= sheets_done.to_f
+    end
+
+    sheets_to_go *= return_quota
+    return sheets_to_go, return_quota
+  end
+
   # lists all barcodes associated with the current term
   def barcodes
     course_profs.map { |cp| cp.id }
