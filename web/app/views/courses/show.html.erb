@@ -1,11 +1,14 @@
+<% content_for :enable_small_screen, "true" %>
 <% content_for :title, "“#{@course.title}”" %>
 
 <div>
-  <h2><%=@course.title %> (<%=@course.term.title %>)</h2>
-  <%= courseLinksForShowPage %>
-  <br style="clear:both"/>
+  <div class="rd-hide">
+    <h2><%=@course.title %> (<%=@course.term.title %>)</h2>
+    <%= courseLinksForShowPage %>
+    <br style="clear:both"/>
+  </div>
 
-  <table style="float:left;min-width:50%;">
+  <table class="two-tables-left">
     <tr><th colspan="2" style="font-size:120%">master data</th></tr>
     <%
       comment_link = link_to "#{@course.c_pics.size} comments (#{number_to_percentage(@course.c_pics.size/@course.returned_sheets.to_f*100, :precision => 0)})", (edit_course_path(@course) + "#commentfield")
@@ -27,7 +30,7 @@
     <% end %>
   </table>
 
-  <table style="float:left;margin-left:2em;">
+  <table class="two-tables-right">
     <tr><th colspan="2" style="font-size:120%">adminstrative data</th></tr>
     <% for item in [
         [:evaluator,      @course.evaluator],
@@ -48,7 +51,7 @@
   </table>
 </div>
 
-<div>
+<div class="rd-hide">
   <h3><%=latex_logo%> Preview</h3>
   <div class="preview">
     <%= render "shared/preview", :text => @course.summary %>
@@ -61,12 +64,12 @@
   <h3>Professors</h3>
   <% if @course.profs.empty? %><span class="warning">No professors have been specified so far. The course cannot be evaluated and no sheets will be printed until at least one professor is added.</span><% end %>
 
-  <table>
+  <table class="rd-hide-2 rd-hide-3">
     <tr>
       <th>Name</th>
       <th>Mail</th>
       <th>ID/Barcode</th>
-      <th colspan="<%=@course.critical? ? 1 : 2%>">Actions</th>
+      <th colspan="3">Actions</th>
     </tr>
     <% @course.course_profs.each do |cp| %>
     <tr>
@@ -81,7 +84,7 @@
         <% end %>
       </td>
       <% unless @course.critical? %>
-        <td>
+        <td class="rd-hide">
           <%= link_to 'Destroy', { :action => 'drop_prof', :id => @course, :prof_id => cp.prof},
           :confirm => "Really remove #{cp.prof.fullname}? Don't continue if sheets have been printed.", :method => :delete %>
         </td>
@@ -90,7 +93,7 @@
     <% end %>
   </table>
 
-  <%=render "add_prof"%>
+  <div class="rd-hide"><%=render "add_prof"%></div>
 </div>
 
 
@@ -102,14 +105,14 @@
         <th>Name</th>
         <th># Comments</th>
         <th># Sheets</th>
-        <th>Actions</th>
+        <th class="rd-hide">Actions</th>
       </tr>
       <% @course.tutors.each do |tutor| %>
       <tr>
         <td><%= link_to tutor.abbr_name, edit_course_tutor_path(@course, tutor) %></td>
         <td style="text-align:right"><%= tutor.pics.count %></td>
         <td style="text-align:right"><%= tutor.returned_sheets %></td>
-        <td>
+        <td class="rd-hide">
         <% unless tutor.critical? %>
           <%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,
             :course_id => @course.id, :action => 'destroy'},
@@ -121,7 +124,9 @@
       <% end %>
     </table>
     <% end %>
-    <%= render @tutor = Tutor.new, :button_name => 'Add Tutor(s)' %>
+    <div class="rd-hide">
+      <%= render @tutor = Tutor.new, :button_name => 'Add Tutor(s)' %>
+    </div>
 </div>
 
 <div>

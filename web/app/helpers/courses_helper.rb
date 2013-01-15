@@ -42,14 +42,14 @@ module CoursesHelper
   end
 
   def courseEditLink
-    link_to("✎ Edit “#{@course.title}”", edit_course_path(@course), :class => "button primary")
+    link_to("✎ Edit “#{@course.title}”", edit_course_path(@course), :class => "button primary rd-hide")
   end
 
   def courseDestroyLink
     link_to_unless(@course.critical?, 'Destroy course', @course, \
       :confirm => "Really destroy course '#{@course.title}'?", \
       :method => :delete,
-      :class => "button danger") do
+      :class => "button danger rd-hide") do
       "&nbsp;⚠ Course is critical".html_safe
     end
   end
