@@ -105,7 +105,7 @@ class FormsController < ApplicationController
     cantdel = @form.critical? || !Course.find_by_form_id(params[:id]).nil?
     unless cantdel
       @form.destroy
-      $loaded_yaml_sheets[params[:id].to_i] = nil
+      $loaded_yaml_sheets[params[:id].to_i] = nil if defined? $loaded_yaml_sheets
     end
 
     respond_to do |format|
