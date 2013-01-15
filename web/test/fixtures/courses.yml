@@ -1,7 +1,7 @@
 mathSummerCourse:
   term: summerTerm
   title: Mathematical background of east-asian art-history
-  students: 123
+  students: 5
   faculty: mathFac
   evaluator: stefan
   description: needs more sheets
@@ -12,7 +12,7 @@ mathSummerCourse:
 physWinterCourse:
   term: winterTerm
   title: Physical background of east-asian art-history
-  students: 321
+  students: 2
   faculty: physFac
   evaluator: beccy
   fscontact: sischoen
@@ -25,7 +25,7 @@ physWinterCourse:
 hitmeCourse:
   term: nowTerm
   title: Testcourse for the hitme feature
-  students: 123
+  students: 4
   faculty: mathFac
   form: someFormForWT
   language: en
