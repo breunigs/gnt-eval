@@ -42,8 +42,15 @@ Term.currently_active.each do |term|
       sql << %(WHERE #{col} = ? AND (#{txt_col} = "" OR #{txt_col} IS NULL))
       rows = RT.custom_query(sql, [quest.boxes.count])
 
-
+      # pre-fill columns
       answ[col] ||= {}
+      sql = "SELECT COUNT(*) AS cnt, #{txt_col} AS val FROM #{table} "
+      sql << %(WHERE #{col} = ? AND #{txt_col} <> "" AND #{txt_col} IS NOT NULL )
+      sql << "GROUP BY #{txt_col}"
+      RT.custom_query(sql, [quest.boxes.count]).each do |p|
+        answ[col][p["val"]] ||= 0
+        answ[col][p["val"]] += p["cnt"].to_i
+      end
 
       rows.each do |r|
         form = Marshal.load(Base64.decode64(r["abstract_form"]))
