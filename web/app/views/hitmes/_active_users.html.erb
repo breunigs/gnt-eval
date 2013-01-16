@@ -1,0 +1,46 @@
+<h2>Active Users</h2>
+<% sessions = Session.where(:cont => ["cpics", "pics", "courses"]) %>
+<% if sessions.none? %>
+  No active users currently.
+<% else %>
+  <table>
+    <tr><th>User</th><th>at it for</th><th>last ping</th><th colspan="3">working on</th></tr>
+    <% sessions.each do |s| %>
+      <%
+        c = nil
+        step = nil
+        course = nil
+        details = nil
+        case s.cont
+          when "cpics" then
+            c = CPic.find(s.viewed_id)
+            details = c.for
+          when "pics" then
+            c = Pic.find(s.viewed_id)
+            details = c.for
+          when "courses" then
+            c = Course.find(s.viewed_id)
+            step = c.get_hitme_step
+            course = c
+            details = "profs / course comment"
+          when "tutors" then
+            c = Tutor.find(s.viewed_id)
+            step = Hitme::COMBINING
+            details = "tutor #{c.abbr_name}"
+          else
+            logger.debug "hitme type of #{s.cont} not implemented. Cannot preview this."
+        end
+        step ||= c.step
+        course ||= c.course
+      %>
+      <tr>
+        <td><%=s.username%></td>
+        <td><%=time_ago_in_words(s.created_at)%></td>
+        <td><%=time_ago_in_words(s.updated_at, true)%> ago</td>
+        <td><%=Hitme.step_to_text(step) %></td>
+        <td><%=course.title %></td>
+        <td><%=details%></td>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
