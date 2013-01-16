@@ -1,3 +1,5 @@
+// long press button to submit associated form.
+// Use via the shared/_hold_button view.
 function hold_button(elem, seconds, only_once, url) {
   var t;
 
@@ -29,7 +31,9 @@ function hold_button(elem, seconds, only_once, url) {
   elem.ontouchend = clear;
 }
 
-// auto linkify elements with class "hold"
+
+// auto linkify elements with class "hold". Put the URL to
+// redirect to in a data-url attribute.
 $(document).ready(function() {
 
   $(".hold").each(function(ind, elem) {
@@ -39,7 +43,6 @@ $(document).ready(function() {
     var t;
     elem.onclick = function (event) { event.preventDefault(); }
     var exe = function() {
-      if(!confirm("Continue?")) return;
       window.location = $(elem).data("url");
     }
     elem.onmousedown = elem.touchstart = function() {
