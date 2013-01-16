@@ -5,6 +5,10 @@ class HitmesController < ApplicationController
     render :action => "overview"
   end
 
+  def active_users
+    render :partial => "active_users"
+  end
+
   def assign_work
     if (cookies["username"] || "").gsub(/[^a-z0-9_\s-]/i, "").blank?
       flash[:error] = "No username set, cannot continue."

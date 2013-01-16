@@ -8,6 +8,8 @@ class HitmeCompleteFlowTest < ActionDispatch::IntegrationTest
   # end
 
   test "overview and assign work" do
+    cookies[:username] = "tester"
+
     get "/hitme"
     assert_response :success
 
