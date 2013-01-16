@@ -33,6 +33,7 @@ text.strip!
 <% content_for :script, %(<script>
   var ident = '#{@ident}';
   var combinedText = #{text.to_json};
+  $(document).ready(function() { $('#text').data('editor').focus() });
 
   function setCombinedText() {
     var e = $('#text').data('editor').getSession();

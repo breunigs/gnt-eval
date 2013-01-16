@@ -1,9 +1,8 @@
 <% content_for :title, " // #{@workon.step == 1 ? "Proofread" : "Type"}!" %>
 <% content_for :css, "#text_ace_editor { height: 100px }" %>
 <% content_for :css, "figure img { max-width: 100% }" %>
-<% content_for :script, "<script>var ident = '#{@ident}'; var listify = true;</script>".html_safe %>
-
 <%= render "shared/aceify_textareas", :line_offset => 0 %>
+<% content_for :script, "<script>var ident = '#{@ident}'; var listify = true; $(document).ready(function() { $('#text').data('editor').focus() });</script>".html_safe %>
 
 
 <div>
