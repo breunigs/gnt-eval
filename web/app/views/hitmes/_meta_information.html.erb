@@ -10,7 +10,11 @@
     <% end %>
     <tr><th>Lecture</th><td><%=course.title%></td></tr>
     <tr><th>Profs</th><td><%=safe_join(course.profs.map(&:fullname).sort, "<br>".html_safe)%></td></tr>
-    <tr><th>Tutors</th><td><%=safe_join(course.tutors.map(&:abbr_name).sort, "<br>".html_safe)%></td></tr>
+    <tr><th>Tutors</th><td>
+      <div class="columnize-list-<%=[4, (course.tutors.size/8.0).round].min%>">
+      <%=safe_join(course.tutors.map(&:abbr_name).sort, "<br>".html_safe)%>
+      </div>
+    </td></tr>
     <tr><th>Form</th><td><%=link_to("#{course.form.name} (language: #{course.language})", course.form)%></td></tr>
     <tr><th>Faculty</th><td><%=course.faculty.longname%></td></tr>
   </table>
