@@ -6,8 +6,13 @@ class HitmesController < ApplicationController
   end
 
   def assign_work
-    # typing and proofreading basically work the same
+    if (cookies["username"] || "").gsub(/[^a-z0-9_\s-]/i, "").blank?
+      flash[:error] = "No username set, cannot continue."
+      redirect_to :action => "overview"
+      return
+    end
 
+    # typing and proofreading basically work the same
     @workon = Hitme.get_workable_comment_by_step(0)
     @workon ||= Hitme.get_workable_comment_by_step(1)
     @workon ||= Hitme.get_combinable
