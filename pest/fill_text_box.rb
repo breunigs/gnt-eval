@@ -39,7 +39,7 @@ Term.currently_active.each do |term|
       txt_col = "#{col}_text"
 
       sql = "SELECT abstract_form, path FROM #{table} "
-      sql << %(WHERE #{col} = ? AND (#{txt_col} = "" OR #{txt_col} IS NULL))
+      sql << %(WHERE #{col} = ? AND #{txt_col} IS NULL)
       rows = RT.custom_query(sql, [quest.boxes.count])
 
       # pre-fill columns
