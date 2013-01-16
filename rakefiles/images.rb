@@ -16,63 +16,92 @@ namespace :images do
     # use default directory if none given
     if d.directory.nil? || d.directory.empty?
       d = {}
-      puts "No directory given, using default one: #{simplify_path(SCfp[:scanned_pages_dir])}"
       d[:directory] = SCfp[:scanned_pages_dir]
       FileUtils.makedirs(d[:directory])
     end
 
     # abort if the directory of choice does not exist for some reason
-    if !File.directory?(d[:directory])
-      puts "Given directory does not exist. Aborting."
+    abort("Given directory does not exist. Aborting.") unless File.directory?(d[:directory])
+
     # actually sort the images
-    else
-      puts "Working directory is: #{d[:directory]}"
-      files = Dir.glob(File.join(d[:directory], '*.tif'))
-      sort_path = SCfp[:sorted_pages_dir]
+    puts "Working directory is: #{simplify_path d[:directory]}"
+    files = Dir.glob(File.join(d[:directory], '*.tif'))
+    sort_path = SCfp[:sorted_pages_dir]
 
-      curr = 0
-      threads = []
+    curr = 0
+    errs = []
 
-      files.each do |f|
-        unless File.writable?(f)
-          puts "No write access, cancelling."
-          break
-        end
+    puts "Reading course information"
+    # Unfortunately ActiveRecord is not always threadsafe, which leads
+    # to some threads failing. For this reason and to prevent the n+1
+    # queries problem, select all required data in one go.
+    data = {}
+    # Rails magic tries too hard and loads much more information than
+    # required, making the auto-generated query very slow. This one is
+    # fast enough.
+    Course.connection.select_all("
+      SELECT
+        courses.language AS lang,
+        course_profs.id  AS barcode,
+        forms.id         AS form
+      FROM courses
+      INNER JOIN course_profs ON course_profs.course_id = courses.id
+      INNER JOIN forms        ON forms.id = courses.form_id").map do |x|
+      data[x["barcode"]] = { :lang => x["lang"], :form_id => x["form"] }
+    end
 
-        work_queue.enqueue_b do
+
+    files.each do |f|
+      unless File.writable?(f)
+        puts "No write access, cancelling."
+        break
+      end
+
+      work_queue.enqueue_b do
+        begin
           basename = File.basename(f, '.tif')
           zbar_result = find_barcode(f)
           barcode = (zbar_result.to_f / 10.0).floor.to_i
+
           # retry in case a non-existant barcode was found
-          if zbar_result && (not CourseProf.exists?(barcode))
+          if zbar_result && (not data.include?(barcode))
             zbar_result = find_barcode(f, true)
             barcode = (zbar_result.to_f / 10.0).floor.to_i
           end
 
-          if zbar_result.nil? || (not CourseProf.exists?(barcode))
-            puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
+          if zbar_result.nil? || (not data.include?(barcode))
+            reason = zbar_result ? "CourseProf (#{zbar_result}) does not exist" : "Barcode not found"
+            errs << "bizarre #{basename}: #{reason}"
             FileUtils.makedirs(File.join(sort_path, "bizarre"))
             FileUtils.move(f, File.join(sort_path, "bizarre"))
           else
-            form = CourseProf.find(barcode).course.form.id.to_s + '_' +
-              CourseProf.find(barcode).course.language.to_s
-
+            form = "#{data[barcode][:form_id]}_#{data[barcode][:lang]}"
             FileUtils.makedirs(File.join(sort_path, form))
             FileUtils.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
           end
 
-          curr += 1
-          print_progress(curr, files.size)
+        rescue Exception => e
+          errs << e.message
+          errs << e.backtrace
         end
+
+        curr += 1
+        print_progress(curr, files.size)
       end
-      work_queue.join
-      print_progress(curr, files.size)
+    end
+    work_queue.join
+    if errs.empty?
       puts
       puts "Done!"
-    end # else
-
-    puts
-    puts "Next recommended step: rake images:omr"
+      puts
+      puts "Next recommended step: rake images:omr"
+    else
+      puts
+      puts "There have been some errors:"
+      errs.each { |e| puts "   #{e}" }
+      puts
+      puts "Investigate and run again: rake images:sortandalign"
+    end
   end
 
   desc "(5) Evaluates all sheets in #{simplify_path(SCfp[:sorted_pages_dir])}"
@@ -217,7 +246,7 @@ namespace :images do
 
           # load tutors
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
-          
+
           if tut_num < 0
             warn "\n\nCouldn’t add tutor image #{bname}, because OMR result is ambigious. Have you run `rake images:correct`?"
             next
