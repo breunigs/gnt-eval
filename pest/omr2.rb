@@ -276,15 +276,15 @@ class PESTOmr < PESTDatabaseTools
     x = ((c[:tr].x + c[:br].x)/2.0 - (c[:tl].x + c[:bl].x)/2.0).to_i
     y = ((c[:bl].y + c[:br].y)/2.0 - (c[:tl].y + c[:tr].y)/2.0).to_i
     # safety margin so that the corners are not included
-    s = 2*30*@dpifix
+    s = 2*30*dpifix
     c = i.crop(Magick::CenterGravity, x-s, y-s).trim(true)
 
     # region is too small, assume it is empty
-    return 0 if c.rows*c.columns < 500*@dpifix
+    return 0 if c.rows*c.columns < 500*dpifix
 
     c = c.resize(0.4)
 
-    step = 20*@dpifix
+    step = 20*dpifix
     thres = 100
 
     # Find left border
@@ -323,7 +323,7 @@ class PESTOmr < PESTDatabaseTools
     c.trim!(true)
 
     # check again for size after cropping. Drop if too small.
-    return 0 if c.rows*c.columns < 500*@dpifix
+    return 0 if c.rows*c.columns < 500*dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + group.save_as + ".jpg"
@@ -339,7 +339,7 @@ class PESTOmr < PESTDatabaseTools
   # portion of the scanned sheet with the text and save it as .jpg.
   def process_text_box(img_id, question)
     # TWEAK HERE
-    limit = 1000 * @dpifix
+    limit = 1000 * dpifix
     # the x,y coordinate is made before the box, so we need to account
     # for the box border. It marks the top left corner.
     addtox, addtoy = 15, 15
@@ -360,7 +360,7 @@ class PESTOmr < PESTDatabaseTools
     # file, but since width/height are not supposed to be coordinates we
     # have to do it by hand. Grep this: WIDTH_HEIGHT_AS_COORDINATE
     b.x += addtox; b.y += addtoy; b.width += addtow - b.x
-    b.height = PAGE_HEIGHT*@dpifix - b.height - b.y + addtoh
+    b.height = PAGE_HEIGHT*dpifix - b.height - b.y + addtoh
     # in a perfect scan, the coordinates now mark the inside of the box
     draw_dot(img_id, correct(img_id, b.top_left), "red")
     draw_dot(img_id, correct(img_id, b.top_right), "red")
@@ -464,9 +464,9 @@ class PESTOmr < PESTDatabaseTools
     start_time = Time.now
     debug("  Loading Image: #{file}", "loading_image") if @verbose
 
-    # Load image and yaml sheet
-    @doc = load_yaml_sheet(@omrsheet)
+    # Load image and yaml sheet.
     @ilist = Magick::ImageList.new(file)
+    @doc = load_yaml_sheet(@omrsheet)
     @draw = {}
 
     if @debug
@@ -730,6 +730,7 @@ class PESTOmr < PESTDatabaseTools
     @overwrite, @debug = false, false
     @test_mode = false
     @cores     = 1
+    @dpifix    = nil
 
     # Option Parser
     begin
@@ -819,7 +820,9 @@ class PESTOmr < PESTDatabaseTools
     cmd << (@debug     ? " -d " : " ")
     cmd << (@test_mode ? " -t " : " ")
     cmd << (@overwrite ? " -o " : " ")
-    cmd << " --dpi #{@dpifix*300.0}"
+    # let the subprocess determine DPI on their own when loading the
+    # first file, unless it has been manually set.
+    cmd << " --dpi #{dpifix*300.0}" unless @dpifix.nil?
 
     tmpfiles, threads, exit_codes = [], [], []
 
@@ -883,17 +886,6 @@ class PESTOmr < PESTDatabaseTools
     STDOUT.sync = true
     files = parse_commandline
     check_magick_version
-
-    # Unless set manually, grab a sample image and use it to calculate
-    # the DPI
-    if @dpifix.nil?
-      debug("Calculating DPI", "calc_dpi") if @verbose
-      list = Magick::ImageList.new(files[0])
-      @dpifix = list[0].dpifix
-      list.each { |i| i.destroy! }
-      list = nil
-      debug("Calculated DPI", "calc_dpi") if @verbose
-    end
 
     # Let other ruby instances do the hard work for multi core...
     if @cores > 1

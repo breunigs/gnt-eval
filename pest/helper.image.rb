@@ -25,10 +25,10 @@ module PESTImageTools
   def black_pixels_img(image, x, y, width, height)
     # all hard coded values are for 300 DPI images. Adjust values here
     # to match actual scanned resolution
-    x = (x*@dpifix).round
-    y = (y*@dpifix).round
-    width = (width*@dpifix).round
-    height = (height*@dpifix).round
+    x = (x*dpifix).round
+    y = (y*dpifix).round
+    width = (width*dpifix).round
+    height = (height*dpifix).round
 
     # limit values that go beyond the available pixels
     return 0 if x >= image.columns || y >= image.rows
@@ -89,10 +89,10 @@ module PESTImageTools
     raise "left and right have been switched" if !(tl[1] <= br[1])
 
     # support negative values
-    tl.x += @ilist[img_id].columns/@dpifix if tl.x < 0
-    br.x += @ilist[img_id].columns/@dpifix if br.x < 0
-    tl.y += @ilist[img_id].rows/@dpifix if tl.y < 0
-    br.y += @ilist[img_id].rows/@dpifix if br.y < 0
+    tl.x += @ilist[img_id].columns/dpifix if tl.x < 0
+    br.x += @ilist[img_id].columns/dpifix if br.x < 0
+    tl.y += @ilist[img_id].rows/dpifix if tl.y < 0
+    br.y += @ilist[img_id].rows/dpifix if br.y < 0
 
     # round here, so we don't have to take care elsewhere
     tl.x = tl.x.round
@@ -401,6 +401,12 @@ module PESTImageTools
     debug
   end
 
+  def dpifix
+    raise "Please load an image before accessing DPI." if @ilist.nil? && @dpifix.nil?
+    @dpifix ||= @ilist[0].dpifix
+    @dpifix
+  end
+
   # Loads the YAML file and converts LaTeX's scalepoints into pixels
   def load_yaml_sheet(omrsheet)
     @omrsheet_parsed ||= {}
@@ -417,10 +423,10 @@ module PESTImageTools
         end
         next if q.boxes.nil?
         q.boxes.each do |b|
-          b.width  = b.width/SP_TO_PX*@dpifix unless b.width.nil?
-          b.height = b.height/SP_TO_PX*@dpifix unless b.height.nil?
-          b.x = b.x / SP_TO_PX*@dpifix
-          b.y = PAGE_HEIGHT*@dpifix - (b.y / SP_TO_PX*@dpifix)
+          b.width  = b.width/SP_TO_PX*dpifix unless b.width.nil?
+          b.height = b.height/SP_TO_PX*dpifix unless b.height.nil?
+          b.x = b.x / SP_TO_PX*dpifix
+          b.y = PAGE_HEIGHT*dpifix - (b.y / SP_TO_PX*dpifix)
         end
       end
     end
