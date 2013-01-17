@@ -21,8 +21,8 @@ class Hitme < ActiveRecord::Base
   # Includes comments that are being worked on right now.
   def self.get_all_comments_by_step(step)
     step = [nil, Hitme::TYPING] if step == Hitme::TYPING
-    all = CPic.joins(:course).where("courses.term_id" => self.t, "step" => step)
-    all += Pic.joins(:course).where("courses.term_id" => self.t, "step" => step)
+    all = CPic.joins(:course).where("courses.term_id" => self.curr_term, "step" => step)
+    all += Pic.joins(:course).where("courses.term_id" => self.curr_term, "step" => step)
     logger.debug "Found #{all.size} comments in step #{step}"
     all
   end
@@ -40,7 +40,7 @@ class Hitme < ActiveRecord::Base
   end
 
   def self.get_all_combinable_courses
-    c = Course.includes(:c_pics).where("term_id" => self.t).to_a
+    c = Course.includes(:c_pics).where("term_id" => self.curr_term).to_a
     # remove all courses without images
     c.reject! { |x| x.c_pics.none? }
     # remove course if there are any images below COMBINING
@@ -54,7 +54,7 @@ class Hitme < ActiveRecord::Base
   end
 
   def self.get_all_combinable_tutors
-    c = Tutor.joins(:course).includes(:pics).where("courses.term_id" => self.t).to_a
+    c = Tutor.joins(:course).includes(:pics).where("courses.term_id" => self.curr_term).to_a
     # remove all tutors without images
     c.reject! { |x| x.pics.none? }
     # remove all tutors if there are any images below COMBINING
@@ -76,7 +76,7 @@ class Hitme < ActiveRecord::Base
 
 
   def self.get_all_final_checkable
-    c = Course.includes(:c_pics).where("term_id" => self.t).to_a
+    c = Course.includes(:c_pics).where("term_id" => self.curr_term).to_a
     c.reject! { |x| x.c_pics.none? && x.tutors.all? { |t| t.pics.none? } }
     # remove course if there are course-images below FINALCHECK
     c.reject! { |x| x.c_pics.any? { |p| p.step < Hitme::FINALCHECK } }
@@ -95,7 +95,7 @@ class Hitme < ActiveRecord::Base
 
 
   private
-  def self.t
+  def self.curr_term
     Term.currently_active.map(&:id)
   end
 

@@ -109,7 +109,6 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
 
   # use normal result.pdf preamble
   if add_header
-    def t(t); I18n.t(t); end
     evalname = "#{id} (#{pdf_path})"
     head = ERB.new(RT.load_tex("preamble")).result(binding)
     tex_code = head + tex_code + '\end{document}'
