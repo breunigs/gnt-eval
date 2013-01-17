@@ -215,7 +215,7 @@ namespace :images do
           next
         end
 
-        course_prof = CourseProf.find(barcode)
+        course_prof = CourseProf.find(barcode) rescue nil
         if course_prof.nil?
           warn "\nCouldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
           next
