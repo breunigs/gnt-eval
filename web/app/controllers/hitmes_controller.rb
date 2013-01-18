@@ -173,7 +173,7 @@ class HitmesController < ApplicationController
       else
         step_warn = true unless tutor.pics.update_all(:step => Hitme::DONE)
       end
-    end
+    end if params[:tutor]
 
     remove_session(course)
 

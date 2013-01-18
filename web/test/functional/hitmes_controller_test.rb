@@ -51,4 +51,14 @@ class HitmesControllerTest < ActionController::TestCase
     assert_equal("tutortext", tutors(:hitmeTutor).comment)
     assert_redirected_to :hitme_assign_work
   end
+
+  def test_save_final_check_works_for_courses_without_tutor
+    assert_no_difference(lambda { Hitme.get_all_final_checkable.size }) do
+      post :save_final_check, {:course => "coursetext12", :id => courses(:courseWithoutTutors).id, :save_and_skip => true}
+      assert_response :redirect
+    end
+    courses(:courseWithoutTutors).reload
+    assert_equal("coursetext12", courses(:courseWithoutTutors).comment)
+    assert_redirected_to :hitme_assign_work
+  end
 end

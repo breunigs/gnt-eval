@@ -29,3 +29,11 @@ hitmeCourse:
   faculty: mathFac
   form: someFormForWT
   language: en
+
+courseWithoutTutors:
+  term: nowTerm
+  title: this course has no associated tutors
+  students: 2
+  faculty: mathFac
+  form: someFormForWT
+  language: en
