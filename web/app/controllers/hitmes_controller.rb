@@ -21,6 +21,7 @@ class HitmesController < ApplicationController
     # work is found or all options are depleted. This setup avoids
     # finding /all/ available chunks while still being kinda-random.
     @workon = nil
+    is_final_checkable = false
     (0..3).to_a.shuffle.each do |x|
       case x
         when 0 then @workon = Hitme.get_workable_comment_by_step(0)

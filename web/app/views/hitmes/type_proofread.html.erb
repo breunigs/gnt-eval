@@ -39,10 +39,10 @@
   <%= hidden_field_tag(:type, @workon.class) %>
   <%= hidden_field_tag(:id, @workon.id) %>
   <%= hidden_field_tag(:ident, @ident) %>
-  <div class="group containersplit" id="commentfield">
+  <div class="group containersplit">
     <%= render "comment_preview" %>
     <h3>Input</h3>
-    <%= text_area_tag(:text, @workon.text.strip + "\n\n\n")%>
+    <%= text_area_tag(:text, @workon.text.to_s.strip + "\n\n\n")%>
     <br style="clear:both"/>
   </div>
 
