@@ -8,18 +8,18 @@ if @workon.is_a?(Course)
     next if cp.c_pics.all? { |p| p.text.blank? }
     text << %(\\vspace{0.4cm}\\textbf{#{cp.prof.fullname}}\n) if many
     text << %(\\begin{compactitem}\n)
-    cp.c_pics.each do |p|
-      next if p.text.blank?
-      text << %(  \\item #{p.text}\n)
+    cp.c_pics.map { |p| p.text.split("\n") }.flatten.each do |t|
+      next if t.blank?
+      text << %(  \\item #{t.strip}\n)
     end
     text << %(\\end{compactitem}\n\n\n)
   end
 elsif @workon.is_a?(Tutor)
   unless @workon.pics.all? { |p| p.text.blank? }
     text << %(\\begin{compactitem}\n)
-    @workon.pics.each do |p|
-      next if p.text.blank?
-      text << %(  \\item #{p.text}\n)
+    @workon.pics.map { |p| p.text.split("\n") }.flatten.each do |t|
+      next if t.blank?
+      text << %(  \\item #{t.strip}\n)
     end
     text << %(\\end{compactitem}\n\n\n)
   end
