@@ -71,6 +71,9 @@ class HitmeCompleteFlowTest < ActionDispatch::IntegrationTest
     # now we’re in step=2, i.e. combining
     get "/hitme/assign_work"
     assert_response :success
+    assert assigns(:workon)
+    # can’t be type/proof anymore, but not yet final
+    assert_template :combine
     delete_session
 
     post_via_redirect "/hitme/save_combination", {:text => "testtext", :type => "Tutor", :id => tutors(:hitmeTutor).id, :save_and_skip => true}
@@ -96,6 +99,8 @@ class HitmeCompleteFlowTest < ActionDispatch::IntegrationTest
 
     get "/hitme/assign_work"
     assert_response :success
+    assert assigns(:workon)
+    assert_template :final_check
     delete_session
 
     post_via_redirect "/hitme/save_final_check", {:course => "coursetext", :id => courses(:hitmeCourse).id, :tutor => {tutors(:hitmeTutor).id => "tutortext"}, :save_and_quit => true}

@@ -30,8 +30,8 @@ class HitmesController < ApplicationController
         when 3 then
           # required because final checkables and course combines are
           # the same class
-          is_final_checkable = true
           @workon = Hitme.get_final_checkable
+          is_final_checkable = !@workon.nil?
       end
       break unless @workon.nil?
     end
