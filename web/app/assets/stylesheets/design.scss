@@ -226,6 +226,11 @@ pre, div.pre {
   border:1px solid #ccc;
   padding:2px;
   padding:0.2rem;
+  .pre, pre {
+    max-height:none;
+    border-left:0;
+    border-right:0;
+  }
 }
 
 select.question {
