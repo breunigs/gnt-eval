@@ -1,12 +1,18 @@
 <% content_for :title, " // #{@workon.step == 1 ? "Proofread" : "Type"}!" %>
 <% content_for :css, "#text_ace_editor { height: 100px }" %>
 <% content_for :css, "figure img { max-width: 100% }" %>
-<%= render "shared/aceify_textareas", :line_offset => 0 %>
-<% content_for :script, "<script>var ident = '#{@ident}'; var listify = true; $(document).ready(function() { $('#text').data('editor').focus() });</script>".html_safe %>
+<%= render "shared/aceify_textareas", :line_offset => 0, :autosize => true %>
+<% content_for :script, %(<script>
+  var ident = '#{@ident}';
+  var listify = true;
+  var hitme_preview_url="#{hitme_preview_text_url}";
+  $(document).ready(function() { $('#text').data('editor').focus() });
+</script>).html_safe %>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
 
 
-<div>
-  <div style="width:60%;float:left">
+<div class="containersplit">
+  <div class="leftside">
     <% if @workon.step == 1 %>
       <h2>Your Job: Proofread!</h2>
       <ul>
@@ -33,14 +39,17 @@
   <%= hidden_field_tag(:type, @workon.class) %>
   <%= hidden_field_tag(:id, @workon.id) %>
   <%= hidden_field_tag(:ident, @ident) %>
-  <div class="group" id="commentfield">
-    <%= text_area_tag(:text, @workon.text, :style => 'width:99%')%>
-    <br/>
+  <div class="group containersplit" id="commentfield">
+    <%= render "comment_preview" %>
+    <h3>Input</h3>
+    <%= text_area_tag(:text, @workon.text.strip + "\n\n\n")%>
+    <br style="clear:both"/>
+  </div>
+
+  <div class="group">
     <%= render "shared/comment_pic", :course => @workon.course, :pic => @workon %>
     <br/>
     Hint: if the comment is cut off, click-and-hold for one second to download the original sheet.
   </div>
-
-  <%= render "comment_preview" %>
   <%= render "action_buttons" %>
 </form>

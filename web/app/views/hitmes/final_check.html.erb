@@ -2,11 +2,11 @@
 <% content_for :script, "<script>var ident = '#{@ident}'</script>".html_safe %>
 <%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset, :autosize => true %>
 <% content_for :script, %(<script>var hitme_preview_url="#{hitme_preview_text_url}"</script>).html_safe%>
-<% content_for :script, javascript_include_tag("hitme_final_check") %>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
 
 
-<div>
-  <div style="width:60%;float:left">
+<div class="containersplit">
+  <div class="leftside">
     <h2>Your Job: Final Check!</h2>
     <ul>
       <li><b>move misplaced comments to the correct position.</b><br>Rule of thumb:
@@ -23,24 +23,17 @@
 <%= form_tag(:controller => "hitmes", :action => "save_final_check") %>
   <%= hidden_field_tag(:id, @workon.id) %>
   <%= hidden_field_tag(:ident, @ident) %>
-  <div class="group sidepreview">
+  <div class="group containersplit">
+    <%= render "comment_preview" %>
     <h3>Profs / Course Comment</h3>
-    <%= text_area_tag(:course, @workon.summary, :style => 'width:99%')%>
-
-    <div class="previewbox">
-      <span class="rendermsg"></span><br/><br/>
-      <div></div>
-    </div>
+    <%= text_area_tag(:course, @workon.summary, :class => "previewable")%>
   </div>
 
   <% @workon.tutors.each do |tutor| %>
-    <div class="group sidepreview">
+    <div class="group containersplit">
+      <%= render "comment_preview" %>
       <h3>Tutor: <%=tutor.abbr_name%></h3>
-      <%= text_area_tag("tutor[#{tutor.id}]", tutor.comment, :style => 'width:99%')%>
-      <div class="previewbox">
-        <span class="rendermsg"></span><br/><br/>
-        <div></div>
-      </div>
+      <%= text_area_tag("tutor[#{tutor.id}]", tutor.comment, :class => "previewable")%>
     </div>
 
   <% end %>

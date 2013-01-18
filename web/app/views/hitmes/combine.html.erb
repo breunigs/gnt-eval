@@ -26,11 +26,12 @@ elsif @workon.is_a?(Tutor)
 else
   raise "Unknown class; not implemented"
 end
-text.strip!
 %>
 
 <% content_for :title, " // Combine!" %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset, :autosize => true %>
 <% content_for :script, %(<script>
+  var hitme_preview_url="#{hitme_preview_text_url}";
   var ident = '#{@ident}';
   var combinedText = #{text.to_json};
 
@@ -44,15 +45,14 @@ text.strip!
     e.setValue(combinedText);
     renderPreview();
   }
+
+    $(document).ready(function() { $('#text').data('editor').focus() });
 </script>).html_safe %>
-
-<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
-<% content_for :script, %(<script>$(document).ready(function() { $('#text').data('editor').focus() });</script>).html_safe %>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
 
 
-
-<div>
-  <div style="width:60%;float:left">
+<div class="containersplit">
+  <div class="leftside">
     <h2>Your Job: <%=isCourse ? "Group" : "Sort" %>!</h2>
     <ul>
       <li>check auto-combine worked correctly</li>
@@ -79,10 +79,11 @@ text.strip!
   <%= hidden_field_tag(:type, @workon.class) %>
   <%= hidden_field_tag(:id, @workon.id) %>
   <%= hidden_field_tag(:ident, @ident) %>
-  <div class="group">
-    <%= text_area_tag(:text, @workon.comment.blank? ? text : @workon.comment, :style => 'width:99%')%>
+  <div class="group containersplit">
+    <%= render "comment_preview" %>
+    <h3>Input</h3>
+    <%= text_area_tag(:text, @workon.comment.blank? ? text : @workon.comment)%>
   </div>
 
-  <%= render "comment_preview" %>
   <%= render "action_buttons" %>
 </form>

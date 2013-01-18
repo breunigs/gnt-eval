@@ -1,8 +1,5 @@
-<% content_for :script, %(<script>var hitme_preview_url="#{hitme_preview_text_url}"</script>).html_safe%>
-<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
-
-<div class="group">
-  <h3>Comments preview</h3>
-  <span id="rendermsg"></span><br/><br/>
-  <div id="previewbox"></div>
+<div class="previewbox">
+<h3>Preview</h3>
+  <span class="rendermsg"></span><br/><br/>
+  <div></div>
 </div>
