@@ -33,7 +33,6 @@ text.strip!
 <% content_for :script, %(<script>
   var ident = '#{@ident}';
   var combinedText = #{text.to_json};
-  $(document).ready(function() { $('#text').data('editor').focus() });
 
   function setCombinedText() {
     var e = $('#text').data('editor').getSession();
@@ -48,7 +47,7 @@ text.strip!
 </script>).html_safe %>
 
 <%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
-
+<% content_for :script, %(<script>$(document).ready(function() { $('#text').data('editor').focus() });</script>).html_safe %>
 
 
 
