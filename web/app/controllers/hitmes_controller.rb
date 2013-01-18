@@ -16,14 +16,24 @@ class HitmesController < ApplicationController
       return
     end
 
-    # typing and proofreading basically work the same
-    @workon = Hitme.get_workable_comment_by_step(0)
-    @workon ||= Hitme.get_workable_comment_by_step(1)
-    @workon ||= Hitme.get_combinable
-    # required because final checkables and course combines are the same
-    # class
-    is_final_checkable = @workon.nil?
-    @workon ||= Hitme.get_final_checkable
+    # randomize type of work first, then try to get a random chunk for
+    # the selected type. If there isn’t one, try the next type until
+    # work is found or all options are depleted. This setup avoids
+    # finding /all/ available chunks while still being kinda-random.
+    @workon = nil
+    (0..3).to_a.shuffle.each do |x|
+      case x
+        when 0 then @workon = Hitme.get_workable_comment_by_step(0)
+        when 1 then @workon = Hitme.get_workable_comment_by_step(1)
+        when 2 then @workon = Hitme.get_combinable
+        when 3 then
+          # required because final checkables and course combines are
+          # the same class
+          is_final_checkable = true
+          @workon = Hitme.get_final_checkable
+      end
+      break unless @workon.nil?
+    end
 
     @workon.freeze
 
