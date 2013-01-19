@@ -16,8 +16,9 @@ class HitmesController < ApplicationController
       return
     end
 
-    skip = (cookies["skip_courses"] || "").split(",").map{|x| x.to_i }
-    skip = skip.compact.reject { |x| x == 0 }
+    pp cookies[:skip_course]
+
+    skip = cookies[:skip_course].to_i
 
     # randomize type of work first, then try to get a random chunk for
     # the selected type. If there isn’t one, try the next type until

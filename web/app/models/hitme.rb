@@ -29,13 +29,13 @@ class Hitme < ActiveRecord::Base
   end
 
   # find a comment someone can work on.
-  def self.get_workable_comment_by_step(step, skip = [])
+  def self.get_workable_comment_by_step(step, skip = 0)
     all = self.get_all_comments_by_step(step)
     self.get_workable_sample(all, skip)
   end
 
 
-  def self.get_combinable(skip = [])
+  def self.get_combinable(skip = 0)
     all = self.get_all_combinable_courses + self.get_all_combinable_tutors
     self.get_workable_sample(all, skip)
   end
@@ -69,7 +69,7 @@ class Hitme < ActiveRecord::Base
   end
 
 
-  def self.get_final_checkable(skip = [])
+  def self.get_final_checkable(skip = 0)
     # locking is only happening for the course. Hope there will be no
     # collisions for the tutors
     self.get_workable_sample(self.get_all_final_checkable, skip)
@@ -111,7 +111,8 @@ class Hitme < ActiveRecord::Base
         all -= [workon]
         next
       end
-      if (workon.is_a?(Course) && skip.include?(workon.id)) || (workon.is_a?(Tutor) && skip.include?(workon.course.id))
+
+      if (workon.is_a?(Course) ? workon.id : workon.course.id) == skip
         logger.debug "#{workon.class}=#{workon.id} skipped, because user marked it as so."
         all -= [workon]
         next

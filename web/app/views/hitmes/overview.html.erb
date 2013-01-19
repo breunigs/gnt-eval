@@ -31,6 +31,13 @@
     });
   }
 
+  function skipCourse(elm) {
+    console.log("running");
+    var id = $(elm).val();
+    var c = id + "; expires=Thu, 31 Dec 2020 23:59:59 GMT; path=/";
+    document.cookie = "skip_course=" + c;
+  }
+
   $(document).ready(function() {
     if(getCookie("testcookie") === "test value" || usernameValid()) {
       setStatus("Cookies", true);
@@ -74,11 +81,21 @@
   <span id="username" class="unknown"><b>? Username </b></span> – Set a descriptive username, so others may easily identify who is working on what.<br/><br/>
 
   <a onclick="setUsernameCookie(); setStatus('Username', usernameValid()); updateUsername();"><b>Change Username</b></a>
-  <span id="currentUsername"></span><br/><br/>
+  <span id="currentUsername"></span><br/><br/><br/>
+  <a onclick="giveWork();" style="font-size:150%;font-weight:bold">Give me a chunk of work</a><br/><br/><br/>
 
-  <a onclick="giveWork();" style="font-size:120%;font-weight:bold">Give me a chunk of work</a>
+  <h3>I’m a tutor</h3>
+  <%
+    c = Term.currently_active.map { |t| t.courses }.flatten
+    courses = options_from_collection_for_select(c, "id", "title", cookies[:skip_course])
+  %>
+
+  Select the course for which you are tutor. You will not be given chunks of work for that course.
+
+  <%= select_tag "skip_course", courses, :style => "height:auto;width:auto;max-width:20rem;", :onchange => "skipCourse(this)", :include_blank => true %><br/>
+
+
 </div>
-
 
 <div id="active_users">
   <%=render "active_users"%>
