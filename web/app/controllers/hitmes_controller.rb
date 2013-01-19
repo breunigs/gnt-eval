@@ -86,9 +86,10 @@ class HitmesController < ApplicationController
     elsif params[:save_and_quit] || params[:save_and_work]
       x.text = params[:text]
 
-      next_step = { nil => 1, 0 => 1, 1 => 2 }
+      next_step = { nil => Hitme::PROOFREADING, Hitme::TYPING => Hitme::PROOFREADING, Hitme::PROOFREADING => Hitme::COMBINING }
       if next_step.keys.include?(x.step)
         x.step = next_step[x.step]
+        x.step = Hitme::DONE if x.step == Hitme::COMBINING && x.text.blank?
       else
         flash[:warning] = "Could not advance step, there might have been a collision. You shouldn’t worry too much about it though."
       end
