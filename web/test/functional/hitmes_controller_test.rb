@@ -30,13 +30,28 @@ class HitmesControllerTest < ActionController::TestCase
     assert_redirected_to :hitme_assign_work
   end
 
-  def test_coure_typing_does_save_long_comment
+  def test_course_typing_does_save_long_comment
     long_text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis fringilla augue sit amet vehicula. Sed hendrerit vulputate turpis, egestas sodales nulla sollicitudin ac. In dui eros, dapibus non lobortis eu, congue at elit. Proin nec ante tortor. Cras eget sem felis, at mattis libero. Aenean tincidunt sodales metus, nec molestie odio egestas non. Morbi non quam sit amet arcu pharetra dignissim. Curabitur eget laoreet ante. Nulla blandit hendrerit neque, at pulvinar leo consequat ac. Suspendisse tristique, nunc sit amet fringilla convallis, libero nisi sodales purus, nec dictum nisl nulla a nibh. Etiam dignissim faucibus viverra. Vestibulum mi tellus, dignissim ut ultrices at, facilisis non justo. Aenean sed nisi a odio ultricies pulvinar. Donec ultrices bibendum neque a aliquet. Suspendisse laoreet est nec orci congue interdum. Ut elit orci, accumsan sed pulvinar eget, euismod sit amet neque."
     post :save_comment, :text => long_text, :type => "Pic",
       :id => pics(:one).id, :save_and_quit => true
     pics(:one).reload
     assert_equal(long_text, pics(:one).text)
     assert_redirected_to :hitme
+  end
+
+  def test_empty_comment_is_advanced_to_done
+    # advance to proofreading
+    post :save_comment, :text => "", :type => "Pic",
+      :id => pics(:one).id, :save_and_quit => true
+    pics(:one).reload
+    assert_equal(Hitme::PROOFREADING, pics(:one).step)
+
+    post :save_comment, :text => "", :type => "Pic",
+      :id => pics(:one).id, :save_and_quit => true
+    pics(:one).reload
+
+    assert_equal("", pics(:one).text)
+    assert_equal(Hitme::DONE, pics(:one).step)
   end
 
   def test_course_combination_save_updates_text
