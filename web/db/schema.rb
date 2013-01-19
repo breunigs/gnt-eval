@@ -19,7 +19,7 @@ ActiveRecord::Schema.define(:version => 20130110093720) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "source"
-    t.string   "text"
+    t.text     "text"
     t.integer  "step"
   end
 
@@ -67,7 +67,7 @@ ActiveRecord::Schema.define(:version => 20130110093720) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "source"
-    t.string   "text"
+    t.text     "text"
     t.integer  "step"
   end
 
