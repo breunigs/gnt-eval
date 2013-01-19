@@ -62,7 +62,7 @@ class Hitme < ActiveRecord::Base
     c.reject! { |x| x.pics.any? { |p| p.step < Hitme::COMBINING } }
     # remove all tutors if there ALL images are above COMBINING
     c.reject! { |x| x.pics.all? { |p| p.step > Hitme::COMBINING } }
-    # remove courses that don’t have any text comments
+    # remove tutors that don’t have any text comments
     c.reject! { |x| x.pics.all? { |p| p.text.blank? } }
     logger.debug "Found #{c.size} combinale tutors"
     c
