@@ -28,15 +28,15 @@ class Hitme < ActiveRecord::Base
   end
 
   # find a comment someone can work on.
-  def self.get_workable_comment_by_step(step)
+  def self.get_workable_comment_by_step(step, skip = [])
     all = self.get_all_comments_by_step(step)
-    self.get_workable_sample(all)
+    self.get_workable_sample(all, skip)
   end
 
 
-  def self.get_combinable
+  def self.get_combinable(skip = [])
     all = self.get_all_combinable_courses + self.get_all_combinable_tutors
-    self.get_workable_sample(all)
+    self.get_workable_sample(all, skip)
   end
 
   def self.get_all_combinable_courses
@@ -68,10 +68,10 @@ class Hitme < ActiveRecord::Base
   end
 
 
-  def self.get_final_checkable
+  def self.get_final_checkable(skip = [])
     # locking is only happening for the course. Hope there will be no
     # collisions for the tutors
-    self.get_workable_sample(self.get_all_final_checkable)
+    self.get_workable_sample(self.get_all_final_checkable, skip)
   end
 
 
@@ -99,15 +99,21 @@ class Hitme < ActiveRecord::Base
     Term.currently_active.map(&:id)
   end
 
-  def self.get_workable_sample(all)
+  def self.get_workable_sample(all, skip)
     raise "Expected an array, but got #{all.class}" unless all.is_a?(Array)
     while not (workon = all.sample).nil?
-      return workon unless Hitme.is_being_worked_on(workon)
-      logger.debug "#{workon.class}=#{workon.id} is being worked on. Skipping."
-      # workon is already being worked on by someone else, remove it
-      # from the array so it’s not picked again. Deliberately not using
-      # all.delete because it may invoke Rails deleting the object.
-      all -= [workon]
+      if Hitme.is_being_worked_on(workon)
+        logger.debug "#{workon.class}=#{workon.id} is being worked on. Skipping."
+        # workon is already being worked on by someone else, remove it
+        # from the array so it’s not picked again. Deliberately not using
+        # all.delete because it may invoke Rails deleting the object.
+        all -= [workon]
+      end
+      if (workon.is_a?(Course) && skip.include?(workon.id)) || (workon.is_a?(Tutor) && skip.include?(workon.course.id))
+        logger.debug "#{workon.class}=#{workon.id} skipped, because user marked it as so."
+        all -= [workon]
+      end
+      return workon
     end
     nil
   end

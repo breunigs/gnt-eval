@@ -16,6 +16,9 @@ class HitmesController < ApplicationController
       return
     end
 
+    skip = (cookies["skip_courses"] || "").split(",").map{|x| x.to_i }
+    skip = skip.compact.reject { |x| x == 0 }
+
     # randomize type of work first, then try to get a random chunk for
     # the selected type. If there isn’t one, try the next type until
     # work is found or all options are depleted. This setup avoids
@@ -24,13 +27,13 @@ class HitmesController < ApplicationController
     is_final_checkable = false
     (0..3).to_a.shuffle.each do |x|
       case x
-        when 0 then @workon = Hitme.get_workable_comment_by_step(0)
-        when 1 then @workon = Hitme.get_workable_comment_by_step(1)
-        when 2 then @workon = Hitme.get_combinable
+        when 0 then @workon = Hitme.get_workable_comment_by_step(0, skip)
+        when 1 then @workon = Hitme.get_workable_comment_by_step(1, skip)
+        when 2 then @workon = Hitme.get_combinable(skip)
         when 3 then
           # required because final checkables and course combines are
           # the same class
-          @workon = Hitme.get_final_checkable
+          @workon = Hitme.get_final_checkable(skip)
           is_final_checkable = !@workon.nil?
       end
       break unless @workon.nil?
