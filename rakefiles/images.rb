@@ -128,6 +128,7 @@ namespace :images do
     all_sql = []
     tables = []
     Term.currently_active.map { |s| s.forms }.flatten.each do |form|
+      next unless RT.table_exists?(form.db_table)
       tables << form.db_table
       sql = "SELECT path FROM #{form.db_table} WHERE #{checks} > (0 "
       form.questions.map do |q|
