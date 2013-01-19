@@ -108,10 +108,12 @@ class Hitme < ActiveRecord::Base
         # from the array so it’s not picked again. Deliberately not using
         # all.delete because it may invoke Rails deleting the object.
         all -= [workon]
+        next
       end
       if (workon.is_a?(Course) && skip.include?(workon.id)) || (workon.is_a?(Tutor) && skip.include?(workon.course.id))
         logger.debug "#{workon.class}=#{workon.id} skipped, because user marked it as so."
         all -= [workon]
+        next
       end
       return workon
     end
