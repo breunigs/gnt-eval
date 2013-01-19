@@ -107,6 +107,7 @@ class Course < ActiveRecord::Base
   # domain to it. Returns array
   def fs_contact_addresses_array
     pre_format = fscontact.blank? ? evaluator : fscontact
+    return [] if pre_format.nil?
 
     pre_format.split(',').map do |a|
       (a =~ /@/ ) ? a : a + '@' + SCs[:standard_mail_domain]
