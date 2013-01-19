@@ -53,20 +53,34 @@ end
 
 <div class="containersplit">
   <div class="leftside">
-    <h2>Your Job: <%=isCourse ? "Group" : "Sort" %>!</h2>
+    <h2>Your Job: sort / combine</h2>
     <ul>
-      <li>check auto-combine worked correctly</li>
-      <% if isCourse %>
-        <li><b>group comments sensibly</b>. Usually only required if there are many comments.
-          <ul>
-            <li>group by topic (study group orga, exercises, …) and profs</li>
-            <li>combine frequent, similar comments like this: <i>Beccy ist doof 37$\times$</i></li>
-          </ul>
-        </li>
-      <% end %>
-      <li>keep the compactlist, even for only one comment</li>
-      <li><b>move comments that do not belong here to the very top</b>. Rule of thumb: <%=isCourse ? "concerns tutor or study group’s room? Move it!" : "doesn’t concern tutor or room? Move it!" %> </li>
-      <li>ensure insults are commented out. Don’t delete them. </li>
+      <li>Does not look like this?  Click “start over (autocombine comments)“<br/>
+        <tt>\begin{compactitem}&nbsp;&nbsp;&nbsp;&nbsp;\item …&nbsp;&nbsp;&nbsp;\end{compactitem}</tt>
+      </li>
+      <li><b>keep</b> the <b>compactitem</b>-environment, even for one comment</li>
+      <li>
+        <b>combine repeated comments</b>, i.e. change<br/>
+        <tt>&nbsp;&nbsp;\item script would be nice<br/>
+          &nbsp;&nbsp;\item (37 comments with the same meaning)
+        </tt><br/>
+      to<br/>
+        <tt>&nbsp;&nbsp;\item a script would be helpful (39$\times$)</tt>
+      </li>
+      <li><b>Sort:</b> <tt>Microphone, Friendly, M, F</tt> → <tt>M, M, F, F</tt></li>
+      <li><b>Group</b> by topic (profs, exercices, study groups, …)</li>
+      <li><b>Where do comments belong?</b>
+        <ul><li>Concerns tutor or this and only this study group? Tutor</li>
+            <li>Concerns anything else? Course</li>
+        </ul>
+      </li>
+      <li>
+       <b>Comment doesn’t belong here?</b> Move it to the top:<br/>
+       <tt>&nbsp;&nbsp;\item prof rocks! %%%%%% should be moved to prof<br/>
+          \begin{compactitem} &nbsp;&nbsp;\item Tutor sucks…</tt>
+      </li>
+      <li>ensure insults are commented out. Don’t delete them!</li>
+      <li><a onclick="alert('\\item tutor Bruno ist Doof is really legendary %%%%% does not belong here, move to tutor “Bruno ist Doof”\n\n\\vspace{0.4cm}\\textbf{Rebecca ist Doof}\n\\begin{compactitem}\n% \\item kill yourself %%% insulting, commented out\n  \\item nice handwriting\n  \\item please write smaller\n  \\item handwriting illegible\n  \\item microphone broken\n\\end{compactitem}\n\n\\vspace{0.4cm}\\textbf{Exercises}\n\\begin{compactitem}\n  \\item exercises are too hard\n  \\item handing out exercices on friday is evil\n  \\item …\n\\end{compactitem}\n\n\\vspace{0.4cm}\\textbf{Study Groups}\n\\begin{compactitem}\n  \\item study groups overlap with courses\n  \\item …\n\\end{compactitem}')">Show a complete example for courses</a>. Tutors usually don’t need grouping.</li>
     </ul><br/>
 
     <a onclick="setCombinedText()">start over (“auto combine comments”)</a>
