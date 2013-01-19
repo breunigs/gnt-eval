@@ -12,6 +12,7 @@ class Hitme < ActiveRecord::Base
       when Hitme::PROOFREADING then "proofreading"
       when Hitme::COMBINING then "combining"
       when Hitme::FINALCHECK then "final checking"
+      when Hitme::DONE then "about to finish"
       else raise("Undefined step: #{step}")
     end
   end
