@@ -3,7 +3,8 @@
 class PicsController < ApplicationController
   def download
     @pic = Pic.find(params[:id])
-    raise ActionController::RoutingError.new('Not Found') unless @pic && File.exists?(@pic.source)
+    msg = "Original sheet not found. Try `locate #{File.basename @pic.source}` (stored path:  #{@pic.source})" 
+    raise ActionController::RoutingError.new(msg) unless @pic && File.exists?(@pic.source)
     send_file(@pic.source)
   end
 end
