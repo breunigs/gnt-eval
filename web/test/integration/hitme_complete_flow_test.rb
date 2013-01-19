@@ -3,10 +3,6 @@
 require "test_helper"
 
 class HitmeCompleteFlowTest < ActionDispatch::IntegrationTest
-  # test "the truth" do
-  #   assert true
-  # end
-
   test "overview and assign work" do
     cookies[:username] = "tester"
 
