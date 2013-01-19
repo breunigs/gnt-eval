@@ -5,7 +5,7 @@ namespace :results do
   # given term and faculty_id in the specified directory.
   def evaluate(term_id, faculty_id, directory)
     f = Faculty.find(faculty_id)
-    t = term.find(term_id)
+    t = Term.find(term_id)
 
     puts "Could not find specified faculty (id = #{faculty_id})" if f.nil?
     puts "Could not find specified term (id = #{term_id})" if t.nil?
