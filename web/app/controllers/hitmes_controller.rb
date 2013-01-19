@@ -16,8 +16,6 @@ class HitmesController < ApplicationController
       return
     end
 
-    pp cookies[:skip_course]
-
     skip = cookies[:skip_course].to_i
 
     # randomize type of work first, then try to get a random chunk for
