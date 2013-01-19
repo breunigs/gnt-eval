@@ -140,12 +140,17 @@ class PESTOmr < PESTDatabaseTools
     debug_box = []
 
     fixes = { :horiz => 0, :vert => 0 }
+    retried = false
     question.boxes.each_with_index do |box, i|
       x, y, had_to_fix = search_square_box(img_id, box)
       fixes[:horiz] += 1 if had_to_fix[:horiz]
       fixes[:vert] += 1 if had_to_fix[:vert]
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
+        if !retried
+          retried = true
+          @auto_correction_vert -= 8
+        end
         @soft_error += 1
         debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
               " db_column=#{question.db_column} in #{@currentFile}"
@@ -154,6 +159,7 @@ class PESTOmr < PESTDatabaseTools
         box.bp = 0
         next
       end
+      retried = false
 
       # inside the box. Take one further pixel from the width of the box
       # because the results (omr-test) show that in many cases the boxes
@@ -175,6 +181,7 @@ class PESTOmr < PESTDatabaseTools
 
     v_fix_ratio = fixes[:vert].to_f/question.boxes.size.to_f
     @auto_correction_vert += 3 if v_fix_ratio >= 0.65
+
 
     # see if there is anything inside the boxes. If yes, assume the user
     # knows how a checkbox works.
@@ -570,7 +577,6 @@ class PESTOmr < PESTDatabaseTools
     # escaping
     q << (["?"]*(vals.size)).join(", ")
     q << ")"
-
 
     # only create YAMLs in debug and test mode
     if @debug || @test_mode
