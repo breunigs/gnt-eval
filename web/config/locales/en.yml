@@ -78,3 +78,14 @@ en:
     # rename the models
     models:
       prof: Professor
+
+
+  postoffice:
+    erinnerungsmail:
+      subject: Evaluation of '%{title}' on %{date}
+    ankuendigungsmail:
+      subject: Evaluation of your class %{title}
+    evalverschickung:
+      subject: Results of this term's evaluation
+    single_evalverschickung:
+      subject: Evaluation results for %{title}

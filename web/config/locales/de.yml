@@ -60,3 +60,15 @@ de:
 
 
   note: Hinweis
+
+
+  postoffice:
+    erinnerungsmail:
+      subject: "Evaluation von '%{title}' am %{date}"
+    ankuendigungsmail:
+      subject: "Evaluation Ihrer Veranstaltung %{title}"
+    evalverschickung:
+      subject: Ergebnisse der diessemestrigen Veranstaltungsumfrage
+      subject: Ergebnisse der diessemestrigen Veranstaltungsumfrage
+    single_evalverschickung:
+      subject: "Evaluations-Ergebnisse für %{title}"

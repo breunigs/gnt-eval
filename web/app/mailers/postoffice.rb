@@ -12,18 +12,17 @@ class Postoffice < ActionMailer::Base
 
     @course = c
     @anrede = prof_address(c)
-    @sprache = {:de => 'Deutsch', :en => "Englisch"}[c.language]
+    @sprache = I18n.t(c.language.to_sym, :raise => true)
 
     headers['X-GNT-Eval-Mail'] = __method__.to_s
     headers['X-GNT-Eval-Id'] = c.id.to_s
 
-    subject = "Evaluation Ihrer Veranstaltung '#{c.title}'"
     to = c.profs.collect{ |p| p.email }
 
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
 
-    do_mail(to, subject, debug)
+    do_mail(to, debug)
   end
 
   def erinnerungsmail(course_id)
@@ -35,13 +34,12 @@ class Postoffice < ActionMailer::Base
     headers['X-GNT-Eval-Mail'] = __method__.to_s
     headers['X-GNT-Eval-Id'] = c.id.to_s
 
-    subject = "Evaluation von '#{c.title}' am #{c.description}"
     to = c.fs_contact_addresses_array
 
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
 
-    do_mail(to, subject, debug)
+    do_mail(to, debug)
   end
 
   # verschickt die eval, will faculty_links ist array mit
@@ -59,13 +57,12 @@ class Postoffice < ActionMailer::Base
     @anrede = prof_address(c)
     @link = faculty_links[c.faculty.id] + '#nameddest=' + course_id.to_s
 
-    subject = 'Ergebnisse der diessemestrigen Veranstaltungsumfrage'
     to = c.profs.collect{ |p| p.email }
 
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
 
-    do_mail(to, subject, debug)
+    do_mail(to, debug)
   end
 
 
@@ -92,22 +89,25 @@ class Postoffice < ActionMailer::Base
     end
 
     attachments[File.basename(path)] = File.read(path)
-    subject = 'Ergebnisse der diessemestrigen Veranstaltungsumfrage'
     to = c.profs.collect{ |p| p.email }
 
     # debug = true ⇒ mail will only be sent to DEBUG_MAILTO_ADDRESS
     debug = true
 
-    do_mail(to, subject, debug)
+    do_mail(to, debug)
   end
 
   private
-  def do_mail(to, subject, debug = true)
-    if debug || to.compact.empty?
-      headers['X-GNT-Eval-Debug'] = "yes"
-      mail(:to => DEBUG_MAILTO_ADDRESS, :cc => [], :bcc => [], :subject => subject)
-    else
-      mail(:to => to.compact, :subject => subject)
+  def do_mail(to, debug = true)
+    I18n.with_locale(@course.language.to_s) do
+      subject = I18n.t("#{self.class.to_s.downcase}.#{caller[2][/`.*'/][1..-2]}.subject", :title => @course.title, :date => @course.description, :raise => true)
+
+      if debug || to.compact.empty?
+        headers['X-GNT-Eval-Debug'] = "yes"
+        mail(:to => DEBUG_MAILTO_ADDRESS, :cc => [], :bcc => [], :subject => subject)
+      else
+        mail(:to => to.compact, :subject => subject)
+      end
     end
   end
 
