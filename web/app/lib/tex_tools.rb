@@ -188,7 +188,7 @@ def tex_to_pdf(file, one_time = false, quiet = false)
       warn "COMMAND: #{texpath} #{first} #{filename}"
       warn "="*60
       warn "Running 'rake results:find_broken_comments' or 'rake results:fix_tex_errors' might help."
-      raise
+      raise "Errors when TeXing the document. You may find more information in the logs at #{File.dirname(file)}"
   end
 
   unless one_time
