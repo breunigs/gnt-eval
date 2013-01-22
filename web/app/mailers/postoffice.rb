@@ -46,7 +46,7 @@ class Postoffice < ActionMailer::Base
   # faculty_links[faculty_id] =
   # 'http://mathphys.fsk.uni-heidelberg.de/~eval/.uieduie/Ich_bin_das_richtige_file.pdf'
   def evalverschickung(course_id, faculty_links)
-    c = Course.find(course_id)
+    @course = c = Course.find(course_id)
 
     raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
@@ -67,7 +67,7 @@ class Postoffice < ActionMailer::Base
 
 
   def single_evalverschickung(course_id, faculty_links, path = "")
-    c = Course.find(course_id)
+    @course = c = Course.find(course_id)
 
     headers['X-GNT-Eval-Mail'] = __method__.to_s
     headers['X-GNT-Eval-Id'] = c.id.to_s
