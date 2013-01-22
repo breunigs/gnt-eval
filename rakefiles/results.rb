@@ -164,6 +164,7 @@ namespace :results do
 	work_queue.join
       end
     end # sem_ids.each
+    Rake::Task["results:make_preliminary".to_sym].invoke
   end
 
   desc "Creates preliminary versions of result files in tmp/results."
