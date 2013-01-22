@@ -94,35 +94,39 @@ namespace :results do
     puts "first before fixing manually."
   end
 
-  desc "create pdf report for a single course"
-  task :pdf_single, [:course_id] => "forms:samples" do |t,a|
+  def pdf_single(course)
     dirname = './tmp/results/singles/'
     FileUtils.mkdir_p(dirname)
-    I18n.load_path += Dir.glob(File.join(Rails.root, 'config/locales/*.yml'))
-
-    c = Course.find(a.course_id)
+    c = course
     filename = c.dir_friendly_title << '_' << c.term.dir_friendly_title << '.pdf'
-    render_tex(c.evaluate(true), dirname + filename, false)
+    render_tex(c.evaluate(true), dirname + filename, false, false, true)
+  end
+
+  desc "create pdf report for a single course"
+  task :pdf_single, [:course_id] => "forms:samples" do |t,a|
+    course = Course.find(a.course_id) rescue nil
+    if course.nil?
+      warn "Course with ID=#{a.course_id} does not exist"
+      next
+    end
+    pdf_single(course)
   end
 
   desc "create pdf reports for all courses of a faculty for a given term one at a time (i.e. a whole bunch of files). leave term_id and faculty_id empty for current term and all faculties."
   task :pdf_singles, [:term_id, :faculty_id] => "forms:samples" do |t,a|
-    sem_ids = if a.term_id.nil?
-      Term.currently_active.map { |s| s.id }
-    else
-      [a.term_id]
-    end
+    term_ids = a.term_id ? [a.term_id] : Term.currently_active.map(&:id)
+    faculty_ids = a.faculty_id ? [a.faculty_id] : Faculty.find(:all).map(&:id)
 
-    faculty_ids = if a.faculty_id.nil?
-                    Faculty.find(:all).map { |f| f.id }
-                  else
-                    [a.faculty_id]
-                  end
-    courses = Course.find(:all).find_all do |c|
-      sem_ids.include?(c.term_id) and faculty_ids.include?(c.faculty_id)
-    end
+    courses = Course.where(:term_id => term_ids, :faculty_id => faculty_ids)
+    max = courses.map { |c| c.course_profs.size + c.tutors.size }.sum
+    cur = 0
+    print_progress(cur, max)
     courses.each do |course|
-      work_queue.enqueue_b { system("rake -s results:pdf_single[#{course.id}]") }
+      work_queue.enqueue_b {
+        pdf_single(course)
+        cur += course.course_profs.size + course.tutors.size
+        print_progress(cur, max, course.title)
+      }
     end
     work_queue.join
   end
