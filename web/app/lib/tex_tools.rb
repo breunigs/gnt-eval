@@ -99,7 +99,7 @@ end
 # location. Set add_header to false if you plan to include your own
 # preamble and footer. Set one_time to true, if it’s enough to render
 # the document once. If false, it is rendered three times.
-def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
+def render_tex(tex_code, pdf_path, add_header=true, one_time=false, quiet = false)
   I18n.load_path += Dir.glob(File.join(RAILS_ROOT, '/config/locales/*.yml'))
   I18n.load_path.uniq!
 
@@ -121,12 +121,11 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
     temp_dir(id) # this makes all newly created files world writable
     FileUtils.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
-    puts
-    puts "Done, have a look at #{pdf_path}"
+    puts "\nDone, have a look at #{pdf_path}" if !quiet
     return true
   else
     temp_dir(id) # this makes all newly created files world writable
-    puts "Rendering your TeX Code failed."
+    warn "Rendering your TeX Code failed."
     return false
   end
 end
