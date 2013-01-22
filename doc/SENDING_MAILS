@@ -125,12 +125,14 @@ ccs.each { |c| Postoffice.erinnerungsmail(c.id).XXXdeliver }
 # single_evalverschickung may be generated like this. It’s assumed
 # you ran “rake results:pdf_singles” beforehand.
 
-# Find IDs for each term:
-Term.currently_active.map { |t| "#{t.id}=#{t.title}" }
+# Find IDs for each faculty:
+Faculty.all.map { |t| "#{t.id}=#{t.shortname}" }
 
-# Assume we have the term IDs 4 and 2, then:
+# Assume we have the faculty IDs 4 and 2, then:
 links = { 4 => "http://…/eval_for_term_4.pdf", 2 => "…for_term_2.pdf" }
 
+# we don’t want to send them for faculty 1 yet:
+ccs.reject! { |c| c.faculty_id == 1 }
 
 m = Postoffice.single_evalverschickung(some_course.id, links)
 m.XXXdeliver
