@@ -109,6 +109,7 @@ namespace :results do
       warn "Course with ID=#{a.course_id} does not exist"
       next
     end
+    puts "Evaluating #{course.title}"
     pdf_single(course)
   end
 
