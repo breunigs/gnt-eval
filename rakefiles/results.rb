@@ -137,13 +137,9 @@ namespace :results do
     dirname = './tmp/results/'
     FileUtils.mkdir_p(dirname)
 
-    sem_ids = if a.term_id.nil?
-      Term.currently_active.map { |s| s.id }
-    else
-      [a.term_id]
-    end
+    term_ids = a.term_id ? [a.term_id] : Term.currently_active.map(&:id)
 
-    sem_ids.each do |sem_id|
+    term_ids.each do |sem_id|
       # we have been given a specific faculty, so evaluate it and exit.
       if not a.faculty_id.nil?
 	I18n.default_locale = Seee::Config.settings[:default_locale]
@@ -167,7 +163,7 @@ namespace :results do
 	end
 	work_queue.join
       end
-    end # sem_ids.each
+    end # term_ids.each
     Rake::Task["results:make_preliminary".to_sym].invoke
   end
 
