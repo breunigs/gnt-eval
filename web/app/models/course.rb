@@ -180,7 +180,7 @@ class Course < ActiveRecord::Base
   # evaluates this whole course against the associated form. if single
   # is set, include headers etc.
   def evaluate(single=nil)
-    puts "   #{title}"
+    puts "   #{title}" if single.nil?
 
     # if this course doesn't have any lecturers it cannot have been
     # evaluated, since the sheets are coded with the course_prof id
