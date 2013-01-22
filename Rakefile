@@ -45,7 +45,6 @@ def make_sample_sheet(form, lang)
   # parsing. Only skip if both files are present and newer than the
   # form itself.
   if !form_needs_regen && File.exists?(filename+'.pdf') && File.exists?(filename+'.yaml')
-    puts "#{filename}.pdf already exists. Skipping."
     return filename
   end
 
