@@ -117,7 +117,7 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false, quiet = fals
   tmp = File.join(temp_dir(id), "#{id}.tex")
   File.open(tmp, 'w') {|f| f.write(tex_code) }
 
-  if tex_to_pdf(tmp) and File.exists?(tmp)
+  if tex_to_pdf(tmp, one_time, quiet) and File.exists?(tmp)
     temp_dir(id) # this makes all newly created files world writable
     FileUtils.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
