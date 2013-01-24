@@ -114,6 +114,12 @@ class TutorsController < ApplicationController
       return
     end
 
+    if @tutor.returned_sheets < Seee::Config.settings[:minimum_sheets_required]
+      flash[:error] = 'Not enough returned sheets, cannot generate results.'
+      redirect_to tutors_path
+      return
+    end
+
     pdf_path = temp_dir("tutor_result_pdf")
     path = pdf_path + "/tutor_eval_#{@tutor.id}.pdf"
     tex_code = @tutor.evaluate
