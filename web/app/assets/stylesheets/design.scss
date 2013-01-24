@@ -168,7 +168,7 @@ span.error {
   color:red;
 }
 
-a, .hold_button:not(.hold_button_form_compat) input {
+a {
   color:$link_color;
   text-decoration:none;
   background:transparent;
@@ -178,6 +178,10 @@ a, .hold_button:not(.hold_button_form_compat) input {
     border: 0;
     border-bottom:0.1rem dotted #FF3636;
     text-shadow: 0 0 0.05rem rgba(0, 0, 0, 0.1);
+  }
+
+  &.disabled {
+    text-decoration: line-through;
   }
 }
 

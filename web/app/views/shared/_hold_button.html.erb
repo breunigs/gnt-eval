@@ -1,6 +1,8 @@
-<form title="This button is special. If you don’t know how to use it, then don’t." class="hold_button <%=defined?(button) && button ? "hold_button_form_compat" : ""%>" method="post">
-  <input type="submit" id="<%=id%>" value="<%=name%>" disabled="disabled" class="<%=defined?(button) && button ? "button" : ""%> <%=defined?(classes) && classes ? classes : ""%>"/>
-  <script> hold_button(document.getElementById("<%=id%>"), 5, true, "<%=url%>"); </script>
-  <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token%>" />
-  <noscript>needs JS</noscript>
-</form>
+<a
+  title="Click and hold for five seconds to activate."
+  class="hold <%=defined?(button) && button ? "button" : ""%>"
+  data-time="5"
+  data-group="<%=id%>"
+  data-onlyonce="true"
+  data-post="<%= form_authenticity_token%>"
+  data-url="<%=url%>"><noscript>(needs JS)</noscript> <%=name%></a>
