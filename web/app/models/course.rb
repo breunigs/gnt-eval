@@ -241,10 +241,10 @@ class Course < ActiveRecord::Base
             # title, it is added automaticall in order to make it clear
             # to whom this block of questions refers. If there is only
             # one prof, it is assumed it’s clear who is meant.
-            s << " (\\lect)" unless s.include?("\\lect") || course_profs.size == 1
+            s += " (\\lect)" unless s.include?("\\lect") || course_profs.size == 1
             course_profs.each { |cp| b << cp.eval_block(block, s) }
           when :tutor
-            s << " (\\tutor)" unless s.include?("\\tutor") || tutors_sorted.size == 1
+            s += " (\\tutor)" unless s.include?("\\tutor") || tutors_sorted.size == 1
             tutors_sorted.each { |t| b << t.eval_block(block, s) }
           else
             raise "Unimplemented repeat_for type #{repeat_for}"
