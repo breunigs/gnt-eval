@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
 gem "rake"
 gem "rails",           "3.2.11"
-gem "jquery-rails"
+gem "jquery-rails",    "2.1.2"
 gem "jquery_datepicker"
 
 # replaces WebRick to get rid of the content length warnings. See
