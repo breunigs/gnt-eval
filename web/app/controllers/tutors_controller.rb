@@ -118,12 +118,14 @@ class TutorsController < ApplicationController
     path = pdf_path + "/tutor_eval_#{@tutor.id}.pdf"
     tex_code = @tutor.evaluate
 
-    unless render_tex(tex_code, path, true, true)
+    unless render_tex(tex_code, path, false, true)
       flash[:error] = 'Couldn’t render TeX due to some errors. Have a look at the log file to find out why.'
       redirect_to [@tutor.course, @tutor]
       return
     end
-    send_file path, :type => "application/pdf"
-    File.delete(path)
+
+    data = open(path, "rb") { |io| io.read }
+    send_data data, :type => "application/pdf", :filename => "tutor_eval_#{@tutor.id}.pdf"
+    FileUtils.remove_dir(pdf_path)
   end
 end
