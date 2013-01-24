@@ -3,8 +3,8 @@
 \globalQuestion{
   <%= question_text %>\\
   {\globalNumberStyle
-    <%=t :answers%>: <%=sc%>,
-    <%=t :abstentions%>: <%=answ[:abstentions]%>}
+    <%=t :answers%>: <%=sc%>%
+    <%= answ[:abstentions] == 0 ? "" : ", #{t :abstentions}: #{answ[:abstentions]}" %>}
 }
 <%# the \hfils{} centers the text without underfull warnings like %>
 <%# 'text centered' does. %>
