@@ -133,5 +133,6 @@ class TutorsController < ApplicationController
     data = open(path, "rb") { |io| io.read }
     send_data data, :type => "application/pdf", :filename => "tutor_eval_#{@tutor.id}.pdf"
     FileUtils.remove_dir(pdf_path)
+    FileUtils.remove_dir(temp_dir("tutor_eval_#{@tutor.id}"))
   end
 end
