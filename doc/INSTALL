@@ -20,6 +20,7 @@ packages w/o special treatment
   curl
   ghostscript
   git
+  hunspell
   libc6-dev
   libcairo2-dev
   libmagickcore-dev
@@ -315,7 +316,7 @@ FURTHER READING
 SUMMARY
 =======
 
-sudo apt-get install curl git autoconf barcode bison build-essential ghostscript libc6-dev libcairo2-dev libmagickcore-dev libmagickwand-dev libmysqlclient-dev libpq-dev libreadline6 libreadline6-dev libsqlite3-0 libsqlite3-dev libssl-dev libtool libxml2-dev libxslt-dev libyaml-dev libzbar0 ncurses-dev openssl pkg-config postgresql sqlite3 texlive texlive-fonts-extra texlive-lang-german texlive-latex-extra texlive-xetex tex-gyre ttf-thai-tlwg zlib1g zlib1g-dev imagemagick librmagick-ruby poppler-utils qrencode
+sudo apt-get install curl git autoconf barcode bison build-essential ghostscript hunspell libc6-dev libcairo2-dev libmagickcore-dev libmagickwand-dev libmysqlclient-dev libpq-dev libreadline6 libreadline6-dev libsqlite3-0 libsqlite3-dev libssl-dev libtool libxml2-dev libxslt-dev libyaml-dev libzbar0 ncurses-dev openssl pkg-config postgresql sqlite3 texlive texlive-fonts-extra texlive-lang-german texlive-latex-extra texlive-xetex tex-gyre ttf-thai-tlwg zlib1g zlib1g-dev imagemagick librmagick-ruby poppler-utils qrencode
 
 Above command will take forever, wait until curl and git are installed,
 then continue without waiting for it to finish.
