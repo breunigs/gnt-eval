@@ -119,6 +119,13 @@
             :confirm => "Really remove tutor #{tutor.abbr_name}? (Order changes after destruction. Don't continue if sheets have been printed.)",
             :method => :delete %></td>
         <% end %>
+        <% if tutor.returned_sheets >= Seee::Config.settings[:minimum_sheets_required] %>
+          <a class="hold"
+            data-time="5"
+            data-onlyonce="true"
+            data-post="<%= form_authenticity_token%>"
+            data-url="<%=course_tutor_result_pdf_path(tutor.course, tutor)%>"><noscript>(needs JS)</noscript> result.pdf (slow)</a>
+          <% end %>
         </td>
       </tr>
       <% end %>
