@@ -1,49 +1,49 @@
-<% @curr_sem ||= get_selected_semesters %>
+<% @curr_term ||= get_selected_terms %>
 <!DOCTYPE html>
 <html>
 <head>
-  <title><%=APP_NAME%> // <%=controller.human_name.pluralize %> // <%= params[:action].humanize %> <%= yield(:title) %></title>
-  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <title><%=APP_NAME%> // <%=controller.human_name.pluralize %> // <%= controller.action_name.humanize %> <%= yield(:title) %></title>
+  <% if yield(:enable_small_screen).include?("true") %>
+    <%= stylesheet_link_tag    "application", :media => "all and (min-width: 501px)" %>
+    <%= stylesheet_link_tag    "small_screen", :media => "screen and (max-width: 500px)" %>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% else %>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+  <% end %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
   <%= yield(:script) %>
+  <% unless yield(:css).blank? %><style><%= yield(:css) %></style><% end %>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link href="<%=ENV['RAILS_RELATIVE_URL_ROOT'] || "" %>/favicon.ico" rel="icon" type="image/x-icon" />
-  <% if controller.action_name == "edit" %><%=render "shared/collision_detection"%><% end %>
 </head>
 <body>
-  <div id="darkened"></div>
-  <% if controller.action_name == "edit" %>
-    <noscript><div class="group warning">You have <b>disabled JavaScript</b>. You and others can’t be notified if they edit this page at the same time. This might lead to <b>collisions</b> as they are not handled in any way. User who hits the save button last wins.</div></noscript>
-
-    <div id="collision-warning" class="warning hidden">This page is currently opened more than once. This might lead to your changes being overwritten. If you opened this window just now, please close it. Otherwise talk to each other and solve this.</div>
-  <% end %>
-
   <div>
-    <div class="infobox">
-      <% if @curr_sem.nil? || @curr_sem.empty? %>
-        <span class="warning">No active terms. Change the dates or <%= link_to "create a new one", new_semester_path %>.</span>
+    <div class="infobox rd-hide">
+      <% if @curr_term.blank? %>
+        <span class="warning">No active terms. Change the dates or <%= link_to "create a new one", new_term_path %>.</span>
       <% else %>
-        <b>active term</b><br/><%=@curr_sem.map { |c| c.title }.join(", ") %><br/>
+        <b>active term</b><br/><%=@curr_term.map { |c| c.title }.join(", ") %><br/>
       <% end %>
 
-      <% if @course && @course.semester && @course.semester.critical? %>
+      <% if @course && @course.term && @course.term.critical? %>
         <span class="warning">Sheets have been printed for this course. Destroy them all before changing anything.</span>
       <% end %>
 
-      <% if (@course.nil? || @course.semester.nil?) && @curr_sem.any? { |c| c.critical? } %>
+      <% if (@course.nil? || @course.term.nil?) && @curr_term.any? { |c| c.critical? } %>
         <span class="warning">Careful, current term is critical.</span>
       <% end %>
     </div>
 
     <h1><%=controller.human_name.pluralize%> // <%= params[:action].humanize %> <%=yield(:title) %></h1>
     <nav class="button-group">
-      <%= link_to 'Courses', 	  courses_path,   :class => "button big" %>
+      <%= link_to 'Courses',    courses_path,   :class => "button big" %>
       <%= link_to 'Professors', profs_path,     :class => "button big" %>
-      <%= link_to 'Terms',      semesters_path, :class => "button big" %>
-      <%= link_to 'Forms', 		  forms_path,     :class => "button big" %>
+      <%= link_to 'Terms',      terms_path,     :class => "button big" %>
+      <%= link_to 'Forms',      forms_path,     :class => "button big" %>
       <%= link_to 'Faculties',  faculties_path, :class => "button big" %>
-      <%= link_to 'Tutors', 		tutors_path,    :class => "button big" %>
+      <%= link_to 'Tutors',     tutors_path,    :class => "button big" %>
+      <%= link_to 'Hitmes',     hitme_path,     :class => "button big" %>
     </nav>
   </div>
 
@@ -56,6 +56,6 @@
   <% end %>
 
 <%= yield %>
-
+  <% if ["edit", "assign_work"].include?(controller.action_name) %><%=render "shared/collision_detection"%><% end %>
 </body>
 </html>

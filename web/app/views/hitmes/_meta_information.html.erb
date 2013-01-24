@@ -1,0 +1,21 @@
+<% course = workon.is_a?(Course) ? workon : workon.course %>
+
+<div class="rightside">
+  <h2>Meta Information</h2>
+  <table style="width:100%">
+    <% if workon.respond_to?(:for) %>
+      <tr><th>meant for</th><td><%=workon.for%></td></tr>
+    <% elsif workon.is_a?(Tutor) %>
+      <tr><th>comments for tutor</th><td><%=workon.abbr_name%></td></tr>
+    <% end %>
+    <tr><th style="width:160px">Lecture</th><td><%=course.title%></td></tr>
+    <tr><th>Profs</th><td><%=safe_join(course.profs.map(&:fullname).sort, "<br>".html_safe)%></td></tr>
+    <tr><th>Tutors</th><td>
+      <div class="columnize-list">
+      <%=safe_join(course.tutors.map(&:abbr_name).sort, "<br>".html_safe)%>
+      </div>
+    </td></tr>
+    <tr><th>Form</th><td><%=link_to("#{course.form.name} (language: #{course.language})", course.form)%></td></tr>
+    <tr><th>Faculty</th><td><%=course.faculty.longname%></td></tr>
+  </table>
+</div>

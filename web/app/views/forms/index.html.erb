@@ -1,5 +1,5 @@
-<% current_forms = Semester.currently_active_forms.map { |f| f.title } %>
-<% curr_term ||= get_selected_semesters %>
+<% current_forms = Term.currently_active_forms.map { |f| f.title } %>
+<% curr_term ||= get_selected_terms %>
 <% curr_term_titles = curr_term.map { |t| t.title }.join(", ") %>
 <% has_curr_term = curr_term && curr_term.size %>
 
@@ -11,27 +11,27 @@
     <tr>
       <th>Term</th>
       <th>Name</th>
-      <th>Table</th>
+      <th>DB Table</th>
       <th colspan="<%=has_curr_term ? 3 : 2 %>">Actions</th>
       <th></th>
     </tr>
 
     <% for form in @forms.sort { |x,y|
-      s = x.semester_id <=> y.semester_id
+      s = x.term_id <=> y.term_id
       s == 0 ? (x.name <=> y.name) : s
     } %>
     <tr>
-      <td <%=get_selected_semesters.include?(form.semester) ? 'style="font-weight:bold"'.html_safe : ""%>>
-        <%=h form.semester.title %>
+      <td <%=get_selected_terms.include?(form.term) ? 'style="font-weight:bold"'.html_safe : ""%>>
+        <%=h form.term.title %>
       </td>
       <td><%= link_to form.name, form %></td>
-      <td><%= (form.form_checks_out? ? form.abstract_form.db_table : "") %></td>
+      <td><%= form.db_table %></td>
 
       <% if form.critical? %>
         <td colspan="2" class="fade">Term critical</td>
       <% else %>
         <td><%= link_to 'Edit form', edit_form_path(form) %></td>
-        <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.semester.title}?", :method => :delete %></td>
+        <td><%= link_to 'Destroy', form, :confirm => "Do you really want to DESTROY #{form.name} in #{form.term.title}?", :method => :delete if Course.find_by_form_id(form.id).nil? %></td>
       <% end %>
       <% if has_curr_term %>
         <td>

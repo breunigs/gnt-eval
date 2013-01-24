@@ -33,30 +33,22 @@ function FormEditor() {
     return arguments.callee.instance;
   arguments.callee.instance = this;
 
-  // default variables
-  this.undoData = new Array();
-  this.redoData = new Array();
-  this.undoTmp = null;
-  this.groupTagStack = new Array();
-  this.languages = ["en"];
-  this.data = this.getValue();
-  this.invalidData = false;
-  this.generatedHtml = "";
 
-  // parsing
-  this.parseAbstractForm(this.data);
+  this.loadFormFromTextbox();
+
+
+  // useful for testing
+  this.animationSpeed = 500;
+  this.testMode = false;
+
 
   // listeners and other initial setup work
   $("[type=numeric]").numeric({ decimal: false, negative: false });
-  this.attachSectionHeadUpdater();
-  this.attachQuestionHeadUpdater();
-  this.attachChangeListenerForUndo();
+  this.initSectionAndQuestionHeaders();
+  this.attachChangeListenerToAllInputs();
   this.attachCollapsers();
-  $('#form_editor textarea').autosize();
   this.allowSortingCancelByEsc();
-  this.toggleSorting(false);
-  this.toggleDeleting(false);
-  this.toggleDuplicating(false);
+
   this.checkSectionUpDownLinks();
   this.attachFormSubmit();
   $(document).ready(function() { $F().fixToolBoxScrolling(); });
@@ -66,6 +58,29 @@ function FormEditor() {
   // hide original text edit box if form editor loaded successfully
   $("#form_content").parents("tr").hide();
 }
+
+/* @private
+ * Loads the YAML sheet from the default text area and parses it into
+ * a FormEditor. Should be only called once in production mode, but may
+ * be useful when debugging. */
+FormEditor.prototype.loadFormFromTextbox = function() {
+  // (re)set default variables
+  this.undoData = new Array();
+  this.redoData = new Array();
+  this.undoTmp = null;
+  this.groupTagStack = new Array();
+  this.languages = [":en"];
+  this.data = this.getValue();
+  this.invalidData = false;
+  this.generatedHtml = "";
+
+  // parsing
+  this.parseAbstractForm(this.data);
+
+  this.toggleSorting(false);
+  this.toggleDeleting(false);
+  this.toggleDuplicating(false);
+};
 
 /* @private
  * Run once function that makes the #form_tools element semi-fixed.
@@ -113,6 +128,9 @@ FormEditor.prototype.fixToolBoxScrolling = function() {
     else
       box.css({ position: "fixed", top: "0" , right: "2.1rem"  });
   });
+
+  // run once
+  $(window).scroll();
 };
 
 /* @public
@@ -164,7 +182,31 @@ FormEditor.prototype.assert = function(expression, message) {
   if (!expression) {
     this.invalidData = true;
     this.trace();
+    if(!this.testMode) alert("The FormEditor… crashed. At least it encountered a situation it can’t handle. Maybe it still works, but you also might have data loss. If you haven’t saved you form yet, reloading will get you to an old version.");
     throw(message);
+  }
+};
+
+/* @public
+ * Checks if the given expression is true; prints the message if it
+ * isn’t. If expression is a function, the function will be executed.
+ * If there’s no error, it’s assumed everything worked fine, otherwise
+ * the message will be printed. The functions return value doesn’t
+ * matter.
+ * @param expression to check
+ * @param message to show, if expression is not true */
+FormEditor.prototype.test = function(expression, message) {
+  if(typeof expression === "function") {
+    try {
+      expression.call();
+    } catch(err) {
+      this.warn(message);
+      this.log(err);
+      this.failedTests++;
+    }
+  } else if (!expression) {
+    this.warn(message);
+    this.failedTests++;
   }
 };
 

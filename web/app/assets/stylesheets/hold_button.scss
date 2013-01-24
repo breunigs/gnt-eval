@@ -1,0 +1,18 @@
+.hold_button:not(.hold_button_form_compat) input {
+  border:0;
+  border-bottom:1px dotted transparent;
+  display:inline;
+  height:auto;
+  width:auto;
+  padding:0;
+  min-width:0;
+  border-radius:0;
+}
+
+.hold_button_form_compat {
+  float:left;
+}
+
+.hold_button input[disabled], .hold_button input[disabled]:hover {
+  text-decoration: line-through;
+}

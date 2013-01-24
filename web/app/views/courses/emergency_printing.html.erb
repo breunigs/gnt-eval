@@ -1,0 +1,16 @@
+<% content_for :title, "“#{@course.title}”" %>
+<% content_for :enable_small_screen, "true" %>
+<% content_for :css, "#print#{@course.id} { width: 22rem }" %>
+
+
+<div>
+  <ul>
+    <li><b>Click and hold</b> for five seconds to start printing.</li>
+    <li>Prints <%=@amount%> sheets for each prof: <%=@course.profs.map { |p| p.fullname }.join(", ")%></li>
+    <li>If you need more than <%=@amount%> sheets, wait until the page reloads, then click again.</li>
+  </ul><br/>
+  <%= render 'shared/hold_button', :url => course_emergency_printing_path(@course), :name => "print #{@course.course_profs.size}×#{@amount} sheets NOW", :id => "print#{@course.id}", :button => true, :classes => "primary big" %>
+
+  <br/><br/>
+  <%=link_to "return to course", @course, :class => "button" %>
+</div>

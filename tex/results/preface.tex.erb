@@ -2,11 +2,11 @@
 <%# facultylong, String, required, should contain an unabbreviated name %>
 <%#                                for the evaluated faculty %>
 <%# %>
-<%# sem_title[:long], String, required, should contain an unabbreviated %>
-<%#                                     name for the evaluated semester %>
+<%# term_title[:long], String, required, should contain an unabbreviated %>
+<%#                                     name for the evaluated term %>
 <%# %>
-<%# sem_title[:short], String, required, should contain an shortened %>
-<%#                                      name for the evaluated semester %>
+<%# term_title[:short], String, required, should contain an shortened %>
+<%#                                      name for the evaluated term %>
 <%# %>
 <%# Expects locale-related variables to be set, so that the translate %>
 <%# method »t« works. %>
@@ -22,6 +22,6 @@ end
 %>
 
 \newcommand{\facultylong}{<%=facultylong%>}
-\newcommand{\semesterlong}{<%=sem_title[:long]%>}
-\newcommand{\semestershort}{<%=sem_title[:short]%>}
+\newcommand{\termlong}{<%=term_title[:long]%>}
+\newcommand{\termshort}{<%=term_title[:short]%>}
 \input{<%=preface%>}

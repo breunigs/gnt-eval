@@ -97,6 +97,11 @@ $closed-height: 3.5rem;
       padding-right: 0.4rem;
     }
   }
+  #closeall:before {
+    content: "↟";
+    padding-right:0.3rem;
+    padding-left:0.5rem;
+  }
 }
 
 
@@ -160,7 +165,7 @@ $closed-height: 3.5rem;
   }
 
   input {
-    width:44rem;
+    width:49rem;
     height:1.5rem;
 
     &[type=checkbox] {
@@ -171,7 +176,7 @@ $closed-height: 3.5rem;
 
   textarea {
     min-height:4rem;
-    width:42.4rem;
+    width:47.4rem;
     @include addgradient(#FFFFFF, #FBFBFB, url(textarea-cheap-lines.png) no-repeat 0rem 0.8rem);
     padding-left:2rem;
     line-height:16px;
@@ -187,16 +192,12 @@ $closed-height: 3.5rem;
   }
 
   select {
-    width: 44rem + 0.8rem;
+    width: 49rem + 0.8rem;
   }
 
   span {
     display:block;
     margin-left:0.2rem;
-  }
-
-  .deleteTarget, .deleteTarget * {
-    cursor: crosshair !important;
   }
 
   .indent {
@@ -242,7 +243,6 @@ $closed-height: 3.5rem;
     counter-reset:question;
     h5 {
       margin-top:2rem;
-      &:before { content: "Section " counter(section) ": " attr(data-title); }
       display:block;
       background:#eee;
       border-bottom:0.1rem solid #aaa;
@@ -255,6 +255,14 @@ $closed-height: 3.5rem;
       a {
         font-weight:normal;
       }
+
+      &:before {
+        content: "Section " counter(section) ": " attr(data-title);
+        display: inline-block;
+        overflow: hidden;
+        width: 56.5rem;
+        white-space:nowrap;
+      }
     }
 
   }
@@ -264,6 +272,10 @@ $closed-height: 3.5rem;
     > .header {
       &:before {
         content: "Question " counter(section) "."  counter(question) ": (" attr(data-db-column) ") " attr(data-qtext);
+        display: inline-block;
+        overflow: hidden;
+        width: 56.5rem;
+        white-space:nowrap;
       }
     }
   }

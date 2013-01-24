@@ -3,5 +3,14 @@ one:
   course_prof: :oneA
 
 two:
-  basename: some_image_file.jpg"
+  basename: some_image_file.jpg
   course_prof: :oneB
+
+
+three:
+  basename: some_image_file1.jpg
+  course_prof: :hitmeCp
+
+four:
+  basename: some_image_file2.jpg
+  course_prof: :hitmeCp

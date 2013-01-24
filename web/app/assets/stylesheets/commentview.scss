@@ -33,15 +33,16 @@
       -moz-box-sizing:padding-box;
       -webkit-box-sizing:padding-box;
       background:white;
-      color:#eee;
+      color:#ccc;
       font-size:400%;
       display:inline-block;
+      vertical-align:top;
       content: counter(comments) " ";
     }
 
     &:nth-child(odd) {
       &:before {
-        color:rgba(0,0,255,0.05);
+        color:rgba(0,0,255,0.2);
       }
 
       span {

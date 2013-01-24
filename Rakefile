@@ -45,14 +45,13 @@ def make_sample_sheet(form, lang)
   # parsing. Only skip if both files are present and newer than the
   # form itself.
   if !form_needs_regen && File.exists?(filename+'.pdf') && File.exists?(filename+'.yaml')
-    puts "#{filename}.pdf already exists. Skipping."
     return filename
   end
 
   generate_barcode("0"*8, dir + "barcode00000000.pdf")
 
   File.open(filename + ".tex", "w") do |h|
-    h << form.abstract_form.to_tex(lang)
+    h << form.abstract_form.to_tex(lang, form.db_table)
   end
 
   puts "Wrote #{filename}.tex"
@@ -118,7 +117,7 @@ namespace :misc do
 
   desc "Generate lovely HTML output for our static website"
   task :static_output do
-    courses = Semester.currently_active.map { |s| s.courses }.flatten
+    courses = Term.currently_active.map { |t| t.courses }.flatten
     puts courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
     # Sort by faculty first, then by course title
     sorted = courses.sort do |x,y|

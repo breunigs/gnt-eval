@@ -99,7 +99,7 @@ end
 # location. Set add_header to false if you plan to include your own
 # preamble and footer. Set one_time to true, if it’s enough to render
 # the document once. If false, it is rendered three times.
-def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
+def render_tex(tex_code, pdf_path, add_header=true, one_time=false, quiet = false)
   I18n.load_path += Dir.glob(File.join(RAILS_ROOT, '/config/locales/*.yml'))
   I18n.load_path.uniq!
 
@@ -109,7 +109,6 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
 
   # use normal result.pdf preamble
   if add_header
-    def t(t); I18n.t(t); end
     evalname = "#{id} (#{pdf_path})"
     head = ERB.new(RT.load_tex("preamble")).result(binding)
     tex_code = head + tex_code + '\end{document}'
@@ -118,14 +117,15 @@ def render_tex(tex_code, pdf_path, add_header=true, one_time=false)
   tmp = File.join(temp_dir(id), "#{id}.tex")
   File.open(tmp, 'w') {|f| f.write(tex_code) }
 
-  if tex_to_pdf(tmp) and File.exists?(tmp)
+  if tex_to_pdf(tmp, one_time, quiet) and File.exists?(tmp)
+    temp_dir(id) # this makes all newly created files world writable
     FileUtils.makedirs(File.dirname(pdf_path))
     FileUtils.mv(tmp.gsub(/\.tex$/, ".pdf"), pdf_path)
-    puts
-    puts "Done, have a look at #{pdf_path}"
+    puts "\nDone, have a look at #{pdf_path}" if !quiet
     return true
   else
-    puts "Rendering your TeX Code failed."
+    temp_dir(id) # this makes all newly created files world writable
+    warn "Rendering your TeX Code failed."
     return false
   end
 end
@@ -187,7 +187,7 @@ def tex_to_pdf(file, one_time = false, quiet = false)
       warn "COMMAND: #{texpath} #{first} #{filename}"
       warn "="*60
       warn "Running 'rake results:find_broken_comments' or 'rake results:fix_tex_errors' might help."
-      raise
+      raise "Errors when TeXing the document. You may find more information in the logs at #{File.dirname(file)}"
   end
 
   unless one_time

@@ -15,7 +15,8 @@ $(document).ready(function() {
 
 $(window).bind('beforeunload', function() {
   if($formIsBeingSubmitted) {
-    $formIsBeingSubmitted = false;
+    // timeout required because beforeunload may be fired multiple times
+    setTimeout("$formIsBeingSubmitted = false", 500);
     return null;
   }
 

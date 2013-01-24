@@ -1,0 +1,55 @@
+<% content_for :title, " // #{@workon.step == 1 ? "Proofread" : "Type"}!" %>
+<% content_for :css, "#text_ace_editor { height: 100px }" %>
+<% content_for :css, "figure img { max-width: 100% }" %>
+<%= render "shared/aceify_textareas", :line_offset => 0, :autosize => true %>
+<% content_for :script, %(<script>
+  var ident = '#{@ident}';
+  var listify = true;
+  var hitme_preview_url="#{hitme_preview_text_url}";
+  $(document).ready(function() { $('#text').data('editor').focus() });
+</script>).html_safe %>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
+
+
+<div class="containersplit">
+  <div class="leftside">
+    <% if @workon.step == 1 %>
+      <h2>Your Job: Proofread!</h2>
+      <ul>
+        <li>correct <b>spelling errors</b> and check for <b>differences from handwritten comment</b></li>
+        <li>ensure there’s only <b>one bullet point per line</b></li>
+        <li>comment insulting or offensive? Prepend a %-sign but keep it! Include reasoning if you want, so the next person know why you wanted to exclude the comment. Example: <i>% Jasper ist doof %% almost cried when he heard this</i></li>
+    <% else %>
+      <h2>Your Job: Type!</h2>
+      <ul>
+        <li><b>type handwritten comment</b> into text field (please correct spelling)</li>
+        <li>write one and only <b>one bullet point per line</b></li>
+        <li>comment doesn’t belong here? Type anyway!</li>
+        <li>comment insulting or offensive? Prepend a %-sign and type anyway! Include reasoning if you want, so the next person know why you wanted to exclude the comment. Example: <i>% Jasper ist doof %% almost cried when he heard this</i></li>
+    <% end %>
+      <li>write valid <b><%=latex_logo%></b>. Use proper UTF-8 quotes, e.g. <b>„Deutsch“</b> or <b>“English”</b>. Escape % or $ by prepending a backslash \. Convert underlined or CAPS <i>passages</i> to <b>\emph{…}</b>.  Further hints: <b>\Smiley \Frowny \Heart $\rightarrow$</b> Theo~1 (<b>~</b> avoids line breaks). Use <b>--</b> as proper dash and <b>\dots</b> instead of …</li>
+      <li>No need to add \item commands and similar. Those will be automatically created for you.</li>
+    </ul>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_comment") %>
+  <%= hidden_field_tag(:type, @workon.class) %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
+  <div class="group containersplit">
+    <%= render "comment_preview" %>
+    <h3>Input</h3>
+    <%= text_area_tag(:text, @workon.text.to_s.strip + "\n\n\n")%>
+    <br style="clear:both"/>
+  </div>
+
+  <div class="group">
+    <%= render "shared/comment_pic", :course => @workon.course, :pic => @workon %>
+    <br/>
+    Hint: if the comment is cut off, click-and-hold for one second to download the original sheet.
+  </div>
+  <%= render "action_buttons" %>
+</form>

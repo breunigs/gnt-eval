@@ -1,10 +1,16 @@
-<div>
-  <h2>Available courses</h2>
+<% content_for :enable_small_screen, "true" %>
 
-  <%=link_to 'Create new Course', new_course_path, :class => "button"%><br/><br/>
+<div>
+  <h2>Courses in <%=Term.currently_active.map { |t| t.title }.join(", ")%></h2>
+
+  <div class="button-group rd-hide">
+    <%=link_to 'Create new Course', new_course_path, :class => "button"%>
+    <%=link_to 'Show courses from other terms', terms_path, :class => "button"%>
+  </div>
+  <span class="rd-hide"><br/><br/></span>
 
   <%=render "shared/tablemagic", :search => true %>
-  <table id="tablemagic" style="min-width:70em; width:100%">
+  <table id="tablemagic" style="min-width:70em; width:100%" class="rd-hide-2 rd-hide-3 rd-hide-4 rd-hide-6">
     <thead>
     <tr>
       <% ["Title", "Students", "Evaluated by", "Profs", "Description", "Faculty"].each do |x| %>
@@ -28,5 +34,8 @@
 </div>
 
 <div>
-  <%=link_to 'Create new Course', new_course_path, :class => "button"%>
+  <div class="button-group">
+    <%=link_to 'Create new Course', new_course_path, :class => "button"%>
+    <%=link_to 'Show courses from other terms', terms_path, :class => "button"%>
+  </div>
 </div>

@@ -2,16 +2,17 @@
 
 require 'erb'
 
-# A course has many professors, belongs to a semester and has a lot of
+# A course has many professors, belongs to a term and has a lot of
 # tutors. The semantic could be a lecute, some seminar, tutorial etc.
 class Course < ActiveRecord::Base
-  belongs_to :semester, :inverse_of => :courses
+  belongs_to :term, :inverse_of => :courses
   belongs_to :faculty, :inverse_of => :courses
   belongs_to :form, :inverse_of => :courses
   has_many :course_profs, :inverse_of => :course
   has_many :profs, :through => :course_profs
+  has_many :c_pics, :through => :course_profs
   has_many :tutors, :inverse_of => :course
-  validates_presence_of :semester_id, :title, :faculty, :language, :form
+  validates_presence_of :term_id, :title, :faculty, :language, :form
   validates_numericality_of :students, :allow_nil => true
 
   # finds all courses that contain all given keywords in their title.
@@ -21,7 +22,7 @@ class Course < ActiveRecord::Base
   # additional classes to include in order to speed things up using
   # the inc variable. An array is expected. Use cond and vals to specify
   # additional search criteria. For example, to limit to certain
-  # semesters, you would specify: cond="semester_id IN (?)"  vals=[1,4]
+  # terms, you would specify: cond="term_id IN (?)"  vals=[1,4]
   # You can also sort by passing an array of attributes to sorty by.
   def self.search(term, inc = [], cond = [], vals = [], order = nil)
     return Course.filter(inc, cond, vals, order) if term.nil?
@@ -47,8 +48,7 @@ class Course < ActiveRecord::Base
     Course.find(:all, :include => inc, :conditions => [cond.join(" AND "), *vals], :order => order)
   end
 
-  # Create an alias for this rails variable
-  def comment; summary; end
+  alias_attribute :comment, :summary
 
   # Returns list of tutors sorted by name (instead of adding-order)
   def tutors_sorted
@@ -71,10 +71,10 @@ class Course < ActiveRecord::Base
   end
 
   # returns if the course is critical. If it is, some features should
-  # be disabled (e.g. deletion). A course is critical, when the semester
+  # be disabled (e.g. deletion). A course is critical, when the term
   # it belongs to is.
   def critical?
-    semester.critical? || returned_sheets > 0
+    term.critical? || returned_sheets > 0
   end
 
   # Tries to parse the description field for eval times and returns them
@@ -107,6 +107,7 @@ class Course < ActiveRecord::Base
   # domain to it. Returns array
   def fs_contact_addresses_array
     pre_format = fscontact.blank? ? evaluator : fscontact
+    return [] if pre_format.nil?
 
     pre_format.split(',').map do |a|
       (a =~ /@/ ) ? a : a + '@' + SCs[:standard_mail_domain]
@@ -132,13 +133,18 @@ class Course < ActiveRecord::Base
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
-    return 0 if profs.empty?
+    return 0 if course_profs.empty?
     RT.count(form.db_table, {:barcode => barcodes})
   end
 
   # returns true if there have been sheets returned.
   def returned_sheets?
     returned_sheets > 0
+  end
+
+  # calculates the ratio of returned_sheets/printed_sheets
+  def return_quota
+    returned_sheets / (course_profs.size * students).to_f
   end
 
   # the head per course. this adds stuff like title, submitted
@@ -174,7 +180,7 @@ class Course < ActiveRecord::Base
   # evaluates this whole course against the associated form. if single
   # is set, include headers etc.
   def evaluate(single=nil)
-    puts "   #{title}"
+    puts "   #{title}" if single.nil?
 
     # if this course doesn't have any lecturers it cannot have been
     # evaluated, since the sheets are coded with the course_prof id
@@ -195,7 +201,7 @@ class Course < ActiveRecord::Base
       b << RT.load_tex_definitions
       b << '\maketitle' + "\n\n"
       facultylong = faculty.longname
-      sem_title = { :short => semester.title, :long => semester.longtitle }
+      term_title = { :short => term.title, :long => term.longtitle }
       b << ERB.new(RT.load_tex("preface")).result(binding)
     end
 
@@ -230,8 +236,15 @@ class Course < ActiveRecord::Base
           when :course
             b << eval_block(block, s)
           when :lecturer
+            # when there are repeat_for = lecturer questions in a
+            # section that does not include the lecturer’s name in the
+            # title, it is added automaticall in order to make it clear
+            # to whom this block of questions refers. If there is only
+            # one prof, it is assumed it’s clear who is meant.
+            s += " (\\lect)" unless s.include?("\\lect") || course_profs.size == 1
             course_profs.each { |cp| b << cp.eval_block(block, s) }
           when :tutor
+            s += " (\\tutor)" unless s.include?("\\tutor") || tutors_sorted.size == 1
             tutors_sorted.each { |t| b << t.eval_block(block, s) }
           else
             raise "Unimplemented repeat_for type #{repeat_for}"
@@ -248,6 +261,14 @@ class Course < ActiveRecord::Base
 
   def dir_friendly_title
     ActiveSupport::Inflector.transliterate(title.strip).gsub(/[^a-z0-9_-]/i, '_')
+  end
+
+  # returns in which Hitme step the current course is. Effectively
+  # returns the lowest step in any of the associated pics
+  def get_hitme_step
+    a = c_pics.map { |p| p.step }.compact.min
+    b = tutors.map { |t| t.pics.map { |p| p.step } }.flatten.compact.min
+    [a, b].compact.min || 0
   end
 
   private

@@ -1,0 +1,31 @@
+
+/* ensures the contents of the element will be cleared after the element.
+   Uses content:after rules. */
+@mixin clear-after {
+  &:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    overflow:hidden;
+    margin-bottom:-3px;
+    margin-bottom:-0.3rem;
+  }
+}
+
+// applies background grandient to element for all browsers.
+@mixin gradient($from, $to) {
+  background-image: -moz-linear-gradient($from, $to);
+  background-image: -o-linear-gradient($from, $to);
+  background-image: -ms-linear-gradient($from, $to);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from($from), to($to));
+}
+
+
+@mixin transition($transition) {
+  -ms-transition: $transition;
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  -webkit-transition: $transition;
+  transition: $transition;
+}

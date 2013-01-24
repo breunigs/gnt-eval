@@ -1,0 +1,42 @@
+<% content_for :title, " // Final Check!" %>
+<% content_for :script, "<script>var ident = '#{@ident}'</script>".html_safe %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset, :autosize => true %>
+<% content_for :script, %(<script>var hitme_preview_url="#{hitme_preview_text_url}"</script>).html_safe%>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
+
+
+<div class="containersplit">
+  <div class="leftside">
+    <h2>Your Job: Final Check!</h2>
+    <ul>
+      <li><b>move misplaced comments to the correct position.</b><br>Rule of thumb:
+      <ul><li>concerns tutor or study group’s room? Put in tutor’s text box.</li><li>everything else? Put in course’s one.</li></ul>
+      If your colleagues did good work, you should easily spot those at the top of each text box.</li>
+      <li>Check for improper use of quotation marks. Correct ones are <b>„Deutsch“</b> or <b>“English”</b>.</li>
+      <li>Otherwise: use your intuition.</li>
+    </ul><br/>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_final_check") %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
+  <div class="group containersplit">
+    <%= render "comment_preview" %>
+    <h3>Profs / Course Comment</h3>
+    <%= text_area_tag(:course, @workon.summary, :class => "previewable")%>
+  </div>
+
+  <% @workon.tutors.each do |tutor| %>
+    <div class="group containersplit">
+      <%= render "comment_preview" %>
+      <h3>Tutor: <%=tutor.abbr_name%></h3>
+      <%= text_area_tag("tutor[#{tutor.id}]", tutor.comment, :class => "previewable")%>
+    </div>
+
+  <% end %>
+
+  <%= render "action_buttons" %>
+</form>

@@ -1,0 +1,27 @@
+<div class="group">
+  <h2>Editing <%=Term.model_name.human%> <%=h @term.title %></h2>
+  <%= render "form" %>
+</div>
+
+<div>
+  <h3>Courses</h3>
+  This term has <%=@term.courses.size%> courses. <%=link_to "You can view them if you want", term_courses_path(@term)%>. If you want to work on this term it’s highly recommended to make it active, i.e. ensure that the current date lies in between the term’s start and end date. Otherwise handling will be unnecessarily complicated.
+</div>
+
+
+<div>
+  <h3>rake Actions</h3>
+  <pre>
+# Generate forms:
+rake forms:generate[<%=@term.id%>]
+
+# Generate result PDFs for each faculty:
+<% @term.faculties.each do |f| %>
+rake results:pdf_report["en", <%=@term.id%>, <%=f.id%>]
+<% end %>
+
+# Alternatively, generate result PDFs for each course:
+<% @term.faculties.each do |f| %>
+rake results:pdf_singles[<%=@term.id%>, <%=f.id%>]
+<% end %></pre>
+</div>

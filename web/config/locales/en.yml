@@ -20,8 +20,8 @@ en:
   preface: Preface
   eval_results: Result of the Evaluation
   tex_babel_lang: english
-  teaching_eval_pdf_title: Teaching Evaluation $faculty_semester
-  teaching_eval_headline: Teaching Evaluation\\$faculty_semester
+  teaching_eval_pdf_title: Teaching Evaluation $faculty_term
+  teaching_eval_headline: Teaching Evaluation\\$faculty_term
 
   results_of_survey: results of the courses survey
   # displayed in the result PDFs on the 2nd page in the lower left
@@ -41,7 +41,7 @@ en:
     :male: Lecturer
     :female: Lecturer
     :both: Lecturer
-  semester: Term
+  term: Term
 
   # these serve as placeholders for the forms when the name of the
   # tutor is not yet available. In result.pdf, these variables will
@@ -70,7 +70,6 @@ en:
   attributes:
     email: Mail
     abbr_name: Abbreviated Name
-    semester: Term
     students: "# Students"
     evaluator: "Evaluated By"
     fscontact: "Account Name"
@@ -78,7 +77,15 @@ en:
   activerecord:
     # rename the models
     models:
-      semester: Term
       prof: Professor
 
 
+  postoffice:
+    erinnerungsmail:
+      subject: Evaluation of '%{title}' on %{date}
+    ankuendigungsmail:
+      subject: Evaluation of your class %{title}
+    evalverschickung:
+      subject: Results of this term's evaluation
+    single_evalverschickung:
+      subject: Evaluation results for %{title}

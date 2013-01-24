@@ -7,5 +7,6 @@
 // only include the tests in dev/test so their size and performance cost
 // doesn’t matter
 <% unless Rails.env.production?
+  require_asset "formeditor-test-form.coffee"
   require_asset "formeditor-tests.js"
 end %>

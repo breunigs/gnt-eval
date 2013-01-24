@@ -15,13 +15,13 @@ answ = {}
 pdf_viewer_started = false
 tmp_path = "#{temp_dir}/fill_text_box.jpg"
 
-Semester.currently_active.each do |semester|
-  semester.forms.each do |source_form|
+Term.currently_active.each do |term|
+  term.forms.each do |source_form|
     puts "Proccessing #{source_form.name}"
 
     table = source_form.db_table
     unless RT.table_exists?(table)
-      warn "#{semester.title} | #{source_form.name}’s table #{table} " \
+      warn "#{term.title} | #{source_form.name}’s table #{table} " \
               + "does not exist. Skipping."
       warn ""
       next
@@ -39,14 +39,26 @@ Semester.currently_active.each do |semester|
       txt_col = "#{col}_text"
 
       sql = "SELECT abstract_form, path FROM #{table} "
-      sql << %(WHERE #{col} = ? AND (#{txt_col} = "" OR #{txt_col} IS NULL))
+      sql << %(WHERE #{col} = ? AND #{txt_col} IS NULL)
       rows = RT.custom_query(sql, [quest.boxes.count])
 
-
+      # pre-fill columns
       answ[col] ||= {}
+      sql = "SELECT COUNT(*) AS cnt, #{txt_col} AS val FROM #{table} "
+      sql << %(WHERE #{col} = ? AND #{txt_col} <> "" AND #{txt_col} IS NOT NULL )
+      sql << "GROUP BY #{txt_col}"
+      RT.custom_query(sql, [quest.boxes.count]).each do |p|
+        answ[col][p["val"]] ||= 0
+        answ[col][p["val"]] += p["cnt"].to_i
+      end
 
       rows.each do |r|
         form = Marshal.load(Base64.decode64(r["abstract_form"]))
+        unless File.exist?(r["path"])
+          warn "Missing file: #{r["path"]}. Skipping."
+          next
+        end
+
         box = form.get_question(col).boxes[quest.no_answer? ? -2 : -1]
         coords = "#{box.width.to_i+2*200}x#{box.height.to_i+2*100}"
         coords << "+#{box.x-200}+#{box.y-100}"

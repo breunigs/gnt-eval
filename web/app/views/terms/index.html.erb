@@ -1,0 +1,34 @@
+<% t = Term.currently_active %>
+
+<div class="group">
+  <h2>Available Terms</h2>
+  <%= link_to 'Create new term', new_term_path, :class => "button" %>
+  <br />
+  <br />
+  <%=render "shared/tablemagic"%>
+  <table id="tablemagic" style="min-width:68em">
+    <thead>
+      <tr>
+        <th>Firstday</th>
+        <th>Lastday</th>
+        <th>Title</th>
+        <th>Longtitle</th>
+        <th colspan="3">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @terms.each do |term| %>
+      <tr style="<%=t.include?(term) ? "font-weight:bold" : "" %>">
+        <td><%=h term.firstday %></td>
+        <td><%=h term.lastday %></td>
+        <td><%=h term.title %></td>
+        <td><%=h term.longtitle %></td>
+        <td><%= link_to "Edit #{term.title}", edit_term_path(term) %></td>
+        <td><%= link_to "Show courses", term_courses_path(term) %></td>
+        <td><%= term.critical ? "Critical" : (link_to 'Destroy', term, :confirm => 'Are you sure?', :method => :delete) %></td>
+
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</div>

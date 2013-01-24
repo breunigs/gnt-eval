@@ -1,9 +1,54 @@
-This is G'n'T Eval 1.0.1
+This is G'n'T Eval 1.1
+
+1.1:
+  • Performance: many performance improvements for the FormEditor
+  • Performance: per course result PDF generation is now faster
+  • Feature: add finish time estimate to many  long running jobs
+  • Feature: collision detection may now store username
+  • Feature: improve handling for multiple 3+ pages sheets. Still needs
+             a lot of work, though.
+  • Feature: emergency printing QR-code on the cover sheets for each
+             course. The link is not available from within the web GUI
+             unless you know it. Should make printing additional sheets
+             easier for non-admins/non-organization personel.
+  • Feature: some pages are now easier usable on a mobile phone (curr-
+             ently only a few, mainly for emergency printing)
+  • Feature: save which types of mail have been sent per course
+  • Feature: docs on “interactive exploring” and sending mass mails
+  • Feature: Hitme is map-reduce with humans, makes typing the hand-
+             written comments easier and scales better with more people.
+  • Bugfix: greatly improve OMR. It should now require much less user
+            interaction / manual correction.
+  • Bugfix: OMR would fail if there were missing corners
+  • Bugfix: support multiple “evaluated by”s in GUI
+  • Bugfix: comment field would cut off long comment images
+  • Bugfix: sheet printing failed if the course title had certain chars
+  • Bugfix: Ace editor looking weird in Chrome
+  • Bugfix: inserting comments into the web GUI would fail if they still
+            needed to be processed by a human (i.e. when OMR failed)
+  • Change: using \underline in TeX now results in an error. Underline
+            is ugly and should not be used in professional documents.
+  • Change: single tutor eval now includes preface as well
+  • Change: Semester is now called Term throughout the code
+  • Change: Form table names are now automatically generated from form
+            name and term title. This allows to simply copy the previous
+            forms to the current term and be done with it. Please note
+            that name collisions ARE POSSIBLE, because non-alpha-numeric
+            chars are replaced. Collisions are not handlded.
+
+1.0.2:
+  • Bugfix: Various fixes for the FormEditor
+  • Bugfix: Export-Stats-File was missing columns
+  • Bugfix: Loading the stack for external apps required a DB
+            connection due to including the Session-Classes
+  • Bugfix: Questionnaires wouldn’t page break in certain locations
+  • Feature: also export to XLSX if Gnumeric is installed
+  • Feature: add many sanity checkers for Forms/Questionnaires
 
 1.0.1: Fix small error in docs
 
 1.0: It marks the first public release, that is
-     deemed ready for other people to use. 
+     deemed ready for other people to use.
 
 If you find bugs, please report them to
 https://github.com/breunigs/gnt-eval/issues/new

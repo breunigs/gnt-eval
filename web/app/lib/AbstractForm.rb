@@ -3,7 +3,7 @@
 # = AbstractForm.rb - Everything you need to have an abstract form
 #
 # Contains the following classes:
-# - AbstractForm: Basic class containing pages and dbtable
+# - AbstractForm: Basic class containing pages and headers
 # - Page: Containing list of questions on that particular page
 # - Question: see class.
 # - Box: see class
@@ -51,7 +51,7 @@ class Box
   # be /the/ accessor for @text, similar to the way question#text works.
   def any_text(lang = I18n.locale)
     return @text if @text.is_a? String
-    (return @text[lang.to_sym] || @text[:en] || @text.first[1]) if @text.is_a? Hash
+    (return (@text[lang.to_sym] || @text[:en] || @text.first[1]).to_s) if @text.is_a? Hash
     ""
   end
 end
@@ -363,12 +363,15 @@ class Page
   end
 
   def questions
+    # some forms don’t have any sections and instead specify their
+    # questions right here. If that’s the case, simply return those.
+    return @questions if @questions
     sections.collect {|s| s.questions }.flatten
   end
 end
 
 
-# main form, list of pages and dbtable.
+# main form, list of pages and headers.
 #
 
 class AbstractForm
@@ -395,7 +398,8 @@ class AbstractForm
   attr_accessor :pages
 
   # database table to use for this form
-  attr_accessor :db_table
+  attr_reader :db_table
+
 
   # we differentiate gender here
   attr_accessor :lecturer_header
@@ -417,9 +421,8 @@ class AbstractForm
     @pages.count
   end
 
-  def initialize(pages = [], db_table = '')
+  def initialize(pages = [])
     @pages = pages
-    @db_table = db_table
   end
 
   # direct access to sections
@@ -466,9 +469,8 @@ class AbstractForm
   # { :offending_column => ["Question 1?", "Question 2?"] }
   def get_duplicate_db_columns
     h = {}
-    c = get_all_db_columns
-    c.get_duplicates.each do |d|
-      h[d.to_sym] = c.find_all { |q| q.db_column == d }.map { |q| q.text }
+    get_all_db_columns.get_duplicates.each do |d|
+      h[d.to_sym] = questions.find_all { |q| q.db_column == d }.map { |q| q.text }
     end
     h
   end
@@ -493,6 +495,7 @@ class AbstractForm
   # specific data is provided it will be filled with some default values
   def to_tex(
       lang = I18n.locale,
+      db_table = "db_table_name",
       title = "Jasper ist doof 3",
       lecturer_first = "Oliver",
       lecturer_last = "Istdoof",
@@ -502,7 +505,7 @@ class AbstractForm
                 "Pierre Dupont", "John Smith", "Eddi Exzellenz",
                 "Joe Bloggs", "John Doe", "Stefan ist doof",
                 "Beccy ist doof"],
-      semester = "the same semester as last year",
+      term    = "the same term as last year",
       barcode = "00000000")
 
     # in case someone didn’t give us symbols
@@ -522,7 +525,7 @@ class AbstractForm
     tex << "\\lecturerLast{#{lecturer_last.escape_for_tex}}\n"
     tex << "\\lecture{#{title.escape_for_tex}}\n"
     tex << "\\dbtable{#{db_table}}\n"
-    tex << "\\term{#{semester.escape_for_tex}}\n"
+    tex << "\\term{#{term.escape_for_tex}}\n"
     tex << "\\noAnswerText{#{I18n.t(:no_answer)}}\n"
     # note: these cannot be customized per tutor, as the tutor is not
     # known yet. They will be filled in result.pdf, so give placeholders
@@ -554,7 +557,7 @@ class AbstractForm
   private
   # returns array of db columns used in this form
   def get_all_db_columns
-    quest = questions.collect { |q| q.db_column }
+    quest = questions.collect { |q| q.db_column }.flatten
     litf = questions.reject { |q| !q.last_is_textbox? } .map { |q| \
               (q.multi? ? q.db_column.last : q.db_column) + "_text" }
     (quest+litf)
@@ -575,7 +578,7 @@ class AbstractForm
     s << "#{intro(lang)}\n\n"
     s << "\\vspace{0.8mm}"
     s << "\\dataline{#{I18n.t(:title)}}"
-    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:semester)}}\n"
+    s << "{#{I18n.t(:lecturer)[gender]}}{#{I18n.t(:term)}}\n"
     s << "\\vspace{-2.5mm}"
     s
   end

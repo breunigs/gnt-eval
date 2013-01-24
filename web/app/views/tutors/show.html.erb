@@ -1,3 +1,5 @@
+<% content_for :title, "“#{@tutor.abbr_name}”" %>
+
 <div>
   <h2>Showing <%=@tutor.abbr_name%></h2>
   <div class="button-group"><%=tutor_edit_link + tutor_result_pdf_link + tutor_return_link %></div>

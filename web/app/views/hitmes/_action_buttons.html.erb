@@ -1,0 +1,16 @@
+<div class="group">
+  <span class="button-group">
+    <%= submit_tag("Save and give more work", :class => "button primary", :name => "save_and_work", :accesskey => "s", :title => "Saves your changes and advanced to the next step.\nYou will be given a new chunk of work.\nAccessible via Alt+Shift+S or Ctrl+Enter.", :id => "main_submit_button") %>
+    <%= submit_tag("Save and quit", :class => "button", :name => "save_and_quit", :title => "Saves your changes and advanced to the next step.\nYou will be returned to the overview page.") %>
+    <%= submit_tag("incomplete / can’t read / skip", :class => "button", :name => "save_and_skip", :title => "Saves your changes but does NOT advance to the next step.\nYou will be given a new chunk of work.") %>
+
+    <%# confirmation handled by prevent-leaving-unsaved-form %>
+    <%= link_to("quit without saving", hitme_path, :class => "button danger", :title => "Discards your changes.\nYou will be returned to the overview page.") %>
+  </span>
+</div>
+<script>
+  $(document).keydown(function(e) {
+    if(e.ctrlKey && e.which === 13 && $("#main_submit_button").length === 1 && confirm("Save changes. Give work. Continue?"))
+      $("#main_submit_button").click();
+  });
+</script>

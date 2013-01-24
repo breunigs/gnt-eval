@@ -120,7 +120,7 @@
 \definecolor{gray}{rgb}{.88,.88,.88}
 \definecolor{darkgray}{rgb}{.6,.6,.6}
 
-% overwrite color of the horizontal lines
+% overwrite color of the horizontal lines. Needs also to be set in the \separator command
 \arrayrulecolor{darkgray}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,11 +135,8 @@
 
 % let the user store data using these commands
 \newcommand{\lecture}[1]{\def\storedLecture{#1}}
-\newcommand{\vorlesung}[1]{\message{DEPRECATION: The command "vorlesung" is deprecated. Please use "lecture" instead. Arguments are exactly the same.}\def\storedLecture{#1}}
 \newcommand{\term}[1]{\def\storedTerm{#1}}
-\newcommand{\semester}[1]{\message{DEPRECATION: The command "semester" is deprecated. Please use "term" instead. Arguments are exactly the same.}\def\storedTerm{#1}}
 \newcommand{\dbtable}[1]{\def\dbt{#1}}
-\newcommand{\tutoren}[1]{\message{DEPRECATION: The command "tutoren" is deprecated. Please use "tutors" instead. Arguments are exactly the same.}\def\tut{#1}}
 \newcommand{\tutors}[1]{\def\tut{#1}}
 \newcommand{\noAnswerText}[1]{\def\noAnswTxt{#1}}
 \newcommand{\lecturerLast}[1]{\def\lectLast{#1}}
@@ -275,8 +272,7 @@
 }
 
 % places everything into a box as wide as the page, thus preventing its contents
-% from being interrupted by a page break. Moves its content slightly to the left
-% to combat the hardcoded padding inside the box. Usage:
+% from being interrupted by a page break. Usage:
 % \preventBreak{%
 %    some content
 % }
@@ -284,7 +280,7 @@
   \begin{tabular}[t]{p{192mm}}
     #1
   \end{tabular}
-  \vspace*{-1.8mm}
+  \vspace{-1.78mm}
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -316,6 +312,7 @@
 
 % helper function that prints the main text in a header
 \newcommand{\sectText}[1]{\ \ \textbf{#1} \phantom{\"Ay}}
+
 % helper function prints the gray box around any content given in the style of a headline
 \newcommand{\sectBox}[1]{\colorbox{gray}{%
   \hspace*{-1.05mm}%
@@ -325,6 +322,7 @@
   }%
   \hspace*{-1.8mm}
 }}
+
 % helper function that sets the given options in a tabular environment so everything aligns. See
 % \sect for a better explanation.
 \NewDocumentCommand\sectFullBox{m o o o o o o o}{%
@@ -356,7 +354,8 @@
   \setlength{\sectionHeight}{\the\sectionHeight/2}
   \setlength{\sectionHeight}{\maxof{\the\sectionHeight}{0mm}}
 
-  \stepcounter{section}
+  \stepcounter{section}%
+  \vspace*{-2.6mm}%
   \sectFullBox{\arabic{section}. #1}[#2][#3][#4][#5][#6][#7][#8]
 
   \vspace*{-2.4mm}
@@ -370,7 +369,7 @@
 
 % used at the end of the page to mark the end of a comment field
 \newcommand{\separator}[1]{
-  \vspace{-1.15em}\rule{19.2cm}{#1}\\
+  \vspace{-1.15em}\color{darkgray}\rule{19.2cm}{#1}\\
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

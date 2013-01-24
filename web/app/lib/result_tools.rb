@@ -213,7 +213,17 @@ class ResultTools
     end
 
     # removes guard braces inserted by get_anwer_counts
-    Hash[a.map {|k, v| [k.is_a?(String) ? k[1..-2] : k, v] }]
+    r = Hash[a.map {|k, v| [k.is_a?(String) ? k[1..-2] : k, v] }]
+
+    # sanity check
+    exp = (question.boxes.size * (text_only ? 1 : 2)) + 2 # +invalid, abstentions
+    if r.values.size != exp
+      s = ["Histogram has different number of answers than expected."]
+      s << "Expected: #{exp}   Present: #{r.values.size}"
+      s << "Histogram keys: #{r.keys.join(", ")}"
+      raise s.join("\n")
+    end
+    r
   end
 
   # runs a custom query against the result-database. Returns the all
@@ -458,11 +468,9 @@ class ResultTools
       q.get_answers.each_with_index do |txt, i|
         where_hash[q.db_column[i]] = i+1
         answ[(i+1)] = count(table, where_hash)
-        t = "{#{txt.strip_common_tex}}" unless txt.nil?
-        unless t.nil? || t.empty?
-          answ[t] = answ[(i+1)]
-          text_to_ind[t] = i+1
-        end
+        t = "{#{(txt || "#{i+1} of #{q.boxes.size}").strip_common_tex}}"
+        answ[t] = answ[(i+1)]
+        text_to_ind[t] = i+1
         where_hash.delete(q.db_column[i])
       end
 
@@ -483,8 +491,7 @@ class ResultTools
       # name if available
       q.get_answers.each_with_index do |txt, i|
         answ[(i+1)] = cc.foz(i+1)
-        t = "{#{txt.strip_common_tex}}" unless txt.nil?
-        next if t.nil? || t.empty?
+        t = "{#{(txt || "#{i+1} of #{q.boxes.size}").strip_common_tex}}"
         answ[t] = answ[(i+1)]
         text_to_ind[t] = i+1
       end

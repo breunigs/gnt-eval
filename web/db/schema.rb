@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120831175110) do
+ActiveRecord::Schema.define(:version => 20130110093720) do
 
   create_table "c_pics", :force => true do |t|
     t.string   "basename"
@@ -19,6 +19,8 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "source"
+    t.text     "text"
+    t.integer  "step"
   end
 
   create_table "course_profs", :force => true do |t|
@@ -27,7 +29,7 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
   end
 
   create_table "courses", :force => true do |t|
-    t.integer  "semester_id"
+    t.integer  "term_id"
     t.string   "title"
     t.integer  "students"
     t.integer  "faculty_id"
@@ -41,6 +43,7 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
     t.integer  "form_id"
     t.string   "language"
     t.text     "note"
+    t.string   "mails_sent"
   end
 
   create_table "faculties", :force => true do |t|
@@ -51,7 +54,7 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
   end
 
   create_table "forms", :force => true do |t|
-    t.integer  "semester_id"
+    t.integer  "term_id"
     t.string   "name"
     t.text     "content"
     t.datetime "created_at"
@@ -64,6 +67,8 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "source"
+    t.text     "text"
+    t.integer  "step"
   end
 
   create_table "profs", :force => true do |t|
@@ -75,7 +80,18 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
     t.datetime "updated_at"
   end
 
-  create_table "semesters", :force => true do |t|
+  create_table "sessions", :force => true do |t|
+    t.string   "ident"
+    t.string   "cont"
+    t.integer  "viewed_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+    t.string   "ip"
+    t.string   "agent"
+    t.string   "username"
+  end
+
+  create_table "terms", :force => true do |t|
     t.date     "firstday"
     t.date     "lastday"
     t.string   "title"
@@ -83,14 +99,6 @@ ActiveRecord::Schema.define(:version => 20120831175110) do
     t.datetime "updated_at"
     t.boolean  "critical"
     t.string   "longtitle"
-  end
-
-  create_table "sessions", :force => true do |t|
-    t.string   "ident"
-    t.string   "cont"
-    t.integer  "viewed_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
   end
 
   create_table "tutors", :force => true do |t|

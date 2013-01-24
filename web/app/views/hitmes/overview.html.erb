@@ -1,0 +1,123 @@
+<% content_for :css, ".broken, .broken * { color: red }" %>
+<% content_for :css, ".itworks, .itworks * { color: darkgreen }" %>
+<% content_for :css, ".unknown, .unknown * { color: orange }" %>
+<% content_for :script, javascript_include_tag("viewer_count") %>
+<% content_for :script do %>
+<script>
+  function setStatus(object, worked) {
+    $("#" + object.toLowerCase())
+      .attr("class", (worked ? "itworks" : "broken"))
+      .html((worked ? "✔" : "✘")+ " <b>"+object+" </b>");
+  }
+
+  function updateUsername() {
+    if(usernameValid())
+      $("#currentUsername").html("(currently known as <b>" + getUsernameCookie() + "</b>)");
+    else
+      $("#currentUsername").html("(no username set)");
+  }
+
+  function giveWork() {
+    if($('.broken').size() !== 0) {
+      alert("Please fix the issues mentioned above before continuing.");
+      return;
+    }
+    location.href = "<%=hitme_assign_work_url%>";
+  }
+
+  function updateActiveUsers() {
+    $("#active_users").load("<%=hitme_active_users_path%>", function() {
+      setTimeout("updateActiveUsers()", 10000);
+    });
+  }
+
+  function skipCourse(elm) {
+    console.log("running");
+    var id = $(elm).val();
+    var c = id + "; expires=Thu, 31 Dec 2020 23:59:59 GMT; path=/";
+    document.cookie = "skip_course=" + c;
+  }
+
+  $(document).ready(function() {
+    if(getCookie("testcookie") === "test value" || usernameValid()) {
+      setStatus("Cookies", true);
+    } else {
+      document.cookie = "testcookie=test value; expires=Thu, 31 Dec 2020 23:59:59 GMT; path=/"
+      $.getJSON("<%=url_for(:controller => "hitmes", :action => "cookie_test")%>",  function(result) {
+        setStatus("Cookies", result);
+      });
+    }
+
+    updateUsername();
+    setStatus("Username", usernameValid());
+
+    // keep active users display up to date
+    setTimeout("updateActiveUsers()", 10000);
+  });
+</script>
+<% end %>
+
+<div>
+  <h2>What is this?</h2>
+  Each Hitme is a <b>small unit of work</b>. It requires <b>no time commitment</b> on your side, so you can even do it in very short breaks. You don’t even need to finish if you’re interrupted.<br><br>
+  There are multiple steps:
+  <ol>
+    <li>type handwritten comment</li>
+    <li>proofread</li>
+    <li>group/sort comments</li>
+    <li>final touches</li>
+  </ol><br/>
+
+  The last two steps might take more than five minutes, depending on the lecture. If you don’t have that amount of time right now, you can skip this chunk of work and be assigned another one. Or you could start, but mark it as incomplete and leave it for the next person to finish. Just click the correct button below each hitme.
+</div>
+
+<div>
+  <h2>What do I need?</h2>
+
+  <span class="noscript broken"><b>✘ JavaScript </b></span> – Ensure JavaScript is enabled for the whole domain and that you don’t block any of its features.<script>$(".noscript").attr("class", "itworks").html("✔ <b>JavaScript </b>");</script><br/>
+
+  <span id="cookies" class="unknown"><b>? Cookies </b></span> – Enable cookies for the domain. Persistent ones are preferred, so you only need to set your username once.<br/>
+
+  <span id="username" class="unknown"><b>? Username </b></span> – Set a descriptive username, so others may easily identify who is working on what.<br/><br/>
+
+  <a onclick="setUsernameCookie(); setStatus('Username', usernameValid()); updateUsername();"><b>Change Username</b></a>
+  <span id="currentUsername"></span><br/><br/><br/>
+  <a onclick="giveWork();" style="font-size:150%;font-weight:bold">Give me a chunk of work</a><br/><br/><br/>
+
+  <h3>I’m a tutor</h3>
+  <%
+    c = Term.currently_active.map { |t| t.courses }.flatten
+    courses = options_from_collection_for_select(c, "id", "title", cookies[:skip_course])
+  %>
+
+  Select the course for which you are tutor. You will not be given chunks of work for that course.
+
+  <%= select_tag "skip_course", courses, :style => "height:auto;width:auto;max-width:20rem;", :onchange => "skipCourse(this)", :include_blank => true %><br/>
+
+
+</div>
+
+<div id="active_users">
+  <%=render "active_users"%>
+</div>
+
+<div>
+  <h3>Progress</h3>
+  It’s assumed amount of work scales linearly with number of comments, so take it with a grain of salt.<br/>
+  Also, there are about <b><%=Term.sheets_to_go.first.to_i%> questionnaires left to process</b>, which are not included below.
+  <%
+    stages = [Hitme::TYPING, Hitme::PROOFREADING, Hitme::COMBINING, Hitme::FINALCHECK, Hitme::DONE]
+    data = stages.map { |s| Hitme.get_all_comments_by_step(s).size }
+    all = data.sum.to_f
+
+    def n(d, all)
+      number_to_percentage( 100*d/all, :precision => 0)
+    end
+  %>
+  <table>
+    <tr><th>typing          </th><td><%=n(all-data[0]        , all)%></td><td rowspan="4" style="font-size:400%;padding-left:2rem"> Σ=<%=n((data[1] + 2*data[2] + 3*data[3] + 4*data[4])/4.0, all)%></td></tr>
+    <tr><th>proofreading    </th><td><%=n(all-data[0]-data[1], all)%></td></tr>
+    <tr><th>grouping/sorting</th><td><%=n(data[3]+data[4]    , all)%></td></tr>
+    <tr><th>final touching  </th><td><%=n(data[4]            , all)%></td></tr>
+  </table>
+</div>

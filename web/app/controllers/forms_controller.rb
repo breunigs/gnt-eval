@@ -82,10 +82,10 @@ class FormsController < ApplicationController
       elsif @form.update_attributes(params[:form])
         expire_fragment("preview_forms_#{params[:id]}")
 
+        $loaded_yaml_sheets ||= {}
         if $loaded_yaml_sheets.keys.any? { |k| k.is_a?(String) }
           raise "$loaded_yaml_sheets only allows integer keys, but somewhere a string-key got added. Find out where, or you will run into a lot of stale caches."
         end
-        logger.warn "\n\n\n\n\n\n"
 
         $loaded_yaml_sheets[params[:id].to_i] = nil
         format.html { redirect_to @form, notice: 'Form was successfully updated.' }
@@ -101,13 +101,15 @@ class FormsController < ApplicationController
   # DELETE /forms/1.xml
   def destroy
     @form = Form.find(params[:id])
-    unless @form.critical?
+    # don’t delete if form is critical or any course uses it
+    cantdel = @form.critical? || !Course.find_by_form_id(params[:id]).nil?
+    unless cantdel
       @form.destroy
-      $loaded_yaml_sheets[params[:id].to_i] = nil
+      $loaded_yaml_sheets[params[:id].to_i] = nil if defined? $loaded_yaml_sheets
     end
 
     respond_to do |format|
-      flash[:error] = 'Form was critical and has therefore not been destroyed.' if @form.critical?
+      flash[:error] = 'Form was critical and has therefore not been destroyed.' if cantdel
       format.html { redirect_to(forms_url) }
       format.xml  { head :ok }
     end
@@ -115,23 +117,28 @@ class FormsController < ApplicationController
 
   def copy_to_current
     form = Form.find(params[:id])
-    sems = Semester.currently_active
-    if sems.empty?
-      flash[:error] = "No current semesters found. Please create them first."
+    terms = Term.currently_active
+    if terms.empty?
+      flash[:error] = "No current terms found. Please create them first."
     else
-      sems.each do |s|
-        if s.forms.map { |f| f.name }.include?(form.title)
-          flash[:warning] = "Could not add #{form.title} to #{s.title} because there is already a form with that name."
+      terms.each do |t|
+        if t.forms.any? { |f| f.name == form.title }
+          flash[:warning] ||= []
+          flash[:warning] << "Could not add #{form.title} to #{t.title} because there is already a form with that name."
           next
         end
-        new_form = form.clone
-        new_form.semester = s
+        new_form = form.dup
+        new_form.term = t
         if new_form.save
-          flash[:notice] = "Copied #{form.title} to #{s.title}."
+          flash[:notice] ||= []
+          flash[:notice] << "Copied #{form.title} to #{t.title}."
         else
-          flash[:warning] = "Could not add #{form.title} to #{s.title} because of some error."
+          flash[:warning] ||= []
+          flash[:warning] << "Could not add #{form.title} to #{t.title} because of some error."
         end
       end
+      flash[:warning] *= "; " if flash[:warning].is_a?(Array)
+      flash[:notice] *= "; " if flash[:notice].is_a?(Array)
     end
 
     respond_to do |format|

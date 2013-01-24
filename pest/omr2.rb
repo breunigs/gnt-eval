@@ -89,10 +89,17 @@ class PESTOmr < PESTDatabaseTools
           [box.br.x+4, box.tl.y+box.height+9], :up, 40, true)
     y -= box.height unless y.nil?
 
+    # note if we had to search again. If we do, it may be the case that
+    # the whole form is misaligned.
+    had_to_fix = { :horiz => false, :vert => false }
+
     # If any coordinate couldn't be found, try again further away. Only
     # searches the newly added area.
-    x = search(img_id, [box.tl.x-15, box.tl.y-10],
-          [box.tl.x-6, box.br.y+10], :right, 30) if x.nil?
+    if x.nil?
+      x = search(img_id, [box.tl.x-15, box.tl.y-10],
+            [box.tl.x-6, box.br.y+10], :right, 30)
+      had_to_fix[:horiz] = true
+    end
     # in case of y-direction, the line that divides the questions would
     # be detected. Search top down instead. Since bottom up failed, we
     # can be pretty sure the initial box was placed too high, therefore
@@ -100,6 +107,7 @@ class PESTOmr < PESTDatabaseTools
     if y.nil?
       y = search(img_id, [box.tl.x-4, box.tl.y],
             [box.br.x+4, box.br.y - box.height/3*2], :down, 40)
+      had_to_fix[:vert] = true
     end
 
     box.x = x unless x.nil?
@@ -107,7 +115,7 @@ class PESTOmr < PESTDatabaseTools
 
     draw_text(img_id, [x-15,y+20], "black", box.choice) unless [x,y].any_nil?
 
-    return x, y
+    return x, y, had_to_fix
   end
 
   # Finds and stores the black percentage for all boxes for the given
@@ -131,10 +139,18 @@ class PESTOmr < PESTDatabaseTools
 
     debug_box = []
 
+    fixes = { :horiz => 0, :vert => 0 }
+    retried = false
     question.boxes.each_with_index do |box, i|
-      x, y = search_square_box(img_id, box)
+      x, y, had_to_fix = search_square_box(img_id, box)
+      fixes[:horiz] += 1 if had_to_fix[:horiz]
+      fixes[:vert] += 1 if had_to_fix[:vert]
       # Looks like the box doesn't exist. Assume it's empty.
       if x.nil? || y.nil?
+        if !retried
+          retried = true
+          @auto_correction_vert -= 8
+        end
         @soft_error += 1
         debug "Couldn't find box for page=#{img_id} box=#{box.choice}"+\
               " db_column=#{question.db_column} in #{@currentFile}"
@@ -143,6 +159,7 @@ class PESTOmr < PESTDatabaseTools
         box.bp = 0
         next
       end
+      retried = false
 
       # inside the box. Take one further pixel from the width of the box
       # because the results (omr-test) show that in many cases the boxes
@@ -152,6 +169,19 @@ class PESTOmr < PESTDatabaseTools
       box.bp = black_percentage(img_id, tl.x, tl.y, br.x-tl.x, br.y-tl.y)
       debug_box[i] = [tl, br]
     end
+
+    # If many boxes were not found on the initial try for one question
+    # then that’s a strong hint that the whole form is misaligned --
+    # or at least it became misaligned due to imperfect printing and/or
+    # scanning. In that case adjust a little so the next boxes my be
+    # found on first try. The values are applied in helper.image.rb
+    # correct/translate.
+    h_fix_ratio = fixes[:horiz].to_f/question.boxes.size.to_f
+    @auto_correction_horiz -= 3 if h_fix_ratio >= 0.65
+
+    v_fix_ratio = fixes[:vert].to_f/question.boxes.size.to_f
+    @auto_correction_vert += 3 if v_fix_ratio >= 0.65
+
 
     # see if there is anything inside the boxes. If yes, assume the user
     # knows how a checkbox works.
@@ -253,15 +283,15 @@ class PESTOmr < PESTDatabaseTools
     x = ((c[:tr].x + c[:br].x)/2.0 - (c[:tl].x + c[:bl].x)/2.0).to_i
     y = ((c[:bl].y + c[:br].y)/2.0 - (c[:tl].y + c[:tr].y)/2.0).to_i
     # safety margin so that the corners are not included
-    s = 2*30*@dpifix
+    s = 2*30*dpifix
     c = i.crop(Magick::CenterGravity, x-s, y-s).trim(true)
 
     # region is too small, assume it is empty
-    return 0 if c.rows*c.columns < 500*@dpifix
+    return 0 if c.rows*c.columns < 500*dpifix
 
     c = c.resize(0.4)
 
-    step = 20*@dpifix
+    step = 20*dpifix
     thres = 100
 
     # Find left border
@@ -300,7 +330,7 @@ class PESTOmr < PESTDatabaseTools
     c.trim!(true)
 
     # check again for size after cropping. Drop if too small.
-    return 0 if c.rows*c.columns < 500*@dpifix
+    return 0 if c.rows*c.columns < 500*dpifix
 
     filename = @path + "/" + File.basename(@currentFile, ".tif")
     filename << "_" + group.save_as + ".jpg"
@@ -316,7 +346,7 @@ class PESTOmr < PESTDatabaseTools
   # portion of the scanned sheet with the text and save it as .jpg.
   def process_text_box(img_id, question)
     # TWEAK HERE
-    limit = 1000 * @dpifix
+    limit = 1000 * dpifix
     # the x,y coordinate is made before the box, so we need to account
     # for the box border. It marks the top left corner.
     addtox, addtoy = 15, 15
@@ -337,7 +367,7 @@ class PESTOmr < PESTDatabaseTools
     # file, but since width/height are not supposed to be coordinates we
     # have to do it by hand. Grep this: WIDTH_HEIGHT_AS_COORDINATE
     b.x += addtox; b.y += addtoy; b.width += addtow - b.x
-    b.height = PAGE_HEIGHT*@dpifix - b.height - b.y + addtoh
+    b.height = PAGE_HEIGHT*dpifix - b.height - b.y + addtoh
     # in a perfect scan, the coordinates now mark the inside of the box
     draw_dot(img_id, correct(img_id, b.top_left), "red")
     draw_dot(img_id, correct(img_id, b.top_right), "red")
@@ -406,6 +436,9 @@ class PESTOmr < PESTDatabaseTools
         next
       end
 
+      @auto_correction_horiz = 0
+      @auto_correction_vert = 0
+
       @doc.pages[i].questions.each do |g|
         @currentQuestion = g.db_column
         case g.type
@@ -438,9 +471,9 @@ class PESTOmr < PESTDatabaseTools
     start_time = Time.now
     debug("  Loading Image: #{file}", "loading_image") if @verbose
 
-    # Load image and yaml sheet
-    @doc = load_yaml_sheet(@omrsheet)
+    # Load image and yaml sheet.
     @ilist = Magick::ImageList.new(file)
+    @doc = load_yaml_sheet(@omrsheet)
     @draw = {}
 
     if @debug
@@ -544,7 +577,6 @@ class PESTOmr < PESTDatabaseTools
     # escaping
     q << (["?"]*(vals.size)).join(", ")
     q << ")"
-
 
     # only create YAMLs in debug and test mode
     if @debug || @test_mode
@@ -704,6 +736,7 @@ class PESTOmr < PESTDatabaseTools
     @overwrite, @debug = false, false
     @test_mode = false
     @cores     = 1
+    @dpifix    = nil
 
     # Option Parser
     begin
@@ -793,7 +826,9 @@ class PESTOmr < PESTDatabaseTools
     cmd << (@debug     ? " -d " : " ")
     cmd << (@test_mode ? " -t " : " ")
     cmd << (@overwrite ? " -o " : " ")
-    cmd << " --dpi #{@dpifix*300.0}"
+    # let the subprocess determine DPI on their own when loading the
+    # first file, unless it has been manually set.
+    cmd << " --dpi #{dpifix*300.0}" unless @dpifix.nil?
 
     tmpfiles, threads, exit_codes = [], [], []
 
@@ -857,17 +892,6 @@ class PESTOmr < PESTDatabaseTools
     STDOUT.sync = true
     files = parse_commandline
     check_magick_version
-
-    # Unless set manually, grab a sample image and use it to calculate
-    # the DPI
-    if @dpifix.nil?
-      debug("Calculating DPI", "calc_dpi") if @verbose
-      list = Magick::ImageList.new(files[0])
-      @dpifix = list[0].dpifix
-      list.each { |i| i.destroy! }
-      list = nil
-      debug("Calculated DPI", "calc_dpi") if @verbose
-    end
 
     # Let other ruby instances do the hard work for multi core...
     if @cores > 1

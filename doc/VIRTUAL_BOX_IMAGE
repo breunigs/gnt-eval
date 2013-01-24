@@ -23,6 +23,13 @@ more about that here:
 http://www.virtualbox.org/manual/ch04.html#sharedfolders
 
 
+To update the image to the latest version of GnT-Eval you can simply
+open a terminal and run
+  cd ~/gnt-eval && git pull
+to retrieve the newest stable release. You’ll have to restart the server
+or simply reboot the virtual machine after that.
+
+
 
 == Changes to default Debian Install
 

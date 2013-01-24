@@ -2,9 +2,9 @@
   var sfl = <%= json_map_sfl %>;
 
   function updateSelectors() {
-    // gather data derivable from "semester"
+    // gather data derivable from "term"
     // $("#course_form_id > option:selected").text()
-    var availForms = sfl[$("#course_semester_id").val()].forms;
+    var availForms = sfl[$("#course_term_id").val()].forms;
 
     // find current settings of "form"
     var formOldName = $("#course_form_id > option:selected").text();

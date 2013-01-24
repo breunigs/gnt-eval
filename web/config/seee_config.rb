@@ -129,19 +129,26 @@ module Seee
       # no locale is given on the command line, courses will be printed
       # in their selected language and all other pieces of text in the
       # language below.
-      :default_locale => :en
+      :default_locale => :en,
+
+      # how many sheets should be printed when running emergency print
+      :emergency_printing_amount => 50
     }
 
     @@file_paths = {
       # Specify a directory where to cache things
       :cache_tmp_dir => '/tmp/seee/',
 
-      # directory to store the extracted comment images in. Each semester
+      # directory to store the extracted comment images in. Each term
       # has its own subfolder, which will be created automatically.
       :comment_images_public_dir  => File.join(RAILS_ROOT, "public", "comments"),
 
       # Same directory as above, but available via http
       :comment_images_public_link => "http://localhost:3000/comments",
+
+      # public URL to the seee web gui. It’s required in order to
+      # generate the correct links on the cover sheets.
+      :web_gui_public_link => "http://localhost:3000/",
 
       # the directory where the final form pdf files will be stored.
       # this location will be printed below each howto, in case additional

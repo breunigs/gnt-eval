@@ -15,13 +15,12 @@
  * Genderizes a given path. It therefore updates the data object from
  * the current DOM. This way the common functions to generate the text
  * boxes and action links may be used.
- * @param path    The path which should be genderized. Will not object
- *                if the path is not suitable to be translated.
  * @param caller  The element which issues the call. Required if the
  *                non-genderized text box should be replaced with the
  *                new version. The select rule is rather complicated,
  *                but it works for the default links. */
-FormEditor.prototype.genderizePath = function(path, caller) {
+FormEditor.prototype.genderizePath = function(caller) {
+  var path = $(caller).prev().attr('id');
   this.updateDataFromDom();
   this.addUndoStep("genderizing " + path);
 
@@ -42,7 +41,8 @@ FormEditor.prototype.genderizePath = function(path, caller) {
 /* @public
  * Works just like genderizePath, but the other way round. See there
  * for details. */
-FormEditor.prototype.ungenderizePath = function(path, caller) {
+FormEditor.prototype.ungenderizePath = function(caller) {
+  var path = $(caller).parent().attr('id');
   this.addUndoStep("un-gendering " + path);
   this.updateDataFromDom();
 

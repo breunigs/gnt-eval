@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "rails",           "3.2.8"
+gem "rails",           "3.2.11"
 gem "jquery-rails"
 gem "jquery_datepicker"
 
@@ -15,6 +15,7 @@ gem "strip_attributes"
 
 gem "work_queue",      ">=2.0"
 gem "open4"
+gem "fastimage",	"1.2.13"
 
 # Proper unicode downcase and the like
 gem "unicode_utils"
@@ -29,6 +30,7 @@ group :assets do
   gem "coffee-rails", "~> 3.2.2"
   gem "uglifier", ">= 1.0.3"
   gem "therubyracer"
+  gem "yui-compressor"
 end
 
 group :test do
@@ -60,7 +62,7 @@ end
 
 # gems required for OMR
 group :pest do
-  gem "gtk2"
+  gem "gtk2", "~> 1.1.5"
   gem "rmagick", :require => "RMagick"
 end
 

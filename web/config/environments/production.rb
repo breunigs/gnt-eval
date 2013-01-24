@@ -19,9 +19,8 @@ Seee::Application.configure do
   config.serve_static_assets = true
 
   # Don’t compress the assets for now. It takes ages and many of the
-  # large JS files are already compressed. Also, CSS compression removes
-  # the px-instead-of-rem fallback for older browsers.
-  config.assets.compress = false
+  # large JS files are already compressed.
+  config.assets.compress = true
 
   # don't fallback to assets pipeline if a precompiled asset is missing
   config.assets.compile = false
@@ -56,7 +55,7 @@ Seee::Application.configure do
 
   # The following files are not included in the application.{css,js} files. List
   # them here so they get precompiled for production.
-  config.assets.precompile += %w(js-yaml.min.js json2yaml.js formeditor.js ace/*.js excanvas.js visualize.jQuery.js correlate.js aceify-textareas.js viewer_count.js)
+  config.assets.precompile += %w(small_screen.css js-yaml.min.js json2yaml.js formeditor.js ace/*.js excanvas.js visualize.jQuery.js correlate.js aceify-textareas.js viewer_count.js hitme_comment_preview.js hitme_final_check.js)
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false

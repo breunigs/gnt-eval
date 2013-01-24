@@ -59,7 +59,7 @@ class TutorsControllerTest < ActionController::TestCase
     assert_redirected_to course_tutor_path(a.course, a)
   end
 
-  def test_should_not_destroy_tutor_if_semester_critical
+  def test_should_not_destroy_tutor_if_term_critical
     assert_no_difference('Tutor.count') do
       # Paul belongs to the summer course, which belongs to the summer
       # term, which is critical.

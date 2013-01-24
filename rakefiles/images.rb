@@ -16,57 +16,92 @@ namespace :images do
     # use default directory if none given
     if d.directory.nil? || d.directory.empty?
       d = {}
-      puts "No directory given, using default one: #{simplify_path(SCfp[:scanned_pages_dir])}"
       d[:directory] = SCfp[:scanned_pages_dir]
       FileUtils.makedirs(d[:directory])
     end
 
     # abort if the directory of choice does not exist for some reason
-    if !File.directory?(d[:directory])
-      puts "Given directory does not exist. Aborting."
+    abort("Given directory does not exist. Aborting.") unless File.directory?(d[:directory])
+
     # actually sort the images
-    else
-      puts "Working directory is: #{d[:directory]}"
-      files = Dir.glob(File.join(d[:directory], '*.tif'))
-      sort_path = SCfp[:sorted_pages_dir]
+    puts "Working directory is: #{simplify_path d[:directory]}"
+    files = Dir.glob(File.join(d[:directory], '*.tif'))
+    sort_path = SCfp[:sorted_pages_dir]
 
-      curr = 0
-      threads = []
+    curr = 0
+    errs = []
 
-      files.each do |f|
-        unless File.writable?(f)
-          puts "No write access, cancelling."
-          break
-        end
+    puts "Reading course information"
+    # Unfortunately ActiveRecord is not always threadsafe, which leads
+    # to some threads failing. For this reason and to prevent the n+1
+    # queries problem, select all required data in one go.
+    data = {}
+    # Rails magic tries too hard and loads much more information than
+    # required, making the auto-generated query very slow. This one is
+    # fast enough.
+    Course.connection.select_all("
+      SELECT
+        courses.language AS lang,
+        course_profs.id  AS barcode,
+        forms.id         AS form
+      FROM courses
+      INNER JOIN course_profs ON course_profs.course_id = courses.id
+      INNER JOIN forms        ON forms.id = courses.form_id").map do |x|
+      data[x["barcode"]] = { :lang => x["lang"], :form_id => x["form"] }
+    end
 
-        work_queue.enqueue_b do
+
+    files.each do |f|
+      unless File.writable?(f)
+        puts "No write access, cancelling."
+        break
+      end
+
+      work_queue.enqueue_b do
+        begin
           basename = File.basename(f, '.tif')
           zbar_result = find_barcode(f)
           barcode = (zbar_result.to_f / 10.0).floor.to_i
 
-          if zbar_result.nil? || (not CourseProf.exists?(barcode))
-            puts "\nbizarre #{basename}: " + (zbar_result.nil? ? "Barcode not found" : "CourseProf (#{zbar_result}) does not exist")
+          # retry in case a non-existant barcode was found
+          if zbar_result && (not data.include?(barcode))
+            zbar_result = find_barcode(f, true)
+            barcode = (zbar_result.to_f / 10.0).floor.to_i
+          end
+
+          if zbar_result.nil? || (not data.include?(barcode))
+            reason = zbar_result ? "CourseProf (#{zbar_result}) does not exist" : "Barcode not found"
+            errs << "bizarre #{basename}: #{reason}"
             FileUtils.makedirs(File.join(sort_path, "bizarre"))
             FileUtils.move(f, File.join(sort_path, "bizarre"))
           else
-            form = CourseProf.find(barcode).course.form.id.to_s + '_' +
-              CourseProf.find(barcode).course.language.to_s
-
+            form = "#{data[barcode][:form_id]}_#{data[barcode][:lang]}"
             FileUtils.makedirs(File.join(sort_path, form))
             FileUtils.move(f, File.join(sort_path, form, "#{barcode}_#{basename}.tif"))
           end
 
-          curr += 1
-          print_progress(curr, files.size)
+        rescue Exception => e
+          errs << e.message
+          errs << e.backtrace
         end
+
+        curr += 1
+        print_progress(curr, files.size)
       end
-      work_queue.join
+    end
+    work_queue.join
+    if errs.empty?
       puts
       puts "Done!"
-    end # else
-
-    puts
-    puts "Next recommended step: rake images:omr"
+      puts
+      puts "Next recommended step: rake images:omr"
+    else
+      puts
+      puts "There have been some errors:"
+      errs.each { |e| puts "   #{e}" }
+      puts
+      puts "Investigate and run again: rake images:sortandalign"
+    end
   end
 
   desc "(5) Evaluates all sheets in #{simplify_path(SCfp[:sorted_pages_dir])}"
@@ -74,7 +109,8 @@ namespace :images do
     # OMR needs the YAML files as TeX also outputs position information
     p = SCfp[:sorted_pages_dir]
     Dir.glob(File.join(p, "[0-9]*.yaml")).each do |f|
-      puts "Now processing #{f}"
+      next unless Dir.exist?(f[0..-6])
+      puts "\n\n\nNow processing #{f}"
       bn = File.basename(f, ".yaml")
       system(%(./pest/omr2.rb -s "#{f}" -p "#{p}/#{bn}" -c #{number_of_processors}))
     end
@@ -91,7 +127,8 @@ namespace :images do
     puts "to you so you can decide to throw it out or not."
     all_sql = []
     tables = []
-    Semester.currently_active.map { |s| s.forms }.flatten.each do |form|
+    Term.currently_active.map { |s| s.forms }.flatten.each do |form|
+      next unless RT.table_exists?(form.db_table)
       tables << form.db_table
       sql = "SELECT path FROM #{form.db_table} WHERE #{checks} > (0 "
       form.questions.map do |q|
@@ -132,7 +169,7 @@ namespace :images do
 
   desc "(6) Correct invalid sheets"
   task :correct do
-    forms = Semester.currently_active.map { |s| s.forms }.flatten
+    forms = Term.currently_active.map { |s| s.forms }.flatten
     tables = forms.collect { |form| form.db_table }
     system("./pest/fix.rb #{tables.join(" ")}")
 
@@ -152,7 +189,7 @@ namespace :images do
     cp = SCc[:cp_comment_image_directory]
     mkdir = SCc[:mkdir_comment_image_directory]
 
-    Semester.currently_active.each do |sem|
+    Term.currently_active.each do |sem|
       system("#{mkdir} -p \"#{SCfp[:comment_images_public_dir]}/#{sem.dir_friendly_title}\"")
       path=File.join(File.dirname(__FILE__), "tmp/images")
 
@@ -179,7 +216,7 @@ namespace :images do
           next
         end
 
-        course_prof = CourseProf.find(barcode)
+        course_prof = CourseProf.find(barcode) rescue nil
         if course_prof.nil?
           warn "\nCouldn’t find Course/Prof for barcode #{barcode} (image: #{bname}). Skipping.\n"
           next
@@ -211,6 +248,16 @@ namespace :images do
           # load tutors
           tutors = course_prof.course.tutors.sort { |a,b| a.id <=> b.id }
 
+          if tut_num < 0
+            warn "\n\nCouldn’t add tutor image #{bname}, because OMR result is ambigious. Have you run `rake images:correct`?"
+            next
+          end
+
+          if tut_num < 0
+            warn "\n\nCouldn’t add tutor image #{bname}, because OMR result is ambigious. Have you run `rake images:correct`?"
+            next
+          end
+
           if tut_num > tutors.count
             warn "\n\nCouldn’t add tutor image #{bname}, because chosen tutor does not exist (checked field num > tutors.count). Skipping.\n"
             next
@@ -228,10 +275,10 @@ namespace :images do
         # let rails know about this comment
         p.save
         # move comment to correct location
-        FileUtils.cp(f, File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title))
+        `#{cp} #{f} #{File.join(SCfp[:comment_images_public_dir], sem.dir_friendly_title)}`
         print_progress(curr+1, allfiles.size)
       end # Dir glob
-    end # Semester.each
+    end # Term.each
 
     puts
     puts "Done."
@@ -240,7 +287,7 @@ namespace :images do
     puts "After that, the commands in the “rake results:*” group should help you."
   end
 
-  # find forms for current semester and extract variables from the
+  # find forms for current term and extract variables from the
   # first key that comes along. The language should exist for every
   # key, even though this is currently not enforced. Will be though,
   # once a graphical form creation interface exists.
@@ -249,7 +296,7 @@ namespace :images do
   desc "Finds all different forms for each folder and saves the form file as #{simplify_path(SCfp[:sorted_pages_dir])}/[form id].yaml."
   task :getyamls do |t,o|
     `mkdir -p ./tmp/images`
-    forms = Semester.currently_active.map { |s| s.forms }.flatten
+    forms = Term.currently_active.map { |s| s.forms }.flatten
     forms.each do |form|
       form.abstract_form.lecturer_header.keys.collect do |lang|
         target = File.join(SCfp[:sorted_pages_dir], "#{form.id}_#{lang}.yaml")

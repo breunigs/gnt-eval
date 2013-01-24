@@ -36,5 +36,6 @@ reqs += Dir.glob(File.join(cdir, "../app/models/*.rb"))
 
 reqs.uniq.each do |d|
   next if d.end_with?(File.basename(__FILE__))
+  next if d.end_with?("session.rb")
   require d
 end

@@ -2,8 +2,8 @@
 \globalQuestion{
   <%= question_text %>\\
   {\globalNumberStyle
-    <%=t :answers%>: <%=sc%>,
-    <%=t :abstentions%>: <%=answ[:abstentions]%>}
+    <%=t :answers%>: <%=sc%>%
+    <%= answ[:abstentions] == 0 ? "" : ", #{t :abstentions}: #{answ[:abstentions]}" %>}
 }
 <%
   a = answ.delete_if { |k,v| v <= 0 || !k.is_a?(String) }.keys

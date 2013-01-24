@@ -4,7 +4,7 @@ namespace :results do
   # accepts array of term IDs and returns array of valid forms for
   # that term
   def get_forms_for_terms(terms)
-    forms = terms.collect { |s| Semester.find_by_id(s).forms }.flatten
+    forms = terms.collect { |s| Term.find_by_id(s).forms }.flatten
     forms.select { |f| f.abstract_form_valid? }
   end
 
@@ -20,10 +20,10 @@ namespace :results do
   def ask_term(user_input)
     print_head "Term"
     puts "Choose term to export:"
-    Semester.all.each do |s|
+    Term.all.each do |s|
       puts "#{s.id}: #{s.title} #{s.now? ? "(current)" : ""}"
     end
-    terms = get_or_fake_user_input(Semester.all.collect{|x|x.id}, user_input)
+    terms = get_or_fake_user_input(Term.all.collect{|x|x.id}, user_input)
     puts
     puts
     if terms.empty?
@@ -65,7 +65,7 @@ namespace :results do
         when "lecture"    then line << cp.course.title
         when "lang"       then line << cp.course.language
         when "sheet"      then line << cp.course.form.name
-        when "term"       then line << cp.course.semester.title
+        when "term"       then line << cp.course.term.title
         when "prof"       then line << cp.prof.fullname
         when "profmail"   then line << cp.prof.email
         when "profgender" then line << cp.prof.gender.to_s[0..0]
@@ -138,7 +138,7 @@ namespace :results do
     # now we have all required data, let’s build the query
     forms.each do |f|
       tutor_col = f.get_tutor_question.db_column
-      bcs = faculty_barcodes & f.semester.barcodes
+      bcs = faculty_barcodes & f.term.barcodes
       # outer query is only used for sorting by the sum of all AVGs to
       # give a rough sorting on 'awesomeness' of the tutor. Highly
       # doubtful, so please don’t tell anyone.
@@ -192,6 +192,8 @@ namespace :results do
 
   desc "Export certain questions in CSV format, so they may be processed elsewhere"
   task :export, [:base64_data] do |t, a|
+    PRECISION = 2
+
     # we now have gathered all necessary data to process the input. To
     # allow the user to execute a query multiple times, we
     require "rubygems"
@@ -225,6 +227,14 @@ namespace :results do
     # select term to limit list of tables
     terms = ask_term(a[:terms])
 
+    facs_bcs = faculty.collect { |f| f.barcodes }.flatten
+    terms_bcs = terms.collect { |t| Term.find(t).barcodes }.flatten
+    valid_barcodes = facs_bcs & terms_bcs
+    if valid_barcodes.empty?
+      puts "No courses found for selected term and faculty. Aborting."
+      exit 1
+    end
+
     ## collect some data which will be required later
     # stores which tables exist
     dbs = []
@@ -240,7 +250,7 @@ namespace :results do
     # stores if a certain DB has a tutor table as well as its name
     tutor_col = {}
     terms.each do |term|
-      term = Semester.find(term)
+      term = Term.find(term)
       dbs += term.forms.collect { |f| f.db_table }.uniq
       title += term.forms.collect do |f|
         "#{f.db_table} (#{f.name}, #{term.title})"
@@ -324,10 +334,6 @@ namespace :results do
     all = export.map { |c| columns_text.include?(c) ? [c, "#{c}_text"] : c }
     all.flatten!
 
-    facs_bcs = faculty.collect { |f| f.barcodes }.flatten
-    terms_bcs = terms.collect { |t| Semester.find(t).barcodes }.flatten
-    valid_barcodes = facs_bcs & terms_bcs
-
     where = "WHERE barcode IN (#{valid_barcodes.join(",")})"
 
     qry = []
@@ -340,10 +346,23 @@ namespace :results do
       end
     end
     qry = qry.join(" UNION ALL ")
-    # add the question text to each question header as well
-    header = export.clone
-    fullheader = header.collect { |h| h + ": " + ident[h].join(" // ") }
 
+
+    puts
+    puts "======="
+    puts "Expand?"
+    puts "======="
+    puts "Include question text in column header? [y/N]"
+    puts "y = db_column+qtext      n = db_column"
+    expand = get_or_fake_user_input(/^$|^[ny]$/i, a[:expand]).downcase
+    expand = "n" if expand.empty?
+
+    # add the question text to each question header as well, if desired
+    header = export.clone
+    fullheader = expand == "y" ? header.map { |h| h + ": " + ident[h].join(" // ") } : header.clone
+
+    puts
+    puts
     puts
     puts "========"
     puts "Metadata"
@@ -360,10 +379,10 @@ namespace :results do
       "profgender" => "gender of prof. m=male, f=female, o=other",
       "tutor" => "name of tutor, if available",
       "term" => "abbreviation of term",
-      "NONE" => "If you are absolutely sure you do not need any meta data" }
+      "NONE" => "If you don’t need any metadata, simply press enter." }
     meta.sort.each { |k,v| puts "#{k.ljust(10)}: #{v}" }
     meta = get_or_fake_user_input(meta.keys, a[:meta])
-    meta_store = meta
+    meta_store = meta.clone
     meta = meta.reject { |m| m == "NONE" }
 
 
@@ -373,6 +392,18 @@ namespace :results do
       header.unshift(m)
       fullheader.unshift(m)
     end
+
+
+    puts
+    puts "============"
+    puts "Decimal Mark"
+    puts "============"
+    puts "Please specify the decimal mark to use. This is required because"
+    puts "importing CSV might otherwise lead to funny results. For example,"
+    puts "English uses a dot (e.g. 3.14) while German uses a comma (e.g. 3,14)."
+    puts "Decimal Divider (exactly one character): "
+    # list of valid decimal points, taken from Wikipedia. Expand if required.
+    decimal_mark = get_or_fake_user_input(/^[٫,.ˌ]$/i, a[:decimal_mark])
 
     puts
     puts "========="
@@ -431,9 +462,32 @@ namespace :results do
         end
         histogram = RT.answer_histogram(table, question, bc)
         sc, sa, ss = RT.count_avg_stddev(table, col, {:barcode => bc})
-        line += [sa, ss] + histogram.values
+
+        # sanity check the output
+        msgs = []
+        msgs << "AVG: #{sa}" if sa < 0 || sa > question.boxes.size
+        msgs << "STDDEV: #{sa}" if ss > question.boxes.size/2.0
+        tmpcnt = 0
+        histogram.each do |hkey, hval|
+          tmpcnt += hval.to_f
+          msgs<< "Histogram value for #{hkey}: #{hval}" if hval.to_f > 100
+        end
+        # allow rounding errors >> eps
+        msgs <<  "Histogram values don’t sum up to 100: #{tmpcnt}" unless tmpcnt.between?(99.9, 100.1)
+        if msgs.any?
+          warn "\nOdd values detected for:"
+          warn "Course: #{cp.course.title}"
+          warn "Prof:   #{cp.prof.fullname}"
+          warn "Quest:  #{question.db_column}"
+          warn msgs.join("\n")
+        end
+
+        hvals = histogram.values.map { |v| "#{v.to_f.round(PRECISION)}%".sub(".", decimal_mark) }
+        sa = sa.round(PRECISION).to_s.sub(".", decimal_mark)
+        ss = ss.round(PRECISION).to_s.sub(".", decimal_mark)
+        line += ["", sa, ss] + hvals
         unless looped_once
-          header_stat += ["#{col} AVG", "#{col} STDDEV"]
+          header_stat += ["", "#{col} AVG", "#{col} STDDEV"]
           header_stat += histogram.keys.map { |k| "#{col}: #{k}" }
         end
       end
@@ -443,10 +497,14 @@ namespace :results do
 
     # write data to CSV
     puts "Writing CSV"
-    `mkdir -p "tmp/export"`
-    now = Time.now.strftime("%Y-%m-%d %H:%M")
-    file_data = "tmp/export/#{now}_data.csv"
-    file_stat = "tmp/export/#{now}_stat.csv"
+    FileUtils.mkdir_p "tmp/export/"
+    filename = Time.now.strftime("%Y-%m-%d %H:%M") + " "
+    filename << faculty.map { |f| f.shortname }.join("+") + " "
+    filename << terms.map { |f| Term.find(f).title }.join("+")
+    filename = "tmp/export/" + filename.gsub(/[^a-z0-9.,;:\s_-]/i, "")
+
+    file_data = filename + " data.csv"
+    file_stat = filename + " stat.csv"
     opt = {:headers => true, :write_headers => true}
     CSV.open(file_data, "wb", opt) do |csv|
       csv << header
@@ -466,14 +524,25 @@ namespace :results do
     puts "Done, have a look at " + %("#{file_data}").bold
     puts "Also, if you know what you are doing see #{file_stat}."
     puts
+    `type ssconvert >/dev/null 2>&1`
+    if $?.exitstatus == 0
+      puts "Also generating XLSX versions of those CSV files."
+      system(%(ssconvert "#{file_data}" "#{file_data[0..-4]}xlsx" > /dev/null))
+      system(%(ssconvert "#{file_stat}" "#{file_stat[0..-4]}xlsx" > /dev/null))
+    else
+      puts "Install gnumeric (or more specifically ssconvert) if you want"
+      puts "to have export output XLSX files as well."
+    end
+    puts
     puts
     puts "=============="
     puts "Automatization"
     puts "=============="
     puts "If you want to run this query in the future, you can use:"
 
-    data = {:terms => terms, :dbs => dbs, :cols => export,
-              :meta => meta_store, :faculty => faculty.map { |f| f.id }}
+    data = {:terms => terms, :dbs => dbs, :cols => export, :expand => expand,
+              :meta => meta_store, :faculty => faculty.map { |f| f.id },
+              :decimal_mark => decimal_mark}
     # base64 encode the data to avoid having to deal with non-printable
     # chars produced by Marshal, spaces, commas, etc.
     print %(rake "results:export[)
@@ -536,5 +605,20 @@ namespace :results do
     csvs.each { |path, csv_table|
       File.open(path, 'w') {|f| f.write(csv_table) }
     }
+
+    `type ssconvert >/dev/null 2>&1`
+    if $?.exitstatus == 0
+      puts "Attempting to re-create the XLSX files from the modified CSV ones…"
+      csvs.each { |path, csv_table|
+        p = path[0..-4]
+        next unless File.exist?(p + "xlsx")
+        begin
+          File.delete(p + "xlsx")
+          system(%(ssconvert "#{p}csv" "#{p}xlsx" > /dev/null))
+        rescue
+          warn "Couldn’t re-create #{p}xlsx from the CSV. Consider it broken."
+        end
+      }
+    end
   end
 end

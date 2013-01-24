@@ -1,3 +1,5 @@
+<% content_for :title, "“#{@course.title}”" %>
+
 <%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset %>
 
 <% # can’t change anything while critical, so don’t load JS %>
@@ -6,7 +8,7 @@
 <%= form_for(@course) do |f| %>
   <%
     links = %(<div class="button-group">)
-    links << (f.submit "Update and Preview", :disable_with => "Saving…", :class => "button primary")
+    links << (f.submit "Save and Preview", :disable_with => "Saving…", :class => "button primary")
     links << (link_to "Discard and Preview", @course, :class => "button")
     links << %(</div>)
     links = links.html_safe
@@ -21,11 +23,11 @@
     <table style="float:left;min-width:50%;">
       <tr><th colspan="3" style="font-size:120%">master data</th></tr>
       <% [[f.label(:title),                             f.text_field(:title), "required"],
-          [f.label(:semester),
+          [f.label(:term),
               if @course.critical?
-                "#{@course.semester.title} (can't change this while critical)"
+                "#{@course.term.title} (can't change this while critical)"
               else
-                collection_select(:course, :semester_id, Semester.all.reverse, :id, :title, {:prompt => true})
+                collection_select(:course, :term_id, Term.all.reverse, :id, :title, {:prompt => true})
               end, "required"],
           [f.label(:faculty, :for=>"course_faculty_id"),collection_select(:course, :faculty_id, Faculty.find(:all), :id, :longname, {:prompt => true}), "required"],
           [f.label(:form),
@@ -67,16 +69,25 @@
       <script>
         $(document).ready(function() {
           $("#course_evaluator").bind("blur change keyup", function() {
-            var v = $(this).val().trim().toLowerCase();
-            var v = v.length == 0 ? "" : v + "@<%=j Seee::Config.settings[:standard_mail_domain]%>";
-            $("#course_fscontact").attr("placeholder", v);
+            var input = $(this).val().trim().toLowerCase();
+            var text = [];
+            $.each(input.split(/,\s*/), function(ind, v) {
+              var v = v.length == 0 ? "" : v + "@<%=j Seee::Config.settings[:standard_mail_domain]%>";
+              text.push(v);
+              if(v.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i) === null) {
+                text = "Cannot derive mail address automatically.";
+                return false;
+              }
+            });
+            text = typeof(text) === 'string' ? text : text.join(", ");
+            $("#course_fscontact").attr("placeholder", text);
           }).blur();
         });
       </script>
     <% end %>
   </div>
 
-  <div class="group">
+  <div class="group" id="commentfield">
     <h3>Comments</h3>
     (This is <%=latex_logo%>-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, e.g. „Deutsch“ or “English”)<br/>
     <%= f.text_area(:summary, :style => 'width:99%')%>
@@ -85,13 +96,14 @@
   <div class="group">
     <h3>Scanned comments</h3>
     <div class="commentview">
+      <% cnt = 0 %>
       <% @course.course_profs.each do |cp| %>
         <% if cp.c_pics.empty? %>
           <span>NO COMMENTS for <%=h cp.prof.fullname %></span>
           <% next %>
         <% end %>
 
-        <span>for <%=cp.prof.fullname %>:</span>
+        <span>for <%=cp.prof.fullname %>: (#<%="#{cnt+1} – ##{cnt + cp.c_pics.size}"%>)</span> <% cnt += cp.c_pics.size %>
         <% cp.c_pics.each do |p| %>
           <%= render "shared/comment_pic", :course => @course, :pic => p %>
         <% end %>
@@ -101,6 +113,20 @@
     </div>
     Hint: if comments are cut off, click-and-hold for one second to download the original sheet.
   </div>
+    <% content_for :script do %>
+      <script>
+        $(document).ready(function() {
+          $(".commentview").each(function() {
+            var view = $(this);
+            var max = $(window).height() - $("#commentfield").outerHeight() - 60 /*margins*/;
+            max = Math.max(max, 280);
+            $(this).find("img:first").load(function() {
+              view.height(Math.min($(this).height(), max) + "px");
+            });
+          });
+        });
+      </script>
+    <% end %>
 
   <div class="group">
     <%=links%>

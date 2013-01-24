@@ -8,13 +8,14 @@ class CourseProf < ActiveRecord::Base
   # shortcuts
   has_one :form, :through => :course
   has_one :faculty, :through => :course
-  has_one :semester, :through => :course
+  has_one :term, :through => :course
   # import some features from other classes
   delegate :gender, :gender=, :to => :prof
 
   # will count the returned sheets if all necessary data is available.
   # In case of an error, -1 will be returned.
   def returned_sheets
+    raise "No valid form associated." if form.nil?
     RT.count(form.db_table, {:barcode => id})
   end
 
@@ -34,6 +35,41 @@ class CourseProf < ActiveRecord::Base
   # afterwards.
   def print_in_progress=(val)
     @print_in_progress = val ? true : false
+  end
+
+  # prints the form for this CourseProf. Optionally give an amount,
+  # otherwise it will print as many sheets as there are students.
+  # Returns the exit status of the printing application.
+  def print_execute(amount = nil)
+    raise "Invalid amount" unless amount.nil? || amount.to_s.match(/^[0-9]+$/)
+
+    print_in_progress = true
+    pdf_path = temp_dir("print_forms")
+
+    # ensure the howtos exist
+    #create_howtos(temp_dir("howtos"), pdf_path)
+
+    # create form
+    make_pdf_for(self, pdf_path)
+    # print!
+    p = Seee::Config.application_paths[:print]
+    # prevent actual printing in test mode
+    p << %( --simulate ) if ENV['RAILS_ENV'] == "test"
+    p << %( --no-howtos )
+    p << %( --amount=#{amount} ) if amount
+    p << %( --non-interactive ")
+    p << File.join(pdf_path, get_filename)
+    p << %(.pdf")
+    logger.debug "Command line used for printing:"
+    logger.debug p
+    `#{p}`
+    exit_status = $?.exitstatus
+
+    # run once again, so all newly created files are accessible by
+    # everyone
+    temp_dir
+    print_in_progress = false
+    exit_status
   end
 
 
@@ -80,8 +116,10 @@ class CourseProf < ActiveRecord::Base
 
   # Returns a pretty unique name for this CourseProf
   def get_filename
-    [course.form.name, course.language, course.title, prof.fullname, \
-      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ').strip
+    x = [course.form.name, course.language, course.title, prof.fullname, \
+      course.students.to_s + 'pcs'].join(' - ').gsub(/\s+/,' ')
+    x = ActiveSupport::Inflector.transliterate(x)
+    x.gsub(/[^a-z0-9_.,:\s\-()]/i, "_")
   end
 
   private

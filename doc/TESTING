@@ -1,0 +1,16 @@
+This guide shows how to run tests for G'n'T-Eval and where to add them.
+Please note that as of writing tests are pretty scarce in the project,
+so please do add them.
+
+
+Rails / web gui / seee
+----------------------
+
+These tests are located in web/test and follow the common Rails way for
+tests. You can run all tests by
+  cd web/test && rake test
+or if you want to run more specific files try something like
+  cd web/test && ruby -I. functional/hitmes_controller_test.rb
+
+For further information, have a look at the official Rails guide on that
+matter: http://guides.rubyonrails.org/testing.html

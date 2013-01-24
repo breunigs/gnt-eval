@@ -1,13 +1,17 @@
 <div>
-<h2>Previewing Form <%=@form.name %> (<%=@form.semester.title %>)</h2>
-  <%= (not @form.form_checks_out?) ? "<strong>⚠ Form is invalid</strong><br/>".html_safe : ""%>
+<h2>Previewing Form <%=@form.name %> (<%=@form.term.title %>)</h2>
+  <% unless @form.form_checks_out? %>
+    <strong>⚠ Form is invalid</strong>
+    <% message = @form.abstract_form_valid_message %><% if message %>(<%=message%>)<% end%>
+    <br/>
+  <% end %>
 
  <table>
     <% for item in
       [
-        ["Semester",      @form.semester.title],
-        ["Name",          @form.name],
-        ["Table",         @form.db_table]
+        ["Term",      @form.term.title],
+        ["Name",      @form.name],
+        ["Table",     @form.db_table]
       ]
     %>
       <tr>
@@ -19,13 +23,6 @@
 
   <%= nav_links %>
 </div>
-
-<% if @form.abstract_form_valid? && @form.db_table.blank? %>
-  <div>
-    <h3>ERROR: db_table blank</h3>
-    <p class="error">Each form needs to have a db_table specified so it’s clear where the data goes. It’s possible for two different forms to have the same database, but it’s best practice to have new tables for each form and term.</p>
-  </div>
-<% end %>
 
 <% if @form.questions && @form.questions.count { |q| q.type == "tutor_table" } >= 2 %>
   <div>
@@ -62,6 +59,35 @@
   </div>
 <% end %>
 
+<% oosv = @form.find_out_of_scope_variables
+unless oosv.empty?
+%>
+  <div>
+    <h3>ERROR: Out of scope variables</h3>
+      <p class="error">
+        There are some variables which can be used to design the form, e.g.
+        \lect to refer to the lecturer’s name. These variables may be valid
+        for the whole sheet when the questions are used in the form due to
+        the fact that a form is bound to a lecturer. However they are
+        actually only valid for certain parts of the form. Consider
+        \lect: It can only valid for questions that depend on the lecturer
+        (i.e. repeat_for = lecturer). Forms should support multiple
+        lecturers per course, therefore these variables cannot be used
+        outside the correct repeat_for-scope.
+      </p>
+      <table>
+        <tr style="background: #<%= cycle('efefef', 'fff')%>">
+          <th>message</th>
+        </tr>
+      <% oosv.each do |err| %>
+        <tr style="background: #<%= cycle('efefef', 'fff')%>">
+          <td><%=err%></td>
+        </tr>
+      <% end %>
+      </table>
+  </div>
+<% end %>
+
 <% if @form.has_questions_without_visualizer? %>
   <div>
     <h3>WARNING: questions without visualizer</h3>
@@ -94,33 +120,100 @@
   <% end %>
 <% end %>
 
-<% oosv = @form.find_out_of_scope_variables
-unless oosv.empty?
-%>
+<% if @form.questions %>
+  <% add_no_answer = @form.questions.keep_if { |q| (q.boxes || []).compact.any? { |b| b.any_text.include?("\\noAnswTxt") } } %>
+  <% if add_no_answer.any? %>
   <div>
-    <h3>ERROR: Out of scope variables</h3>
-      <p class="error">
-        There are some variables which can be used to design the form, e.g.
-        \lect to refer to the lecturer’s name. These variables may be valid
-        for the whole sheet when the questions are used in the form due to
-        the fact that a form is bound to a lecturer. However they are
-        actually only valid for certain parts of the form. Consider
-        \lect: It can only valid for questions that depend on the lecturer
-        (i.e. repeat_for = lecturer). Forms should support multiple
-        lecturers per course, therefore these variables cannot be used
-        outside the correct repeat_for-scope.
-      </p>
-      <table>
-        <tr style="background: #<%= cycle('efefef', 'fff')%>">
-          <th>message</th>
-        </tr>
-      <% oosv.each do |err| %>
-        <tr style="background: #<%= cycle('efefef', 'fff')%>">
-          <td><%=err%></td>
-        </tr>
+    <h3>WARNING: using \noAnswTxt in question answers</h3>
+    <p class="warning">The following questions use \noAnswTxt in their answers. You shouldn’t create a “no answer” check box manually, as they need to be handled separately. Please remove the last box in the FormEditor and check the “no answer” box (as of writing the box is always printed on the questionnaire and it’s not shown in the FormEditor).</p>
+    <table>
+      <tr><th>db column</th><th>question text</th></tr>
+      <% add_no_answer.each do |q| %>
+        <tr><td><%=q.db_column%></td><td><%=q.qtext%></td></tr>
       <% end %>
-      </table>
+    </table>
   </div>
+  <% end %>
+<% end %>
+
+
+<% if @form.questions %>
+  <% empty_boxes = []
+  @form.questions.each do |q|
+    next if q.type == "text"
+    @form.languages.each do |lng|
+      next if q.boxes.nil?
+      if q.multi?
+        q.boxes.each do |b|
+          empty_boxes << [q.db_column, q.qtext, lng] if b.nil? || b.any_text(lng).blank?
+        end
+      else
+        f, l = q.boxes.first, q.boxes.last
+        empty_boxes << [q.db_column, q.qtext, lng] if f.nil? || f.any_text(lng).blank?
+        empty_boxes << [q.db_column, q.qtext, lng] if l.nil? || l.any_text(lng).blank?
+      end
+    end
+  end
+  %>
+  <% if empty_boxes.any? %>
+  <div>
+    <h3>WARNING: missing answers</h3>
+    <p class="warning">The following questions have missing answers. Note that every question <i>must</i> have answers, as they are required for the result.pdf. If you want to save space on the questionnaire check the “hide answers” box. As a rule of thumb: single choice questions need to have their poles defined, i.e. the left- and rightmost answer. Multiple choice question need to have every box defined.</p>
+    <table>
+      <tr><th>db column</th><th>language</th><th>question text</th></tr>
+      <% empty_boxes.uniq.each do |eb| %>
+        <tr><td><%=eb[0]%></td><td><%=eb[2]%></td><td><%=eb[1]%></td></tr>
+      <% end %>
+    </table>
+  </div>
+  <% end %>
+<% end %>
+
+<% if @form.questions %>
+  <%
+    diff_answ_count = []
+    @form.sections.each do |sect|
+      s = sect.answers.size
+      sect.questions.each do |q|
+        next unless q.hide_answers?
+        boxes = (q.size + (q.no_answer? ? 1:0))
+        diff_answ_count << [sect, s, boxes, q] if boxes != s
+      end
+    end
+  %>
+  <% if diff_answ_count.any? %>
+  <div>
+    <h3>WARNING: question’s #answers doesn’t match up with section’s #answers</h3>
+    <p class="warning">The questions below have their answers hidden and feature a different number of boxes than defined in the section head. Either the question’s answer should be displayed or the count should match. Note that if questions feature an additional “no answer” checkbox (always on, as of writing) the section header should have <tt>\noAnswTxt</tt> as last answer. No question should manually define a “no answer” answer because those need to be handled separately. If you need to align the text in the section header use something like <tt>\mbox{\hspace*{-3mm}asd asd asd}</tt>.</p>
+    <table>
+      <tr><th>section</th><th>#s&nbsp;vs&nbsp;#q</th><th>db column</th><th>question text</th></tr>
+      <% diff_answ_count.each do |x| %>
+        <tr><td><%=x[0].any_title%></td><td><%="#{x[1]} vs #{x[2]}"%></td><td><%=x[3].db_column%></td><td><%=x[3].qtext%></td></tr>
+      <% end %>
+    </table>
+  </div>
+  <% end %>
+<% end %>
+
+<% if @form.sections %>
+  <%
+    diff_answ_section = @form.sections.keep_if do |s|
+      cnts = @form.languages.map { |lang| s.answers(lang).size }
+      cnts.uniq.size != 1
+    end
+  %>
+  <% if diff_answ_section.any? %>
+  <div>
+    <h3>WARNING: section’s answers count differs per language</h3>
+    <p class="warning">A section should have the same number of answers printed in its header for all languages.</p>
+    <table>
+      <tr><th>section</th><% @form.languages.each do |l| %><th>#<%=l%></th><% end %></tr>
+      <% diff_answ_section.each do |s| %>
+        <tr><td><%=s.any_title%></td><% @form.languages.each do |l| %><td><%=s.answers(l).size%></td><% end %></tr>
+      <% end %>
+    </table>
+  </div>
+  <% end %>
 <% end %>
 
 <a id="tex-image-preview"></a>

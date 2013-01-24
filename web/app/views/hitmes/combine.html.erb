@@ -1,0 +1,103 @@
+<%
+text = ""
+isCourse = false
+if @workon.is_a?(Course)
+  isCourse = true
+  many = @workon.course_profs.size > 1
+  @workon.course_profs.each do |cp|
+    next if cp.c_pics.all? { |p| p.text.blank? }
+    text << %(\\vspace{0.4cm}\\textbf{#{cp.prof.fullname}}\n) if many
+    text << %(\\begin{compactitem}\n)
+    cp.c_pics.map { |p| p.text.split("\n") }.flatten.each do |t|
+      next if t.blank?
+      text << %(  \\item #{t.strip}\n)
+    end
+    text << %(\\end{compactitem}\n\n\n)
+  end
+elsif @workon.is_a?(Tutor)
+  unless @workon.pics.all? { |p| p.text.blank? }
+    text << %(\\begin{compactitem}\n)
+    @workon.pics.map { |p| p.text.split("\n") }.flatten.each do |t|
+      next if t.blank?
+      text << %(  \\item #{t.strip}\n)
+    end
+    text << %(\\end{compactitem}\n\n\n)
+  end
+else
+  raise "Unknown class; not implemented"
+end
+%>
+
+<% content_for :title, " // Combine!" %>
+<%= render "shared/aceify_textareas", :line_offset => texpreview_header_offset, :autosize => true %>
+<% content_for :script, %(<script>
+  var hitme_preview_url="#{hitme_preview_text_url}";
+  var ident = '#{@ident}';
+  var combinedText = #{text.to_json};
+
+  function setCombinedText() {
+    var e = $('#text').data('editor').getSession();
+
+    // only ask if the comment field is not empty
+    if($.trim(e.getValue()) !== "" && !confirm('This will overwrite the current text in the comment field. Continue?'))
+      return;
+
+    e.setValue(combinedText);
+    renderPreview();
+  }
+
+    $(document).ready(function() { $('#text').data('editor').focus() });
+</script>).html_safe %>
+<% content_for :script, javascript_include_tag("hitme_comment_preview") %>
+
+
+<div class="containersplit">
+  <div class="leftside">
+    <h2>Your Job: sort / combine</h2>
+    <ul>
+      <li>Does not look like this?  Click “start over (autocombine comments)“<br/>
+        <tt>\begin{compactitem}&nbsp;&nbsp;&nbsp;&nbsp;\item …&nbsp;&nbsp;&nbsp;\end{compactitem}</tt>
+      </li>
+      <li><b>keep</b> the <b>compactitem</b>-environment, even for one comment</li>
+      <li>
+        <b>combine repeated comments</b>, i.e. change<br/>
+        <tt>&nbsp;&nbsp;\item script would be nice<br/>
+          &nbsp;&nbsp;\item (37 comments with the same meaning)
+        </tt><br/>
+      to<br/>
+        <tt>&nbsp;&nbsp;\item a script would be helpful (39$\times$)</tt>
+      </li>
+      <li><b>Sort:</b> <tt>Microphone, Friendly, M, F</tt> → <tt>M, M, F, F</tt></li>
+      <li><b>Group</b> by topic (profs, exercices, study groups, …)</li>
+      <li><b>Where do comments belong?</b>
+        <ul><li>Concerns tutor or this and only this study group? Tutor</li>
+            <li>Concerns anything else? Course</li>
+        </ul>
+      </li>
+      <li>
+       <b>Comment doesn’t belong here?</b> Move it to the top:<br/>
+       <tt>&nbsp;&nbsp;\item prof rocks! %%%%%% should be moved to prof<br/>
+          \begin{compactitem} &nbsp;&nbsp;\item Tutor sucks…</tt>
+      </li>
+      <li>ensure insults are commented out. Don’t delete them!</li>
+      <li><a onclick="alert('\\item tutor Bruno ist Doof is really legendary %%%%% does not belong here, move to tutor “Bruno ist Doof”\n\n\\vspace{0.4cm}\\textbf{Rebecca ist Doof}\n\\begin{compactitem}\n% \\item kill yourself %%% insulting, commented out\n  \\item nice handwriting\n  \\item please write smaller\n  \\item handwriting illegible\n  \\item microphone broken\n\\end{compactitem}\n\n\\vspace{0.4cm}\\textbf{Exercises}\n\\begin{compactitem}\n  \\item exercises are too hard\n  \\item handing out exercices on friday is evil\n  \\item …\n\\end{compactitem}\n\n\\vspace{0.4cm}\\textbf{Study Groups}\n\\begin{compactitem}\n  \\item study groups overlap with courses\n  \\item …\n\\end{compactitem}')">Show a complete example for courses</a>. Tutors usually don’t need grouping.</li>
+    </ul><br/>
+
+    <a onclick="setCombinedText()">start over (“auto combine comments”)</a>
+  </div>
+
+  <%= render "meta_information", :workon => @workon %>
+</div>
+
+<%= form_tag(:controller => "hitmes", :action => "save_combination") %>
+  <%= hidden_field_tag(:type, @workon.class) %>
+  <%= hidden_field_tag(:id, @workon.id) %>
+  <%= hidden_field_tag(:ident, @ident) %>
+  <div class="group containersplit">
+    <%= render "comment_preview" %>
+    <h3>Input</h3>
+    <%= text_area_tag(:text, @workon.comment.blank? ? text : @workon.comment)%>
+  </div>
+
+  <%= render "action_buttons" %>
+</form>

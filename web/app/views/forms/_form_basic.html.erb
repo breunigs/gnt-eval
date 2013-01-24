@@ -3,7 +3,7 @@
 <%= form_for(@form) do |f| %>
   <div class="group">
     <% if is_edit %>
-      <h2>Editing form <%=@form.name + ' in ' + @form.semester.title %></h2>
+      <h2>Editing form <%=@form.name + ' in ' + @form.term.title %></h2>
     <% else %>
       <h2>Creating new form</h2>
     <% end %>
@@ -12,7 +12,7 @@
     <table class="large_text_area">
       <% for item in
         [
-          [f.label(:semester_id),  collection_select(:form, :semester_id, Semester.find(:all), :id, :title, {:prompt => true}), "required"],
+          [f.label(:term_id),  collection_select(:form, :term_id, Term.find(:all), :id, :title, {:prompt => true}), "required"],
           [f.label(:name),      f.text_field(:name),     "required"],
           [f.label(:content),   f.text_area(:content),   "required"],
 
@@ -27,7 +27,7 @@
     </table>
 
     <div class="button-group">
-      <%= f.submit (is_edit ? "Update and Preview #{@form.name}" : "Save and Preview"), :disable_with => "Saving…", :class => "button primary" %>
+      <%= f.submit (is_edit ? "Save and Preview #{@form.name}" : "Save and Preview"), :disable_with => "Saving…", :class => "button primary" %>
       <%= link_to "Discard and Preview #{@form.name}", @form, :class => "button" unless is_new %>
       <%= link_to "Discard and show all forms", forms_path, :class => "button" %>
     </div>

@@ -1,5 +1,4 @@
 --- !ruby/object:AbstractForm
-db_table: evaldata_term1112_lectures
 texfoot: ""
 texhead:
   :de: ""
@@ -12,13 +11,14 @@ intro:
   :en: This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly. Mark like \checkLikeThis{} and correct yourself using \correctLikeThis{}.
 lecturer_header:
   :de:
-    :male: "Fragen zur Vorlesung (Dozent: #1, B\xC3\xB6gen: #2)"
-    :female: "Fragen zur Vorlesung (Dozentin: #1, B\xC3\xB6gen: #2)"
-  :en:
-    :male: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
-    :female: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
+    :both: "Fragen zur Vorlesung (Dozent/in: #1, Bögen: #2)"
+    :female: "Fragen zur Vorlesung (Dozentin: #1, Bögen: #2)"
+    :male: "Fragen zur Vorlesung (Dozent: #1, Bögen: #2)"
+  :en: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
 pages:
 - !ruby/object:Page
+  tex_at_top: ""
+  tex_at_bottom: ""
   sections:
   - !ruby/object:Section
     title:
@@ -102,7 +102,7 @@ pages:
         text: 7-10
       - !ruby/object:Box
         text: "> 10"
-      db_column: v_central_semester
+      db_column: v_central_term
 #      qtext: "Bitte gib Dein Fachsemester in \\emph{diesem Studienfach} an:"
       qtext:
         :de: "Bitte geben Sie Ihr Fachsemester in \\emph{diesem Studienfach} an:"
@@ -797,31 +797,6 @@ pages:
       boxes:
       - !ruby/object:Box
         text:
-          :de: "sehr gut"
-          :en: "very good"
-      - !ruby/object:Box
-      - !ruby/object:Box
-      - !ruby/object:Box
-        text:
-          :de: "sehr schlecht"
-          :en: "very bad"
-      - !ruby/object:Box
-        text:
-          :de: "nicht vorhanden"
-          :en: "non-existing"
-      db_column: v_material
-      qtext:
-        :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
-        :en: "The materials provided for the lecture are:"
-      type: square
-      # FIXME: This visualizer does not take the special meaning of the
-      # last field into account and is therefore unsuited. Cannot use
-      # horizontal_bars without naming the middle boxes.
-      visualizer: histogram
-    - !ruby/object:Question
-      boxes:
-      - !ruby/object:Box
-        text:
           :de: 0--20\%
           :en: 0--20\%
       - !ruby/object:Box
@@ -846,6 +821,7 @@ pages:
         :en: "I estimate that compared to the beginning of the lecture, this fraction of students still attends:"
       type: square
       visualizer: histogram
+      repeat_for: lecturer
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -928,6 +904,31 @@ pages:
         :de: "Ich höre diese Vorlesung zum ersten Mal:"
         :en: "This is the first time I attend this lecture:"
       type: square
+      visualizer: histogram
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "sehr gut"
+          :en: "very good"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "sehr schlecht"
+          :en: "very bad"
+      - !ruby/object:Box
+        text:
+          :de: "nicht vorhanden"
+          :en: "non-existing"
+      db_column: v_material
+      qtext:
+        :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
+        :en: "The materials provided for the lecture are:"
+      type: square
+      # FIXME: This visualizer does not take the special meaning of the
+      # last field into account and is therefore unsuited. Cannot use
+      # horizontal_bars without naming the middle boxes.
       visualizer: histogram
     - !ruby/object:Question
       boxes: []

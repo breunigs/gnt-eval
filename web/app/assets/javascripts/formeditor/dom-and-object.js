@@ -10,7 +10,7 @@ FormEditor.prototype.getValue = function() {
   try {
     return jsyaml.load($('#form_content').val());
   } catch(err) {
-    this.log("Error loading JS-YAML: " + err.message);
+    this.log("Error loading JS-YAML: " + err);
     this.invalidData = true;
   }
 };
@@ -26,7 +26,9 @@ FormEditor.prototype.updateDataFromDom = function() {
  * Updates the original textarea with the AbstractForm as currently
  * represented by the DOM elements. Auto-converts it to YAML. */
 FormEditor.prototype.dom2yaml = function() {
-  $("#form_content").html(json2yaml(this.getObjectFromDom()));
+  var v = json2yaml(this.getObjectFromDom());
+  $("#form_content").val(v);
+  $("#form_content").html(v);
 };
 
 

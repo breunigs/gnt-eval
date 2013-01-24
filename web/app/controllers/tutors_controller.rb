@@ -12,8 +12,8 @@ class TutorsController < ApplicationController
   def index
     # (inner) join prevents us from loading tutors whose course does
     # not exist anymore
-    @tutors = Tutor.all(:joins => :course, :include => [:semester],
-                :order => ["semester_id DESC", :title, :abbr_name])
+    @tutors = Tutor.all(:joins => :course, :include => [:term],
+                :order => ["term_id DESC", :title, :abbr_name])
 
     respond_to do |format|
       format.html # index.html.erb
@@ -114,16 +114,25 @@ class TutorsController < ApplicationController
       return
     end
 
+    if @tutor.returned_sheets < Seee::Config.settings[:minimum_sheets_required]
+      flash[:error] = 'Not enough returned sheets, cannot generate results.'
+      redirect_to tutors_path
+      return
+    end
+
     pdf_path = temp_dir("tutor_result_pdf")
     path = pdf_path + "/tutor_eval_#{@tutor.id}.pdf"
     tex_code = @tutor.evaluate
 
-    unless render_tex(tex_code, path, true, true)
+    unless render_tex(tex_code, path, false, true)
       flash[:error] = 'Couldn’t render TeX due to some errors. Have a look at the log file to find out why.'
       redirect_to [@tutor.course, @tutor]
       return
     end
-    send_file path, :type => "application/pdf"
-    File.delete(path)
+
+    data = open(path, "rb") { |io| io.read }
+    send_data data, :type => "application/pdf", :filename => "tutor_eval_#{@tutor.id}.pdf"
+    FileUtils.remove_dir(pdf_path)
+    FileUtils.remove_dir(temp_dir("tutor_eval_#{@tutor.id}"))
   end
 end

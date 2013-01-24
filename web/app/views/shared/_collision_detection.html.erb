@@ -1,3 +1,9 @@
+<div id="darkened"></div>
+
+<noscript><div class="group warning">You have <b>disabled JavaScript</b>. You and others can’t be notified if they edit this page at the same time. This might lead to <b>collisions</b> as they are not handled in any way. User who hits the save button last wins.</div></noscript>
+
+<div id="collision-warning" class="warning hidden">This page is currently opened more than once. This might lead to your changes being overwritten. If you opened this window just now, please close it. Otherwise talk to each other and solve this.<br/><strong>Viewers:</strong><br/><span id="viewers"></span><br/><a onclick="setUsernameCookie(); event.stopPropagation();">Set Your Username</a></div>
+
 <script>
   var   ping = "<%=  ping_path(params[:controller], params[:id], "PLACEHOLDER")%>";
   var unping = "<%=unping_path(params[:controller], params[:id], "PLACEHOLDER")%>";

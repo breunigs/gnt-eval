@@ -1,0 +1,18 @@
+.containersplit {
+  .previewbox, .rightside {
+    float:right;
+    width: 650px;
+    margin-top:0 !important;
+  }
+
+  div.ace_editor, .leftside {
+    float: left;
+    width: calc(100% - 700px);
+    width: -moz-calc(100% - 700px);
+    width: -webkit-calc(100% - 700px);
+  }
+
+  .ace_editor {
+    margin-top:0.3rem !important;
+  }
+}

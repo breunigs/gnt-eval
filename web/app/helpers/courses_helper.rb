@@ -6,7 +6,7 @@ module CoursesHelper
   # finds all available languages in all forms
   def all_langs
     l = []
-    Semester.all.each do |s|
+    Term.all.each do |s|
       s.forms.each { |f| l << f.languages }
     end
     l.flatten.uniq
@@ -22,48 +22,44 @@ module CoursesHelper
     h
   end
 
-  # maps all semesters to a hashs of hashs like:
-  # { semester_id => { :title => "WS 10/11", :forms => (see above) } }
-  def map_semesters_and_forms
-    sfl = {}
-    Semester.all.each do |s|
-      sfl[s.id] = { :title => s.title, :forms => map_forms_and_langs(s.forms) }
+  # maps all terms to a hashs of hashs like:
+  # { term_id => { :title => "WS 10/11", :forms => (see above) } }
+  def map_terms_and_forms
+    tfl = {}
+    Term.all.each do |s|
+      tfl[s.id] = { :title => s.title, :forms => map_forms_and_langs(s.forms) }
     end
-    sfl
+    tfl
   end
 
-  # returns a JSON version of map_semesters_and_forms
+  # returns a JSON version of map_terms_and_forms
   def json_map_sfl
-    ActiveSupport::JSON.encode(map_semesters_and_forms).html_safe
+    ActiveSupport::JSON.encode(map_terms_and_forms).html_safe
   end
 
   def courseShowLink
-    link_to("Show '#{@course.title}'", course_path(@course), :class => "button")
+    link_to("Show “#{@course.title}”", course_path(@course), :class => "button")
   end
 
   def courseEditLink
-    link_to("Edit '#{@course.title}'", edit_course_path(@course), :class => "button")
+    link_to("✎ Edit “#{@course.title}”", edit_course_path(@course), :class => "button primary rd-hide")
   end
 
   def courseDestroyLink
     link_to_unless(@course.critical?, 'Destroy course', @course, \
       :confirm => "Really destroy course '#{@course.title}'?", \
       :method => :delete,
-      :class => "button") do
-      "⚠ Course is critical"
+      :class => "button danger rd-hide") do
+      "&nbsp;⚠ Course is critical".html_safe
     end
   end
 
   def courseLinksForShowPage
     d = []
     d << courseEditLink
-    d << courseDestroyLink unless @course.semester.critical?
-    d << link_to("Correlate", correlate_course_path(@course), :class => "button")
-    d << link_to("List courses", semester_courses_path(@course.semester), :class => "button")
+    d << courseDestroyLink unless @course.term.critical?
+    d << link_to("ϱ Correlate", correlate_course_path(@course), :class => "button")
+    d << link_to("⤶ List courses", term_courses_path(@course.term), :class => "button")
     %(<div class="button-group">#{d*""}</div>).html_safe
-  end
-
-  def comment_image_link
-    Seee::Config.file_paths[:comment_images_public_link]
   end
 end

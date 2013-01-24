@@ -3,10 +3,10 @@
 namespace :mail do
   desc "send reminder mails to FSlers"
   task :reminder do
-    s = Semester.find(:all).find{ |s| s.now? }
+    s = Term.currently_active
 
     puts ("This will send reminder mails to _all_ fscontacts for courses " +
-      "in semester #{s.title}. I will now show you a list of the mails, " +
+      "in term #{s.title}. I will now show you a list of the mails, " +
       "that I will send. After you have seen the list, you will still be " +
       "able to abort.\nPlease press Enter.").word_wrap
     $stdin.gets

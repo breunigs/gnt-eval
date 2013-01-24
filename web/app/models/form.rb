@@ -4,18 +4,18 @@ require 'pp'
 require 'stringio'
 
 class Form < ActiveRecord::Base
-  belongs_to :semester, :inverse_of => :forms
+  belongs_to :term, :inverse_of => :forms
   has_many :courses, :inverse_of => :form
-  validates_presence_of :semester, :name, :content
-  validates_uniqueness_of :name, :scope => :semester_id
+  validates_presence_of :term, :name, :content
+  validates_uniqueness_of :name, :scope => :term_id
 
   alias_attribute :title, :name
 
-  # returns if the form is critical. This is the case if the semester is
+  # returns if the form is critical. This is the case if the term is
   # critical. It may be edited/removed even if there are associated
   # courses. Latter would not be too wise, though.
   def critical?
-    semester.critical?
+    term.critical?
   end
 
   # the AbstractForm object belonging to this form
@@ -51,7 +51,20 @@ class Form < ActiveRecord::Base
 
   # returns true iff the form is a valid AbstractForm class. Nothing else is checked.
   def abstract_form_valid?
-    abstract_form.is_a? AbstractForm
+    return false unless abstract_form.is_a?(AbstractForm)
+    return false unless abstract_form.pages.all? { |s| s.is_a?(Page) }
+    return false unless abstract_form.sections.all? { |s| s.is_a?(Section) }
+    return false unless abstract_form.questions.all? { |s| s.is_a?(Question) }
+    true
+  end
+
+  # returns string why the abstract form is considered invalid
+  def abstract_form_valid_message
+    return "Form is not a valid AbstractForm Class" unless abstract_form.is_a?(AbstractForm)
+    return "Not all pages are of “Page” Class" unless abstract_form.pages.all? { |s| s.is_a?(Page) }
+    return "Not all sections are of “Section” Class" unless abstract_form.sections.all? { |s| s.is_a?(Section) }
+    return "Not all questions are of “Question” Class" unless abstract_form.questions.all? { |s| s.is_a?(Question) }
+    nil
   end
 
   # runs all kinds of checks to see if the form is fine and ready to be used in the wild.
@@ -59,10 +72,16 @@ class Form < ActiveRecord::Base
   def form_checks_out?
     return false unless abstract_form_valid?
     return false if has_duplicate_db_columns?
-    return false if db_table.blank?
     return false if questions.count { |q| q.type == "tutor_table" } >= 2
     return false unless find_out_of_scope_variables.empty?
     true
+  end
+
+  # returns an auto-generated string as db table.
+  def db_table
+    name = ("evaldata_" + term.title + "_" + title).strip
+    name = ActiveSupport::Inflector.transliterate(name).downcase
+    name.gsub(/[^a-z0-9_]+/, "_")
   end
 
   # There are some variables which can be used to design the form, e.g.

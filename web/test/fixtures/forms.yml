@@ -1,7 +1,7 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
 someFormForST:
-  semester: :summerTerm
+  term: summerTerm
   name: some Form
   content: |
     --- !ruby/object:AbstractForm
@@ -38,7 +38,7 @@ someFormForST:
           type: square
 
 someFormForWT:
-  semester: :winterTerm
+  term: winterTerm
   name: some other form
   content: |
     --- !ruby/object:AbstractForm
@@ -75,7 +75,7 @@ someFormForWT:
           type: square
 
 someUnusedForm:
-  semester: :winterTerm
+  term: :winterTerm
   name: unused form
   content: |
     --- !ruby/object:AbstractForm

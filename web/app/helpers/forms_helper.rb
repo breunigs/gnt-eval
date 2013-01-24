@@ -62,9 +62,11 @@ module FormsHelper
     end
 
     # convert to base64
+    dim = nil
     exitcodes << (File.exists?("#{path}.png") ? 0 : 1)
     if exitcodes.total == 0
       data = File.open("#{path}.png", 'rb') { |f| f.read }
+      dim = FastImage.size("#{path}.png")
       base64 = Base64.encode64(data)
     end
 
@@ -72,7 +74,7 @@ module FormsHelper
     files = '"' + Dir.glob("#{path}*").join('" "') + '"'
     `rm -rf #{files}`
 
-    return exitcodes.total > 0, exitcodes, h(logger), base64
+    return exitcodes.total > 0, exitcodes, h(logger), base64, dim
   end
 
   def texpreview(text = nil)

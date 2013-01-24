@@ -1,5 +1,4 @@
 --- !ruby/object:AbstractForm
-db_table: evaldata_term1112_seminars
 texfoot: ""
 texhead:
   :de: ""
@@ -12,13 +11,14 @@ intro:
   :en: This survey is carried out by the committee of studies in cooperation with the Fachschaft MathPhys. Its purpose is to improve or maintain the standards of teaching. In your own best interest, please complete this questionnaire thoroughly and legibly. Mark like \checkLikeThis{} and correct yourself using \correctLikeThis{}.
 lecturer_header:
   :de:
-    :male: "Fragen zum Seminar (Dozent: #1, B\xC3\xB6gen: #2)"
-    :female: "Fragen zum Seminar (Dozentin: #1, B\xC3\xB6gen: #2)"
-  :en:
-    :male: "Questions concerning the seminar (Lecturer: #1, Sheets: #2)"
-    :female: "Questions concerning the seminar (Lecturer: #1, Sheets: #2)"
+    :both: "Fragen zur Vorlesung (Dozent/in: #1, Bögen: #2)"
+    :female: "Fragen zur Vorlesung (Dozentin: #1, Bögen: #2)"
+    :male: "Fragen zur Vorlesung (Dozent: #1, Bögen: #2)"
+  :en: "Questions concerning the lecture (Lecturer: #1, Sheets: #2)"
 pages:
 - !ruby/object:Page
+  tex_at_top: ""
+  tex_at_bottom: ""
   sections:
   - !ruby/object:Section
     title:
@@ -102,7 +102,7 @@ pages:
         text: 7-10
       - !ruby/object:Box
         text: "> 10"
-      db_column: v_central_semester
+      db_column: v_central_term
 #      qtext: "Bitte gib Dein Fachsemester in \\emph{diesem Studienfach} an:"
       qtext:
         :de: "Bitte geben Sie Ihr Fachsemester in \\emph{diesem Studienfach} an:"
@@ -647,11 +647,15 @@ pages:
         text:
           :de: leichter Schein
           :en: "easy course"
-      db_column: v_why_this_seminar
+      db_column:
+      - v_why_this_seminar_a
+      - v_why_this_seminar_b
+      - v_why_this_seminar_c
+      - v_why_this_seminar_d
       visualizer: horizontal_bars
       qtext:
-        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt?"
-        :en: "Why did you choose to attend exactly to this seminar?"
+        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt? (Mehrfachnennung möglich)"
+        :en: "Why did you choose to attend exactly to this seminar? (Multiple entries possible)"
       type: square
 
     - !ruby/object:Question

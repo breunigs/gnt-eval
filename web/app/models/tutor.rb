@@ -6,7 +6,7 @@ class Tutor < ActiveRecord::Base
   has_many :pics, :inverse_of => :tutor
   has_one :form, :through => :course
   has_one :faculty, :through => :course
-  has_one :semester, :through => :course
+  has_one :term, :through => :course
 
   validates_presence_of :abbr_name
   validates_uniqueness_of :abbr_name, :scope => :course_id, \
@@ -24,8 +24,16 @@ class Tutor < ActiveRecord::Base
   def evaluate
     I18n.locale = course.language
 
-    b = RT.load_tex_definitions
+    evalname = "#{abbr_name} (#{term.title}; #{course.title})"
+    b = ERB.new(RT.load_tex("preamble")).result(binding)
+    b << RT.load_tex_definitions
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
+    b << %(\\let\\cleardoublepage\\newpage\n)
+
+
+    facultylong = faculty.longname
+    term_title = { :short => term.title, :long => term.longtitle }
+    b << ERB.new(RT.load_tex("preface")).result(binding)
     b << course.eval_lecture_head
 
     if returned_sheets < SCs[:minimum_sheets_required]
@@ -55,7 +63,7 @@ class Tutor < ActiveRecord::Base
       end
     end
 
-    return b
+    return b + '\end{document}'
   end
 
   def eval_block(questions, section)

@@ -3,11 +3,11 @@
 
 require File.dirname(__FILE__) + "/../web/config/ext_requirements.rb"
 
-#require File.dirname(__FILE__) + "/../lib/RandomUtils.rb"
-#require File.dirname(__FILE__) + "/../web/config/seee_config.rb"
-
 interactive = true
 simulate = false
+print_howtos = true
+overwrite_count = false
+given_amount = 0
 
 # Define which tray contains which type of sheet
 TRAY_NORMAL="1Tray,2Tray,3Tray"
@@ -19,7 +19,11 @@ BIN_SMALL="FinEUPHBUpper" # on top
 BIN_DESC={ BIN_LARGE => "bin on bottom", BIN_SMALL => "bin on top" }
 
 # Other print options which are handed to each lpr run
-LPR_OPTIONS="-o sides=two-sided-long-edge -o PageSize=A4"
+LPR_OPTIONS="-o sides=two-sided-long-edge -o PageSize=A4 -o Resolution=300dpi"
+
+# If the questionnaires need to be stapled (i.e. more than two pages)
+# this determines how:
+STAPLE="-o StapleLocation=UpperLeft"
 
 # Define which how to languages to print in addition to the one of the
 # sheet at hand. E.g., if this is set to “en”, an “en” sheet will yield
@@ -55,6 +59,20 @@ else
     poss.delete("--simulate")
     puts "Simulating only. LPR is not really called."
   end
+
+  if poss.include?("--no-howtos")
+    print_howtos = false
+    poss.delete("--no-howtos")
+    puts "Not printing howtos."
+  end
+
+  poss.reject! do |p|
+    next false unless m = p.match(/^--amount=([0-9]+)$/)
+    puts "Automatic count detection is deactivated. Will always print #{m[1]} sheets."
+    overwrite_count = true
+    given_amount = m[1].to_i
+    true
+  end
 end
 
 # only command options have been given, but no files. Use default.
@@ -79,7 +97,10 @@ end
 
 # now check the given files if they are suitable
 poss.each do |f|
-  next unless File.exist?(f)
+  unless File.exist?(f)
+    puts "File #{f} not found, skipping"
+    next
+  end
   next if File.basename(f).start_with?(" multiple")
   data = f.match(/.*\s-\s([a-z]+)\s-\s.*\s([0-9]+)pcs.pdf/)
   next if data.nil? || data[1].nil? || data[2].nil? || data[2].to_i <= 0
@@ -118,7 +139,7 @@ forms_sorted = forms.sort do |a,b|
 end
 
 forms_sorted.each do |file, data|
-  count = data[:count]
+  count = overwrite_count ? given_amount : data[:count]
   howtos = ([data[:lang]] + DEFAULT_HOWTOS).uniq
 
   puts
@@ -141,8 +162,14 @@ forms_sorted.each do |file, data|
     end
   end
 
+  pages = `pdfinfo "#{file}" | grep Pages: | awk '{print $2}'`.to_i
+  if pages > 2
+    warn "Sheet to print has more than 2 pages. Trying to staple them."
+  end
+
+
   # cycle bins
-  if bin == BIN_SMALL || count > 150
+  if bin == BIN_SMALL || count > 150 || pages > 2
     bin = BIN_LARGE
   else
     bin = BIN_SMALL
@@ -150,15 +177,20 @@ forms_sorted.each do |file, data|
 
   # issue print commands / submit to queue
   cover_file = File.join(File.dirname(file), "covers", "cover #{File.basename(file)}")
-  cover =  "lpr            -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
-  print =  "lpr -##{count} -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{file}\""
-  banner = "lpr -#1        -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
-  howtos.map! { |h| "lpr -#1 -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
+  cover =  "lpr            -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{cover_file}\""
+  print =  "lpr -##{count} -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} #{pages > 2 ? STAPLE : ""} \"#{file}\""
+  banner = "lpr -#1        -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_BANNER} #{LPR_OPTIONS} \"#{Dir.pwd}/bannerpage.txt\""
+  howtos.map! { |h| "lpr -#1 -o landscape=false -o OutputBin=#{bin} -o InputSlot=#{TRAY_NORMAL} #{LPR_OPTIONS} \"#{File.dirname(file)}/../howtos/howto_#{h}.pdf\"" }
   unless simulate
     system(cover) if File.exists?(cover_file)
-    howtos.each { |h| system(h) }
+    howtos.each { |h| system(h) } if print_howtos
     system(print)
     system(banner)
+  else
+    puts(cover) if File.exists?(cover_file)
+    howtos.each { |h| puts(h) } if print_howtos
+    puts(print)
+    puts(banner)
   end
   puts "The sheets will be put in the #{BIN_DESC[bin].bold}"
   puts
@@ -187,7 +219,7 @@ forms_sorted.each do |file, data|
   puts "#{totalcounter} of #{sheets} have been queued/printed."
 
   # print warning, if many sheets have been queued
-  warningcounter += howtos.size + count
+  warningcounter += howtos.size + count*(pages/2.0).ceil
   if warningcounter > SHEET_WARNING
     puts
     puts "="*35

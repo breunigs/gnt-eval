@@ -91,7 +91,7 @@ end
 
 # Finds the barcode of a given image file by looking at the image.
 # Automatically rotates and orders the pages if  a barcode is found.
-def find_barcode(filename)
+def find_barcode(filename, desperate = false)
   zbar = Seee::Config.application_paths[:zbar]
   unless File.exist?(zbar)
     puts "Couldn’t find a suitable zbarimg executable. This is likely due to your platform (= #{`uname -m`.strip}) not being supported by default. You can resolve this by running “rake magick:buildZBar”."
@@ -99,10 +99,11 @@ def find_barcode(filename)
   end
   zbar = Seee::Config.commands[:zbar]
   zbar_d = Seee::Config.commands[:zbar_desperate]
-  r = `#{zbar} "#{filename}"`
+  r = `#{desperate ? zbar_d : zbar} "#{filename}"`
   begin
     return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
   rescue
+    return nil if desperate
     r = `#{zbar_d} "#{filename}"`
     begin
       return r.strip.match(/^([0-9]+)/)[1].to_i if not r.empty?
@@ -187,10 +188,22 @@ end
 # max: amount of items to process
 # title: print name of just processed item
 def print_progress(val, max, title = "")
+  $print_progress_start = Time.now if val == 0
+  if val > 0 && $print_progress_start
+    time = Time.now - $print_progress_start
+    seconds_to_go = (time/val)*(max-val)
+    finish = (Time.now + seconds_to_go).strftime("%H:%M")
+  end
+  $last_printed_progress = [val, Time.now]
   percentage = (val.to_f/max.to_f*100.0).to_i.to_s.rjust(3)
   current = val.to_s.rjust(max.to_s.size)
-  print "\r#{percentage}% (#{current}/#{max})\t#{title[0..49].ljust(50)}"
+  if defined?(finish) && finish
+    print "\r#{percentage}% | #{current}/#{max} | @#{finish} | #{title[0..49].ljust(50)}"
+  else
+    print "\r#{percentage}% | #{current}/#{max} | #{title[0..49].ljust(50)}"
+  end
   STDOUT.flush
+  $print_progress_start = nil if val == max
 end
 
 # prints a headline surrounded by = into stdout
@@ -234,12 +247,13 @@ def make_pdf_for(cp, dirname)
   File.open(filename + '.tex', 'w') do |h|
     h << cp.course.form.abstract_form.to_tex(
       cp.course.language,
+      cp.course.form.db_table,
       cp.course.title,
       cp.prof.firstname,
       cp.prof.lastname,
       cp.prof.gender,
       cp.course.tutors.sort{ |a,b| a.id <=> b.id }.map{ |t| t.abbr_name },
-      cp.semester.title,
+      cp.term.title,
       cp.barcode)
   end
 

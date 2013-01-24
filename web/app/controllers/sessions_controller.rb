@@ -3,12 +3,20 @@
 class SessionsController < ApplicationController
   def ping
     if params[:ident]
-      Session.where(:cont => params[:cont], :viewed_id => params[:viewed_id],
-        :ident => params[:ident]).first_or_create!.touch
+      x = Session.where(:cont => params[:cont], :viewed_id => params[:viewed_id],
+        :ident => params[:ident]).first_or_create!
+      x.agent = request.env['HTTP_USER_AGENT'].to_s
+      x.ip = request.env['REMOTE_ADDR'].to_s
+      x.username = (cookies["username"] || "").gsub(/[^a-z0-9_\s-]/i, "")[0..20]
+      x.touch
+      x.save
     end
 
     @viewers = Session.where(:cont => params[:cont], :viewed_id => params[:viewed_id])
-    render :json => @viewers.count
+    users = @viewers.map do |v|
+      v.username.blank? ? v.ident : v.username
+    end
+    render :json => { :viewers => @viewers.count, :users => users }
   end
 
   def unping

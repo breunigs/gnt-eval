@@ -9,6 +9,10 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require design
+ *= require collision
+ *= require messages
+ *= require lists
+ *= require form_elements
  *= require css-noise
  *= require commentview
  *= require table-sorter
@@ -21,4 +25,7 @@
  *= require jquery-visualize
  *= require jquery-visualize-custom
  *= require formeditor
+ *= require hitme
+ *= require hold_button
+ *= require columnize
 */

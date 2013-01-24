@@ -310,6 +310,8 @@ class LSF
     end
     # Remove bogus lectures
     lectures.compact!
+    # Remove duplicate lectures
+    lectures.uniq! { |l| l.id }
     lectures
   end
 
@@ -348,7 +350,7 @@ class LSF
 
     summer = term_summer.include?(Date.today)
     # if we’re in winter term, but already celebrated new years…
-    y -= 1 if !summer && term_winter_newyear.include?(DateTime.now)
+    y -= 1 if !summer && term_winter_newyear.include?(Date.today)
     "#{y}#{summer ? 1 : 2}"
   end
 
@@ -548,14 +550,30 @@ class LSF
   def self.print_final_tex(data)
     data = data.dup
     LSF.connect_rails
-    # find courses in active semesters
-    cs = Semester.currently_active.map { |s| s.courses }.flatten
-    cst = cs.map { |c| c.title }
+    # find courses in active termss
+    ct = Term.currently_active.map { |t| t.courses }.flatten
     # keep only courses in seee
-    data.reject! { |x| !cst.include?(x.name) }
+    data.reject! do |x|
+      matches = ct.select  { |c| c.title == x.name }
+      if matches.none?
+        LSF.debug "skipping #{x.name} because name doesn’t match"
+        next true
+      end
+
+      # only keep lectures that have at least one prof in common.
+      # Obviously, neither data set may be complete, therefore
+      # include an entry if either data set has no profs at all
+      a = x.profs.flatten.uniq.map { |p| p.last.split(/\s+/) }.flatten
+      b = matches.map { |c| c.profs.map { |p| p.surname } }.flatten
+
+      next false if a.empty? || b.empty? || (a & b).any?
+      LSF.debug "skipping #{x.name} because no profs in common #{a.join(", ")} --- #{b.join(", ")}"
+      true
+    end
+
     data.sort! { |x,y| x.name <=> y.name }
     # create course.title ⇒ course Hash for easy data lookup
-    courses = Hash[cs.collect { |c| [c.title, c] }]
+    courses = Hash[ct.collect { |c| [c.title, c] }]
     ERB.new(RT.load_tex("../lsf_parser_final")).result(binding)
   end
 

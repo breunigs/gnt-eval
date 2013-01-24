@@ -1,0 +1,138 @@
+Sending Mails
+=============
+
+G'n'T-Eval leverages Rails’ mailing feature to send mass mails. There is no
+clickable GUI, but it can be easily used via the interactive ruby shell. If
+you don’t know about irb, best start with the guides in INTERACTIVE_
+EXPLORING_(IRB). 
+
+
+Localization
+------------
+
+Mails are automatically translated, depending on the language set in the
+course. If a subject is not translated, Rails will abort. Please note that
+mails may have already been sent if this occurs. If the message body
+translation is missing, the default locale will be used. For now, only
+German message bodies exist.
+
+change subjects in: web/config/locale/*.yml (look for postoffice block)
+change bodies in: web/app/views/postoffice/*.text.erb
+
+Rails prefers a localized version if available. If you want to create
+a localized variant for, say, Spanish, create a file called 
+  <mailtype>.es.text.erb
+The default language is defined by the symlink without the locale part.
+
+
+Mail types
+----------
+
+ankuendigungsmail: mails profs
+  Sends mail to the prof/profs of the given course. The mail contains
+  all details for the course, so the profs may send corrections. It
+  also serves as reminder that an evaluation is going to take place.
+  Put the date/time information in the description field, to let them
+  know when the eval is carried out.
+
+erinnerungsmail: mails “evaluated by”
+  Sends a reminder mail to the “evaluated by” person that she should
+  carry out the evaluation. If there are multiple people listed, all
+  of them receive the mail. Contains some details of the course, so
+  last minute errors may be spotted.
+
+evalverschickung: mails profs
+  Sends each prof of the given course the result for the *whole* term.
+  Since the result PDF files may be too large, they cannot be attached
+  directly. Instead, you need to provide an array that matches faculty_
+  id to an URL where the evaluation is available. Experience shows that
+  this URL should be publicly available and not behind a password
+  protected proxy or VPN.
+  
+single_evalverschickung: mails profs
+  Mails each prof the evaluation for the given course. Like eval-
+  verschickung, an array matching faculty_id to URL to evaluation for
+  the whole term is expected. Additionally you can pass a path where
+  the per-course result PDFs are located. If you didn’t change anything
+  and used rake results:pdf_singles, you may omit the path. The
+  per course file is attached, while the eval for the whole term of
+  the faculty is only linked.
+  
+  
+
+Actually sending mails
+----------------------
+
+Change into G'n'T-Evals root directory. Modify the body text for the
+mail you want to send first. In this example an “erinnerungsmail” is sent,
+so modify web/app/views/postoffice/erinnerungsmail.*.text.erb.
+
+After that, run “irb” and use the commands below to send mass mail.
+
+# boots rails and connects to the database
+require "./web/config/environment.rb"
+
+# see which terms are considered active
+Term.currently_active
+
+# find all courses in all currently active semesters
+ccs = Term.currently_active.map { |s| s.courses }.flatten
+
+# it is good practice to only send each mail once. If a mail is
+# being sent, this is marked in the course. Please note that this
+# feature does not detect bounces or other mail failures.
+ccs.reject! { |c| (c.mails_sent || "").include?("erinnerungsmail") }
+
+# list selected courses
+ccs.map { |c| c.title }
+
+# test how a generated mail looks like. This does not yet send
+# the mail.
+m = Postoffice.erinnerungsmail(ccs.first.id)
+puts m.header
+puts m.body
+
+# If it looks good, you can try to send it:
+m.XXXdeliver
+# Obviously, you need to remove the XXX for it to work. They were
+# added to prevent accidental mails by copy & paste errors.
+# By default all mails will be sent to a debug address and you need
+# to flip a switch before they are sent to the real people. You can
+# change the debug address in web/app/mails/postoffice.rb near the
+# top.
+# Note that debug mails do NOT update the mails_sent field for the
+# course. 
+
+# Once the debug mail arrives at your account and looks fine, you
+# may want to actually send the mass mails. For it to work, you
+# have to modify postoffice.rb once again and flip the debug
+# variable in the “erinnerungsmail” method. Also, you need to re-
+# start the irb because the file is not reloaded automatically.
+# It’s recommended to set debug to true again once you sent all
+# mails to prevent accidents.
+
+# So, you’re absolutely sure everything is fine. Run this to spam:
+ccs.each { |c| Postoffice.erinnerungsmail(c.id).XXXdeliver }
+
+# Don’t forget to flip debug to false again.
+
+
+
+
+
+
+# Other types of mail work similarily. For example, mails for
+# single_evalverschickung may be generated like this. It’s assumed
+# you ran “rake results:pdf_singles” beforehand.
+
+# Find IDs for each faculty:
+Faculty.all.map { |t| "#{t.id}=#{t.shortname}" }
+
+# Assume we have the faculty IDs 4 and 2, then:
+links = { 4 => "http://…/eval_for_term_4.pdf", 2 => "…for_term_2.pdf" }
+
+# we don’t want to send them for faculty 1 yet:
+ccs.reject! { |c| c.faculty_id == 1 }
+
+m = Postoffice.single_evalverschickung(some_course.id, links)
+m.XXXdeliver
