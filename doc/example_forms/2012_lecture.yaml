@@ -797,31 +797,6 @@ pages:
       boxes:
       - !ruby/object:Box
         text:
-          :de: "sehr gut"
-          :en: "very good"
-      - !ruby/object:Box
-      - !ruby/object:Box
-      - !ruby/object:Box
-        text:
-          :de: "sehr schlecht"
-          :en: "very bad"
-      - !ruby/object:Box
-        text:
-          :de: "nicht vorhanden"
-          :en: "non-existing"
-      db_column: v_material
-      qtext:
-        :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
-        :en: "The materials provided for the lecture are:"
-      type: square
-      # FIXME: This visualizer does not take the special meaning of the
-      # last field into account and is therefore unsuited. Cannot use
-      # horizontal_bars without naming the middle boxes.
-      visualizer: histogram
-    - !ruby/object:Question
-      boxes:
-      - !ruby/object:Box
-        text:
           :de: 0--20\%
           :en: 0--20\%
       - !ruby/object:Box
@@ -846,6 +821,7 @@ pages:
         :en: "I estimate that compared to the beginning of the lecture, this fraction of students still attends:"
       type: square
       visualizer: histogram
+      repeat_for: lecturer
     - !ruby/object:Question
       boxes:
       - !ruby/object:Box
@@ -928,6 +904,31 @@ pages:
         :de: "Ich höre diese Vorlesung zum ersten Mal:"
         :en: "This is the first time I attend this lecture:"
       type: square
+      visualizer: histogram
+    - !ruby/object:Question
+      boxes:
+      - !ruby/object:Box
+        text:
+          :de: "sehr gut"
+          :en: "very good"
+      - !ruby/object:Box
+      - !ruby/object:Box
+      - !ruby/object:Box
+        text:
+          :de: "sehr schlecht"
+          :en: "very bad"
+      - !ruby/object:Box
+        text:
+          :de: "nicht vorhanden"
+          :en: "non-existing"
+      db_column: v_material
+      qtext:
+        :de: "Das vorlesungsbegleitende Material (Skript/Folien/\\dots) ist:"
+        :en: "The materials provided for the lecture are:"
+      type: square
+      # FIXME: This visualizer does not take the special meaning of the
+      # last field into account and is therefore unsuited. Cannot use
+      # horizontal_bars without naming the middle boxes.
       visualizer: histogram
     - !ruby/object:Question
       boxes: []
