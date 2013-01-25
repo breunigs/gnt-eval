@@ -1,27 +1,31 @@
 # encoding: utf-8
 
-# always recording metadata allows us to show the task list from within
-# the default task, speeding up "rake" which is used more often than
-# the actual rake tasks.
-Rake::TaskManager.record_task_metadata = true
-
-require './web/config/environment.rb'
-Bundler.setup(:rakefiles)
-
-require 'rake/clean'
-CLEAN.include('tmp/**/*.log', 'tmp/**/*.out', 'tmp/**/*.aux',
-  'tmp/**/*.toc', 'tmp/blame.tex', 'tmp/forms/**/*.tex')
-
-# Capture ctrl+c and stop all currently running jobs in the work queue.
-# needs current work_queue gem.
-if work_queue.respond_to?("kill")
-  trap("INT") { work_queue.kill; exit 99  }
+# initialize only very little if no task is given -- i.e. when the task
+# list should be printed.
+if ARGV.empty?
+  Rake::TaskManager.record_task_metadata = true
+  require "./web/app/lib/RandomUtils.rb"
 else
-  trap("INT") { exit 99  }
+
+  require './web/config/environment.rb'
+  Bundler.setup(:rakefiles)
+
+  require 'rake/clean'
+  CLEAN.include('tmp/**/*.log', 'tmp/**/*.out', 'tmp/**/*.aux',
+    'tmp/**/*.toc', 'tmp/blame.tex', 'tmp/forms/**/*.tex')
+
+  # Capture ctrl+c and stop all currently running jobs in the work queue.
+  # needs current work_queue gem.
+  if work_queue.respond_to?("kill")
+    trap("INT") { work_queue.kill; exit 99  }
+  else
+    trap("INT") { exit 99  }
+  end
+
+
+  RT = ResultTools.instance unless defined?(RT)
 end
 
-
-RT = ResultTools.instance unless defined?(RT)
 SCap = Seee::Config.application_paths unless defined?(SCap)
 SCc = Seee::Config.commands unless defined?(SCc)
 SCfp = Seee::Config.file_paths unless defined?(SCfp)
