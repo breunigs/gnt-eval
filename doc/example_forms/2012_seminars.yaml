@@ -641,7 +641,7 @@ pages:
           :en: "other interests"
       - !ruby/object:Box
         text:
-          :de: "ben\xC3\xB6tigter Schein"
+          :de: "benötigter Schein"
           :en: "required course"
       - !ruby/object:Box
         text:
@@ -654,7 +654,7 @@ pages:
       - v_why_this_seminar_d
       visualizer: horizontal_bars
       qtext:
-        :de: "Warum hast Du genau dieses Seminar gew\xC3\xA4hlt? (Mehrfachnennung möglich)"
+        :de: "Warum hast Du genau dieses Seminar gewählt? (Mehrfachnennung möglich)"
         :en: "Why did you choose to attend exactly to this seminar? (Multiple entries possible)"
       type: square
 
@@ -662,7 +662,7 @@ pages:
       boxes:
       - !ruby/object:Box
         text:
-          :de: "Einf\xC3\xBChrung"
+          :de: "Einführung"
           :en: "introduction"
       - !ruby/object:Box
         text:
