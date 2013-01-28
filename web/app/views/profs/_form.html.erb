@@ -7,7 +7,7 @@
         [f.label(:firstname), f.text_field(:firstname), "required"],
         [f.label(:surname),   f.text_field(:surname),   "required"],
         [f.label(:email),     f.text_field(:email)],
-        [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"]
+        [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"],
         [f.label(:agreed),    f.check_box(:agreed),     "no pre-defined meaning. use as you see fit."]
 
       ]
