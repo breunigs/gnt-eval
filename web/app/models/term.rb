@@ -57,8 +57,9 @@ class Term < ActiveRecord::Base
     course_profs.map { |cp| cp.id }
   end
 
-  # evaluate a faculty
-  def evaluate(faculty)
+  # evaluate a faculty. If censor is set to true, will automatically
+  # censor certain parts depending on the agreed-value for each lecturer
+  def evaluate(faculty, censor = false)
     tables = forms.map { |f| f.db_table }
 
     # Let the database do the selection and sorting work. Also include
@@ -87,7 +88,7 @@ class Term < ActiveRecord::Base
     b << ERB.new(RT.load_tex("preface")).result(binding)
 
     puts "Evaluating #{cs.count} courses…"
-    cs.each { |c| b << c.evaluate.to_s }
+    cs.each { |c| b << c.evaluate(nil, censor).to_s }
 
     b << RT.sample_sheets_and_footer(forms)
     return b
@@ -101,6 +102,14 @@ class Term < ActiveRecord::Base
   # are we currently in the critical phase alias
   def critical?
     critical
+  end
+
+  # returns the lang code if Term has only one language for the given
+  # faculty or faculty_id and false otherwise.
+  def is_single_language?(faculty)
+    id = faculty.is_a?(Faculty) ? faculty.id : faculty
+    langs = courses.where(:faculty_id => id).pluck(:language).uniq
+    langs.size == 1 ? langs.first.to_sym : false
   end
 
   def dir_friendly_title

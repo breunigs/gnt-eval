@@ -61,6 +61,13 @@ en:
   # used if no intro is given for the sheets.
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
 
+  censor_title: Blacked Parts
+  censor_note:
+    :male: Mr %{surname} has denied the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+    :female: Mrs %{surname} has denied the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+
+
+
   note: Note
 
 

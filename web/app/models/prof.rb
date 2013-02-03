@@ -31,6 +31,14 @@ class Prof < ActiveRecord::Base
     g == 1 ? "♂" : "♀"
   end
 
+  def female?
+    read_attribute(:gender) != 1
+  end
+
+  def male?
+    read_attribute(:gender) == 1
+  end
+
   # Returns if the prof is critical. This is the case if there are any
   # associated courses
   def critical?

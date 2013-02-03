@@ -74,7 +74,7 @@ class CourseProf < ActiveRecord::Base
 
 
   # evaluates the given questions in the scope of this course and prof.
-  def eval_block(questions, section)
+  def eval_block(questions, section, censor)
     b = RT.include_form_variables(self)
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
@@ -89,7 +89,8 @@ class CourseProf < ActiveRecord::Base
       b << RT.eval_question(form.db_table, q,
             {:barcode => id},
             {:barcode => faculty.barcodes},
-            self)
+            self,
+            censor && !prof.agreed?)
     end
     b
   end

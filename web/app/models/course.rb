@@ -161,25 +161,42 @@ class Course < ActiveRecord::Base
       b << note.strip
       b << "\n\n"
     end
+
+    unless all_agreed?
+      b << RT.small_header(I18n.t(:censor_title))
+      profs.each do |p|
+        b << I18n.t(p.gender,
+                    :scope => :censor_note,
+                    :surname => p.surname,
+                    :mail => p.email,
+                    :mail_tex_safe => p.email.gsub("_", "\\_"))
+        b << "\n\n"
+      end
+    end
     b
   end
 
   # evaluates the given questions in the scope of this course.
-  def eval_block(questions, section)
+  def eval_block(questions, section, censor)
     b = RT.include_form_variables(self)
     b << RT.small_header(section)
     questions.each do |q|
       b << RT.eval_question(form.db_table, q,
             {:barcode => barcodes},
             {:barcode => faculty.barcodes},
-            self)
+            self,
+            censor && !all_agreed?
+          )
     end
     b
   end
 
   # evaluates this whole course against the associated form. if single
-  # is set, include headers etc.
-  def evaluate(single=nil)
+  # is set, include headers etc. If censor is set to true, all course
+  # and/or lecturer content will be censored if at least one prof didn’t
+  # agree. If all agreed, there will be no difference compared to
+  # censor=true.
+  def evaluate(single = nil, censor = false)
     puts "   #{title}" if single.nil?
 
     # if this course doesn't have any lecturers it cannot have been
@@ -229,20 +246,20 @@ class Course < ActiveRecord::Base
         while !questions.empty? && questions.first.repeat_for == repeat_for
           block << questions.shift
         end
-        # now evaluate that block of questions according to it’s
+        # now evaluate that block of questions according to its
         # repeat_for/belong_to value
         s = section.any_title
         case repeat_for
           when :course
-            b << eval_block(block, s)
+            b << eval_block(block, s, censor)
           when :lecturer
             # when there are repeat_for = lecturer questions in a
             # section that does not include the lecturer’s name in the
-            # title, it is added automaticall in order to make it clear
+            # title, it is added automatically in order to make it clear
             # to whom this block of questions refers. If there is only
             # one prof, it is assumed it’s clear who is meant.
             s += " (\\lect)" unless s.include?("\\lect") || course_profs.size == 1
-            course_profs.each { |cp| b << cp.eval_block(block, s) }
+            course_profs.each { |cp| b << cp.eval_block(block, s, censor) }
           when :tutor
             s += " (\\tutor)" unless s.include?("\\tutor") || tutors_sorted.size == 1
             tutors_sorted.each { |t| b << t.eval_block(block, s) }
@@ -269,6 +286,10 @@ class Course < ActiveRecord::Base
     a = c_pics.map { |p| p.step }.compact.min
     b = tutors.map { |t| t.pics.map { |p| p.step } }.flatten.compact.min
     [a, b].compact.min || 0
+  end
+
+  def all_agreed?
+    profs.all? { |p| p.agreed? }
   end
 
   private

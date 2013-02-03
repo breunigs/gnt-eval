@@ -132,6 +132,7 @@ The following people have contributed and are therefore lovingly called _daft_ b
 the project (in German, alphabetical order):
 
 - Jasper ist doof
+– Moritz ist doof
 - Oliver ist doof
 - Paul ist doof
 - Rebecca ist doof

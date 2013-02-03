@@ -1,0 +1,27 @@
+% allows cencoring text blocks. Be aware that TeX has its issues with
+% this. For example, manual line breaks will break this method.
+%
+% Usage example:
+% \CENSORED
+% \begin{itemize}
+%   \item asd
+% \end{itemize}
+% \UNCENSORED
+
+
+\def\removerestofline{\begingroup \catcode`\^^M=\active \RemoveRestOfLine}
+\begingroup
+  \catcode`\^^M=\active %
+  \gdef\RemoveRestOfLine#1^^M{	\endgroup}
+\endgroup
+
+\def\CENSORED{
+  \let\olditem\item
+  \def \item {\olditem
+    \protect\rule[-.3ex]{\textwidth}{2ex}
+    \removerestofline
+  }
+ }
+\def\UNCENSORED{
+  \let\item\olditem
+}

@@ -1,0 +1,9 @@
+\begin{tikzpicture}
+\globalQuestion{
+  <%= question_text %>\\
+  {\globalNumberStyle
+    <%=t :answers%>: \rule[-0.5mm]{1cm}{1.9ex}}
+}
+\path (question text.south east) ++(2cm,0) coordinate (question text end);
+\fill (question text end.south east) rectangle (13cm, 0.7cm);
+\end{tikzpicture}

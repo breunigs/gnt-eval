@@ -21,7 +21,10 @@
     <tbody>
       <% @courses.each do |course| %>
         <tr<%=@matches && !@matches.include?(course) ? %( style="display:none").html_safe : "" %>>
-          <td><%= link_to course.title.truncate(50), course, :title => course.title %></td>
+          <td>
+            <% unless course.all_agreed? %><span title="not all profs agreed. This course can be censored." style="cursor:help">☹</span><% end %>
+            <%= link_to course.title.truncate(50), course, :title => course.title %>
+          </td>
           <td><%=course.students || "MISSING" %></td>
           <td><%=course.evaluator %></td>
           <td><%=course.profs.collect { |p| p.lastname }.join(", ") %></td>

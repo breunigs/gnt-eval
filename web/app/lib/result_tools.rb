@@ -316,13 +316,13 @@ class ResultTools
   # repeat_for_class expects the class to be given in which scope this
   # question is rendered. E.g. repeat_for=course; then give the course.
   # Usually passing «self» should be sufficient.
-  def eval_question(table, q, special_where, compare_where, repeat_for_class)
+  def eval_question(table, q, special_where, compare_where, repeat_for_class, censor = false)
     b = if q.comment?
-      eval_question_comment(table, q, special_where, repeat_for_class)
+      eval_question_comment(table, q, special_where, repeat_for_class, censor)
     elsif q.multi?
-      eval_question_multi(table, q, special_where, compare_where, repeat_for_class)
+      eval_question_multi(table, q, special_where, compare_where, repeat_for_class, censor)
     else
-      eval_question_single(table, q, special_where, compare_where, repeat_for_class)
+      eval_question_single(table, q, special_where, compare_where, repeat_for_class, censor)
     end
     (b + "\n\n")
   end
@@ -369,14 +369,14 @@ class ResultTools
   # Currently only supports one comment per class, i.e. one for the
   # course/lecture, one for each lecturer and one for each tutor. FIXME:
   # Needs to support an arbitrary amount of text questions per group.
-  def eval_question_comment(table, q, special_where, repeat_for_class)
+  def eval_question_comment(table, q, special_where, repeat_for_class, censor)
     question_text = get_question_text(q, repeat_for_class)
 
     b = ''
     if repeat_for_class.respond_to?(:comment)
       comment = repeat_for_class.comment || ""
       [q.visualizer].flatten.each do |vis|
-        b << ERB.new(load_tex("comment_#{vis}")).result(binding)
+        b << ERB.new(load_tex("#{censor ? 'censor_' : ''}comment_#{vis}")).result(binding)
       end
     else
       b << "WARNING: Given class #{repeat_for_class.class} does not " \
@@ -387,12 +387,15 @@ class ResultTools
   end
 
   # See eval_question; handles single choice questions only
-  def eval_question_single(table, q, special_where, compare_where, repeat_for_class)
+  def eval_question_single(table, q, special_where, compare_where, repeat_for_class, censor)
     question_text = get_question_text(q, repeat_for_class)
+
+    return ERB.new(load_tex("censor_stat_question")).result(binding) if censor
 
     # collect data for this question
     answ = get_answer_counts(table, q, special_where)
     sc, sa, ss = count_avg_stddev(table, q.db_column, special_where)
+
     # exit early if there is not enough data. Note that this is
     # different from the minimum required sheets: If enough sheets have
     # been handed in, but everyone checked “not specified” you still
@@ -413,11 +416,15 @@ class ResultTools
   end
 
   # See eval_question; handles multiple choice questions only
-  def eval_question_multi(table, q, special_where, compare_where, repeat_for_class)
+  def eval_question_multi(table, q, special_where, compare_where, repeat_for_class, censor)
     question_text = get_question_text(q, repeat_for_class)
+
+
+    return ERB.new(load_tex("censor_stat_question")).result(binding) if censor
 
     answ = get_answer_counts(table, q, special_where)
     sc = answ.values_at(*(1..q.size)).total
+
     # see comment in eval_question_single
     if sc.nil? || sc <= 0
       return ERB.new(load_tex("both_too_few_answers")).result(binding)
