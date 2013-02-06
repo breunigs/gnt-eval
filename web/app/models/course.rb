@@ -149,7 +149,7 @@ class Course < ActiveRecord::Base
 
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
-  def eval_lecture_head
+  def eval_lecture_head(single = false)
     b = ""
     b << "\\kurskopf{#{title.escape_for_tex}}"
     b << "{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}"
@@ -167,7 +167,7 @@ class Course < ActiveRecord::Base
       return b
     end
 
-    unless all_publish_ok?
+    if !all_publish_ok? && !single
       b << RT.small_header(I18n.t(:censor_title))
       profs.each do |p|
         b << I18n.t(p.gender,
@@ -228,7 +228,7 @@ class Course < ActiveRecord::Base
     end
 
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
-    b << eval_lecture_head
+    b << eval_lecture_head(single)
 
     if returned_sheets < SCs[:minimum_sheets_required] && single
       b << RT.sample_sheets_and_footer([form])
