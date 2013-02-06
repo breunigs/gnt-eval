@@ -66,7 +66,7 @@ class Tutor < ActiveRecord::Base
     return b + '\end{document}'
   end
 
-  def eval_block(questions, section)
+  def eval_block(questions, section, censor)
     b = RT.include_form_variables(self)
     # may be used to reference a specific tutor. For example, the tutor_
     # overview visualizer does this.
@@ -85,7 +85,8 @@ class Tutor < ActiveRecord::Base
             {:barcode => course.barcodes, tut_db_col => tutnum},
             # all tutors available
             {:barcode => faculty.barcodes},
-            self)
+            self,
+            censor && !course.all_agreed?)
     end
     b
   end

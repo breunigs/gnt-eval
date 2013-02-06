@@ -195,7 +195,7 @@ class Course < ActiveRecord::Base
   # is set, include headers etc. If censor is set to true, all course
   # and/or lecturer content will be censored if at least one prof didn’t
   # agree. If all agreed, there will be no difference compared to
-  # censor=true.
+  # censor=false.
   def evaluate(single = nil, censor = false)
     puts "   #{title}" if single.nil?
 
@@ -262,7 +262,7 @@ class Course < ActiveRecord::Base
             course_profs.each { |cp| b << cp.eval_block(block, s, censor) }
           when :tutor
             s += " (\\tutor)" unless s.include?("\\tutor") || tutors_sorted.size == 1
-            tutors_sorted.each { |t| b << t.eval_block(block, s) }
+            tutors_sorted.each { |t| b << t.eval_block(block, s, censor) }
           else
             raise "Unimplemented repeat_for type #{repeat_for}"
         end

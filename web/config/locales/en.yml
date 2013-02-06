@@ -63,8 +63,8 @@ en:
 
   censor_title: Blacked Parts
   censor_note:
-    :male: Mr %{surname} has denied the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
-    :female: Mrs %{surname} has denied the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+    :male: Mr %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+    :female: Mrs %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
 
 
 

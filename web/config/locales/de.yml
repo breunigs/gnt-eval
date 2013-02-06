@@ -60,8 +60,8 @@ de:
 
   censor_title: Schwärzungen
   censor_note:
-    :male: Herr %{surname} hat die zur Veröffentlichung notwendige Einverständniserklärung verweigert. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an den Dozenten (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
-    :female: Frau %{surname} hat die zur Veröffentlichung notwendige Einverständniserklärung verweigert. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an die Dozentin (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
+    :male: Herr %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an den Dozenten (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
+    :female: Frau %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an die Dozentin (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
 
 
   note: Hinweis

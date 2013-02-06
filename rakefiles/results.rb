@@ -149,8 +149,23 @@ namespace :results do
   desc "creates a (partly) censored PDF. Accepts the same parameters as pdf_report."
   task :pdf_report_censor, [:lang_code, :term_id, :faculty_id] do |t, a|
     @censor = true
-    puts "It’s very sad, that you need to call this commend, isn’t it?"
+    puts "It’s very sad, that you need to call this command, isn’t it?"
     Rake::Task["results:pdf_report".to_sym].invoke(a.lang_code, a.term_id, a.faculty_id)
+  end
+
+  def print_censor_info(term_id, faculty_id)
+    return unless @censor
+    ccs = Term.find(term_id).courses.where(:faculty_id => faculty_id)
+    ccs = ccs.keep_if { |x| !x.all_agreed? }
+    ccs.each do |x|
+      puts "Censoring: #{x.title}"
+      next if x.summary.blank?
+      x.profs.where(:agreed => false).each do |p|
+        puts  "    #{p.lastname} – check comments for bugs"
+      end
+      puts "\n"
+    end
+    puts "\n\n\n"
   end
 
   desc "create report pdf file for a given term and faculty (leave empty for: lang = auto, term = current, fac = all)"
@@ -162,18 +177,19 @@ namespace :results do
     term_ids = a.term_id ? [a.term_id] : Term.currently_active.map(&:id)
     term_ids.each do |term_id|
       if a.faculty_id
-	work_queue.enqueue_b {
-	  evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor)
-	}
-	next
+        work_queue.enqueue_b { evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor) }
+        print_censor_info(term_id, a.faculty_id)
+        next
       end
+
       Faculty.all.each do |f|
-	      work_queue.enqueue_b {
-          evaluate(lang_code.to_sym, term_id, f.id, @censor)
-	      }
+	      work_queue.enqueue_b { evaluate(lang_code.to_sym, term_id, f.id, @censor) }
+        print_censor_info(term_id, f.id)
       end
     end
     work_queue.join
+
+
 
     Rake::Task["results:make_preliminary".to_sym].invoke
   end
