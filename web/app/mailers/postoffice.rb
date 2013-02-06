@@ -74,6 +74,10 @@ class Postoffice < ActionMailer::Base
 
     raise "faculty_links does not contain an entry for id=#{c.faculty.id}" if !faculty_links[c.faculty.id]
 
+    unless c.all_unencrypted_ok?
+      raise "Trying to send mail for #{c.title}, although not all profs agreed to publish/unenrypted mail."
+    end
+
     @title = c.title
     @anrede = prof_address(c)
     @link = faculty_links[c.faculty.id]

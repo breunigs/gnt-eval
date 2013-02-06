@@ -86,7 +86,7 @@ class Tutor < ActiveRecord::Base
             # all tutors available
             {:barcode => faculty.barcodes},
             self,
-            censor && !course.all_agreed?)
+            censor && !course.all_publish_ok? && SCs[:censor_tutors_with_course])
     end
     b
   end

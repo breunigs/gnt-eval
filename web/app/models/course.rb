@@ -162,7 +162,12 @@ class Course < ActiveRecord::Base
       b << "\n\n"
     end
 
-    unless all_agreed?
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+      return b
+    end
+
+    unless all_publish_ok?
       b << RT.small_header(I18n.t(:censor_title))
       profs.each do |p|
         b << I18n.t(p.gender,
@@ -185,7 +190,7 @@ class Course < ActiveRecord::Base
             {:barcode => barcodes},
             {:barcode => faculty.barcodes},
             self,
-            censor && !all_agreed?
+            censor && !all_publish_ok?
           )
     end
     b
@@ -225,11 +230,8 @@ class Course < ActiveRecord::Base
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head
 
-    if returned_sheets < SCs[:minimum_sheets_required]
-      b << form.too_few_sheets(returned_sheets)
-      if single
-        b << RT.sample_sheets_and_footer([form])
-      end
+    if returned_sheets < SCs[:minimum_sheets_required] && single
+      b << RT.sample_sheets_and_footer([form])
       return b
     end
 
@@ -288,8 +290,12 @@ class Course < ActiveRecord::Base
     [a, b].compact.min || 0
   end
 
-  def all_agreed?
-    profs.all? { |p| p.agreed? }
+  def all_publish_ok?
+    profs.all? { |p| p.publish_ok? }
+  end
+  
+  def all_unencrypted_ok?
+    profs.all? { |p| p.publish_ok? || p.unencrypted_ok? }
   end
 
   private

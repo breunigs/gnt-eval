@@ -4,12 +4,12 @@
   <table>
     <% for item in
       [
-        [f.label(:firstname), f.text_field(:firstname), "required"],
-        [f.label(:surname),   f.text_field(:surname),   "required"],
-        [f.label(:email),     f.text_field(:email)],
-        [f.label(:gender),    select_tag("prof[gender]", options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"],
-        [f.label(:agreed),    f.check_box(:agreed),     "no pre-defined meaning. use as you see fit."]
-
+        [f.label(:firstname),         f.text_field(:firstname),           "required"],
+        [f.label(:surname),           f.text_field(:surname),             "required"],
+        [f.label(:email),             f.text_field(:email)],
+        [f.label(:gender),            select_tag("prof[gender]",          options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"],
+        [f.label(:publish_ok),        f.check_box(:publish_ok),           "Check if results may be published. Unchecked = may be censored."],
+        [f.label(:unencrypted_ok),    f.check_box(:unencrypted_ok),       "Check if it's okay to send the results via unencrypted mail. Assumed true if publish is checked."]
       ]
     %>
       <tr>

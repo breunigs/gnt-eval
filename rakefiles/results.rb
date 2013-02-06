@@ -156,11 +156,11 @@ namespace :results do
   def print_censor_info(term_id, faculty_id)
     return unless @censor
     ccs = Term.find(term_id).courses.where(:faculty_id => faculty_id)
-    ccs = ccs.keep_if { |x| !x.all_agreed? }
+    ccs = ccs.keep_if { |x| !x.all_publish_ok? }
     ccs.each do |x|
       puts "Censoring: #{x.title}"
       next if x.summary.blank?
-      x.profs.where(:agreed => false).each do |p|
+      x.profs.where(:publish_ok => false).each do |p|
         puts  "    #{p.lastname} – check comments for bugs"
       end
       puts "\n"

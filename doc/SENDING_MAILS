@@ -57,6 +57,9 @@ single_evalverschickung: mails profs
   and used rake results:pdf_singles, you may omit the path. The
   per course file is attached, while the eval for the whole term of
   the faculty is only linked.
+  Note that this type of mail will raise an issue if not all of the
+  profs agreed to have their results published and/or receive unen-
+  crypted mail.
   
   
 
@@ -130,6 +133,9 @@ Faculty.all.map { |t| "#{t.id}=#{t.shortname}" }
 
 # Assume we have the faculty IDs 4 and 2, then:
 links = { 4 => "http://…/eval_for_term_4.pdf", 2 => "…for_term_2.pdf" }
+
+# remove all courses where wo do not have permission to send such mail
+ccs.reject! { |c| !c.all_unencrypted_ok? }
 
 # we don’t want to send them for faculty 1 yet:
 ccs.reject! { |c| c.faculty_id == 1 }

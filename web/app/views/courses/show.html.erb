@@ -77,7 +77,7 @@
       <td><%=link_to cp.prof.fullname, edit_prof_path(cp.prof) %></td>
       <td><%=cp.prof.email %></td>
       <td><%=cp.id %></td>
-      <td><%=cp.prof.agreed? ? "yes" : "" %></td>
+      <td><%=cp.prof.publish_ok? ? "publish ok" : (cp.prof.unencrypted_ok? ? "unencrypted ok" : "NO") %></td>
       <td>
         <% if @course.returned_sheets? %>
           <%="Can’t print, has returned sheets."%>

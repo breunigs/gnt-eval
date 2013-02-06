@@ -90,7 +90,7 @@ class CourseProf < ActiveRecord::Base
             {:barcode => id},
             {:barcode => faculty.barcodes},
             self,
-            censor && !prof.agreed?)
+            censor && !prof.publish_ok?)
     end
     b
   end
