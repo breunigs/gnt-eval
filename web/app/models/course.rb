@@ -230,8 +230,8 @@ class Course < ActiveRecord::Base
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << eval_lecture_head(single)
 
-    if returned_sheets < SCs[:minimum_sheets_required] && single
-      b << RT.sample_sheets_and_footer([form])
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << RT.sample_sheets_and_footer([form]) if single
       return b
     end
 
@@ -293,7 +293,7 @@ class Course < ActiveRecord::Base
   def all_publish_ok?
     profs.all? { |p| p.publish_ok? }
   end
-  
+
   def all_unencrypted_ok?
     profs.all? { |p| p.publish_ok? || p.unencrypted_ok? }
   end
