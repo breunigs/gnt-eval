@@ -122,6 +122,10 @@ namespace :misc do
   desc "Generate lovely HTML output for our static website"
   task :static_output do
     courses = Term.currently_active.map { |t| t.courses }.flatten
+    if courses.none?
+      puts "keine aktiven Kurse."
+      next
+    end
     puts courses.sort { |x,y| y.updated_at <=> x.updated_at }[0].updated_at
     # Sort by faculty first, then by course title
     sorted = courses.sort do |x,y|
