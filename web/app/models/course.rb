@@ -144,6 +144,7 @@ class Course < ActiveRecord::Base
 
   # calculates the ratio of returned_sheets/printed_sheets
   def return_quota
+    return 0.0 if course_profs.size == 0 || students == 0
     returned_sheets / (course_profs.size * students).to_f
   end
 
