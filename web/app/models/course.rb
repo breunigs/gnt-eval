@@ -140,6 +140,7 @@ class Course < ActiveRecord::Base
       return 0
     else
       return r
+    end
   end
 
   # returns true if there have been sheets returned.
