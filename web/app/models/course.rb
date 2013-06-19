@@ -134,7 +134,12 @@ class Course < ActiveRecord::Base
   # In case of an error, -1 will be returned.
   def returned_sheets
     return 0 if course_profs.empty?
-    RT.count(form.db_table, {:barcode => barcodes})
+    r = RT.count(form.db_table, {:barcode => barcodes})
+    if r.nil?
+      logger.warn "returned_sheets for #{title} returned a NIL score. Is the form setup even correct? db_table: #{form.nil? ? NO_FORM : form.db_table}, barcodes: #{barcodes*" "}"
+      return 0
+    else
+      return r
   end
 
   # returns true if there have been sheets returned.
