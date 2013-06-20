@@ -58,7 +58,7 @@ class Tutor < ActiveRecord::Base
         # now evaluate that block of questions
         if repeat_for == :tutor
           s = section.any_title
-          b << eval_block(block, s)
+          b << eval_block(block, s, false)
         end
       end
     end
