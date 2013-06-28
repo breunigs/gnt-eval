@@ -21,6 +21,7 @@
       <tbody>
       <%
         @prof.course_profs.includes(:term, :course, :form).order("terms.id DESC, courses.title").each do |cp| %>
+        <% next if cp.course.nil? %>
         <tr>
           <td><%=cp.course.term.title %></td>
           <td><%=link_to cp.course.form.name, cp.course.form if cp.course.form %></td>
