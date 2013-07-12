@@ -1,5 +1,5 @@
 <h2>Active Users</h2>
-<% sessions = Session.where(:cont => ["cpics", "pics", "courses"]) %>
+<% sessions = Session.where(:cont => ["cpics", "pics", "courses", "tutors"]) %>
 <% if sessions.none? %>
   No active users currently.
 <% else %>
