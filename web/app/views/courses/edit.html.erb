@@ -98,12 +98,13 @@
     <div class="commentview">
       <% cnt = 0 %>
       <% @course.course_profs.each do |cp| %>
+        <% censor_note = cp.prof.censor_comments? ? "███████ THESE COMMENTS NEED CENSORING ██████" : "" %>
         <% if cp.c_pics.empty? %>
-          <span>NO COMMENTS for <%=h cp.prof.fullname %></span>
+          <span>NO COMMENTS for <%=h cp.prof.fullname %> <%=censor_note%></span>
           <% next %>
         <% end %>
 
-        <span>for <%=cp.prof.fullname %>: (#<%="#{cnt+1} – ##{cnt + cp.c_pics.size}"%>)</span> <% cnt += cp.c_pics.size %>
+        <span>for <%=cp.prof.fullname %>: (#<%="#{cnt+1} – ##{cnt + cp.c_pics.size}"%>) <%=censor_note%></span> <% cnt += cp.c_pics.size %>
         <% cp.c_pics.each do |p| %>
           <%= render "shared/comment_pic", :course => @course, :pic => p %>
         <% end %>
@@ -127,6 +128,23 @@
         });
       </script>
     <% end %>
+
+<% if @course.profs.any? { |p| p.censor_comments? } %>
+  <div class="group">
+    <p class="info">
+      <b>How do I censor?</b>
+      <pre>not censored
+\CENSORED
+NOT censored here. This is a bug/not implemented.
+\begin{itemize]
+  \item actually censored
+\end{itemize}
+NOT censored here.
+\UNCENSORED
+not censored</pre>
+    </p>
+  </div>
+<% end %>
 
   <div class="group">
     <%=links%>

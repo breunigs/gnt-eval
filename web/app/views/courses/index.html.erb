@@ -22,7 +22,13 @@
       <% @courses.each do |course| %>
         <tr<%=@matches && !@matches.include?(course) ? %( style="display:none").html_safe : "" %>>
           <td>
-            <% unless course.all_publish_ok? %><span title="not all profs agreed. This course can be censored." style="cursor:help">☹</span><% end %>
+            <% unless course.no_censoring? %>
+              <span title="Parts of this course will be censored." style="cursor:help">☹</span>
+            <% end %>
+            <%  xx = course.enough_censored_parts_in_comments?
+              unless  %>
+              <span>Censoring broken. Fix it!</span>
+            <% end %>
             <%= link_to course.title.truncate(50), course, :title => course.title %>
           </td>
           <td><%=course.students || "MISSING" %></td>

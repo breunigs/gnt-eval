@@ -174,22 +174,43 @@ class Course < ActiveRecord::Base
       return b
     end
 
-    if !all_publish_ok? && !single
-      b << RT.small_header(I18n.t(:censor_title))
-      profs.each do |p|
-        b << I18n.t(p.gender,
-                    :scope => :censor_note,
-                    :surname => p.surname,
-                    :mail => p.email,
-                    :mail_tex_safe => p.email.gsub("_", "\\_"))
-        b << "\n\n"
-      end
-    end
+    b << eval_stats_censored_header unless single
+
     b
   end
 
-  # evaluates the given questions in the scope of this course.
-  def eval_block(questions, section, censor)
+  def eval_stats_censored_header
+    return "" if no_prof_censoring?
+
+    unless enough_censored_parts_in_comments?
+      puts "It appears that the following lectures have not enough"
+      puts "censoring in their summaries / prof comments. You need to"
+      puts "fix this first."
+      puts title
+      raise "Fix missing censoring first."
+    end
+
+    b = ""
+    profs.each do |p|
+      next unless p.censor_stats? || p.censor_comments?
+      both = p.censor_comments? && p.censor_stats?
+      b << I18n.t(p.gender,
+                  :scope => [:censor, :profs, both ? :general : :comments_only],
+                  :surname => p.surname,
+                  :mail => p.email,
+                  :mail_tex_safe => ((p.email.gsub("_", "\\_")) rescue ""))
+      b << "\n\n"
+    end
+
+    return "empty" if b.empty? # false alarm, maybe only comments are hidden?
+    return RT.small_header(I18n.t(:censor_title)) + b
+  end
+
+  # evaluates the given questions in the scope of this course. A header
+  # with the contents given in section is prepended in the PDF. Set
+  # allow_censoring to false to forcibly override censoring settings.
+  # Set it to true to censor depending on each person’s settings.
+  def eval_block(questions, section, allow_censoring)
     b = RT.include_form_variables(self)
     b << RT.small_header(section)
     questions.each do |q|
@@ -197,7 +218,10 @@ class Course < ActiveRecord::Base
             {:barcode => barcodes},
             {:barcode => faculty.barcodes},
             self,
-            censor && !all_publish_ok?
+            # note about comment censoring: comments are per-prof and
+            # need to be manually included in the comment field. A
+            # heuristic checks that this has been taken care of.
+            allow_censoring && (q.comment? ? false : censor_any_prof_stats?)
           )
     end
     b
@@ -297,12 +321,71 @@ class Course < ActiveRecord::Base
     [a, b].compact.min || 0
   end
 
-  def all_publish_ok?
-    profs.all? { |p| p.publish_ok? }
+  def may_show_all_prof_stats?
+    profs.all? { |p| p.may_show_stats? }
+  end
+
+  def censor_any_prof_stats?
+    !may_show_all_prof_stats?
+  end
+
+  def may_show_all_prof_comments?
+    profs.all? { |p| p.may_show_comments? }
+  end
+
+  def censor_any_prof_comments?
+    !may_show_all_prof_comments?
+  end
+
+  def may_show_all_tutor_stats?
+    tutors.all? { |t| t.may_show_stats? }
+  end
+
+  def censor_any_tutor_stats?
+    !may_show_all_tutor_stats?
+  end
+
+  def may_show_all_tutor_comments?
+    tutors.all? { |t| t.may_show_comments? }
+  end
+
+  def censor_any_tutor_comments?
+    !may_show_all_tutor_comments?
+  end
+
+  # true if and only if all profs agreed (or if stance is unknown) to
+  # have their stats and comments published
+  def no_prof_censoring?
+    may_show_all_prof_comments? && may_show_all_prof_stats?
+  end
+
+  # true if and only if all tutors agreed (or if stance is unknown) to
+  # have their stats and comments published
+  def no_tutor_censoring?
+    may_show_all_tutor_comments? && may_show_all_tutor_stats?
+  end
+
+  # true if and only if all profs and tutors agreed to have
+  # stats+comments published
+  def no_censoring?
+    no_tutor_censoring? && no_prof_censoring?
   end
 
   def all_unencrypted_ok?
-    profs.all? { |p| p.publish_ok? || p.unencrypted_ok? }
+    profs.all? { |p| p.censor_none? || p.unencrypted_ok? }
+  end
+
+  # calculates how often censoring is required and how often the command
+  # used for that has been included in the comments box. The reason this
+  # is required to be done manually is because the prof fields are
+  # merged.
+  # Returns: true if enough are found or no sheets have been handed in,
+  #          need (int), have (int)
+  def enough_censored_parts_in_comments?
+    need = profs.select { |p| p.censor_comments? }.size
+    have = comment.scan("\\CENSORED").size
+    okay = returned_sheets == 0 || need <= have
+    return okay, need, have
   end
 
   private

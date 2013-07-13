@@ -8,8 +8,8 @@
         [f.label(:surname),           f.text_field(:surname),             "required"],
         [f.label(:email),             f.text_field(:email)],
         [f.label(:gender),            select_tag("prof[gender]",          options_for_select({ "female" => 0, "male" => 1}, (@prof.gender.to_s == 'male' ? 1 : 0))), "required"],
-        [f.label(:publish_ok),        f.check_box(:publish_ok),           "Check if results may be published. Unchecked = may be censored."],
-        [f.label(:unencrypted_ok),    f.check_box(:unencrypted_ok),       "Check if it's okay to send the results via unencrypted mail. Assumed true if publish is checked."]
+        [f.label(:censor),            f.enum_select(:censor),             "required. Unknown means none, but a warning will be issued. Everything means tutors as well, regardless of their setting."],
+        [f.label(:unencrypted_ok),    f.check_box(:unencrypted_ok),       "Check if it's okay to send the results via unencrypted mail. Assumed true if censor is set to none."],
       ]
     %>
       <tr>

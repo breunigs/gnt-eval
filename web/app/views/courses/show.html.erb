@@ -1,6 +1,7 @@
 <% content_for :enable_small_screen, "true" %>
 <% content_for :title, "“#{@course.title}”" %>
 
+
 <div>
   <div class="rd-hide">
     <h2><%=@course.title %> (<%=@course.term.title %>)</h2>
@@ -51,6 +52,18 @@
   </table>
 </div>
 
+<% okay, need, have = @course.enough_censored_parts_in_comments? %>
+<% unless okay %>
+  <div>
+    <p class="error">
+      <b>Comments aren’t censored enough</b><br/>
+      Apparenty at least <%=need%> Prof(s) want their comments censored. However, I only found <%=have%> censored blocks. Go, censor, NOW! The results will <i>not</i> render. If a prof has no comments, include it like this:
+<pre>\CENSORED
+\UNCENSORED</pre>
+    </p>
+  </div>
+<% end %>
+
 <div class="rd-hide">
   <h3><%=latex_logo%> Preview</h3>
   <div class="preview">
@@ -59,6 +72,23 @@
   <%= link_to 'Show preview in full', preview_course_path(@course), :class => "button" %>
 </div>
 
+
+<%
+  unknown_censor = @course.profs.select { |p| p.censor_unknown? }.map { |p| "Prof. #{p.lastname}" }
+  unknown_censor += @course.tutors.select { |t| t.censor_unknown? }.map { |t| "Tutor #{t.abbr_name}" }
+  if unknown_censor.any?
+%>
+<div>
+  <p class="warning">
+    <b>Unknown Censor status</b><br/>The following people have unknown censoring information. <i>All</i> of their contents will be printed.
+    <ul>
+      <% unknown_censor.each do |cc| %>
+        <li><%=cc%></li>
+      <% end %>
+    </ul>
+  <p>
+</div>
+<% end %>
 
 <div>
   <h3>Professors</h3>
@@ -69,7 +99,7 @@
       <th>Name</th>
       <th>Mail</th>
       <th>ID/Barcode</th>
-      <th>Agreed?</th>
+      <th>Censoring</th>
       <th colspan="3">Actions</th>
     </tr>
     <% @course.course_profs.each do |cp| %>
@@ -77,7 +107,7 @@
       <td><%=link_to cp.prof.fullname, edit_prof_path(cp.prof) %></td>
       <td><%=cp.prof.email %></td>
       <td><%=cp.id %></td>
-      <td><%=cp.prof.publish_ok? ? "publish ok" : (cp.prof.unencrypted_ok? ? "unencrypted ok" : "NO") %></td>
+      <td><%=cp.prof.censor %></td>
       <td>
         <% if @course.returned_sheets? %>
           <%="Can’t print, has returned sheets."%>
@@ -107,6 +137,7 @@
         <th>Name</th>
         <th># Comments</th>
         <th># Sheets</th>
+        <th>Censoring</th>
         <th class="rd-hide">Actions</th>
       </tr>
       <% @course.tutors.each do |tutor| %>
@@ -114,6 +145,7 @@
         <td><%= link_to tutor.abbr_name, edit_course_tutor_path(@course, tutor) %></td>
         <td style="text-align:right"><%= tutor.pics.count %></td>
         <td style="text-align:right"><%= tutor.returned_sheets %></td>
+        <td><%= tutor.censor %></td>
         <td class="rd-hide">
         <% unless tutor.critical? %>
           <%= link_to 'Destroy', {:controller => 'tutors', :id => tutor,

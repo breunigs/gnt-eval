@@ -58,6 +58,9 @@ end
 <% additional_packages ||= "" %>
 <%=additional_packages%>
 
+\newcommand{\CENSORED}{\begin{center}\line(1,0){150}  CENSORED PART STARTS \line(1,0){150}\end{center}}
+\newcommand{\UNCENSORED}{\begin{center}\line(1,0){180}  CENSOR END \line(1,0){180}\end{center}}
+
 % style settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \renewcommand{\TruncateMarker}{\textasciitilde}
 

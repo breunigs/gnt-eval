@@ -69,6 +69,15 @@ class Term < ActiveRecord::Base
       :order => "TRIM(LOWER(title))", \
       :include => [:course_profs, :profs, :tutors])
 
+    missing_censor = cs.select { |c| !c.enough_censored_parts_in_comments? }
+    if missing_censor.size > 0
+      puts "It appears that the following lectures have not enough"
+      puts "censoring in their summaries / prof comments. You need to"
+      puts "fix this first."
+      missing_censor.each { |c| puts c }
+      raise "Fix missing censoring first."
+    end
+
     course_count = cs.count
     sheet_count = RT.count(tables, {:barcode => faculty.barcodes })
     prof_count = cs.map { |c| c.profs }.flatten.uniq.count

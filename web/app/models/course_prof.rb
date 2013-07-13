@@ -37,6 +37,22 @@ class CourseProf < ActiveRecord::Base
     @print_in_progress = val ? true : false
   end
 
+  def may_show_stats?
+    prof.censor_unknown? || prof.censor_none? || prof.censor_own_comments?
+  end
+
+  def censor_stats?
+    !may_show_stats?
+  end
+
+  def may_show_comments?
+    prof.censor_unknown? || prof.censor_none?
+  end
+
+  def censor_stats?
+    !may_show_comments?
+  end
+
   # prints the form for this CourseProf. Optionally give an amount,
   # otherwise it will print as many sheets as there are students.
   # Returns the exit status of the printing application.
@@ -74,7 +90,11 @@ class CourseProf < ActiveRecord::Base
 
 
   # evaluates the given questions in the scope of this course and prof.
-  def eval_block(questions, section, censor)
+  # Prepends a section header with the given name. Set allow_censoring
+  # to false, to forcibly overwrite  settings of this tutor (i.e. censor
+  # nothing). Set it to true to censor depending on setting in prof’s
+  # details.
+  def eval_block(questions, section, allow_censoring)
     b = RT.include_form_variables(self)
     b << RT.small_header(section)
     if returned_sheets < SCs[:minimum_sheets_required]
@@ -90,7 +110,7 @@ class CourseProf < ActiveRecord::Base
             {:barcode => id},
             {:barcode => faculty.barcodes},
             self,
-            censor && !prof.publish_ok?)
+            allow_censoring && censor_stats?)
     end
     b
   end

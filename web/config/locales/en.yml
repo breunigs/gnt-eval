@@ -62,10 +62,23 @@ en:
   default_intro: Check answers like \checkLikeThis{} and if you err, correct them like \correctLikeThis{}. Please write clearly in block letters and only in comment fields.
 
   censor_title: Blacked Parts
-  censor_note:
-    :male: Mr %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
-    :female: Mrs %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
 
+  censor:
+    profs:
+      general:
+        :male: Mr %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+        :female: Mrs %{surname} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you want to inspect the results.
+
+      comments_only:
+        :male: Mr %{surname} hasn’t accepted the agreement required to publish listener’s comments. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you have questions.
+        :female: Mrs %{surname} hasn’t accepted the agreement required to publish the listener’s comments. They may therefore not be reproduced here. Please contact the lecturer (\href{mailto:%{mail}}{%{mail_tex_safe}}) if you have questions.
+
+    tutors:
+      blocked_by_prof: One of %{name}’s lecturers denied reproducing the results. Please look above for contact information.
+
+      general: "%{name} hasn’t accepted the agreement required to publish the evaluation. They may therefore not be reproduced here."
+
+      comments_only: "%{name} hasn’t accepted the agreement required to publish the attendee’s comments. They may therefore not be reproduced here."
 
 
   note: Note

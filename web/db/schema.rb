@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130206131516) do
+ActiveRecord::Schema.define(:version => 20130713115409) do
 
   create_table "c_pics", :force => true do |t|
     t.string   "basename"
@@ -78,8 +78,8 @@ ActiveRecord::Schema.define(:version => 20130206131516) do
     t.integer  "gender"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.boolean  "publish_ok",     :default => false
     t.boolean  "unencrypted_ok"
+    t.string   "censor"
   end
 
   create_table "sessions", :force => true do |t|
@@ -109,6 +109,7 @@ ActiveRecord::Schema.define(:version => 20130206131516) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "comment"
+    t.string   "censor"
   end
 
 end

@@ -59,21 +59,33 @@ de:
   default_intro: Kreuze so \checkLikeThis{} bzw. verbessere Dich mit \correctLikeThis{}. Bitte deutlich in Druckbuchstaben und nur in die dafür vorgesehenen Felder schreiben.
 
   censor_title: Schwärzungen
-  censor_note:
-    :male: Herr %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an den Dozenten (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
-    :female: Frau %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an die Dozentin (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
 
+  censor:
+    profs:
+      general:
+        :male: Herr %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an den Dozenten (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
+        :female: Frau %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Bitte wenden Sie sich an die Dozentin (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Evaluation trotzdem einsehen möchten.
+
+      comments_only:
+        :male: Herr %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Kommentare hier nicht abgedruckt werden. Bitte wenden Sie sich an den Dozenten (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Kommentare trotzdem einsehen möchten.
+        :female: Frau %{surname} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Kommentare hier nicht abgedruckt werden. Bitte wenden Sie sich an die Dozentin (\href{mailto:%{mail}}{%{mail_tex_safe}}), wenn Sie die Kommentare trotzdem einsehen möchten.
+
+    tutors:
+      blocked_by_prof: "Einer der ProfessorInnen hat der Veröffentlichung der Evaluation der TutorInnen nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden. Die Kontaktinformationen stehen weiter oben."
+
+      general: "%{name} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Ergebnisse hier nicht abgedruckt werden."
+
+      comments_only: "%{name} hat der zur Veröffentlichung notwendigen Einverständniserklärung nicht zugestimmt. Daher dürfen die Kommentare hier nicht abgedruckt werden."
 
   note: Hinweis
 
 
   postoffice:
     erinnerungsmail:
-      subject: "Evaluation von '%{title}' am %{date}"
+      subject: "Evaluation von „%{title}“ am %{date}"
     ankuendigungsmail:
       subject: "Evaluation Ihrer Veranstaltung %{title}"
     evalverschickung:
-      subject: Ergebnisse der diessemestrigen Veranstaltungsumfrage
       subject: Ergebnisse der diessemestrigen Veranstaltungsumfrage
     single_evalverschickung:
       subject: "Evaluations-Ergebnisse für %{title}"

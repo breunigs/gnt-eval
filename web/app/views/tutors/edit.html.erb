@@ -17,6 +17,11 @@
         <td><%= f.text_field :abbr_name %></td>
       </tr>
       <tr>
+        <th><%=f.label(:censor)%></th>
+        <td><%=f.enum_select(:censor)%></td>
+        <td>required. <i>Unknown</i> means <i>none</i>, but a warning will be issued. Setting may be overwritten if prof’s censor mode is <i>everything</i>.</td>
+      </tr>
+      <tr>
         <th>Comments</th>
         <td>
           (This is <%=latex_logo%>-enabled! Be careful when using % or $ signs. Use proper UTF-8 quotes, e.g. „Deutsch“ or “English”)

@@ -109,12 +109,6 @@ module Seee
     }
 
     @@settings = {
-      # set to true if the tutors should be censored as well if one of the profs
-      # of a course has not agreed to publish their results. In our case, we will
-      # have all tutors sign the publish agreement so we don't need to track this
-      # per tutor.
-      :censor_tutors_with_course => true,
-      
       # default recipient's FQDN
       :standard_mail_domain => 'some.domain.name.asdf',
       :standard_mail_from => 'evaluation@some.domain.name.asdf',

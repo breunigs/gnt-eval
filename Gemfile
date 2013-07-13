@@ -14,6 +14,9 @@ gem "thin"
 # rails plugin that allows stripping attributes easily
 gem "strip_attributes"
 
+# rails handling of enumerated attributes
+gem "enumerated_attribute", "0.2.16"
+
 gem "work_queue",      ">=2.0"
 gem "open4"
 gem "fastimage",	"1.2.13"

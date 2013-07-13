@@ -7,10 +7,13 @@ class Tutor < ActiveRecord::Base
   has_one :form, :through => :course
   has_one :faculty, :through => :course
   has_one :term, :through => :course
+  has_many :profs, :through => :course
 
   validates_presence_of :abbr_name
   validates_uniqueness_of :abbr_name, :scope => :course_id, \
     :message => "Tutor already exists for this course."
+
+  enum_attr :censor, %w(^unknown none own_comments own_comments_and_stats), :init => :unknown, :nil => false
 
   include FunkyTeXBits
 
@@ -18,6 +21,33 @@ class Tutor < ActiveRecord::Base
   # parent course is critical or if the course has returned sheets
   def critical?
     course.critical? || course.returned_sheets > 0
+  end
+
+  def may_show_stats?
+    !censor_stats?
+  end
+
+  def censor_stats?
+    tutor_ok = censor_unknown? || censor_none? || own_comments?
+    prof_ok = profs.none? { |p| p.censor_everything? }
+    may_show = tutor_ok && prof_ok
+    reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
+    return !may_show, reason
+  end
+
+  def may_show_comments?
+    !censor_comments?
+  end
+
+  # returns true if comments should be censored. The 2nd argument
+  # contains either :none, :prof or :tutor, depending on who 'ordered'
+  # the censoring. If both prof and tutor said no, :tutor is returned.
+  def censor_comments?
+    tutor_ok = censor_unknown? || censor_none?
+    prof_ok = profs.none? { |p| p.censor_everything? }
+    may_show = tutor_ok && prof_ok
+    reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
+    return !may_show, reason
   end
 
   # Evaluates this tutor only.
@@ -58,7 +88,9 @@ class Tutor < ActiveRecord::Base
         # now evaluate that block of questions
         if repeat_for == :tutor
           s = section.any_title
-          b << eval_block(block, s, false)
+          # TODO censor: this was always false before. Check if flipping
+          # this is okay.s
+          b << eval_block(block, s, true)
         end
       end
     end
@@ -66,11 +98,36 @@ class Tutor < ActiveRecord::Base
     return b + '\end{document}'
   end
 
-  def eval_block(questions, section, censor)
+  # evaluates the given question and prepends a section header with the
+  # given name. Set allow_censoring to false, to forcibly overwrite censor
+  # settings of this tutor (i.e. censor nothing). Set it to true to
+  # censor depending on setting in tutor’s details.
+  def eval_block(questions, section, allow_censoring)
     b = RT.include_form_variables(self)
     # may be used to reference a specific tutor. For example, the tutor_
     # overview visualizer does this.
     b << RT.small_header(section)
+
+    censor = nil
+
+    prof_censor = profs.any? { |p| p.censor_everything? }
+    if prof_censor
+      # if the tutor censors at all, upgrade the blame to general if any
+      # prof censors as well. The use case is prof: everything and tutor:
+      # comments only. In that case a "comments only" message would be
+      # shown, but the stats also censored. Thus, the message is upgraded
+      # and the tutor blamed for it.
+      censor = :blocked_by_prof
+      censor = :general if censor_own_comments_and_stats? || censor_own_comments?
+    else
+      censor = :comments_only if censor_own_comments?
+      censor = :general if censor_own_comments_and_stats?
+    end
+
+    b << I18n.t(censor,
+        :scope => [:censor, :tutors],
+        :name => abbr_name) + "\n\n" if censor
+
     b << "\\label{tutor#{self.id}}\n"
     if returned_sheets < SCs[:minimum_sheets_required]
       b << form.too_few_sheets(returned_sheets)
@@ -86,7 +143,8 @@ class Tutor < ActiveRecord::Base
             # all tutors available
             {:barcode => faculty.barcodes},
             self,
-            censor && !course.all_publish_ok? && SCs[:censor_tutors_with_course])
+            allow_censoring && (q.comment? ? censor_comments? : censor_stats?)
+          )
     end
     b
   end

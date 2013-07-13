@@ -9,6 +9,24 @@ class Prof < ActiveRecord::Base
 
   strip_attributes
 
+  enum_attr :censor, %w(^unknown none own_comments own_comments_and_stats everything), :init => :unknown, :nil => false
+
+  def may_show_comments?
+    censor_unknown? || censor_none?
+  end
+
+  def censor_comments?
+    !may_show_comments?
+  end
+
+  def may_show_stats?
+    censor_unknown? || censor_none? || censor_own_comments?
+  end
+
+  def censor_stats?
+    !may_show_stats?
+  end
+
   def lastname
     surname
   end

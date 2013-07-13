@@ -70,7 +70,7 @@ namespace :results do
   end
 
 
-  desc "find comment fields with broken LaTeX code"
+  desc "find fields with broken LaTeX code"
   task :find_broken_comments do
     courses = Term.currently_active.map { |s| s.courses }.flatten
     @max = 0
@@ -156,13 +156,12 @@ namespace :results do
   def print_censor_info(term_id, faculty_id)
     return unless @censor
     ccs = Term.find(term_id).courses.where(:faculty_id => faculty_id)
-    ccs = ccs.keep_if { |x| !x.all_publish_ok? }
+    ccs = ccs.keep_if { |x| !x.no_censoring? }
     ccs.each do |x|
-      puts "Censoring: #{x.title}"
-      next if x.summary.blank?
-      x.profs.where(:publish_ok => false).each do |p|
-        puts  "    #{p.lastname} – check comments for bugs"
-      end
+      puts "Censoring: #{x.title} -----------"
+      x.profs.each  { |p| puts p.censor.to_s.rjust(22) + " | Prof  | #{p.lastname}" }
+      x.tutors.each { |t| puts t.censor.to_s.rjust(22) + " | Tutor | #{t.abbr_name}" }
+
       puts "\n"
     end
     puts "\n\n\n"
@@ -178,6 +177,7 @@ namespace :results do
     term_ids.each do |term_id|
       if a.faculty_id
         work_queue.enqueue_b { evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor) }
+        #~ evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor)
         print_censor_info(term_id, a.faculty_id)
         next
       end
