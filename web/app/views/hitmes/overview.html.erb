@@ -104,7 +104,7 @@
 <div>
   <h3>Progress</h3>
   It’s assumed amount of work scales linearly with number of comments, so take it with a grain of salt.<br/>
-  Also, there are about <b><%=Term.sheets_to_go.first.to_i%> questionnaires left to process</b>, which are not included below.
+  Expecting a further <b><%=Term.sheets_to_go.first.to_i%> questionnaires</b> to be scanned, which are not included below.
   <%
     stages = [Hitme::TYPING, Hitme::PROOFREADING, Hitme::COMBINING, Hitme::FINALCHECK, Hitme::DONE]
     data = stages.map { |s| Hitme.get_all_comments_by_step(s).size }
