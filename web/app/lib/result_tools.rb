@@ -390,7 +390,8 @@ class ResultTools
   def eval_question_single(table, q, special_where, compare_where, repeat_for_class, censor)
     question_text = get_question_text(q, repeat_for_class)
 
-    return ERB.new(load_tex("censor_stat_question")).result(binding) if censor
+    overview_only = [q.visualizer].flatten.all? { |v| v == "tutor_overview" }
+    return ERB.new(load_tex("censor_stat_question")).result(binding) if censor && !overview_only
 
     # collect data for this question
     answ = get_answer_counts(table, q, special_where)
