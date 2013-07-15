@@ -17,7 +17,7 @@ namespace :results do
     return if f.nil? || t.nil?
 
     lang_code = t.is_single_language?(faculty_id) || lang_code
-    if lang_code == :auto
+    if lang_code == :auto || lang_code == :mixed
       I18n.taint
     else
       I18n.untaint
@@ -176,9 +176,9 @@ namespace :results do
     term_ids = a.term_id ? [a.term_id] : Term.currently_active.map(&:id)
     term_ids.each do |term_id|
       if a.faculty_id
+        print_censor_info(term_id, a.faculty_id)
         work_queue.enqueue_b { evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor) }
         #~ evaluate(lang_code.to_sym, term_id, a.faculty_id, @censor)
-        print_censor_info(term_id, a.faculty_id)
         next
       end
 
