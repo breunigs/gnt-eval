@@ -25,9 +25,9 @@
             <% unless course.no_censoring? %>
               <span title="Parts of this course will be censored." style="cursor:help">☹</span>
             <% end %>
-            <%  xx = course.enough_censored_parts_in_comments?
-              unless  %>
-              <span>Censoring broken. Fix it!</span>
+            <%  xx, need, have = course.enough_censored_parts_in_comments? %>
+            <% unless xx  %>
+              <span title="<%=need%> profs want cencoring, but only <%=have%> censor blocks found.">Censoring broken. Fix it!</span>
             <% end %>
             <%= link_to course.title.truncate(50), course, :title => course.title %>
           </td>
