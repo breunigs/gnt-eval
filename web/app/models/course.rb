@@ -385,9 +385,11 @@ class Course < ActiveRecord::Base
   #          need (int), have (int)
   def enough_censored_parts_in_comments?
     need = profs.select { |p| p.censor_comments? }.size
-    have = comment.scan("\\CENSORED").size
+    have_open = comment.scan("\\CENSORED").size
+    have_close = comment.scan("\\UNCENSORED").size
+    have = (have_open.to_f + have_close.to_f)/2
     okay = returned_sheets == 0 || need <= have
-    return okay, need, have
+    return okay, need, have_open
   end
 
   private
