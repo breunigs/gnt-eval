@@ -31,8 +31,8 @@ class Tutor < ActiveRecord::Base
     tutor_ok = censor_unknown? || censor_none? || own_comments?
     prof_ok = profs.none? { |p| p.censor_everything? }
     may_show = tutor_ok && prof_ok
-    reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
-    return !may_show, reason
+    #~ reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
+    return !may_show#, reason
   end
 
   def may_show_comments?
@@ -46,17 +46,20 @@ class Tutor < ActiveRecord::Base
     tutor_ok = censor_unknown? || censor_none?
     prof_ok = profs.none? { |p| p.censor_everything? }
     may_show = tutor_ok && prof_ok
-    reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
-    return !may_show, reason
+    #~ reason = may_show ? :none : (tutor_ok ? :prof : :tutor)
+    return !may_show#, reason
   end
 
   # Evaluates this tutor only.
   def evaluate
     I18n.locale = course.language
 
+    # if evaluating a single tutor, then usually to give her the results
+    allow_censoring = false
+
     evalname = "#{abbr_name} (#{term.title}; #{course.title})"
     b = ERB.new(RT.load_tex("preamble")).result(binding)
-    b << RT.load_tex_definitions
+    b << RT.load_tex_definitions(allow_censoring)
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
     b << %(\\let\\cleardoublepage\\newpage\n)
 
@@ -88,9 +91,7 @@ class Tutor < ActiveRecord::Base
         # now evaluate that block of questions
         if repeat_for == :tutor
           s = section.any_title
-          # TODO censor: this was always false before. Check if flipping
-          # this is okay.s
-          b << eval_block(block, s, true)
+          b << eval_block(block, s, allow_censoring)
         end
       end
     end
@@ -108,7 +109,13 @@ class Tutor < ActiveRecord::Base
     # overview visualizer does this.
     b << RT.small_header(section)
 
-    censor = nil
+    b << "\\label{tutor#{self.id}}\n"
+    if returned_sheets < SCs[:minimum_sheets_required]
+      b << form.too_few_sheets(returned_sheets)
+      return b
+    end
+
+    cen_msg = nil
 
     prof_censor = profs.any? { |p| p.censor_everything? }
     if prof_censor
@@ -117,22 +124,16 @@ class Tutor < ActiveRecord::Base
       # comments only. In that case a "comments only" message would be
       # shown, but the stats also censored. Thus, the message is upgraded
       # and the tutor blamed for it.
-      censor = :blocked_by_prof
-      censor = :general if censor_own_comments_and_stats? || censor_own_comments?
+      cen_msg = :blocked_by_prof
+      cen_msg = :general if censor_own_comments_and_stats? || censor_own_comments?
     else
-      censor = :comments_only if censor_own_comments?
-      censor = :general if censor_own_comments_and_stats?
+      cen_msg = :comments_only if censor_own_comments?
+      cen_msg = :general if censor_own_comments_and_stats?
     end
 
-    b << I18n.t(censor,
+    b << I18n.t(cen_msg,
         :scope => [:censor, :tutors],
-        :name => abbr_name) + "\n\n" if censor
-
-    b << "\\label{tutor#{self.id}}\n"
-    if returned_sheets < SCs[:minimum_sheets_required]
-      b << form.too_few_sheets(returned_sheets)
-      return b
-    end
+        :name => abbr_name) + "\n\n" if allow_censoring && !cen_msg.nil?
 
     tut_db_col = form.get_tutor_question.db_column.to_sym
 

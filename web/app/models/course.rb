@@ -156,7 +156,7 @@ class Course < ActiveRecord::Base
 
   # the head per course. this adds stuff like title, submitted
   # questionnaires, what kind of people submitted questionnaires etc
-  def eval_lecture_head(single = false)
+  def eval_lecture_head(single = false, allow_censoring = false)
     b = ""
     b << "\\kurskopf{#{title.escape_for_tex}}"
     b << "{#{profs.map { |p| p.fullname.escape_for_tex }.join(' / ')}}"
@@ -174,7 +174,7 @@ class Course < ActiveRecord::Base
       return b
     end
 
-    b << eval_stats_censored_header unless single
+    b << eval_stats_censored_header if !single && allow_censoring
 
     b
   end
@@ -251,7 +251,9 @@ class Course < ActiveRecord::Base
     if single
       evalname = title.escape_for_tex
       b << ERB.new(RT.load_tex("preamble")).result(binding)
-      b << RT.load_tex_definitions
+      # single evals are for the profs themselves, so censoring makes no
+      # sense. Force it off.
+      b << RT.load_tex_definitions(false)
       b << '\maketitle' + "\n\n"
       facultylong = faculty.longname
       term_title = { :short => term.title, :long => term.longtitle }
@@ -259,7 +261,7 @@ class Course < ActiveRecord::Base
     end
 
     b << "\\selectlanguage{#{I18n.t :tex_babel_lang}}\n"
-    b << eval_lecture_head(single)
+    b << eval_lecture_head(single, censor)
 
     if returned_sheets < SCs[:minimum_sheets_required]
       b << RT.sample_sheets_and_footer([form]) if single

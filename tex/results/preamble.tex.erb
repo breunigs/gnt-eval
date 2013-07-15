@@ -58,6 +58,9 @@ end
 <% additional_packages ||= "" %>
 <%=additional_packages%>
 
+% these will be used when previewing the comments online. Depending on
+% the type of the document either censor.def.tex or no_censor.def.tex
+% will be included later, overwriting these commands.
 \newcommand{\CENSORED}{\begin{center}\line(1,0){150}  CENSORED PART STARTS \line(1,0){150}\end{center}}
 \newcommand{\UNCENSORED}{\begin{center}\line(1,0){180}  CENSOR END \line(1,0){180}\end{center}}
 

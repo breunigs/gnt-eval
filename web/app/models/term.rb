@@ -88,7 +88,7 @@ class Term < ActiveRecord::Base
     b = ""
     # requires evalname
     b << ERB.new(RT.load_tex("preamble")).result(binding)
-    b << RT.load_tex_definitions
+    b << RT.load_tex_definitions(censor)
     # requires the *_count variables
     b << ERB.new(RT.load_tex("header")).result(binding)
 

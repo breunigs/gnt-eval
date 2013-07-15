@@ -355,11 +355,17 @@ class ResultTools
   # Loads all .def.tex files located in the tex/results folder. These
   # files contain commands that do not change and therefore only need to
   # be included once. ERB is not supported.
-  def load_tex_definitions
+  # Set allow_censoring to false to force off any censoring. With it the
+  # commands that usually hide the text comments do nothing. Set it to
+  # true to allow censoring using \CENSORED … \UNCENSORED
+  def load_tex_definitions(allow_censoring)
     b = ""
     Dir.glob(RAILS_ROOT + "/../tex/results/*.def.tex") do |file|
+      next if file.end_with?("censor.dex.tex")
       b << IO.read(file) << "\n\n"
     end
+    ac = allow_censoring ? "" : "no_"
+    b << IO.read(RAILS_ROOT + "/../tex/results/#{ac}censor.def.tex") << "\n\n"
     b
   end
 
