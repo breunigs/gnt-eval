@@ -176,10 +176,11 @@ class Form < ActiveRecord::Base
   # evaluate (anonymity protection). Supports special strings for 0, 1
   # and more than 1 situations.
   def too_few_sheets(count)
+    x = I18n.t(:too_few_questionnaires)
     case count
-      when 0 then I18n.t(:too_few_questionnaires)[:null]
-      when 1 then I18n.t(:too_few_questionnaires)[:singular]
-      else        I18n.t(:too_few_questionnaires)[:plural].gsub(/#1/, count.to_s)
+      when 0 then x[:null]
+      when 1 then x[:singular]
+      else        x[:plural].gsub(/#1/, count.to_s)
     end
   end
 end
