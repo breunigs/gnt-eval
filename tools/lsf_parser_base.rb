@@ -110,7 +110,7 @@ class LSF
   end
 
   def self.facul_id_to_name(id)
-    load_url(FACULTY + id.to_s).match(/<h2>(.*?)<\/h2>/)[0].strip_html
+    load_url(FACULTY + id.to_s).match(/<h2>(.*?)<\/h2>/)[0].strip_html rescue ""
   end
 
   # LSF Service methods ################################################
